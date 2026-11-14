@@ -212,6 +212,37 @@ vm_check_system() {
     return "${errors}"
 }
 
+# Usage: vm_check_tuning <label>
+#   System tuning that only shows on a booted system (see the "System tuning"
+#   checks of build_files/99-tests.sh for what is in the image). Returns 1 if
+#   a check failed. Called once per way of installing (bootc install, ISO).
+vm_check_tuning() {
+    local label="$1" errors=0 unit
+    local -a problems=()
+
+    vm 'swapon --show=NAME --noheadings | grep -q zram' \
+        || problems+=("no compressed RAM swap (zram)")
+    for unit in systemd-oomd.service fstrim.timer tuned.service uupd.timer \
+                bootc-update-ca-trust.service bootc-update-crypto-policies.service; do
+        vm "systemctl is-active --quiet ${unit}" || problems+=("${unit} is not active")
+    done
+    # TRIM now rather than waiting a week: it must succeed and go through the
+    # mount table, not the "/" line that the installer writes to fstab
+    if vm 'systemctl start fstrim.service'; then
+        vm 'journalctl -b -u fstrim.service --no-pager -o cat | tail -n 8' || true
+    else
+        problems+=("fstrim.service failed")
+        vm 'journalctl -b -u fstrim.service --no-pager -n 20' || true
+    fi
+    vm 'swapon --show; cat /proc/sys/vm/swappiness; oomctl | head -n 20' || true
+
+    for problem in "${problems[@]}"; do
+        echo "::error::${label}: ${problem}"
+        errors=1
+    done
+    return "${errors}"
+}
+
 # Desktop screenshots, to check the look without a PC: logs a test user in
 # through the login screen, then opens a few views and apps. Problems here are
 # warnings, not failures: they don't keep a working image from shipping.
