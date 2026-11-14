@@ -1,0 +1,45 @@
+name: Report a failed run in an issue
+description: >-
+  For runs of the default branch (scheduled, pushed or started by hand):
+  opens an issue named after the workflow when the run failed, or comments on
+  it if it is already open, and closes it once a later run succeeds. One open
+  issue per workflow, so a failure gives one notification and nothing piles up.
+  Needs GH_TOKEN with issues: write.
+inputs:
+  result:
+    description: failure, success, or anything else to do nothing (e.g. a cancelled or skipped run)
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Open, update or close the issue
+      shell: bash
+      env:
+        RESULT: ${{ inputs.result }}
+      run: |
+        set -euo pipefail
+        if [[ "${RESULT}" != "failure" && "${RESULT}" != "success" ]]; then
+          echo "Run result: ${RESULT:-none}, nothing to report"
+          exit 0
+        fi
+        title="CI failure: ${GITHUB_WORKFLOW}"
+        run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+        number="$(gh issue list --repo "${GITHUB_REPOSITORY}" --state open \
+          --search "\"${title}\" in:title" --json number,title \
+          --jq "map(select(.title == \"${title}\")) | .[0].number // empty")"
+        if [[ "${RESULT}" == "success" ]]; then
+          if [[ -n "${number}" ]]; then
+            gh issue close "${number}" --repo "${GITHUB_REPOSITORY}" \
+              --comment "Fixed: this run passed: ${run_url}"
+          fi
+          exit 0
+        fi
+        body="The ${GITHUB_WORKFLOW} workflow failed on ${GITHUB_REF_NAME} (${GITHUB_EVENT_NAME}): ${run_url}
+
+        This issue closes by itself when a later run passes."
+        body="$(sed 's/^ *//' <<< "${body}")"
+        if [[ -n "${number}" ]]; then
+          gh issue comment "${number}" --repo "${GITHUB_REPOSITORY}" --body "Failed again: ${run_url}"
+        else
+          gh issue create --repo "${GITHUB_REPOSITORY}" --title "${title}" --body "${body}"
+        fi

@@ -70,6 +70,7 @@ jobs:
     name: Check for a recent build
     if: github.event_name == 'schedule'
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     permissions:
       actions: read
     outputs:
@@ -110,13 +111,23 @@ jobs:
       (needs.recent_build.result == 'skipped' ||
        (needs.recent_build.result == 'success' && needs.recent_build.outputs.skip != 'true'))
     runs-on: ubuntu-26.04
+    timeout-minutes: 10
     permissions:
       contents: read
+      pull-requests: read  # pr-images
     outputs:
       version: ${{ steps.version.outputs.version }}
+      suffixes: ${{ steps.images.outputs.suffixes }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      # Pull requests that do not touch NVIDIA only build cosmic-blue
+      - name: Pick the images
+        id: images
+        uses: ./.github/actions/pr-images
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Install just
         uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 #v4.0.0
@@ -136,12 +147,16 @@ jobs:
     needs: version
     if: ${{ !cancelled() && needs.version.result == 'success' }}
     runs-on: ubuntu-26.04
+    # About 60 to 75 minutes; a stuck run would hold up the main builds queued
+    # behind it
+    timeout-minutes: 150
     strategy:
       fail-fast: false
       matrix:
         # cosmic-blue, and cosmic-blue-nvidia with the NVIDIA driver
-        # (build_files/35-nvidia.sh)
-        image_suffix: ["", "nvidia"]
+        # (build_files/35-nvidia.sh); only cosmic-blue for pull requests that
+        # do not touch NVIDIA (.github/actions/pr-images)
+        image_suffix: ${{ fromJSON(needs.version.outputs.suffixes) }}
 
     permissions:
       contents: read
@@ -328,3 +343,28 @@ jobs:
           fi
           cosign sign -y --new-bundle-format=false --use-signing-config=false --key env://COSIGN_PRIVATE_KEY ${IMAGE_REGISTRY}/${IMAGE_NAME}@${DIGEST}
 
+  # A failed build of main (daily, merge, by hand) opens an issue, closed by
+  # the next build that passes
+  report:
+    name: Report the result
+    needs: [recent_build, version, build_push]
+    if: >-
+      always() && github.event_name != 'pull_request' &&
+      github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Report the result
+        uses: ./.github/actions/failure-issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          result: ${{ contains(needs.*.result, 'failure') && 'failure' || (needs.build_push.result == 'success' && 'success' || 'none') }}

@@ -39,6 +39,7 @@ jobs:
   notes:
     name: Write release notes
     runs-on: ubuntu-26.04
+    timeout-minutes: 60
     permissions:
       contents: write
       packages: read

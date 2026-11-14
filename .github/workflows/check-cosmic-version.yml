@@ -41,6 +41,7 @@ jobs:
   check:
     name: Compare with Bluefin and Fedora
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     permissions:
       contents: read
     outputs:

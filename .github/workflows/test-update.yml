@@ -38,15 +38,38 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Pull requests that do not touch NVIDIA only test cosmic-blue
+  images:
+    name: Pick the images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      suffixes: ${{ steps.images.outputs.suffixes }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Pick the images
+        id: images
+        uses: ./.github/actions/pr-images
+        env:
+          GH_TOKEN: ${{ github.token }}
+
   update_test:
     name: Update ${{ matrix.image_suffix && format('{0} ', matrix.image_suffix) || '' }}${{ inputs.from_tag || 'stable' }} to ${{ inputs.to_tag || 'latest' }}
+    needs: images
     runs-on: ubuntu-26.04
     timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
         # Same images as build.yml: cosmic-blue and cosmic-blue-nvidia
-        image_suffix: ["", "nvidia"]
+        image_suffix: ${{ fromJSON(needs.images.outputs.suffixes) }}
     env:
       # output of build.yml, keep in sync
       IMAGE_NAME: ${{ github.event.repository.name }}${{ matrix.image_suffix && format('-{0}', matrix.image_suffix) || '' }}

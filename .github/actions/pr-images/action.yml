@@ -1,0 +1,37 @@
+name: Pick the images to test
+description: >-
+  Outputs the image suffixes to build or test, as a JSON list for a matrix:
+  "" is cosmic-blue, "nvidia" is cosmic-blue-nvidia. Pull requests only test
+  the NVIDIA image when their diff mentions NVIDIA (file names or content) or
+  when they come from Renovate (base image updates can change the kernel the
+  NVIDIA modules are built for). Everything else gets both images. The main
+  build tests both anyway and never publishes an image that fails.
+  Needs GH_TOKEN with pull-requests: read.
+outputs:
+  suffixes:
+    description: JSON list of image suffixes
+    value: ${{ steps.pick.outputs.suffixes }}
+runs:
+  using: composite
+  steps:
+    - name: Pick the images
+      id: pick
+      shell: bash
+      env:
+        PR: ${{ github.event.pull_request.number }}
+        HEAD_REF: ${{ github.head_ref }}
+      run: |
+        set -euo pipefail
+        both='["","nvidia"]'
+        suffixes="${both}"
+        if [[ "${GITHUB_EVENT_NAME}" == "pull_request" && "${HEAD_REF}" != renovate/* ]]; then
+          diff="${RUNNER_TEMP}/pr.diff"
+          # A diff too large for the API: test both images
+          if gh pr diff "${PR}" --repo "${GITHUB_REPOSITORY}" > "${diff}" \
+             && ! grep -qi nvidia "${diff}"; then
+            suffixes='[""]'
+            echo "::notice::The pull request does not touch NVIDIA: cosmic-blue-nvidia is tested by the main build only"
+          fi
+        fi
+        echo "Images: ${suffixes}"
+        echo "suffixes=${suffixes}" >> "${GITHUB_OUTPUT}"
