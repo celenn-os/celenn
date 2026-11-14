@@ -185,8 +185,15 @@ vm_check_system installed || errors=1
 
 fstype="$(vm 'findmnt -n -o FSTYPE /sysroot' || true)"
 [[ "${fstype}" == btrfs ]] || error "The system is on '${fstype}', not btrfs"
-vm 'findmnt -n -o OPTIONS /sysroot | grep -q compress=zstd:1' \
-    || echo "::warning::btrfs is not mounted with compress=zstd:1"
+# Compression chosen by the installer profile, applied at boot by
+# cosmic-blue-root-mount-options.service. An image published before that
+# service (a pull request testing it) gets the script from this checkout.
+if ! vm 'systemctl cat cosmic-blue-root-mount-options.service' >/dev/null 2>&1; then
+    echo "::notice::The installed image has no cosmic-blue-root-mount-options.service yet: running the script of this checkout"
+    vm 'bash -s' < "$(dirname "$0")/../system_files/usr/libexec/cosmic-blue-root-mount-options" || true
+fi
+vm 'findmnt -n -o OPTIONS /var | grep -q compress=zstd:1' \
+    || error "btrfs compression (compress=zstd:1) is not active"
 vm 'findmnt -n -o FSTYPE /var/home | grep -qx btrfs' || error "/var/home is not on btrfs"
 vm 'cat /etc/fstab; findmnt -o TARGET,SOURCE,FSTYPE,OPTIONS -R /sysroot; findmnt /; findmnt /var; findmnt /var/home; lsblk -f' || true
 
