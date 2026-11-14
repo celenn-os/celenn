@@ -35,6 +35,11 @@ systemctl --global enable \
     podman.socket \
     ublue-user-setup.service
 
+# Speech for the screen reader (Orca): Fedora's presets do not enable
+# speech-dispatcher's socket yet (rhbz#2284507, change pending in
+# redhat-systemd-presets), so Orca can come up silent. Aurora enables it too.
+systemctl --global enable speech-dispatcher.socket
+
 # Keep systemd-gpt-auto-generator from stacking an automount of the EFI
 # system partition on /boot. GRUB tells systemd which disk it booted from
 # (LoaderDevicePartUUID), so on installs where /boot is a directory of the

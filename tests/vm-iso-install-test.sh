@@ -182,6 +182,7 @@ booted="$(vm 'bootc status --json' | jq -r '.status.booted.image.image | "\(.tra
 [[ "${booted}" == "registry ${IMAGE_REF}" ]] \
     || error "The installed system follows '${booted}', not 'registry ${IMAGE_REF}': updates would not come from GHCR"
 vm_check_system installed || errors=1
+vm_check_tuning installed || errors=1
 
 fstype="$(vm 'findmnt -n -o FSTYPE /sysroot' || true)"
 [[ "${fstype}" == btrfs ]] || error "The system is on '${fstype}', not btrfs"

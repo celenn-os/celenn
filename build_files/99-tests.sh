@@ -440,3 +440,22 @@ grep -q "ConditionPathExists=!/run/ostree-booted" /usr/lib/systemd/system/system
 # ...whose btrfs options (compression) are applied to the root btrfs
 test -x /usr/libexec/cosmic-blue-root-mount-options
 systemctl is-enabled cosmic-blue-root-mount-options.service
+
+# System tuning shared with Bluefin and Aurora (most of it comes from Fedora,
+# ublue-os/main and projectbluefin/common; tests/vm-lib.sh vm_check_tuning
+# checks that it is active on a booted system)
+# - weekly TRIM of the mounted filesystems, not of the fstab "/" line
+systemctl is-enabled fstrim.timer
+systemctl cat fstrim.service | grep -q -- '--listed-in /proc/self/mountinfo '
+# - compressed RAM swap and the out-of-memory killer (Fedora defaults)
+rpm -q zram-generator-defaults systemd-oomd-defaults
+# - CA certificates and crypto policies regenerated after each update
+#   (ublue-os/main), coredumps kept 5 days instead of 14
+systemctl is-enabled bootc-update-ca-trust.service bootc-update-crypto-policies.service
+grep -q '^d /var/lib/systemd/coredump .* 5d$' /usr/lib/tmpfiles.d/coredump.conf
+# - zstd-compressed initramfs, with FIDO2 and PKCS#11 unlocking (passkeys,
+#   smart cards) next to TPM2 (projectbluefin/common dracut config)
+[[ "$(/usr/lib/dracut/skipcpio "/usr/lib/modules/${KVER}/initramfs.img" | head -c 4 | od -An -tx1 | tr -d ' \n')" == 28b52ffd ]]
+grep -q 'libcryptsetup-token-systemd-fido2.so' /tmp/initramfs.txt
+# - speech for the screen reader
+systemctl --global is-enabled speech-dispatcher.socket
