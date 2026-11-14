@@ -14,6 +14,9 @@ set -euo pipefail
 [[ "$(findmnt -n -o FSTYPE /var 2>/dev/null)" == btrfs ]] || exit 0
 [[ "$(findmnt -n -o MAJ:MIN /sysroot)" == "$(findmnt -n -o MAJ:MIN /var)" ]] || exit 0
 
+# bootc install to-disk writes no /etc/fstab (the root comes from kargs)
+[[ -r /etc/fstab ]] || exit 0
+
 fstab_options="$(awk '$1 !~ /^#/ && $2 == "/" && $3 == "btrfs" { print $4; exit }' /etc/fstab)"
 options=()
 IFS=, read -ra all <<<"${fstab_options}"
