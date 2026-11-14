@@ -22,6 +22,7 @@ vm_wait_ssh
 
 errors=0
 vm_check_system boot || errors=1
+vm_check_tuning boot || errors=1
 vm "bootc status --json" | jq -e --arg ref "${TARGET_IMGREF}" \
     '.status.booted.image.image.image == $ref' >/dev/null \
     || { echo "::error::The booted image is not ${TARGET_IMGREF}"; errors=1; }
