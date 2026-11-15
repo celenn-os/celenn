@@ -212,6 +212,14 @@ jobs:
         run: |
           # git refuses, as root, a checkout owned by another user
           sudo git config --system --add safe.directory "${GITHUB_WORKSPACE}"
+          # Ubuntu mounts root overlay layers with metacopy=on, which turns off
+          # the native overlay diff: every layer commit then walks the whole
+          # image (minutes per RUN step). Rootless podman never had it.
+          conf=/etc/containers/storage.conf
+          [[ -f "${conf}" ]] || sudo cp /usr/share/containers/storage.conf "${conf}"
+          sudo sed -i -E 's/,metacopy=on|metacopy=on,?//' "${conf}"
+          grep -n mountopt "${conf}" || true
+          sudo podman info --format '{{ json .Store.GraphStatus }}'
           echo "ROOT_ENV=sudo env PATH=${PATH} IMAGE_NAME=${IMAGE_NAME} GIT_OPTIONAL_LOCKS=0" >> "${GITHUB_ENV}"
 
       # Helper stages (Containerfile.helpers: rebuilt COSMIC programs, recolored
