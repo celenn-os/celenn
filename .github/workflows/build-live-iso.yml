@@ -33,7 +33,7 @@ jobs:
   # Pull requests that do not touch NVIDIA only build and test the cosmic-blue ISO
   images:
     name: Pick the images
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     permissions:
       contents: read
@@ -55,7 +55,7 @@ jobs:
   build:
     name: Build live ISO${{ matrix.image_suffix && format(' ({0})', matrix.image_suffix) || '' }}
     needs: images
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 150
     permissions:
       contents: read
@@ -332,7 +332,7 @@ jobs:
     name: Report the result
     needs: [images, build, install_test]
     if: always() && github.event_name != 'pull_request'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     permissions:
       contents: read
