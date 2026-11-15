@@ -3,7 +3,8 @@
 set -euox pipefail
 
 IMAGE_PRETTY_NAME="cosmic-blue"
-HOME_URL="https://github.com/${IMAGE_VENDOR}/${IMAGE_NAME}"
+# One repository for all the images (cosmic-blue-nvidia included)
+HOME_URL="https://github.com/${IMAGE_VENDOR}/cosmic-blue"
 VERSION="${VERSION:-${FEDORA_MAJOR_VERSION}.$(date +%Y%m%d)}"
 
 # The image is verified with cosign.pub (see 10-system-files.sh); without it,
