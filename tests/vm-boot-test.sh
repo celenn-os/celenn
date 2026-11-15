@@ -26,6 +26,15 @@ vm_check_tuning boot || errors=1
 vm "bootc status --json" | jq -e --arg ref "${TARGET_IMGREF}" \
     '.status.booted.image.image.image == $ref' >/dev/null \
     || { echo "::error::The booted image is not ${TARGET_IMGREF}"; errors=1; }
+# `bootc install` here, like a manual `bootc switch`, records the image
+# without signature verification: cosmic-blue-signed-updates must offer to
+# turn it on (dry run: the real switch would download the published image).
+# Its timer is stopped first so it does not start that download mid-test.
+vm "systemctl stop cosmic-blue-signed-updates.timer"
+signed_updates="$(vm "/usr/libexec/cosmic-blue-signed-updates --dry-run")" || signed_updates=""
+echo "${signed_updates}"
+grep -q 'would turn on the signature check' <<<"${signed_updates}" \
+    || { echo "::error::cosmic-blue-signed-updates would not turn on the signature check"; errors=1; }
 
 # Let the login screen draw, then take a picture of it
 sleep 20
