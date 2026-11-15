@@ -1,0 +1,12 @@
+[Unit]
+Description=Update the AppImages added with Gear Lever every day
+
+# Same schedule as the system and flatpak updates (uupd.timer)
+[Timer]
+OnCalendar=*-*-* 04:00:00
+# Missed while logged out, off or suspended: runs at the next login or resume
+Persistent=true
+RandomizedDelaySec=15m
+
+[Install]
+WantedBy=timers.target
