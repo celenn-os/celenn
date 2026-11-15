@@ -23,10 +23,10 @@ CAPTIONS = {
     "first-steps-4": "First steps tour: handy commands",
     "first-steps-5": "First steps tour: help",
     "desktop": "Desktop, panel and dock",
-    "app-library": "App Library (icons)",
-    "files": "Files (folder icons)",
+    "app-library": "App Library",
+    "files": "Files",
     "settings": "Settings: Appearance",
-    "terminal": "Terminal: prompt and fastfetch (ff)",
+    "terminal": "Terminal: welcome message and system information (ff)",
     "terminal-zoom": "Terminal, full size",
     "lock-screen": "Lock screen",
 }
