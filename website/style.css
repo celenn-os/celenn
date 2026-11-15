@@ -128,7 +128,7 @@ code { font-family: var(--mono); font-size: .92em; }
 
 /* Keep the room of the NVIDIA note when it is hidden, so switching the
    graphics card does not change the hero height. */
-.hero-text [data-nvidia-only][hidden] {
+.hero-text p[data-nvidia-only][hidden] {
   display: block;
   visibility: hidden;
 }

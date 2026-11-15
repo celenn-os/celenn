@@ -45,7 +45,7 @@
         <a class="button primary" href="@ISO_URL@" data-nvidia-href="@ISO_NVIDIA_URL@">Télécharger l’ISO live</a>
         <a class="button" href="#install">Comment l’installer</a>
       </div>
-      <p class="fine">x86-64 · environ 4,5&nbsp;Go<!-- checksum --> · <a href="@ISO_URL@.sha256" data-nvidia-href="@ISO_NVIDIA_URL@.sha256">SHA-256</a><!-- /checksum --></p>
+      <p class="fine">x86-64 · <span data-main-only>environ 3,8&nbsp;Go</span><span data-nvidia-only hidden>environ 4,7&nbsp;Go</span><!-- checksum --> · <a href="@ISO_URL@.sha256" data-nvidia-href="@ISO_NVIDIA_URL@.sha256">SHA-256</a><!-- /checksum --></p>
       <p class="fine" data-nvidia-only hidden>Avec le pilote NVIDIA, pour les cartes GTX 16xx, RTX 20xx et plus récentes.
       Carte NVIDIA plus ancienne&nbsp;? Prenez la version AMD ou Intel, qui utilise le pilote libre.</p>
     </div>
@@ -105,10 +105,14 @@
       <p>Déjà sur Bluefin, Aurora, Bazzite ou un bureau Fedora Atomic (Silverblue, Kinoite…)&nbsp;? Basculez sur place&nbsp;:</p>
       <div class="code">
         <pre><code><span data-nvidia-only hidden>ujust enroll-secure-boot-key   # seulement si Secure Boot est activé
-</span>sudo bootc switch ghcr.io/cosmic-blue-os/<span data-image>cosmic-blue</span>:latest
+</span>sudo bootc switch ghcr.io/cosmic-blue-os/<span data-image>cosmic-blue</span>:stable
 sudo systemctl reboot</code></pre>
         <button type="button" class="copy" data-copy>Copier</button>
       </div>
+      <p>Après le redémarrage, cosmic-blue active de lui-même la vérification
+      de la signature de ses mises à jour. <code>stable</code> avance une fois
+      par semaine&nbsp;; prenez <code>latest</code> pour recevoir chaque build
+      quotidien.</p>
     </section>
 
     <section class="block">
@@ -127,7 +131,7 @@ sudo bootc rollback   # revenir à la version précédente au prochain démarrag
       à la main avec
       <a href="https://github.com/cosmic-blue-os/cosmic-blue/blob/main/cosign.pub"><code>cosign.pub</code></a>&nbsp;:</p>
       <div class="code">
-        <pre><code>cosign verify --key cosign.pub ghcr.io/cosmic-blue-os/<span data-image>cosmic-blue</span>:latest</code></pre>
+        <pre><code>cosign verify --key cosign.pub ghcr.io/cosmic-blue-os/<span data-image>cosmic-blue</span>:stable</code></pre>
         <button type="button" class="copy" data-copy>Copier</button>
       </div>
     </section>

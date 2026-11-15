@@ -120,11 +120,19 @@ dnf5 -y copr enable che/nerd-fonts
 dnf5 -y install --repo="copr:copr.fedorainfracloud.org:che:nerd-fonts" nerd-fonts
 dnf5 -y copr disable che/nerd-fonts
 
-# Starship (shell prompt), official binary
-curl -fsSL --retry 3 -o /tmp/starship.tar.gz \
-    https://github.com/starship/starship/releases/latest/download/starship-x86_64-unknown-linux-gnu.tar.gz
-tar -xzf /tmp/starship.tar.gz -C /tmp
+# Starship (shell prompt), official binary of a pinned release (updated by
+# Renovate), checked against the SHA-256 published with that release
+STARSHIP_REPO="https://github.com/starship/starship"
+STARSHIP_VERSION="v1.27.0"
+STARSHIP_ASSET="starship-x86_64-unknown-linux-gnu.tar.gz"
+STARSHIP_URL="${STARSHIP_REPO}/releases/download/${STARSHIP_VERSION}/${STARSHIP_ASSET}"
+curl -fsSL --retry 3 -o "/tmp/${STARSHIP_ASSET}" "${STARSHIP_URL}"
+curl -fsSL --retry 3 -o "/tmp/${STARSHIP_ASSET}.sha256" "${STARSHIP_URL}.sha256"
+echo "$(tr -d '[:space:]' <"/tmp/${STARSHIP_ASSET}.sha256")  /tmp/${STARSHIP_ASSET}" | sha256sum -c -
+tar -xzf "/tmp/${STARSHIP_ASSET}" -C /tmp starship
 install -m 0755 /tmp/starship /usr/bin/starship
+rm -f "/tmp/${STARSHIP_ASSET}" "/tmp/${STARSHIP_ASSET}.sha256" /tmp/starship
+starship --version | grep -Fx "starship ${STARSHIP_VERSION#v}"
 
 # Removed packages, as in Bluefin (Firefox comes as a flatpak)
 EXCLUDED_PACKAGES=(

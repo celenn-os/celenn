@@ -11,7 +11,7 @@ ARG BASE_TAG
 # Default COSMIC themes with frosted glass (see build_files/theme/src/main.rs)
 FROM docker.io/library/rust:1 AS theme
 COPY build_files/theme /theme
-RUN cd /theme && cargo build --release \
+RUN cd /theme && cargo build --release --locked \
     && XDG_CONFIG_HOME=/out /theme/target/release/cosmic-blue-theme \
     && XDG_CONFIG_HOME=/out/previous/stock /theme/target/release/cosmic-blue-theme stock \
     && XDG_CONFIG_HOME=/out/previous/frosted /theme/target/release/cosmic-blue-theme frosted

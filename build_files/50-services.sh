@@ -7,6 +7,7 @@ systemctl enable \
     cosmic-blue-migrate-defaults.service \
     cosmic-blue-user-defaults.service \
     cosmic-blue-root-mount-options.service \
+    cosmic-blue-signed-updates.timer \
     flatpak-nuke-fedora.service \
     flatpak-preinstall.service \
     input-remapper.service \

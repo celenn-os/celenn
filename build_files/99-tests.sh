@@ -432,6 +432,10 @@ fi
 # (50-services.sh)
 [[ "$(readlink /etc/systemd/system-generators/systemd-gpt-auto-generator)" == /dev/null ]]
 
+# Signature check turned on for systems switched to cosmic-blue without it
+test -x /usr/libexec/cosmic-blue-signed-updates
+systemctl is-enabled cosmic-blue-signed-updates.timer
+
 # Repair of the bootc aleph of early installs (bootloader-update.service)
 test -x /usr/libexec/cosmic-blue-fix-aleph
 grep -q cosmic-blue-fix-aleph /usr/lib/systemd/system/bootloader-update.service.d/10-cosmic-blue-aleph.conf

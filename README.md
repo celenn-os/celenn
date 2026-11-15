@@ -11,11 +11,9 @@ effect on the next reboot, and can be rolled back.
 
 ## Install
 
-**New install:** download `cosmic-blue-live-amd64-iso` from the latest
-successful
-[Build live ISO](https://github.com/cosmic-blue-os/cosmic-blue/actions/workflows/build-live-iso.yml)
-run (under *Artifacts*, signed in to GitHub), write the ISO to a USB stick
-with [Fedora Media Writer](https://fedoraproject.org/workstation/download),
+**New install:** download the live ISO from the
+[website](https://cosmic-blue-os.github.io/cosmic-blue/), write it to a USB
+stick with [Fedora Media Writer](https://fedoraproject.org/workstation/download),
 boot it and start the installer from the desktop icon.
 
 **From another bootc system** (Bluefin, Aurora, Bazzite, Fedora Atomic...):
@@ -25,13 +23,16 @@ sudo bootc switch ghcr.io/cosmic-blue-os/cosmic-blue:stable
 sudo systemctl reboot
 ```
 
+After the reboot, cosmic-blue turns on the signature check of its updates by
+itself (`bootc switch --enforce-container-sigpolicy`).
+
 `stable` moves once a week to a build that has spent a week on `latest`.
 `latest` gets every daily build; use it instead of `stable` to get changes
 sooner.
 
 **NVIDIA graphics cards** (GTX 16xx, RTX 20xx and newer): use the
 `cosmic-blue-nvidia` image, which ships NVIDIA's driver. For a new install,
-take `cosmic-blue-nvidia-live-amd64-iso` instead. From an installed system:
+choose NVIDIA on the website. From an installed system:
 
 ```bash
 ujust enroll-secure-boot-key   # only if Secure Boot is on

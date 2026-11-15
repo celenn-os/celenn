@@ -6,7 +6,9 @@ publish = false
 
 # Same libcosmic revision as the COSMIC 1.11.0 packages in Fedora 44
 # (cosmic-settings epoch-1.11.0 Cargo.lock). Update it with COSMIC, together
-# with build_files/cosmic-version.
+# with build_files/cosmic-version. Cargo.lock is that cosmic-settings
+# Cargo.lock trimmed to our dependencies, so the theme is built with the same
+# crate versions as Fedora's COSMIC (the Containerfile builds with --locked).
 [dependencies]
 cosmic-theme = { git = "https://github.com/pop-os/libcosmic", rev = "430f3d48a97d8779f9c1985473912e594ccca1ae", default-features = false }
 cosmic-config = { git = "https://github.com/pop-os/libcosmic", rev = "430f3d48a97d8779f9c1985473912e594ccca1ae", default-features = false }

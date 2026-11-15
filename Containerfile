@@ -5,7 +5,8 @@
 # opens the pull request that moves BASE_TAG and BASE_IMAGE together when
 # Bluefin stable moves to a new release (in 2026-11, Fedora 45 still broke the
 # live ISO installer: systemd-tmpfiles exited with code 73).
-# Renovate only pins and updates the image digests (see .github/renovate.json5).
+# Images are followed by tag, not pinned by digest: every daily build takes
+# the latest base, common and brew images (see .github/renovate.json5).
 # BASE_TAG is the Fedora release of Containerfile.helpers (`just fedora-version`).
 ARG BASE_TAG="44"
 ARG BASE_IMAGE="ghcr.io/ublue-os/base-main:44"
