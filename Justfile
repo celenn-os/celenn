@@ -130,10 +130,62 @@ build $target_image=image_name $tag=default_tag $version="":
     LABELS+=("--label" "org.opencontainers.image.title=${target_image}")
     LABELS+=("--label" "org.opencontainers.image.vendor={{ repo_organization }}")
 
+    # The helper stages (Containerfile.helpers): already built in HELPERS_DIR
+    # (e.g. restored from the CI cache), or built now
+    if [[ -z "${HELPERS_DIR:-}" ]]; then
+        HELPERS_DIR="$(mktemp -d)"
+        trap 'rm -rf "${HELPERS_DIR}"' EXIT
+        just build-helpers "${HELPERS_DIR}"
+    fi
+    test -d "${HELPERS_DIR}/theme"
+
     # This actually builds the image!
     PODMAN_BUILD_ARGS=("${BUILD_ARGS[@]}" "${LABELS[@]}" --pull=newer --tag "${target_image}:${tag}" --file Containerfile)
+    PODMAN_BUILD_ARGS+=(--build-context "helpers=${HELPERS_DIR}")
 
     podman build "${PODMAN_BUILD_ARGS[@]}" .
+
+# Build the helper stages (Containerfile.helpers) and write their outputs to a
+# directory, used by `just build` as the "helpers" build context
+build-helpers $dest:
+    #!/usr/bin/env bash
+    set -euxo pipefail
+
+    mkdir -p "${dest}"
+    podman build --pull=newer --build-arg "BASE_TAG=$(just fedora-version)" \
+        --file Containerfile.helpers --output "type=local,dest=${dest}" .
+
+# Cache key of the helper stages: changes with their files, the base images
+# they build from and the Fedora packages they rebuild or recolor (Fedora
+# updates them without any change here)
+helpers-key:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    base_tag="$(just fedora-version)"
+    fedora="registry.fedoraproject.org/fedora:${base_tag}"
+    {
+        echo "fedora ${base_tag}"
+        # Files read by Containerfile.helpers
+        git ls-files -z Containerfile.helpers build_files/theme build_files/initial_setup \
+            build_files/greeter build_files/plymouth build_files/icon_theme \
+            build_files/cursor_theme system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-orbits.jpg \
+            | sort -z | xargs -0 sha256sum
+        # Base images
+        for image in "${fedora}" docker.io/library/rust:1; do
+            echo "${image} $(skopeo inspect --retry-times 3 --format '{{ '{{.Digest}}' }}' "docker://${image}")"
+        done
+        # Fedora packages: source packages rebuilt, Plymouth spinner recolored
+        packages="$(podman run --rm --pull=newer "${fedora}" \
+            dnf5 -q repoquery --enablerepo=fedora-source --enablerepo=updates-source \
+            --latest-limit=1 --queryformat '%{full_nevra}\n' \
+            cosmic-greeter cosmic-initial-setup plymouth-theme-spinner | sort)"
+        # All three found, or a stale cache could be used
+        for name in cosmic-greeter cosmic-initial-setup plymouth-theme-spinner; do
+            grep -q "^${name}-[0-9]" <<< "${packages}"
+        done
+        echo "${packages}"
+    } | tee /dev/stderr | sha256sum | cut -c1-32
 
 # Split the image for smaller updates (New)!
 rechunk $target_image=image_name $tag=default_tag:
