@@ -7,6 +7,7 @@ const setGpu = (gpu) => {
     link.setAttribute("href", nvidia ? link.dataset.nvidiaHref : link.dataset.mainHref);
   }
   for (const el of document.querySelectorAll("[data-nvidia-only]")) el.hidden = !nvidia;
+  for (const el of document.querySelectorAll("[data-main-only]")) el.hidden = nvidia;
   for (const el of document.querySelectorAll("[data-image]")) {
     el.textContent = nvidia ? "cosmic-blue-nvidia" : "cosmic-blue";
   }
