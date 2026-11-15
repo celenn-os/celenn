@@ -5,7 +5,8 @@
   inside the logo's orbit), the home, desktop, network and trash icons
 - mimetypes: common file types (a light page whose symbol and folded corner
   take the color of the type)
-- apps: the live ISO's welcome tour and installer
+- apps: the live ISO's welcome tour and installer, and the installed
+  system's first steps tour
 
 The icon theme (build_files/icon_theme/compose.py) puts them in front of
 Tela; every other icon still comes from Tela.
@@ -20,6 +21,7 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent
 LAYER = REPO / "build_files" / "icon_theme" / "layer"
 APPS = REPO / "iso_files" / "welcome"
+FIRST_STEPS_ICON = REPO / "system_files/usr/share/icons/hicolor/scalable/apps/cosmic-blue-welcome.svg"
 
 # Logo blues (branding/logo/build.py) and the accent (#4f8dff dark, #1d47c4 light)
 ORBIT = ("#7fe0ff", "#2f6bff")
@@ -228,8 +230,10 @@ def main():
         for alias in names[1:]:
             os.symlink(f"{names[0]}.svg", mimetypes / f"{alias}.svg")
 
-    (APPS / "cosmic-blue-welcome.svg").write_text(
-        app('<circle cx="30" cy="32" r="6.5" fill="url(#planet)"/>'))
+    welcome = app('<circle cx="30" cy="32" r="6.5" fill="url(#planet)"/>')
+    (APPS / "cosmic-blue-welcome.svg").write_text(welcome)
+    # Also the icon of the installed system's first steps tour
+    (FIRST_STEPS_ICON).write_text(welcome)
     (APPS / "cosmic-blue-installer.svg").write_text(app(glyph("download", 30, 32, 0.85, "#ffffff")))
 
 

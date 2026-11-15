@@ -1,0 +1,393 @@
+#!/usr/bin/gjs -m
+// cosmic-blue first steps: a short tour of the installed system, opened once
+// at the first login of each new account (cosmic-blue-first-steps-autostart),
+// and from the "First steps" launcher at any time.
+// Pages: installing apps, updates and rollback, handy commands, help.
+// GTK 4 + libadwaita, in the same style as the live ISO's welcome tour
+// (iso_files/welcome/cosmic-blue-welcome.js).
+//
+// Text is in English, with a French translation picked from the session
+// language. To add a language, add an entry to TRANSLATIONS.
+//
+// COSMIC_BLUE_FIRST_STEPS_CHECK=1 only loads the libraries and checks that
+// every text has its translations, without opening a window (image build test).
+
+import Adw from 'gi://Adw?version=1';
+import Gdk from 'gi://Gdk?version=4.0';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import Gtk from 'gi://Gtk?version=4.0';
+
+import {exit, programArgs, programInvocationName} from 'system';
+
+const APP_ID = 'io.github.cosmic_blue_os.FirstSteps';
+const STORE_DESKTOP_ID = 'com.system76.CosmicStore.desktop';
+const TERMINAL_DESKTOP_ID = 'com.system76.CosmicTerm.desktop';
+const SITE = 'https://cosmic-blue-os.github.io/cosmic-blue/';
+const ISSUES = 'https://github.com/cosmic-blue-os/cosmic-blue/issues';
+
+const TRANSLATIONS = {
+    fr: {
+        'First steps':
+            'Premiers pas',
+        'Welcome to cosmic-blue':
+            'Bienvenue dans cosmic-blue',
+        'Your system is installed and ready. Here are a few things worth knowing to get started.':
+            'Votre système est installé et prêt. Voici quelques points utiles pour bien démarrer.',
+        'Install apps':
+            'Installer des applications',
+        'Apps come from COSMIC Store, which offers Flathub and the COSMIC apps. They run apart from the system and update by themselves.':
+            'Les applications viennent de COSMIC Store, qui propose Flathub et les applications COSMIC. Elles tournent à part du système et se mettent à jour seules.',
+        'Open COSMIC Store':
+            'Ouvrir COSMIC Store',
+        'Command line tools, installed in your home folder with Homebrew':
+            'Outils en ligne de commande, installés dans votre dossier personnel avec Homebrew',
+        'Packages from other distributions, in a container that shares your home folder':
+            'Paquets d’autres distributions, dans un conteneur qui partage votre dossier personnel',
+        'Updates and rollback':
+            'Mises à jour et retour en arrière',
+        'The system, your apps and Homebrew packages update by themselves in the background. A system update applies at the next restart, without interrupting you.':
+            'Le système, vos applications et les paquets Homebrew se mettent à jour seuls en arrière-plan. Une mise à jour du système s’applique au redémarrage suivant, sans vous interrompre.',
+        'Update everything now, without waiting':
+            'Tout mettre à jour maintenant, sans attendre',
+        'An update broke something? Go back to the previous version, then restart':
+            'Une mise à jour a cassé quelque chose ? Revenez à la version précédente, puis redémarrez',
+        'Show the current and previous versions':
+            'Afficher la version actuelle et la précédente',
+        'Handy commands':
+            'Commandes utiles',
+        'ujust runs the shortcuts that come with the system. Type these in a terminal.':
+            'ujust lance les raccourcis fournis avec le système. Tapez-les dans un terminal.',
+        'List all the shortcuts':
+            'Lister tous les raccourcis',
+        'Developer tools: Docker, VS Code, Podman Desktop…':
+            'Outils de développement : Docker, VS Code, Podman Desktop…',
+        'Switch between the dark and light themes':
+            'Passer du thème sombre au thème clair',
+        'Bring the cosmic-blue look back: colors, icons, wallpaper':
+            'Retrouver le style cosmic-blue : couleurs, icônes, fond d’écran',
+        'Open a terminal':
+            'Ouvrir un terminal',
+        'Copy':
+            'Copier',
+        'Copied':
+            'Copié',
+        'Help and feedback':
+            'Aide et retours',
+        'Everything else is in the cosmic-blue guide. You can open this tour again from the app library: look for First steps.':
+            'Tout le reste est dans le guide de cosmic-blue. Vous pouvez rouvrir cette visite depuis la bibliothèque d’applications : cherchez Premiers pas.',
+        'Documentation':
+            'Documentation',
+        'Updates, software, commands and tips':
+            'Mises à jour, logiciels, commandes et astuces',
+        'Report a problem':
+            'Signaler un problème',
+        'Found a bug or something unclear? Tell us on GitHub':
+            'Un bug ou quelque chose de pas clair ? Dites-le-nous sur GitHub',
+        'Get started':
+            'C’est parti',
+        'Back':
+            'Précédent',
+        'Next':
+            'Suivant',
+    },
+};
+
+const language = (() => {
+    for (const name of GLib.get_language_names()) {
+        const lang = name.split(/[_.@]/)[0];
+        if (lang in TRANSLATIONS)
+            return lang;
+        if (lang === 'en' || lang === 'C')
+            break;
+    }
+    return null;
+})();
+const strings = TRANSLATIONS[language] ?? {};
+const usedTexts = new Set();
+
+function _(text) {
+    usedTexts.add(text);
+    return strings[text] ?? text;
+}
+
+// The French documentation lives under /fr/
+const DOCS = `${SITE}${language === 'fr' ? 'fr/' : ''}docs/`;
+
+// First icon name of `names` that the icon theme has.
+function pickIcon(...names) {
+    const theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default());
+    return names.find(name => theme.has_icon(name)) ?? names[names.length - 1];
+}
+
+function statusPage(iconName, title, description, child = null) {
+    const page = new Adw.StatusPage({
+        icon_name: iconName,
+        title,
+        description,
+        hexpand: true,
+        vexpand: true,
+    });
+    if (child) {
+        // Smaller icon and spacing, so the rows fit without scrolling
+        page.add_css_class('compact');
+        page.set_child(child);
+    }
+    return page;
+}
+
+function column(...children) {
+    const box = new Gtk.Box({
+        orientation: Gtk.Orientation.VERTICAL,
+        spacing: 18,
+    });
+    for (const child of children)
+        box.append(child);
+    return new Adw.Clamp({maximum_size: 560, child: box});
+}
+
+function pillButton(label, actionName, suggested = false) {
+    const button = new Gtk.Button({label, action_name: actionName, halign: Gtk.Align.CENTER});
+    button.add_css_class('pill');
+    if (suggested)
+        button.add_css_class('suggested-action');
+    return button;
+}
+
+function escapeMarkup(text) {
+    return GLib.markup_escape_text(text, -1);
+}
+
+class FirstStepsWindow extends Adw.ApplicationWindow {
+    static {
+        GObject.registerClass(this);
+    }
+
+    constructor(application) {
+        super({
+            application,
+            title: _('First steps'),
+            default_width: 720,
+            default_height: 680,
+        });
+
+        this._addAction('store', () => this._launchApp(STORE_DESKTOP_ID),
+            Gio.DesktopAppInfo.new(STORE_DESKTOP_ID) !== null);
+        this._addAction('terminal', () => this._launchApp(TERMINAL_DESKTOP_ID),
+            Gio.DesktopAppInfo.new(TERMINAL_DESKTOP_ID) !== null);
+        this._addAction('finish', () => this.close());
+
+        this._carousel = new Adw.Carousel({
+            hexpand: true,
+            vexpand: true,
+            allow_scroll_wheel: true,
+        });
+
+        this._carousel.append(statusPage(pickIcon('cosmic-blue-logo', 'fedora-logo-icon', 'computer-symbolic'),
+            _('Welcome to cosmic-blue'),
+            _('Your system is installed and ready. Here are a few things worth knowing to get started.')));
+
+        this._carousel.append(statusPage('system-software-install-symbolic',
+            _('Install apps'),
+            _('Apps come from COSMIC Store, which offers Flathub and the COSMIC apps. They run apart from the system and update by themselves.'),
+            column(
+                pillButton(_('Open COSMIC Store'), 'win.store', true),
+                this._commands([
+                    ['brew install', _('Command line tools, installed in your home folder with Homebrew')],
+                    ['distrobox create', _('Packages from other distributions, in a container that shares your home folder')],
+                ]))));
+
+        this._carousel.append(statusPage('software-update-available-symbolic',
+            _('Updates and rollback'),
+            _('The system, your apps and Homebrew packages update by themselves in the background. A system update applies at the next restart, without interrupting you.'),
+            column(this._commands([
+                ['ujust update', _('Update everything now, without waiting')],
+                ['sudo bootc rollback', _('An update broke something? Go back to the previous version, then restart')],
+                ['sudo bootc status', _('Show the current and previous versions')],
+            ]))));
+
+        this._carousel.append(statusPage('utilities-terminal-symbolic',
+            _('Handy commands'),
+            _('ujust runs the shortcuts that come with the system. Type these in a terminal.'),
+            column(
+                this._commands([
+                    ['ujust', _('List all the shortcuts')],
+                    ['ujust devmode', _('Developer tools: Docker, VS Code, Podman Desktop…')],
+                    ['ujust toggle-dark-mode', _('Switch between the dark and light themes')],
+                    ['ujust reset-cosmic-theme', _('Bring the cosmic-blue look back: colors, icons, wallpaper')],
+                ]),
+                pillButton(_('Open a terminal'), 'win.terminal'))));
+
+        this._carousel.append(statusPage('help-browser-symbolic',
+            _('Help and feedback'),
+            _('Everything else is in the cosmic-blue guide. You can open this tour again from the app library: look for First steps.'),
+            column(
+                this._links([
+                    ['help-contents-symbolic', _('Documentation'), _('Updates, software, commands and tips'), DOCS],
+                    ['dialog-warning-symbolic', _('Report a problem'), _('Found a bug or something unclear? Tell us on GitHub'), ISSUES],
+                ]),
+                pillButton(_('Get started'), 'win.finish', true))));
+
+        this._back = new Gtk.Button({label: _('Back'), valign: Gtk.Align.CENTER});
+        this._back.connect('clicked', () => this._scrollBy(-1));
+        this._next = new Gtk.Button({label: _('Next'), valign: Gtk.Align.CENTER});
+        this._next.add_css_class('suggested-action');
+        this._next.connect('clicked', () => this._scrollBy(1));
+        this._carousel.connect('page-changed', () => this._updateButtons());
+
+        const bottom = new Gtk.CenterBox({
+            margin_start: 18,
+            margin_end: 18,
+            margin_top: 6,
+            margin_bottom: 18,
+            start_widget: this._back,
+            center_widget: new Adw.CarouselIndicatorDots({carousel: this._carousel}),
+            end_widget: this._next,
+        });
+
+        const content = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL});
+        content.append(this._carousel);
+        content.append(bottom);
+
+        this._toasts = new Adw.ToastOverlay({child: content});
+        const toolbar = new Adw.ToolbarView({content: this._toasts});
+        toolbar.add_top_bar(new Adw.HeaderBar({show_title: false}));
+        this.set_content(toolbar);
+
+        // Escape closes; Alt+Left and Alt+Right turn the pages
+        const shortcuts = new Gtk.ShortcutController();
+        shortcuts.add_shortcut(new Gtk.Shortcut({
+            trigger: Gtk.ShortcutTrigger.parse_string('Escape'),
+            action: Gtk.NamedAction.new('window.close'),
+        }));
+        for (const [trigger, delta] of [['<Alt>Right', 1], ['<Alt>Left', -1]]) {
+            shortcuts.add_shortcut(new Gtk.Shortcut({
+                trigger: Gtk.ShortcutTrigger.parse_string(trigger),
+                action: Gtk.CallbackAction.new(() => {
+                    this._scrollBy(delta);
+                    return true;
+                }),
+            }));
+        }
+        this.add_controller(shortcuts);
+
+        this._updateButtons();
+    }
+
+    _addAction(name, callback, enabled = true) {
+        const action = new Gio.SimpleAction({name, enabled});
+        action.connect('activate', callback);
+        this.add_action(action);
+    }
+
+    // Rows of terminal commands, each with a button that copies it
+    _commands(commands) {
+        const group = new Adw.PreferencesGroup();
+        for (const [command, description] of commands) {
+            const row = new Adw.ActionRow({
+                title: `<tt>${escapeMarkup(command)}</tt>`,
+                subtitle: escapeMarkup(description),
+            });
+            const copy = new Gtk.Button({
+                icon_name: 'edit-copy-symbolic',
+                tooltip_text: _('Copy'),
+                valign: Gtk.Align.CENTER,
+            });
+            copy.add_css_class('flat');
+            copy.update_property([Gtk.AccessibleProperty.LABEL], [`${_('Copy')}: ${command}`]);
+            copy.connect('clicked', () => {
+                this.get_clipboard().set_text(command);
+                this._toasts.add_toast(new Adw.Toast({title: _('Copied'), timeout: 2}));
+            });
+            row.add_suffix(copy);
+            group.add(row);
+        }
+        return group;
+    }
+
+    // Rows that open a web page
+    _links(links) {
+        const group = new Adw.PreferencesGroup();
+        for (const [icon, title, subtitle, uri] of links) {
+            const row = new Adw.ActionRow({
+                title: escapeMarkup(title),
+                subtitle: escapeMarkup(subtitle),
+                activatable: true,
+                tooltip_text: uri,
+            });
+            row.add_prefix(new Gtk.Image({icon_name: icon}));
+            row.add_suffix(new Gtk.Image({icon_name: 'adw-external-link-symbolic'}));
+            row.connect('activated', () => this._openUri(uri));
+            group.add(row);
+        }
+        return group;
+    }
+
+    _launchApp(desktopId) {
+        try {
+            Gio.DesktopAppInfo.new(desktopId)?.launch([], this.get_display().get_app_launch_context());
+        } catch (e) {
+            logError(e, `Could not start ${desktopId}`);
+        }
+    }
+
+    _openUri(uri) {
+        try {
+            Gio.AppInfo.launch_default_for_uri(uri, this.get_display().get_app_launch_context());
+        } catch (e) {
+            logError(e, `Could not open ${uri}`);
+        }
+    }
+
+    _scrollBy(delta) {
+        const target = Math.round(this._carousel.position) + delta;
+        if (target < 0 || target >= this._carousel.n_pages)
+            return;
+        this._carousel.scroll_to(this._carousel.get_nth_page(target), true);
+    }
+
+    _updateButtons() {
+        const position = Math.round(this._carousel.position);
+        this._back.opacity = position > 0 ? 1 : 0;
+        this._back.sensitive = position > 0;
+        const last = position >= this._carousel.n_pages - 1;
+        this._next.opacity = last ? 0 : 1;
+        this._next.sensitive = !last;
+    }
+}
+
+class FirstStepsApp extends Adw.Application {
+    static {
+        GObject.registerClass(this);
+    }
+
+    constructor() {
+        super({application_id: APP_ID});
+    }
+
+    vfunc_activate() {
+        let window = this.active_window;
+        if (!window)
+            window = new FirstStepsWindow(this);
+        window.present();
+    }
+}
+
+// Image build test: every text has a translation in every language
+if (GLib.getenv('COSMIC_BLUE_FIRST_STEPS_CHECK')) {
+    const source = new TextDecoder().decode(
+        GLib.file_get_contents(programInvocationName)[1]);
+    const texts = [...source.matchAll(/\b_\('((?:[^'\\]|\\.)*)'\)/g)].map(match => match[1]);
+    let missing = 0;
+    for (const [lang, table] of Object.entries(TRANSLATIONS)) {
+        for (const text of texts.filter(t => !(t in table))) {
+            printerr(`No ${lang} translation for: ${text}`);
+            missing++;
+        }
+    }
+    print(`${texts.length} texts, ${missing} missing translations`);
+    exit(missing === 0 && texts.length > 0 ? 0 : 1);
+}
+
+new FirstStepsApp().run([programInvocationName, ...programArgs]);

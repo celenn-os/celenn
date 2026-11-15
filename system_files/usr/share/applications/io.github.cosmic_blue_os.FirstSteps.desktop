@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=First steps
+Name[fr]=Premiers pas
+Comment=Get started with cosmic-blue: apps, updates, handy commands and help
+Comment[fr]=Bien démarrer avec cosmic-blue : applications, mises à jour, commandes utiles et aide
+Keywords=cosmic-blue;Welcome;Tour;Help;Getting started;
+Keywords[fr]=cosmic-blue;Bienvenue;Visite;Aide;Démarrer;
+Icon=cosmic-blue-welcome
+Exec=/usr/libexec/cosmic-blue-first-steps
+Terminal=false
+StartupNotify=true
+Categories=System;

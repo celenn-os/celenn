@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=First steps
+Name[fr]=Premiers pas
+Comment=Opens the cosmic-blue first steps tour at the first login of a new account
+Comment[fr]=Ouvre la visite Premiers pas de cosmic-blue à la première connexion d'un nouveau compte
+Icon=cosmic-blue-welcome
+Exec=/usr/libexec/cosmic-blue-first-steps-autostart
+Terminal=false
+NoDisplay=true

@@ -308,6 +308,17 @@ test -f /etc/skel/.config/gnome-initial-setup-done
 cmp /ctx/initial_setup/cosmic-initial-setup /usr/bin/cosmic-initial-setup
 rpm -q spice-vdagent
 
+# First steps tour: opened once for new accounts, after the first-run assistant;
+# its module loads and every text has its French translation
+test -f /etc/skel/.config/cosmic-blue/first-steps-pending
+test -x /usr/libexec/cosmic-blue-first-steps
+test -x /usr/libexec/cosmic-blue-first-steps-autostart
+grep -qx 'Exec=/usr/libexec/cosmic-blue-first-steps-autostart' \
+    /etc/xdg/autostart/io.github.cosmic_blue_os.FirstSteps.desktop
+test -f /usr/share/applications/io.github.cosmic_blue_os.FirstSteps.desktop
+test -f /usr/share/icons/hicolor/scalable/apps/cosmic-blue-welcome.svg
+COSMIC_BLUE_FIRST_STEPS_CHECK=1 gjs -m /usr/libexec/cosmic-blue-first-steps
+
 # Login and lock screens: our rebuild, with the cosmic-blue wallpaper as the
 # background shown before a user has a saved one
 cmp /ctx/greeter/cosmic-greeter /usr/bin/cosmic-greeter
