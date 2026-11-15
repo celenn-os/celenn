@@ -30,9 +30,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Pull requests that do not touch NVIDIA only build and test the cosmic-blue ISO
+  images:
+    name: Pick the images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      suffixes: ${{ steps.images.outputs.suffixes }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Pick the images
+        id: images
+        uses: ./.github/actions/pr-images
+        env:
+          GH_TOKEN: ${{ github.token }}
+
   build:
     name: Build live ISO${{ matrix.image_suffix && format(' ({0})', matrix.image_suffix) || '' }}
+    needs: images
     runs-on: ubuntu-24.04
+    timeout-minutes: 150
     permissions:
       contents: read
       packages: read
@@ -41,7 +65,7 @@ jobs:
       fail-fast: false
       matrix:
         # One ISO per image: cosmic-blue, and cosmic-blue-nvidia for NVIDIA cards
-        image_suffix: ["", "nvidia"]
+        image_suffix: ${{ fromJSON(needs.images.outputs.suffixes) }}
     env:
       # output of build.yml, keep in sync
       IMAGE_NAME: ${{ github.event.repository.name }}${{ matrix.image_suffix && format('-{0}', matrix.image_suffix) || '' }}
@@ -170,7 +194,7 @@ jobs:
   # The public download is only replaced by an ISO that passed.
   install_test:
     name: Install test${{ matrix.image_suffix && format(' ({0})', matrix.image_suffix) || '' }}
-    needs: build
+    needs: [images, build]
     runs-on: ubuntu-26.04
     timeout-minutes: 180
     permissions:
@@ -179,7 +203,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image_suffix: ["", "nvidia"]
+        image_suffix: ${{ fromJSON(needs.images.outputs.suffixes) }}
     env:
       # output of build.yml, keep in sync
       IMAGE_NAME: ${{ github.event.repository.name }}${{ matrix.image_suffix && format('-{0}', matrix.image_suffix) || '' }}
@@ -301,3 +325,27 @@ jobs:
             "${ISO_NAME}.iso" "s3://${R2_BUCKET}/${ISO_NAME}.iso"
           aws s3 cp --endpoint-url "${endpoint}" --no-progress \
             "${ISO_NAME}.iso.sha256" "s3://${R2_BUCKET}/${ISO_NAME}.iso.sha256"
+
+  # A failed ISO build or install test opens an issue, closed by the next
+  # run that passes (pull requests excluded)
+  report:
+    name: Report the result
+    needs: [images, build, install_test]
+    if: always() && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Report the result
+        uses: ./.github/actions/failure-issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          result: ${{ contains(needs.*.result, 'failure') && 'failure' || (needs.install_test.result == 'success' && 'success' || 'none') }}

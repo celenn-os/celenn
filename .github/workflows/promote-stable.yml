@@ -53,6 +53,8 @@ jobs:
   promote:
     name: Promote ${{ matrix.image_suffix && format('{0} ', matrix.image_suffix) || '' }}to stable
     runs-on: ubuntu-26.04
+    # The update test takes up to 90 minutes
+    timeout-minutes: 150
     strategy:
       fail-fast: false
       matrix:
@@ -236,6 +238,7 @@ jobs:
     needs: promote
     if: ${{ !cancelled() && needs.promote.outputs.promoted == 'true' }}
     runs-on: ubuntu-26.04
+    timeout-minutes: 10
     permissions:
       actions: write
     steps:
@@ -244,3 +247,28 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: gh workflow run build-live-iso.yml --ref "${{ github.event.repository.default_branch }}"
+
+  # A failed promotion (update test, copy, release notes) opens an issue,
+  # closed by the next promotion that passes. The live ISO build reports
+  # its own result.
+  report:
+    name: Report the result
+    needs: [promote, release-notes, live-iso]
+    if: always()
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: .github/actions
+
+      - name: Report the result
+        uses: ./.github/actions/failure-issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          result: ${{ contains(needs.*.result, 'failure') && 'failure' || (needs.promote.result == 'success' && 'success' || 'none') }}
