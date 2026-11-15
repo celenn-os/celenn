@@ -227,6 +227,12 @@ for app in io.github.flattool.Ignition org.gnome.FileRoller org.gnome.Showtime \
     if grep -q "${app}" /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall; then exit 1; fi
 done
 test ! -e /usr/lib/systemd/system/flatpak-add-fedora-repos.service
+# AppImages: Gear Lever on first boot, and the host can run both AppImage
+# runtimes (older ones load libfuse.so.2, newer static ones need fusermount3)
+grep -q '^\[Flatpak Preinstall it.mijorus.gearlever\]' /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall
+test -e /usr/lib64/libfuse.so.2
+command -v fusermount >/dev/null
+command -v fusermount3 >/dev/null
 # No Bluefin GNOME dconf settings (the folder itself may come from Fedora)
 if compgen -G '/etc/dconf/db/distro.d/*bluefin*' >/dev/null; then
     echo "Bluefin (GNOME) dconf settings present"; exit 1

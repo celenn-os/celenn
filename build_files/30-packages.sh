@@ -19,6 +19,7 @@ FEDORA_PACKAGES=(
     fish
     foo2zjs
     fuse-encfs
+    fuse-libs  # libfuse.so.2: runs AppImages (Gear Lever)
     gcc
     gcc-c++
     git-credential-libsecret
