@@ -134,6 +134,20 @@ GNOME_ONLY+=(
     usr/share/glib-2.0/schemas/io.projectbluefin.chairlift.updates.gschema.xml
     usr/share/glib-2.0/schemas/io.projectbluefin.chairlift.firstrun.gschema.xml
 )
+# FlatPark, the second Flatpak remote of projectbluefin/common: how far its
+# apps can be trusted is not established yet, so cosmic-blue offers it but
+# leaves it off. Its descriptor moves out of remotes.d (which flatpak adds by
+# itself) to where `ujust toggle-flatpark` finds it; its filter, which hides
+# the apps that are also on Flathub, stays in /usr/share/flatpak. The filter
+# copy service is dropped: it only serves Bazaar's sandbox, and `flatpak
+# remote-add --filter` keeps its own copy of the filter in the repository.
+install -d "${STAGE}/usr/share/cosmic-blue/flatpak"
+mv "${STAGE}/usr/share/flatpak/remotes.d/flatpark.flatpakrepo" "${STAGE}/usr/share/cosmic-blue/flatpak/"
+GNOME_ONLY+=(
+    usr/lib/systemd/system/flatpark-filter-copy.path
+    usr/lib/systemd/system/flatpark-filter-copy.service
+)
+sed -i '/flatpark-filter-copy/d' "${STAGE}/usr/lib/systemd/system-preset/02-flatpak-appstream-refresh.preset"
 for path in "${GNOME_ONLY[@]}"; do
     rm -rf "${STAGE:?}/${path}"
 done

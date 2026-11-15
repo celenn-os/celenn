@@ -90,6 +90,13 @@ if [[ "$(vm_booted_digest)" != "${to_digest}" ]]; then
     vm 'journalctl -b -1 --no-pager -u ostree-finalize-staged.service -u ostree-finalize-staged-hold.service; journalctl -b -1 --no-pager -n 60' || true
 fi
 vm_check_system after-update || errors=1
+# Older images turned FlatPark on by themselves: an update that brings
+# cosmic-blue-flatpark-off turns it off (no app was installed from it)
+if vm 'test -e /usr/libexec/cosmic-blue-flatpark-off' \
+    && vm 'flatpak remotes --system --columns=name' | grep -qx flatpark; then
+    echo "::error::FlatPark is still on after the update"
+    errors=1
+fi
 vm "grep -qx kept /etc/cosmic-blue-update-test" \
     || { echo "::error::A change to /etc was lost in the update"; errors=1; }
 vm "grep -qx kept ~${DEMO_USER}/update-test" \

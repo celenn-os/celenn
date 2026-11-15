@@ -185,15 +185,20 @@ for recipe in toggle-dark-mode reset-cosmic-theme reset-cosmic-config export-cos
 done
 
 test ! -e /usr/share/flatpak/preinstall.d/bazaar.preinstall
-# FlatPark (Bluefin's second Flatpak remote) is kept: when it is there, its
-# filter must be too, so apps also on Flathub only come from Flathub
-FLATPARK=/usr/share/flatpak/remotes.d/flatpark.flatpakrepo
-if [[ -f "${FLATPARK}" ]]; then
-    filter="$(sed -n 's/^Filter=//p' "${FLATPARK}")"
-    test -n "${filter}"
-    grep -q '^deny ' "${filter}"
-    grep -qx 'enable flatpark-filter-copy.path' /usr/lib/systemd/system-preset/02-flatpak-appstream-refresh.preset
-fi
+# FlatPark (Bluefin's second Flatpak remote) is offered but off: not in
+# remotes.d nor in the image's installation, its descriptor and filter (apps
+# also on Flathub only come from Flathub) ready for `ujust toggle-flatpark`
+test ! -e /usr/share/flatpak/remotes.d/flatpark.flatpakrepo
+if flatpak remotes --system --columns=name | grep -qx flatpark; then echo "FlatPark is on"; exit 1; fi
+FLATPARK=/usr/share/cosmic-blue/flatpak/flatpark.flatpakrepo
+grep -q '^\[Flatpak Repo\]' "${FLATPARK}"
+filter="$(sed -n 's/^Filter=//p' "${FLATPARK}")"
+test "${filter}" = /usr/share/flatpak/flatpark.filter
+grep -q '^deny ' "${filter}"
+grep -qw toggle-flatpark <<<"${recipes}"
+test ! -e /usr/lib/systemd/system/flatpark-filter-copy.path
+if grep -q flatpark /usr/lib/systemd/system-preset/*.preset; then exit 1; fi
+systemctl is-enabled --quiet cosmic-blue-flatpark-off.service
 # Bluefin leftovers removed in 10-system-files.sh
 for path in /etc/bazaar \
     /usr/lib/systemd/user/bazaar.service /usr/libexec/projectbluefin-countme \
