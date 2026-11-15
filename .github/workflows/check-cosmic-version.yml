@@ -159,16 +159,14 @@ jobs:
           git switch -c "${branch}"
 
           if [ "${TARGET_TAG}" != "${BASE_TAG}" ]; then
-            # Pin the new base image digest (Renovate keeps it updated)
-            digest="$(skopeo inspect --retry-times 3 --format '{{.Digest}}' \
-              "docker://ghcr.io/ublue-os/base-main:${TARGET_TAG}")"
+            # By tag, like the other images (no digest: see .github/renovate.json5)
             sed -i \
               -e "s|^ARG BASE_TAG=\"${BASE_TAG}\"\$|ARG BASE_TAG=\"${TARGET_TAG}\"|" \
-              -e "s|^\(ARG BASE_IMAGE=\"ghcr.io/ublue-os/base-main:\)[^\"]*\"|\1${TARGET_TAG}@${digest}\"|" \
+              -e "s|^\(ARG BASE_IMAGE=\"ghcr.io/ublue-os/base-main:\)[^\"]*\"|\1${TARGET_TAG}\"|" \
               Containerfile
             sed -i "s|based on Fedora ${BASE_TAG}|based on Fedora ${TARGET_TAG}|" README.md
             grep -qx "ARG BASE_TAG=\"${TARGET_TAG}\"" Containerfile
-            grep -q "base-main:${TARGET_TAG}@${digest}\"" Containerfile
+            grep -qx "ARG BASE_IMAGE=\"ghcr.io/ublue-os/base-main:${TARGET_TAG}\"" Containerfile
           fi
 
           # libcosmic revision locked by cosmic-settings for this release
@@ -189,6 +187,11 @@ jobs:
             -e "s|COSMIC [0-9][^ ]* packages in Fedora [0-9]*|COSMIC ${CURRENT} packages in Fedora ${TARGET_TAG}|" \
             -e "s|cosmic-settings epoch-[^ ]* Cargo.lock|cosmic-settings ${tag} Cargo.lock|" \
             build_files/theme/Cargo.toml
+          # The theme tool's Cargo.lock: cosmic-settings' own, trimmed by cargo
+          # to the crates the theme tool uses (same versions as Fedora's COSMIC)
+          curl -fsSL "${lock_url}" -o build_files/theme/Cargo.lock
+          (cd build_files/theme && cargo metadata --format-version 1 >/dev/null)
+          grep -q "libcosmic?rev=${rev}#" build_files/theme/Cargo.lock
           if [ "${CURRENT}" != "${PINNED}" ]; then
             sed -i "s|^${PINNED//./\\.}\$|${CURRENT}|" build_files/cosmic-version
           fi
@@ -225,11 +228,11 @@ jobs:
               if [ "${TARGET_TAG}" != "${BASE_TAG}" ]; then
                 echo "\`${REFERENCE_IMAGE}\` is now based on Fedora ${TARGET_TAG}: move cosmic-blue from Fedora ${BASE_TAG} to Fedora ${TARGET_TAG}."
                 echo
-                echo "- \`Containerfile\`: \`BASE_TAG\` ${TARGET_TAG}, \`BASE_IMAGE\` \`ghcr.io/ublue-os/base-main:${TARGET_TAG}\` (pinned digest)."
+                echo "- \`Containerfile\`: \`BASE_TAG\` ${TARGET_TAG}, \`BASE_IMAGE\` \`ghcr.io/ublue-os/base-main:${TARGET_TAG}\`."
                 echo "- \`README.md\`: Fedora ${TARGET_TAG}."
               fi
               echo "- Fedora ${TARGET_TAG} ships COSMIC ${CURRENT} (cosmic-blue was pinned to ${PINNED})."
-              echo "- \`build_files/theme/Cargo.toml\`: libcosmic revision locked by cosmic-settings ${CURRENT}."
+              echo "- \`build_files/theme/Cargo.toml\` and \`Cargo.lock\`: libcosmic revision and crate versions locked by cosmic-settings ${CURRENT}."
               echo "- \`build_files/cosmic-version\`: ${CURRENT}."
               echo
               if [ "${TARGET_TAG}" != "${BASE_TAG}" ] && [ "${FEDORA_AUTOMERGE}" != "true" ]; then

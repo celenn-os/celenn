@@ -5,7 +5,8 @@
 # opens the pull request that moves BASE_TAG and BASE_IMAGE together when
 # Bluefin stable moves to a new release (in 2026-11, Fedora 45 still broke the
 # live ISO installer: systemd-tmpfiles exited with code 73).
-# Renovate only pins and updates the image digests (see .github/renovate.json5).
+# Images are followed by tag, not pinned by digest: every daily build takes
+# the latest base, common and brew images (see .github/renovate.json5).
 ARG BASE_TAG="44"
 ARG BASE_IMAGE="ghcr.io/ublue-os/base-main:44"
 ARG COMMON_IMAGE="ghcr.io/projectbluefin/common:latest"
@@ -18,7 +19,7 @@ FROM ${BREW_IMAGE} AS brew
 # Default COSMIC themes with frosted glass (see build_files/theme/src/main.rs)
 FROM docker.io/library/rust:1 AS theme
 COPY build_files/theme /theme
-RUN cd /theme && cargo build --release \
+RUN cd /theme && cargo build --release --locked \
     && XDG_CONFIG_HOME=/out /theme/target/release/cosmic-blue-theme \
     && XDG_CONFIG_HOME=/out/previous/stock /theme/target/release/cosmic-blue-theme stock \
     && XDG_CONFIG_HOME=/out/previous/frosted /theme/target/release/cosmic-blue-theme frosted

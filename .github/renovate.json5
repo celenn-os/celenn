@@ -13,12 +13,14 @@
 
   "packageRules": [
     {
-      // Base images are rebuilt every day (ublue-os/base-main around 01:10
-      // and 04:10 UTC): one grouped pull request at 04:00-04:59 UTC. Its
-      // merge (after ~1 hour of CI) builds the image, and the daily build of
-      // build.yml then sees a recent build and skips.
-      "description": "Container images in the Containerfile",
+      // Container images are followed by tag, not pinned by digest: base
+      // images are rebuilt every day, and a digest pin would mean one more
+      // pull request and one more image build each day for the same result
+      // as the daily build. Tag updates (rare: Fedora moves are turned off
+      // below) come as one grouped pull request.
+      "description": "Container images in the Containerfile, by tag only",
       "matchManagers": ["dockerfile"],
+      "pinDigests": false,
       "groupName": "base images",
       "schedule": ["* 4 * * *"]
     },
@@ -57,8 +59,17 @@
 
   // Tela circle is fetched by git at a pinned commit in
   // build_files/icon_theme/tela.sh, the Bibata cursors at a pinned tag in
-  // build_files/cursor_theme/bibata.sh
+  // build_files/cursor_theme/bibata.sh, Starship at a pinned release in
+  // build_files/30-packages.sh
   "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^build_files/30-packages\\.sh$/"],
+      "matchStrings": [
+        "STARSHIP_REPO=\"https://github\\.com/(?<depName>[^\"]+)\"\\s+STARSHIP_VERSION=\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "github-releases"
+    },
     {
       "customType": "regex",
       "managerFilePatterns": ["/^build_files/icon_theme/tela\\.sh$/"],
@@ -78,7 +89,7 @@
     }
   ],
 
-  // libcosmic follows the Fedora COSMIC packages through
-  // .github/workflows/check-cosmic-version.yml, not Renovate.
+  // libcosmic (and the theme tool's Cargo.lock) follows the Fedora COSMIC
+  // packages through .github/workflows/check-cosmic-version.yml, not Renovate.
   "cargo": { "enabled": false }
 }
