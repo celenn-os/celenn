@@ -206,21 +206,29 @@ jobs:
       # storage, where `bootc install` (tests/vm-lib.sh) reads it: no copy from
       # the user storage (3 to 6 minutes, and a second copy on the disk).
       # ROOT_ENV runs a command as root with the variables the just recipes
-      # read (sudo resets the environment). GIT_OPTIONAL_LOCKS=0: `git status`
-      # leaves the runner's index alone.
+      # read (sudo resets the environment), without the runner's runtime
+      # directory (root podman would leave root-owned files there that break
+      # rootless podman). GIT_OPTIONAL_LOCKS=0: `git status` leaves the
+      # runner's index alone.
       - name: Use the root podman storage
         run: |
+          set -euo pipefail
+          root_env="sudo env -u XDG_RUNTIME_DIR -u DBUS_SESSION_BUS_ADDRESS PATH=${PATH} IMAGE_NAME=${IMAGE_NAME} GIT_OPTIONAL_LOCKS=0"
+          echo "ROOT_ENV=${root_env}" >> "${GITHUB_ENV}"
           # git refuses, as root, a checkout owned by another user
           sudo git config --system --add safe.directory "${GITHUB_WORKSPACE}"
-          # Ubuntu mounts root overlay layers with metacopy=on, which turns off
-          # the native overlay diff: every layer commit then walks the whole
-          # image (minutes per RUN step). Rootless podman never had it.
+          # Without the native overlay diff, committing a layer walks the whole
+          # image (minutes for each RUN step). Root overlay mounts lose it
+          # with Ubuntu's metacopy=on and the kernel's redirect_dir default;
+          # rootless podman can use neither, so it always had it.
           conf=/etc/containers/storage.conf
           [[ -f "${conf}" ]] || sudo cp /usr/share/containers/storage.conf "${conf}"
           sudo sed -i -E 's/,metacopy=on|metacopy=on,?//' "${conf}"
-          grep -n mountopt "${conf}" || true
-          sudo podman info --format '{{ json .Store.GraphStatus }}'
-          echo "ROOT_ENV=sudo env PATH=${PATH} IMAGE_NAME=${IMAGE_NAME} GIT_OPTIONAL_LOCKS=0" >> "${GITHUB_ENV}"
+          sudo modprobe overlay
+          for param in redirect_dir metacopy; do
+            echo N | sudo tee "/sys/module/overlay/parameters/${param}" >/dev/null
+          done
+          ${root_env} podman info --format '{{ json .Store.GraphStatus }}'
 
       # Helper stages (Containerfile.helpers: rebuilt COSMIC programs, recolored
       # themes): restored from the Actions cache while their inputs do not
@@ -349,10 +357,10 @@ jobs:
         run: |
           set -euo pipefail
           # The login above is for cosign; root podman has its own credentials
-          sudo podman login ghcr.io --username "${REGISTRY_USER}" --password-stdin <<< "${REGISTRY_PASSWORD}"
+          ${ROOT_ENV} podman login ghcr.io --username "${REGISTRY_USER}" --password-stdin <<< "${REGISTRY_PASSWORD}"
           set -x
           for tag in ${ALIAS_TAGS}; do
-            sudo podman push --digestfile=/tmp/digestfile ${IMAGE_NAME}:${tag} ${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}
+            ${ROOT_ENV} podman push --digestfile=/tmp/digestfile ${IMAGE_NAME}:${tag} ${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}
           done
 
           digest=$(< /tmp/digestfile)
