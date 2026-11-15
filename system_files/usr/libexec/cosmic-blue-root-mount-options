@@ -1,0 +1,35 @@
+#!/usr/bin/bash
+# Applies the btrfs options of the "/" line of /etc/fstab (written by the
+# installer, e.g. compress=zstd:1) to the root filesystem.
+#
+# Since Fedora Atomic 42 the root is a composefs overlay: the options of the
+# "/" line can no longer be applied to it (systemd-remount-fs fails, see its
+# drop-in), so btrfs compression chosen in the installer was never active:
+# https://discussion.fedoraproject.org/t/148562
+# Most btrfs options, compression included, belong to the whole filesystem,
+# so remounting /var, which sits on the same btrfs, applies them everywhere.
+set -euo pipefail
+
+[[ "$(findmnt -n -o FSTYPE /sysroot 2>/dev/null)" == btrfs ]] || exit 0
+[[ "$(findmnt -n -o FSTYPE /var 2>/dev/null)" == btrfs ]] || exit 0
+[[ "$(findmnt -n -o MAJ:MIN /sysroot)" == "$(findmnt -n -o MAJ:MIN /var)" ]] || exit 0
+
+# bootc install to-disk writes no /etc/fstab (the root comes from kargs)
+[[ -r /etc/fstab ]] || exit 0
+
+fstab_options="$(awk '$1 !~ /^#/ && $2 == "/" && $3 == "btrfs" { print $4; exit }' /etc/fstab)"
+options=()
+IFS=, read -ra all <<<"${fstab_options}"
+for option in "${all[@]}"; do
+    case "${option}" in
+        # Per mount point, or not for a remount
+        subvol=* | subvolid=* | ro | rw | defaults | auto | noauto | nofail | x-* | "") ;;
+        *) options+=("${option}") ;;
+    esac
+done
+(( ${#options[@]} )) || exit 0
+
+joined="$(IFS=,; echo "${options[*]}")"
+echo "Applying ${joined} to the root btrfs filesystem"
+# Only these options, not the /var line of fstab (its subvol cannot change)
+mount --options-mode ignore -o "remount,${joined}" /var

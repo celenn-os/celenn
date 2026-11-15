@@ -437,6 +437,9 @@ test -x /usr/libexec/cosmic-blue-fix-aleph
 grep -q cosmic-blue-fix-aleph /usr/lib/systemd/system/bootloader-update.service.d/10-cosmic-blue-aleph.conf
 # ISO installs: no systemd-remount-fs on the composefs root (fstab "/" line)
 grep -q "ConditionPathExists=!/run/ostree-booted" /usr/lib/systemd/system/systemd-remount-fs.service.d/10-cosmic-blue-ostree.conf
+# ...whose btrfs options (compression) are applied to the root btrfs
+test -x /usr/libexec/cosmic-blue-root-mount-options
+systemctl is-enabled cosmic-blue-root-mount-options.service
 
 # System tuning shared with Bluefin and Aurora (most of it comes from Fedora,
 # ublue-os/main and projectbluefin/common; tests/vm-lib.sh vm_check_tuning
