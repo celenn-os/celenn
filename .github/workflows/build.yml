@@ -204,9 +204,37 @@ jobs:
           echo "IMAGE_REGISTRY=${IMAGE_REGISTRY,,}" >> ${GITHUB_ENV}
           echo "IMAGE_NAME=${IMAGE_NAME,,}" >> ${GITHUB_ENV}
 
+      # Helper stages (Containerfile.helpers: rebuilt COSMIC programs, recolored
+      # themes): restored from the Actions cache while their inputs do not
+      # change (`just helpers-key`), built otherwise. Caches saved by main
+      # builds are shared with pull requests.
+      - name: Helper stages cache key
+        id: helpers
+        run: echo "key=helpers-$(just helpers-key)" >> "${GITHUB_OUTPUT}"
+
+      - name: Restore the helper stages
+        id: helpers-cache
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ${{ runner.temp }}/helpers
+          key: ${{ steps.helpers.outputs.key }}
+
+      - name: Build the helper stages
+        if: steps.helpers-cache.outputs.cache-hit != 'true'
+        run: just build-helpers "${RUNNER_TEMP}/helpers"
+
+      - name: Save the helper stages
+        if: steps.helpers-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ${{ runner.temp }}/helpers
+          key: ${{ steps.helpers.outputs.key }}
+
       # This actually builds the container image
       - name: Build Image
         id: build-image
+        env:
+          HELPERS_DIR: ${{ runner.temp }}/helpers
         run: |
           just build \
             ${IMAGE_NAME} \

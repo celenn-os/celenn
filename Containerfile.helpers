@@ -1,0 +1,59 @@
+# Helper stages of the cosmic-blue image: programs rebuilt with our changes
+# and themes recolored with the cosmic-blue colors. They change rarely and take
+# a large part of the build, so they are built on their own (`just
+# build-helpers`) and the CI keeps their output in the Actions cache, keyed on
+# their inputs (`just helpers-key`). The final stage only holds the outputs,
+# handed to the Containerfile as the "helpers" build context.
+
+# Fedora release: passed by `just build-helpers` from BASE_TAG in the Containerfile
+ARG BASE_TAG
+
+# Default COSMIC themes with frosted glass (see build_files/theme/src/main.rs)
+FROM docker.io/library/rust:1 AS theme
+COPY build_files/theme /theme
+RUN cd /theme && cargo build --release \
+    && XDG_CONFIG_HOME=/out /theme/target/release/cosmic-blue-theme \
+    && XDG_CONFIG_HOME=/out/previous/stock /theme/target/release/cosmic-blue-theme stock \
+    && XDG_CONFIG_HOME=/out/previous/frosted /theme/target/release/cosmic-blue-theme frosted
+
+# COSMIC's first-run assistant, rebuilt from Fedora's source package with the
+# cosmic-blue patches (see build_files/initial_setup/patch.py)
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS initial_setup
+COPY build_files/initial_setup /initial_setup
+RUN /initial_setup/build.sh
+
+# Login and lock screens, rebuilt from Fedora's source package with the
+# cosmic-blue wallpaper as their built-in background
+# (see build_files/greeter/build.sh)
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS greeter
+COPY build_files/greeter /greeter
+COPY system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-orbits.jpg /greeter/background.jpg
+RUN /greeter/build.sh /greeter/background.jpg
+
+# Boot screen spinner frames, tinted with the logo blue
+# (see build_files/plymouth/tint.py)
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS plymouth
+COPY build_files/plymouth /plymouth
+RUN dnf5 -y install plymouth-theme-spinner python3-pillow \
+    && python3 /plymouth/tint.py /usr/share/plymouth/themes/spinner /out
+
+# Tela circle icons, recolored with the logo blue
+# (see build_files/icon_theme/tela.sh)
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS icons
+COPY build_files/icon_theme/tela.sh /tela.sh
+RUN /tela.sh
+
+# Bibata Modern cursors, recolored with the cosmic-blue colors
+# (see build_files/cursor_theme/bibata.py)
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS cursors
+COPY build_files/cursor_theme /cursor_theme
+RUN /cursor_theme/bibata.sh
+
+# Only the outputs
+FROM scratch
+COPY --from=theme /out /theme
+COPY --from=initial_setup /out /initial_setup
+COPY --from=greeter /out /greeter
+COPY --from=plymouth /out /plymouth
+COPY --from=icons /out /icons
+COPY --from=cursors /out /cursors
