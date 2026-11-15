@@ -202,6 +202,34 @@ jobs:
           echo "IMAGE_REGISTRY=${IMAGE_REGISTRY,,}" >> ${GITHUB_ENV}
           echo "IMAGE_NAME=${IMAGE_NAME,,}" >> ${GITHUB_ENV}
 
+      # The image is built, rechunked, boot-tested and pushed in the root podman
+      # storage, where `bootc install` (tests/vm-lib.sh) reads it: no copy from
+      # the user storage (3 to 6 minutes, and a second copy on the disk).
+      # ROOT_ENV runs a command as root with the variables the just recipes
+      # read (sudo resets the environment), without the runner's runtime
+      # directory (root podman would leave root-owned files there that break
+      # rootless podman). GIT_OPTIONAL_LOCKS=0: `git status` leaves the
+      # runner's index alone.
+      - name: Use the root podman storage
+        run: |
+          set -euo pipefail
+          root_env="sudo env -u XDG_RUNTIME_DIR -u DBUS_SESSION_BUS_ADDRESS PATH=${PATH} IMAGE_NAME=${IMAGE_NAME} GIT_OPTIONAL_LOCKS=0"
+          echo "ROOT_ENV=${root_env}" >> "${GITHUB_ENV}"
+          # git refuses, as root, a checkout owned by another user
+          sudo git config --system --add safe.directory "${GITHUB_WORKSPACE}"
+          # Without the native overlay diff, committing a layer walks the whole
+          # image (minutes for each RUN step). Root overlay mounts lose it
+          # with Ubuntu's metacopy=on and the kernel's redirect_dir default;
+          # rootless podman can use neither, so it always had it.
+          conf=/etc/containers/storage.conf
+          [[ -f "${conf}" ]] || sudo cp /usr/share/containers/storage.conf "${conf}"
+          sudo sed -i -E 's/,metacopy=on|metacopy=on,?//' "${conf}"
+          sudo modprobe overlay
+          for param in redirect_dir metacopy; do
+            echo N | sudo tee "/sys/module/overlay/parameters/${param}" >/dev/null
+          done
+          ${root_env} podman info --format '{{ json .Store.GraphStatus }}'
+
       # Helper stages (Containerfile.helpers: rebuilt COSMIC programs, recolored
       # themes): restored from the Actions cache while their inputs do not
       # change (`just helpers-key`), built otherwise. Caches saved by main
@@ -234,7 +262,7 @@ jobs:
         env:
           HELPERS_DIR: ${{ runner.temp }}/helpers
         run: |
-          just build \
+          ${ROOT_ENV} HELPERS_DIR="${HELPERS_DIR}" just build \
             ${IMAGE_NAME} \
             ${DEFAULT_TAG} \
             ${VERSION}
@@ -243,7 +271,7 @@ jobs:
       - name: Rechunk with rpm-ostree
         id: rechunk
         run: |
-          just ostree-rechunk \
+          ${ROOT_ENV} just ostree-rechunk \
             ${IMAGE_NAME} \
             ${DEFAULT_TAG}
 
@@ -264,7 +292,7 @@ jobs:
         env:
           ALIAS_TAGS: ${{ steps.gen-build-tags.outputs.alias_tags }}
         run: |
-          just tag-images \
+          ${ROOT_ENV} just tag-images \
             "${IMAGE_NAME}" \
             "${DEFAULT_TAG}" \
             "${ALIAS_TAGS}"
@@ -273,10 +301,6 @@ jobs:
       # and check the login screen comes up. A failing image is not pushed.
       - name: Prepare the boot test
         uses: ./.github/actions/vm-test-setup
-
-      - name: Copy the image for the boot test
-        # bootc install runs from the root podman storage
-        run: podman save "localhost/${IMAGE_NAME}:${DEFAULT_TAG}" | sudo podman load
 
       - name: Boot test
         timeout-minutes: 40
@@ -313,10 +337,6 @@ jobs:
           base64 -w 200 "${RUNNER_TEMP}/terminal.jpg"
           echo "TERMINAL-JPEG-END"
 
-      - name: Free the boot test space
-        if: always()
-        run: sudo podman rmi -f "localhost/${IMAGE_NAME}:${DEFAULT_TAG}" || true
-
       # Only the default branch publishes: pull requests and other branches
       # (e.g. the COSMIC update branches) build and test the image only.
       - name: Login to GitHub Container Registry
@@ -332,10 +352,15 @@ jobs:
         id: push-image
         env:
           ALIAS_TAGS: ${{ steps.gen-build-tags.outputs.alias_tags }}
+          REGISTRY_USER: ${{ github.actor }}
+          REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -euox pipefail
+          set -euo pipefail
+          # The login above is for cosign; root podman has its own credentials
+          ${ROOT_ENV} podman login ghcr.io --username "${REGISTRY_USER}" --password-stdin <<< "${REGISTRY_PASSWORD}"
+          set -x
           for tag in ${ALIAS_TAGS}; do
-            podman push --digestfile=/tmp/digestfile ${IMAGE_NAME}:${tag} ${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}
+            ${ROOT_ENV} podman push --digestfile=/tmp/digestfile ${IMAGE_NAME}:${tag} ${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}
           done
 
           digest=$(< /tmp/digestfile)
