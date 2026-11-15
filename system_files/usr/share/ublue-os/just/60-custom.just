@@ -1,5 +1,5 @@
 # vim: set ft=make :
-# cosmic-blue commands, listed by `ujust` under "Desktop" and "Apps".
+# cosmic-blue commands, listed by `ujust` under "Desktop", "Apps" and "System".
 #
 # COSMIC reads each setting from ~/.config/cosmic first and falls back to the
 # image defaults in /usr/share/cosmic. Resetting a setting therefore means
@@ -294,3 +294,49 @@ toggle-flatpark mode="toggle":
             exit 1
             ;;
     esac
+
+# Collect your system details and open a new bug report with them filled in
+[group('System')]
+bug-report mode="open":
+    #!/usr/bin/bash
+    set -euo pipefail
+    # The details (cosmic-blue-system-info) hold no personal data. They go
+    # into the "System details" field of the bug report form through its
+    # URL: nothing is sent until the report is submitted on GitHub.
+    form="https://github.com/cosmic-blue-os/cosmic-blue/issues/new?template=bug_report.yml"
+    info="$(/usr/libexec/cosmic-blue-system-info)"
+    case "{{ mode }}" in
+        open) ;;
+        print)
+            printf '%s\n' "${info}"
+            exit 0
+            ;;
+        *)
+            echo "Usage: ujust bug-report [open|print]" >&2
+            exit 1
+            ;;
+    esac
+    echo "System details for the bug report (no personal data):"
+    echo
+    printf '%s\n' "${info}"
+    echo
+    if [[ -n "${WAYLAND_DISPLAY:-}" ]] && printf '%s\n' "${info}" | wl-copy 2>/dev/null; then
+        echo "Copied to the clipboard."
+    fi
+    url="${form}&system-info=$(printf '%s\n' "${info}" | jq -sRr @uri)"
+    # Browsers and GitHub refuse very long addresses: then paste the details
+    if [[ "${#url}" -gt 7000 ]]; then
+        url="${form}"
+    fi
+    if [[ -z "${WAYLAND_DISPLAY:-}${DISPLAY:-}" ]]; then
+        echo "Report the bug at ${form}"
+        echo "and paste the details above into the \"System details\" field."
+        exit 0
+    fi
+    if gum confirm "Open the bug report form in the browser?"; then
+        xdg-open "${url}" >/dev/null 2>&1 &
+        disown
+        echo "Describe the problem in the form, then submit it (a GitHub account is needed)."
+    else
+        echo "Report the bug later at ${form}"
+    fi

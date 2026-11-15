@@ -106,6 +106,8 @@ distrobox enter arch</code></pre>
         <dd>Unlock an encrypted disk with the TPM2 chip instead of a password.</dd>
         <dt><code>ujust enroll-secure-boot-key</code></dt>
         <dd>NVIDIA image with Secure Boot: enroll the key that lets the driver load.</dd>
+        <dt><code>ujust bug-report</code></dt>
+        <dd>Open a bug report with your system details already filled in.</dd>
       </dl>
     </section>
 
@@ -129,9 +131,10 @@ distrobox enter arch</code></pre>
 
     <section id="help" class="block">
       <h2>Getting help</h2>
-      <p>Found a bug or something unclear? <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues">Report a problem on GitHub</a>. Please say what you did, what happened, and add the output of:</p>
+      <p>A question, or something unclear? Ask in <a href="https://github.com/cosmic-blue-os/cosmic-blue/discussions">Discussions</a>.</p>
+      <p>Found a bug? Run this in a terminal on the computer with the problem: it collects the system details (no personal data) and opens a <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues/new/choose">bug report</a> with them filled in. Then say what you did and what happened.</p>
       <div class="code">
-        <pre><code>sudo bootc status</code></pre>
+        <pre><code>ujust bug-report</code></pre>
         <button type="button" class="copy" data-copy>Copy</button>
       </div>
     </section>

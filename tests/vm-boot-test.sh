@@ -36,6 +36,13 @@ echo "${signed_updates}"
 grep -q 'would turn on the signature check' <<<"${signed_updates}" \
     || { echo "::error::cosmic-blue-signed-updates would not turn on the signature check"; errors=1; }
 
+# `ujust bug-report` lists the image and the booted deployment
+bug_report="$(vm "ujust bug-report print")" || bug_report=""
+echo "${bug_report}"
+grep -qE '^Image: cosmic-blue(-nvidia)? [0-9]' <<<"${bug_report}" \
+    && grep -qE '^Booted: [0-9.]+ +.*ghcr\.io/cosmic-blue-os/cosmic-blue' <<<"${bug_report}" \
+    || { echo "::error::ujust bug-report does not show the image and the booted deployment"; errors=1; }
+
 # FlatPark is off by default. `ujust toggle-flatpark` turns it on at the
 # lowest priority with its filter, and off again; the one-time cleanup for
 # systems where older images turned it on removes it when no app uses it.

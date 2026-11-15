@@ -1,0 +1,59 @@
+name: Bug report
+description: Something does not work as it should on cosmic-blue
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a problem.
+
+        - Please check first that it is not [already reported](https://github.com/cosmic-blue-os/cosmic-blue/issues?q=is%3Aissue).
+        - For questions and help, use [Discussions](https://github.com/cosmic-blue-os/cosmic-blue/discussions) instead.
+        - cosmic-blue is an independent project: please do not report its problems to Universal Blue or Bluefin.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What went wrong, and what did you expect instead? Screenshots help.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What did you do before the problem showed up? Does it happen every time?
+      placeholder: |
+        1. Open ...
+        2. Click ...
+        3. ...
+    validations:
+      required: false
+  - type: dropdown
+    id: when
+    attributes:
+      label: When does it happen?
+      options:
+        - On the installed system
+        - In the live ISO, before installing
+        - During the installation
+        - After an update
+    validations:
+      required: true
+  - type: textarea
+    id: system-info
+    attributes:
+      label: System details
+      description: |
+        On the computer with the problem, open a terminal and run `ujust bug-report`: it fills this field in for you (it holds no personal data). If you cannot run it (live ISO, the system does not start), give the computer model and the graphics card.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        Optional. Error messages, or the end of `journalctl -b -p warning` from around the time of the problem. Read them first: logs can contain personal details such as your user name or network names.
+      render: text
+    validations:
+      required: false
