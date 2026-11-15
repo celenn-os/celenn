@@ -134,6 +134,9 @@ rpm -q "f${FEDORA_MAJOR_VERSION}-backgrounds-base"
 test -z "$(find /usr/share/backgrounds -type l)"
 test -z "$(find /usr/share/backgrounds -type f -exec sha256sum {} + | cut -d' ' -f1 | sort | uniq -d)"
 grep -q '^LOGO=cosmic-blue-logo$' /usr/lib/os-release
+# Links to the repository, also from cosmic-blue-nvidia
+grep -qx 'HOME_URL="https://github.com/cosmic-blue-os/cosmic-blue"' /usr/lib/os-release
+grep -qx 'BUG_REPORT_URL="https://github.com/cosmic-blue-os/cosmic-blue/issues"' /usr/lib/os-release
 # The live ISO installer matches its profile on VARIANT_ID
 grep -qE '^VARIANT_ID=cosmic-blue(-nvidia)?$' /usr/lib/os-release
 # Boot screen (Plymouth): cosmic-blue theme by default, with our logo images,
