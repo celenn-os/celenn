@@ -1,4 +1,5 @@
-# cosmic-blue: a Bluefin-like Universal Blue image with COSMIC instead of GNOME.
+# cosmic-blue: an independent Fedora Atomic image with the COSMIC desktop, built
+# on Universal Blue base images (not affiliated with Universal Blue or Bluefin).
 # See docs/plan.md for the choice of base image and the inventory.
 
 # Fedora release: the one of Bluefin's stable tag. check-cosmic-version.yml

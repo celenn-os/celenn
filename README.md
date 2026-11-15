@@ -2,9 +2,11 @@
 
 # cosmic-blue
 
-cosmic-blue is a Bluefin-like [Universal Blue](https://universal-blue.org/) image
-based on Fedora 44, with the [COSMIC](https://system76.com/cosmic) desktop
-instead of GNOME.
+cosmic-blue is an independent Fedora Atomic image (Fedora 44) with the
+[COSMIC](https://system76.com/cosmic) desktop. It is built on the
+[Universal Blue](https://universal-blue.org/) base images and inspired by
+Bluefin, but it is not part of, affiliated with or endorsed by Universal Blue
+or Bluefin.
 
 It is an atomic (bootc) system: updates are applied in the background, take
 effect on the next reboot, and can be rolled back.
@@ -78,3 +80,6 @@ and [COSMIC](https://github.com/pop-os/cosmic-epoch), from the
 [ublue-os/image-template](https://github.com/ublue-os/image-template) repository.
 The Milky Way wallpaper is a photo taken on the International Space Station,
 courtesy of NASA.
+
+cosmic-blue is an independent project, not affiliated with any of the projects
+above.
