@@ -307,6 +307,10 @@ demo_login() {
 desktop_tour() {
     mkdir -p "${OUT}/${SHOTS}"
     demo_user || return 1
+    # New accounts get the first steps tour (not the account kept from the
+    # previous image in the update test)
+    local first_steps=false
+    vm "test -e ~${DEMO_USER}/.config/cosmic-blue/first-steps-pending" && first_steps=true
     screenshot "${SHOTS}/01-login-screen"
     demo_login 02-login-failed || return 1
 
@@ -318,6 +322,9 @@ desktop_tour() {
         screenshot "${SHOTS}/02-first-run"
         vm "pkill -u ${DEMO_USER} -f cosmic-initial-setup" || true
         sleep 8
+    fi
+    if [[ "${first_steps}" == true ]]; then
+        first_steps_shots || true
     fi
     screenshot "${SHOTS}/03-desktop"
 
@@ -351,6 +358,28 @@ desktop_tour() {
     vm 'loginctl lock-sessions' || { warn "could not lock the session"; return 1; }
     sleep 8
     screenshot "${SHOTS}/08-lock-screen"
+}
+
+# cosmic-blue's first steps tour, which opens once the first-run assistant is
+# closed: one screenshot per page (Alt+Right turns the page), then closed.
+FIRST_STEPS_PAGES=5
+
+first_steps_shots() {
+    local page
+    if ! wait_for 60 "pgrep -u ${DEMO_USER} -f cosmic-blue-first-steps\$"; then
+        warn "the first steps tour did not open after the first-run assistant"
+        return 1
+    fi
+    sleep 8
+    for (( page = 1; page <= FIRST_STEPS_PAGES; page++ )); do
+        screenshot "${SHOTS}/02-first-steps-${page}"
+        monitor "sendkey alt-right"
+        sleep 3
+    done
+    vm "pkill -u ${DEMO_USER} -f cosmic-blue-first-steps\$" || true
+    sleep 3
+    vm "test ! -e ~${DEMO_USER}/.config/cosmic-blue/first-steps-pending" \
+        || warn "the first steps tour would open again at the next login"
 }
 
 # The terminal as the test user sees it: the cosmic-blue prompt (Starship) and

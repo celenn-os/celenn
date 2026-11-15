@@ -208,6 +208,11 @@ grep -q 'layout: "ch"' <<< "${xkb}" && grep -q 'variant: "fr"' <<< "${xkb}" \
 [[ "$(vm "cat ~${DEMO_USER}/.config/cosmic/com.system76.CosmicAppletTime/v1/military_time" || true)" == true ]] \
     || error "COSMIC did not get the 24-hour clock of ${KS_LANG}"
 vm "id -nG ${DEMO_USER} | grep -qw wheel" || error "The user made in the installer is not an administrator"
+# The first steps tour opens at this user's first login (images that have it)
+if vm "test -f /etc/xdg/autostart/io.github.cosmic_blue_os.FirstSteps.desktop"; then
+    vm "test -e ~${DEMO_USER}/.config/cosmic-blue/first-steps-pending" \
+        || error "The user made in the installer will not get the first steps tour"
+fi
 
 vm 'timeout 300 bootc upgrade --check' \
     || echo "::warning::bootc upgrade --check failed on the installed system"

@@ -185,3 +185,8 @@ gtk-update-icon-cache --force /usr/share/icons/hicolor || :
 # session so that it does not open on top of the tour.
 mkdir -p /etc/skel/.config
 touch /etc/skel/.config/cosmic-initial-setup-done
+# The installed system's first steps tour (updates, rollback, ujust...) is not
+# for the live session either: the welcome tour above takes its place.
+rm -f /etc/xdg/autostart/io.github.cosmic_blue_os.FirstSteps.desktop \
+    /usr/share/applications/io.github.cosmic_blue_os.FirstSteps.desktop
+rm -rf /etc/skel/.config/cosmic-blue/first-steps-pending
