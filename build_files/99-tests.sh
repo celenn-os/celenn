@@ -233,6 +233,7 @@ grep -q '^\[Flatpak Preinstall it.mijorus.gearlever\]' /usr/share/flatpak/preins
 test -e /usr/lib64/libfuse.so.2
 command -v fusermount >/dev/null
 command -v fusermount3 >/dev/null
+systemctl --global is-enabled cosmic-blue-appimage-update.timer
 # No Bluefin GNOME dconf settings (the folder itself may come from Fedora)
 if compgen -G '/etc/dconf/db/distro.d/*bluefin*' >/dev/null; then
     echo "Bluefin (GNOME) dconf settings present"; exit 1

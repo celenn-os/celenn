@@ -1,0 +1,16 @@
+[Unit]
+Description=Update the AppImages added with Gear Lever
+Documentation=https://github.com/mijorus/gearlever
+
+[Service]
+Type=oneshot
+# Only when Gear Lever is installed and automatic updates are on
+# (`ujust toggle-updates` turns uupd.timer on or off)
+ExecCondition=/usr/bin/flatpak info it.mijorus.gearlever
+ExecCondition=/usr/bin/systemctl is-enabled --quiet uupd.timer
+# Updates every AppImage whose update source is known (embedded in the
+# AppImage or set in Gear Lever), without asking; an app that is running is
+# skipped and updated on a later run. No desktop notification.
+ExecStart=/usr/bin/flatpak run it.mijorus.gearlever --update --all --yes
+Nice=19
+IOSchedulingClass=idle

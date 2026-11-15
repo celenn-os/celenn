@@ -1,0 +1,11 @@
+[Unit]
+Description=Update the AppImages added with Gear Lever every day
+
+[Timer]
+# Some time after login, then once a day while the session stays open
+OnStartupSec=15min
+OnUnitActiveSec=1d
+RandomizedDelaySec=10min
+
+[Install]
+WantedBy=timers.target

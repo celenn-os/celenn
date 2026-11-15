@@ -41,6 +41,10 @@ systemctl --global enable \
 # redhat-systemd-presets), so Orca can come up silent. Aurora enables it too.
 systemctl --global enable speech-dispatcher.socket
 
+# AppImages added with Gear Lever update by themselves once a day, like the
+# system and flatpaks (and stop when `ujust toggle-updates` turns uupd off)
+systemctl --global enable cosmic-blue-appimage-update.timer
+
 # Keep systemd-gpt-auto-generator from stacking an automount of the EFI
 # system partition on /boot. GRUB tells systemd which disk it booted from
 # (LoaderDevicePartUUID), so on installs where /boot is a directory of the
