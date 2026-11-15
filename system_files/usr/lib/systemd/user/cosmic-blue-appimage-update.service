@@ -1,6 +1,9 @@
 [Unit]
 Description=Update the AppImages added with Gear Lever
 Documentation=https://github.com/mijorus/gearlever
+# Same retries as the system and flatpak updates (uupd.service)
+StartLimitBurst=3
+StartLimitIntervalSec=600
 
 [Service]
 Type=oneshot
@@ -12,5 +15,9 @@ ExecCondition=/usr/bin/systemctl is-enabled --quiet uupd.timer
 # AppImage or set in Gear Lever), without asking; an app that is running is
 # skipped and updated on a later run. No desktop notification.
 ExecStart=/usr/bin/flatpak run it.mijorus.gearlever --update --all --yes
+# Gear Lever exits with an error when offline, e.g. right after a resume
+# before the network is back
+Restart=on-failure
+RestartSec=60s
 Nice=19
 IOSchedulingClass=idle
