@@ -1,8 +1,8 @@
 name: Set up the virtual machine tests
 description: >-
   Lets the runner use KVM and installs what tests/vm-boot-test.sh and
-  tests/vm-update-test.sh need (QEMU, UEFI firmware, socat, Pillow for the
-  screenshot sheet).
+  tests/vm-update-test.sh need (QEMU, UEFI firmware with Secure Boot, socat,
+  Pillow for the screenshot sheet).
 runs:
   using: composite
   steps:

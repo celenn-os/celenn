@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 # Boot smoke test: installs the image to a virtual disk with `bootc install`,
-# boots it in QEMU (UEFI, KVM) and checks over SSH that the system starts
-# cleanly and that the COSMIC login screen is up. Then logs in a test user
+# boots it in QEMU (UEFI with Secure Boot, KVM) and checks over SSH that the
+# system starts cleanly and that the COSMIC login screen is up. Then logs in a test user
 # and takes screenshots of the desktop (desktop_tour in vm-lib.sh).
 #
 # Usage: tests/vm-boot-test.sh <image> <output dir>

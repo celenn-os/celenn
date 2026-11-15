@@ -234,9 +234,10 @@ jobs:
         if: steps.image.outputs.published == 'true'
         uses: ./.github/actions/vm-test-setup
 
-      - name: Install xorriso
+      # To give the test's copy of the ISO a serial console and SSH
+      - name: Install ISO tools
         if: steps.image.outputs.published == 'true'
-        run: sudo apt-get install -y --no-install-recommends xorriso
+        run: sudo apt-get install -y --no-install-recommends xorriso mtools fdisk
 
       - name: Download the ISO
         if: steps.image.outputs.published == 'true'
