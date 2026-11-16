@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Troubleshooting · cosmic-blue</title>
+  <meta name="description" content="Fix common problems on cosmic-blue: go back after a bad update, reset the desktop, repair apps and report a bug.">
+  <meta name="theme-color" content="#060b1c">
+  <link rel="alternate" hreflang="en" href="https://cosmic-blue-os.github.io/cosmic-blue/docs/troubleshooting/">
+  <link rel="alternate" hreflang="fr" href="https://cosmic-blue-os.github.io/cosmic-blue/fr/docs/troubleshooting/">
+  <link rel="alternate" hreflang="x-default" href="https://cosmic-blue-os.github.io/cosmic-blue/docs/troubleshooting/">
+  <link rel="icon" href="../../img/cosmic-blue-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <header class="page-head">
+    <nav class="top">
+      <a class="brand" href="../../"><img src="../../img/cosmic-blue-logo.svg" alt="" width="28" height="28">cosmic-blue</a>
+      <span class="links">
+        <a class="text" href="../" aria-current="page">Docs</a>
+        <a class="text" href="../../screenshots/">Screenshots</a>
+        <a class="icon" href="../../fr/docs/troubleshooting/" hreflang="fr" lang="fr" title="Français" aria-label="Français"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><ellipse cx="12" cy="12" rx="4" ry="9.5"/><path d="M2.5 12h19M4.2 7h15.6M4.2 17h15.6"/></svg><span aria-hidden="true">FR</span></a>
+      </span>
+    </nav>
+  </header>
+
+  <main class="docs">
+    <section class="block">
+      <h1>Troubleshooting</h1>
+      <p>Something went wrong? Most problems on cosmic-blue can be undone: the previous system version stays installed, and your COSMIC settings can be put back to the defaults. Commands go in a terminal. See also the <a href="../">documentation</a>.</p>
+      <nav class="toc" aria-label="Contents">
+        <a href="#no-boot">The computer does not start</a>
+        <a href="#bad-update">An update broke something</a>
+        <a href="#no-desktop">The desktop does not start</a>
+        <a href="#settings">Look and settings</a>
+        <a href="#apps">An app does not work</a>
+        <a href="#no-updates">Updates do not install</a>
+        <a href="#nvidia">NVIDIA driver</a>
+        <a href="#report">Report a problem</a>
+      </nav>
+    </section>
+
+    <section id="no-boot" class="block">
+      <h2>The computer does not start after an update</h2>
+      <ol>
+        <li>Turn the computer on and press <kbd>Esc</kbd> a few times (or hold <kbd>Shift</kbd>) until the boot menu shows.</li>
+        <li>Pick the second entry, marked <code>ostree:1</code>: it is the version you had before the update.</li>
+        <li>Once on the desktop, keep that version for the next boots too:</li>
+      </ol>
+      <div class="code">
+        <pre><code>sudo bootc rollback</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+      <p>Then follow the next section so the broken version does not come back.</p>
+    </section>
+
+    <section id="bad-update" class="block">
+      <h2>An update broke something</h2>
+      <p>Go back to the version you had before. It stays installed until the next update, so this works offline:</p>
+      <div class="code">
+        <pre><code>sudo bootc rollback    # use the previous version on next boot
+sudo systemctl reboot</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+      <p>Automatic updates would install the broken version again. Pause them, <a href="#report">report the problem</a>, and turn them back on once a fix is out:</p>
+      <div class="code">
+        <pre><code>ujust toggle-updates disable   # pause automatic updates
+ujust toggle-updates enable    # turn them back on later</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+      <h3>Go back further</h3>
+      <p>Every build has its own version, like <code>44.20261110</code>: <code>sudo bootc status</code> shows yours, and the <a href="https://github.com/cosmic-blue-os/cosmic-blue/releases">releases page</a> lists the weekly ones. You can install one of them, and come back to the normal updates later. On the NVIDIA image, write <code>cosmic-blue-nvidia</code> instead of <code>cosmic-blue</code>.</p>
+      <div class="code">
+        <pre><code>sudo bootc switch ghcr.io/cosmic-blue-os/cosmic-blue:44.20261110   # stay on this version
+sudo bootc switch ghcr.io/cosmic-blue-os/cosmic-blue:stable        # back to the weekly updates</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+    </section>
+
+    <section id="no-desktop" class="block">
+      <h2>The desktop does not start</h2>
+      <p>Black screen, or back to the login screen after typing your password? Your COSMIC settings may be the cause.</p>
+      <ol>
+        <li>Press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F3</kbd> to open a text console, and log in with your user name and password.</li>
+        <li>Reset the COSMIC settings (your files and apps are not touched), then restart:</li>
+      </ol>
+      <div class="code">
+        <pre><code>ujust reset-cosmic-config
+sudo systemctl reboot</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+      <p>If it started after an update, <a href="#bad-update">go back to the previous version</a> from the same console instead.</p>
+    </section>
+
+    <section id="settings" class="block">
+      <h2>Look and settings</h2>
+      <p>Lost the cosmic-blue look, or a panel, dock or shortcut stopped behaving? Reset the appearance only, or every COSMIC setting. Log out and back in after either one.</p>
+      <dl class="commands">
+        <dt><code>ujust reset-cosmic-theme</code></dt>
+        <dd>Restore the colors, dark theme, icons, fonts and wallpaper. The panel, dock, keyboard and shortcuts are kept.</dd>
+        <dt><code>ujust reset-cosmic-config</code></dt>
+        <dd>Reset every COSMIC setting, but keep your keyboard layout and clock format. The old settings are moved to a <code>~/.config/cosmic.backup-</code> folder, and the command prints how to bring them back.</dd>
+      </dl>
+    </section>
+
+    <section id="apps" class="block">
+      <h2>An app does not work</h2>
+      <p>Apps from the COSMIC Store are Flatpaks. Update them and repair the installed files first:</p>
+      <div class="code">
+        <pre><code>flatpak update
+sudo flatpak repair</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+      <p>Still broken? Start the app with fresh settings. Find its ID, then move its data aside (put the folder back to undo):</p>
+      <div class="code">
+        <pre><code>flatpak list --app
+mv ~/.var/app/org.example.App ~/.var/app/org.example.App.old</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+      <p>An app from FlatPark misbehaves? <code>ujust toggle-flatpark off</code> uninstalls its apps and turns FlatPark off.</p>
+    </section>
+
+    <section id="no-updates" class="block">
+      <h2>Updates do not install</h2>
+      <p>Run the update by hand to see the error, and check that automatic updates are on:</p>
+      <div class="code">
+        <pre><code>ujust update
+ujust toggle-updates</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+      <p>Disk full? <code>ujust clean-system</code> removes unused container images, Flatpak runtimes and Homebrew files, and asks before it touches the containers.</p>
+    </section>
+
+    <section id="nvidia" class="block">
+      <h2>NVIDIA driver</h2>
+      <p>On the NVIDIA image with Secure Boot on, the driver only loads once its key is enrolled. Run the command below and restart: a blue screen asks to <strong>Enroll MOK</strong>, with the password <code>universalblue</code> (typed on a QWERTY layout).</p>
+      <div class="code">
+        <pre><code>ujust enroll-secure-boot-key</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+      <p>Installed the standard image on a computer with an NVIDIA card? Switch to the NVIDIA image:</p>
+      <div class="code">
+        <pre><code>sudo bootc switch ghcr.io/cosmic-blue-os/cosmic-blue-nvidia:stable</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+    </section>
+
+    <section id="report" class="block">
+      <h2>Report a problem</h2>
+      <p>Run the first command below on the computer with the problem: it collects the system details (no personal data) and opens a <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues/new/choose">bug report</a> with them filled in. Say what you did and what happened. If the problem showed up during the previous boot, add the errors it logged (second command). Questions go to <a href="https://github.com/cosmic-blue-os/cosmic-blue/discussions">Discussions</a>.</p>
+      <div class="code">
+        <pre><code>ujust bug-report
+sudo journalctl -b -1 -p err --no-pager</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>cosmic-blue is built on <a href="https://universal-blue.org/">Universal Blue</a>, <a href="https://projectbluefin.io/">Bluefin</a>, <a href="https://fedoraproject.org/">Fedora</a> and <a href="https://system76.com/cosmic">COSMIC</a>. cosmic-blue is an independent project, not affiliated with or endorsed by these projects.</p>
+    <p><a href="https://github.com/cosmic-blue-os/cosmic-blue">Source code</a> ·
+    <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues">Report a problem</a></p>
+  </footer>
+
+  <script src="../../site.js"></script>
+</body>
+</html>
