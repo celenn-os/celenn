@@ -39,6 +39,7 @@ const FRENCH: &[(&str, &str)] = &[
     ("Back", "Précédent"),
     ("Next", "Suivant"),
     ("Close", "Fermer"),
+    ("Later", "Plus tard"),
     ("Copy", "Copier"),
     ("Copied", "Copié"),
     ("Welcome to cosmic-blue", "Bienvenue dans cosmic-blue"),
@@ -432,6 +433,7 @@ fn all_texts() -> Vec<&'static str> {
         "Back",
         "Next",
         "Close",
+        "Later",
         "Copy",
         "Copied",
         "First steps",
@@ -642,9 +644,16 @@ impl<T: Tour> Application for App<T> {
         } else {
             "Close"
         };
+        // On the first page of the first steps tour, a clearly visible
+        // "Later" button: the tour stays in the app library
+        let close_button = if self.mode == Mode::FirstSteps && self.page_i == 0 {
+            Element::from(widget::button::standard(tr("Later")).on_press(Message::Exit))
+        } else {
+            Element::from(widget::button::link(tr(close_label)).on_press(Message::Exit))
+        };
         let mut button_row = widget::row::with_capacity(4)
             .spacing(space_xxs)
-            .push(widget::button::link(tr(close_label)).on_press(Message::Exit))
+            .push(close_button)
             .push(widget::space::horizontal());
         if let Some(page_i) = self.page_i.checked_sub(1) {
             button_row = button_row
