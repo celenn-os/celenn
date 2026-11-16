@@ -5,8 +5,9 @@
   inside the logo's orbit), the home, desktop, network and trash icons
 - mimetypes: common file types (a light page whose symbol and folded corner
   take the color of the type)
-- apps: the live ISO's welcome tour and installer, and the installed
-  system's first steps tour
+- apps: the COSMIC dock buttons (launcher, workspaces, applications) in
+  the Tela circle style, which Tela lacks; the live ISO's welcome tour and
+  installer, and the installed system's first steps tour
 
 The icon theme (build_files/icon_theme/compose.py) puts them in front of
 Tela; every other icon still comes from Tela.
@@ -214,12 +215,65 @@ def app(center):
     )
 
 
+# --- COSMIC dock buttons ------------------------------------------------------
+
+# Drawn like Tela circle's application icons: a disk in the accent, white
+# symbols, the less important parts in translucent white.
+TELA_DISK = '<circle cx="32" cy="32" r="27" fill="#4f8dff"/>'
+TELA_SHADE = '<path d="M5 32a27 27 0 0 0 54 0z" opacity=".1"/>'
+
+
+def tela_app(body):
+    return svg(TELA_DISK + TELA_SHADE + body)
+
+
+def tile(x, y, size, opacity=None, radius=1.6):
+    alpha = f' opacity="{opacity}"' if opacity else ""
+    return f'<rect x="{x}" y="{y}" width="{size}" height="{size}" rx="{radius}" fill="#fff"{alpha}/>'
+
+
+# The app library: a grid of applications
+APPLICATIONS = tela_app("".join(
+    tile(18 + col * 10, 18 + row * 10, 8, None if (row, col) == (1, 1) else ".75")
+    for row in range(3) for col in range(3)
+))
+# Workspaces: two windows, one behind the other
+WORKSPACES = tela_app(
+    '<rect x="15" y="17" width="23" height="17" rx="2" fill="#fff" opacity=".45"/>'
+    '<rect x="26" y="28" width="23" height="19" rx="2" fill="#fff"/>'
+    '<path d="M28 28h19a2 2 0 0 1 2 2v2H26v-2a2 2 0 0 1 2-2z" fill="#2f6bff"/>'
+)
+# The launcher: search over applications
+LAUNCHER = tela_app(
+    tile(16, 16, 9, ".45") + tile(16, 27, 9, ".45") + tile(27, 16, 9, ".45")
+    + '<circle cx="34" cy="34" r="9.5" fill="#4f8dff"/>'
+    '<circle cx="34" cy="34" r="7.5" fill="none" stroke="#fff" stroke-width="3.6"/>'
+    '<path d="M39.6 39.6l7.4 7.4" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/>'
+)
+
+# Icon -> names (the desktop entries of the dock buttons and of the apps
+# they open). The first name gets the file, the others are links to it.
+DOCK = {
+    "applications": (APPLICATIONS, ["com.system76.CosmicPanelAppButton", "com.system76.CosmicAppLibrary"]),
+    "workspaces": (WORKSPACES, ["com.system76.CosmicPanelWorkspacesButton", "com.system76.CosmicWorkspaces",
+                                "com.system76.CosmicAppletWorkspaces"]),
+    "launcher": (LAUNCHER, ["com.system76.CosmicPanelLauncherButton", "com.system76.CosmicLauncher"]),
+}
+
+
 def main():
     shutil.rmtree(LAYER, ignore_errors=True)
     places = LAYER / "places"
     mimetypes = LAYER / "mimetypes"
+    apps = LAYER / "apps"
     places.mkdir(parents=True)
     mimetypes.mkdir()
+    apps.mkdir()
+
+    for icon, names in DOCK.values():
+        (apps / f"{names[0]}.svg").write_text(icon)
+        for alias in names[1:]:
+            os.symlink(f"{names[0]}.svg", apps / f"{alias}.svg")
 
     for name, symbol in PLACES.items():
         is_open = symbol == "open"
