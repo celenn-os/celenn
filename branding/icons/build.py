@@ -5,8 +5,8 @@
   inside the logo's orbit), the home, desktop, network and trash icons
 - mimetypes: common file types (a light page whose symbol and folded corner
   take the color of the type)
-- apps: the COSMIC dock buttons (launcher, workspaces, applications) in
-  the Tela circle style, which Tela lacks; the live ISO's welcome tour and
+- apps: the COSMIC dock buttons (launcher, workspaces, applications) and
+  the COSMIC Store and Settings in the Tela circle style; the live ISO's welcome tour and
   installer, and the installed system's first steps tour
 
 The icon theme (build_files/icon_theme/compose.py) puts them in front of
@@ -219,12 +219,13 @@ def app(center):
 
 # Drawn like Tela circle's application icons: a disk in the accent, white
 # symbols, the less important parts in translucent white.
-TELA_DISK = '<circle cx="32" cy="32" r="27" fill="#4f8dff"/>'
 TELA_SHADE = '<path d="M5 32a27 27 0 0 0 54 0z" opacity=".1"/>'
+STORE_COLOR = "#2ec4c4"
+SETTINGS_COLOR = "#5f6b86"
 
 
-def tela_app(body):
-    return svg(TELA_DISK + TELA_SHADE + body)
+def tela_app(body, color="#4f8dff"):
+    return svg(f'<circle cx="32" cy="32" r="27" fill="{color}"/>' + TELA_SHADE + body)
 
 
 def tile(x, y, size, opacity=None, radius=1.6):
@@ -251,6 +252,26 @@ LAUNCHER = tela_app(
     '<path d="M39.6 39.6l7.4 7.4" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/>'
 )
 
+# The store: a shopping bag with the logo's "c"
+STORE = tela_app(
+    '<path d="M25 24v-3a7 7 0 0 1 14 0v3" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>'
+    '<path d="M18.5 24h27a1.5 1.5 0 0 1 1.5 1.6l-1.4 19.6a3 3 0 0 1-3 2.8H21.4a3 3 0 0 1-3-2.8L17 25.6'
+    'a1.5 1.5 0 0 1 1.5-1.6z" fill="#fff"/>'
+    f'<path d="M37.2 31.5A6.5 6.5 0 1 0 37.2 40.5" fill="none" stroke="{STORE_COLOR}" stroke-width="2.6" '
+    'stroke-linecap="round"/>'
+    f'<circle cx="32" cy="36" r="2.4" fill="{STORE_COLOR}"/>',
+    STORE_COLOR,
+)
+# The settings: two sliders
+SETTINGS = tela_app(
+    '<rect x="16" y="21" width="32" height="4" rx="2" fill="#fff" opacity=".45"/>'
+    '<rect x="16" y="39" width="32" height="4" rx="2" fill="#fff" opacity=".45"/>'
+    '<rect x="16" y="21" width="22" height="4" rx="2" fill="#fff"/>'
+    '<rect x="16" y="39" width="10" height="4" rx="2" fill="#fff"/>'
+    '<circle cx="38" cy="23" r="5" fill="#fff"/><circle cx="26" cy="41" r="5" fill="#fff"/>',
+    SETTINGS_COLOR,
+)
+
 # Icon -> names (the desktop entries of the dock buttons and of the apps
 # they open). The first name gets the file, the others are links to it.
 DOCK = {
@@ -258,6 +279,8 @@ DOCK = {
     "workspaces": (WORKSPACES, ["com.system76.CosmicPanelWorkspacesButton", "com.system76.CosmicWorkspaces",
                                 "com.system76.CosmicAppletWorkspaces"]),
     "launcher": (LAUNCHER, ["com.system76.CosmicPanelLauncherButton", "com.system76.CosmicLauncher"]),
+    "store": (STORE, ["com.system76.CosmicStore"]),
+    "settings": (SETTINGS, ["com.system76.CosmicSettings"]),
 }
 
 

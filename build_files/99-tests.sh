@@ -366,6 +366,7 @@ grep -q '^\[layer/mimetypes\]' /usr/share/icons/cosmic-blue/index.theme
 grep -q '^\[layer/apps\]' /usr/share/icons/cosmic-blue/index.theme
 for icon in apps/com.system76.CosmicPanelAppButton apps/com.system76.CosmicPanelWorkspacesButton \
     apps/com.system76.CosmicPanelLauncherButton apps/com.system76.CosmicAppLibrary \
+    apps/com.system76.CosmicStore apps/com.system76.CosmicSettings \
     places/default-folder places/folder places/folder-download places/inode-directory \
     places/user-home places/user-trash mimetypes/text-plain mimetypes/image-jpeg mimetypes/application-zip; do
     test -s "/usr/share/icons/cosmic-blue/layer/${icon}.svg"
