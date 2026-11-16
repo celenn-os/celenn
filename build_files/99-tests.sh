@@ -49,9 +49,11 @@ fi
 grep -q "alias ff='ublue-fastfetch'" /etc/profile.d/cosmic-blue-fastfetch.sh
 # Terminal welcome banner (uwelcome): cosmic-blue links and tips, no
 # Bluefin links, launchers or commands left
-jq -e '.links | map(.url) == ["https://github.com/cosmic-blue-os/cosmic-blue/issues", "https://cosmic-blue-os.github.io/cosmic-blue/docs/"]' \
-    /etc/uwelcome/config.json >/dev/null
-jq -e '.motd.commands == ["cosmic-blue-tips"]' /etc/uwelcome/config.json >/dev/null
+# (uwelcome only reads config.toml since projectbluefin/common #1662)
+test ! -e /etc/uwelcome/config.json
+[[ "$(grep -E '^url = ' /etc/uwelcome/config.toml)" == 'url = "https://github.com/cosmic-blue-os/cosmic-blue/issues"
+url = "https://cosmic-blue-os.github.io/cosmic-blue/docs/"' ]]
+grep -qx 'commands = \["cosmic-blue-tips"\]' /etc/uwelcome/config.toml
 test -n "$(LANG=en_US.UTF-8 cosmic-blue-tips)"
 test -n "$(LANG=fr_FR.UTF-8 cosmic-blue-tips)"
 if grep -rlE 'projectbluefin\.io|bluefin-cli|ujust report' /etc/uwelcome \
