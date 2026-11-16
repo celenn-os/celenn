@@ -18,7 +18,7 @@
 
 use cosmic_config::CosmicConfigEntry;
 use cosmic_theme::palette::{Srgb, Srgba};
-use cosmic_theme::{AlphaMap, BlurStrength, Roundness, Theme, ThemeBuilder};
+use cosmic_theme::{AlphaMap, BlurStrength, Theme, ThemeBuilder};
 
 /// Dark theme accent: the middle of the logo orbit gradient (#4f8dff).
 const ACCENT_DARK: Srgb<u8> = Srgb::new(0x4f, 0x8d, 0xff);
@@ -51,13 +51,6 @@ fn frosted(mut builder: ThemeBuilder) -> ThemeBuilder {
     builder.frosted_panel = true;
     builder.frosted_applets = true;
     builder
-}
-
-/// The "Slightly round" style of COSMIC Settings (Appearance): 8 px corners
-/// on windows, the panel and the dock instead of COSMIC's round default
-/// (which makes a floating panel or dock a pill).
-fn slightly_round(builder: ThemeBuilder) -> ThemeBuilder {
-    builder.corner_radii(Roundness::SlightlyRound.into())
 }
 
 /// Frosted glass settings of COSMIC Settings (Appearance > Frosted glass):
@@ -113,16 +106,12 @@ fn write(dark: ThemeBuilder, light: ThemeBuilder) {
 fn main() {
     match std::env::args().nth(1).as_deref() {
         None => write(
-            frosted_glass(slightly_round(colors(
-                frosted(ThemeBuilder::dark()),
-                ACCENT_DARK,
-                BG_DARK,
-            ))),
-            frosted_glass(slightly_round(colors(
+            frosted_glass(colors(frosted(ThemeBuilder::dark()), ACCENT_DARK, BG_DARK)),
+            frosted_glass(colors(
                 frosted(ThemeBuilder::light()),
                 ACCENT_LIGHT,
                 BG_LIGHT,
-            ))),
+            )),
         ),
         Some("stock") => write(ThemeBuilder::dark(), ThemeBuilder::light()),
         Some("frosted") => write(

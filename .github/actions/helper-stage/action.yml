@@ -1,0 +1,41 @@
+name: Helper stage
+description: >-
+  Restores the output of one helper stage of Containerfile.helpers from the
+  Actions cache into <dir>/<stage>, or builds it (`just build-helpers`) and
+  saves it to the cache. Each stage has its own cache entry, keyed on its own
+  inputs (`just helpers-keys`), so a change to one stage only rebuilds that
+  stage. Caches saved by main builds are shared with pull requests.
+inputs:
+  stage:
+    description: Stage name, as listed by `just helper-stages`
+    required: true
+  key:
+    description: Cache key of the stage
+    required: true
+  dir:
+    description: Directory of the helper stage outputs
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Restore the ${{ inputs.stage }} stage
+      id: cache
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ inputs.dir }}/${{ inputs.stage }}
+        key: ${{ inputs.key }}
+
+    - name: Build the ${{ inputs.stage }} stage
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        DIR: ${{ inputs.dir }}
+        STAGE: ${{ inputs.stage }}
+      run: just build-helpers "${DIR}" "${STAGE}"
+
+    - name: Save the ${{ inputs.stage }} stage
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ inputs.dir }}/${{ inputs.stage }}
+        key: ${{ inputs.key }}

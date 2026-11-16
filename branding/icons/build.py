@@ -8,6 +8,9 @@
 - apps: the COSMIC dock buttons (launcher, workspaces, applications) and
   the COSMIC Store and Settings in the Tela circle style; the live ISO's
   welcome tour and installer, and the installed system's first steps tour
+- actions: the symbolic icons of the suspend and restart buttons in the
+  panel's power menu (Tela has none for restart, and its suspend icon is
+  hard to read). They follow the style of Tela's shutdown icon, which stays.
 
 The icon theme (build_files/icon_theme/compose.py) puts them in front of
 Tela; every other icon still comes from Tela.
@@ -277,6 +280,25 @@ DOCK = {
     "settings": (SETTINGS, ["com.system76.CosmicSettings"]),
 }
 
+# Session action symbolic icons, 16x16, in Tela's symbolic gray. They are
+# drawn with strokes, then outlined into plain fills: GTK recolors symbolic
+# icons by forcing their fill, which would fill an unoutlined stroke.
+# (names, path); the first name gets the file, the others are links to it.
+SYMBOLIC_COLOR = "#565656"
+ACTIONS = [
+    # A crescent moon
+    (["system-suspend-symbolic"],
+     "M7.31,2.04 C6.12,4.03 6.45,6.57 8.11,8.18 C9.77,9.8 12.32,10.06 14.28,8.82 C14,12.13 11.2,14.66 7.88,14.6 C4.56,14.54 1.86,11.91 1.71,8.59 C1.55,5.27 4,2.4 7.31,2.04 Z"),
+    # An open ring with a clockwise arrowhead, like the shutdown ring
+    (["system-reboot-symbolic", "system-restart-symbolic"],
+     "M14.07,6.17 Q16.18,10.68 12.46,14 Q8.74,17.31 4.5,14.71 Q0.25,12.11 1.52,7.29 Q2.65,3.02 6.69,2.4 L6.63,0.84 Q6.63,0.71 6.7,0.6 Q6.8,0.47 6.96,0.44 Q7.12,0.41 7.26,0.5 L10.74,2.88 Q10.8,2.91 10.83,2.96 Q10.94,3.09 10.92,3.26 Q10.9,3.42 10.77,3.52 L7.46,6.14 Q7.35,6.22 7.22,6.23 Q7.06,6.23 6.94,6.12 Q6.82,6.01 6.81,5.84 L6.76,4.43 Q4.2,4.98 3.45,7.8 Q2.57,11.18 5.54,13.01 Q8.52,14.83 11.13,12.51 Q13.74,10.18 12.26,7.01 Q12.09,6.64 12.23,6.25 Q12.37,5.86 12.74,5.68 Q13.12,5.51 13.51,5.65 Q13.9,5.79 14.07,6.17 Z"),
+]
+
+
+def symbolic(d):
+    return ('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
+            f'<path fill="{SYMBOLIC_COLOR}" fill-rule="evenodd" d="{d}"/></svg>\n')
+
 
 def main():
     shutil.rmtree(LAYER, ignore_errors=True)
@@ -286,6 +308,13 @@ def main():
     places.mkdir(parents=True)
     mimetypes.mkdir()
     apps.mkdir()
+    actions = LAYER / "actions"
+    actions.mkdir()
+
+    for names, d in ACTIONS:
+        (actions / f"{names[0]}.svg").write_text(symbolic(d))
+        for alias in names[1:]:
+            os.symlink(f"{names[0]}.svg", actions / f"{alias}.svg")
 
     for icon, names in DOCK.values():
         (apps / f"{names[0]}.svg").write_text(icon)

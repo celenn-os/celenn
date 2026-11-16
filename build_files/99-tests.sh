@@ -100,6 +100,9 @@ done
 PANEL=/usr/share/cosmic/com.system76.CosmicPanel.Panel/v1
 grep -qx true "${PANEL}/anchor_gap"
 grep -qx 4 "${PANEL}/margin"
+# Dock hidden when a window overlaps it, as COSMIC Settings' "Automatically
+# hide dock" toggle sets it
+grep -qx OnOverlap /usr/share/cosmic/com.system76.CosmicPanel.Dock/v1/autohide
 # Firefox defaults (policies), linked into the flatpak's systemconfig
 # extension at boot; Bluefin's prefs and copy hook are gone
 FIREFOX_POLICIES=/usr/share/cosmic-blue/firefox/policies/policies.json
@@ -365,11 +368,9 @@ for theme in Dark Light; do
     grep -qx true "/usr/share/cosmic/com.system76.CosmicTheme.${theme}.Builder/v2/frosted_panel"
     # Frosted glass a notch thicker than COSMIC's middle setting
     grep -qx High "/usr/share/cosmic/com.system76.CosmicTheme.${theme}.Builder/v2/frosted"
-    # "Slightly round" style: 8 px corners, none of COSMIC's 160 px pill radius
+    # COSMIC's own "Round" style (160 px radius_xl: pill-shaped panel and dock)
     for dir in "${theme}" "${theme}.Builder"; do
-        radii="/usr/share/cosmic/com.system76.CosmicTheme.${dir}/v2/corner_radii"
-        grep -q 'radius_xl' "${radii}"
-        if grep -q '160' "${radii}"; then exit 1; fi
+        grep -q '160' "/usr/share/cosmic/com.system76.CosmicTheme.${dir}/v2/corner_radii"
     done
 done
 

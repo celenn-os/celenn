@@ -1,77 +1,87 @@
 # Helper stages of the cosmic-blue image: programs rebuilt with our changes
 # and themes recolored with the cosmic-blue colors. They change rarely and take
 # a large part of the build, so they are built on their own (`just
-# build-helpers`) and the CI keeps their output in the Actions cache, keyed on
-# their inputs (`just helpers-key`). The final stage only holds the outputs,
-# handed to the Containerfile as the "helpers" build context.
+# build-helpers`) and the CI keeps the output of each one in the Actions cache,
+# keyed on that stage's own inputs (`just helpers-keys`): a change to one
+# stage only rebuilds that stage.
+#
+# Each helper is a "<name>-build" stage that writes its output to /out, and a
+# "<name>" stage that only holds that output. `just build-helpers` builds the
+# "<name>" stages into <dest>/<name>, handed to the Containerfile as the
+# "helpers" build context. Keep the stage names in `just helper-stages`.
 
 # Fedora release: passed by `just build-helpers` from BASE_TAG in the Containerfile
 ARG BASE_TAG
 
 # Default COSMIC themes with frosted glass (see build_files/theme/src/main.rs)
-FROM docker.io/library/rust:1 AS theme
+FROM docker.io/library/rust:1 AS theme-build
 COPY build_files/theme /theme
 RUN cd /theme && cargo build --release --locked \
     && XDG_CONFIG_HOME=/out /theme/target/release/cosmic-blue-theme \
     && XDG_CONFIG_HOME=/out/previous/stock /theme/target/release/cosmic-blue-theme stock \
     && XDG_CONFIG_HOME=/out/previous/frosted /theme/target/release/cosmic-blue-theme frosted
+FROM scratch AS theme
+COPY --from=theme-build /out /
 
 # cosmic-blue's tours: "First steps" on installed systems and the live ISO's
 # welcome tour, built with libcosmic like COSMIC's first-run assistant
 # (see build_files/first_steps/src/main.rs)
-FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS tour
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS tour-build
 COPY build_files/first_steps /tour
 RUN dnf5 -y install cargo rust gcc pkgconf-pkg-config libxkbcommon-devel wayland-devel \
     && cd /tour && cargo build --release --locked \
     && /tour/target/release/cosmic-blue-tour --check \
     && install -D -m 0755 /tour/target/release/cosmic-blue-tour /out/cosmic-blue-tour
+FROM scratch AS tour
+COPY --from=tour-build /out /
 
 # COSMIC's first-run assistant, rebuilt from Fedora's source package with the
 # cosmic-blue patches (see build_files/initial_setup/patch.py)
-FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS initial_setup
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS initial_setup-build
 COPY build_files/initial_setup /initial_setup
 RUN /initial_setup/build.sh
+FROM scratch AS initial_setup
+COPY --from=initial_setup-build /out /
 
 # Login and lock screens, rebuilt from Fedora's source package with the
 # cosmic-blue wallpaper as their built-in background
 # (see build_files/greeter/build.sh)
-FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS greeter
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS greeter-build
 COPY build_files/greeter /greeter
 COPY system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-orbits.jpg /greeter/background.jpg
 RUN /greeter/build.sh /greeter/background.jpg
+FROM scratch AS greeter
+COPY --from=greeter-build /out /
 
 # COSMIC Store, rebuilt from Fedora's source package with FlatPark as a
 # recommended source, off by default (see build_files/store/patch.py)
-FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS store
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS store-build
 COPY build_files/store /store
 RUN /store/build.sh
+FROM scratch AS store
+COPY --from=store-build /out /
 
 # Boot screen spinner frames, tinted with the logo blue
 # (see build_files/plymouth/tint.py)
-FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS plymouth
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS plymouth-build
 COPY build_files/plymouth /plymouth
 RUN dnf5 -y install plymouth-theme-spinner python3-pillow \
     && python3 /plymouth/tint.py /usr/share/plymouth/themes/spinner /out
+FROM scratch AS plymouth
+COPY --from=plymouth-build /out /
 
 # Tela circle icons, recolored with the logo blue
 # (see build_files/icon_theme/tela.sh)
-FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS icons
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS icons-build
 COPY build_files/icon_theme/tela.sh /tela.sh
 RUN /tela.sh
+FROM scratch AS icons
+COPY --from=icons-build /out /
 
 # Bibata Modern cursors, recolored with the cosmic-blue colors
 # (see build_files/cursor_theme/bibata.py)
-FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS cursors
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS cursors-build
 COPY build_files/cursor_theme /cursor_theme
 RUN /cursor_theme/bibata.sh
-
-# Only the outputs
-FROM scratch
-COPY --from=theme /out /theme
-COPY --from=tour /out /tour
-COPY --from=initial_setup /out /initial_setup
-COPY --from=greeter /out /greeter
-COPY --from=store /out /store
-COPY --from=plymouth /out /plymouth
-COPY --from=icons /out /icons
-COPY --from=cursors /out /cursors
+FROM scratch AS cursors
+COPY --from=cursors-build /out /
