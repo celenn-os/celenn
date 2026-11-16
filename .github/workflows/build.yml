@@ -300,7 +300,9 @@ jobs:
             "${ALIAS_TAGS}"
 
       # Software bill of materials (SPDX) of the image, from its mounted root
-      # file system: the packages, not every file they own. Built for pull
+      # file system: the RPMs and the binaries installed outside them, not
+      # every file they own nor the language libraries bundled inside them
+      # (with every cataloger: 10,000 entries, 93 MB, 4.5 minutes). Built for pull
       # requests too, so a broken step shows before merging; attached to the
       # published image after it is signed.
       - name: Install Syft
@@ -317,7 +319,7 @@ jobs:
           root=$(${ROOT_ENV} podman image mount "localhost/${IMAGE_NAME}:${DEFAULT_TAG}")
           trap '${ROOT_ENV} podman image unmount "localhost/${IMAGE_NAME}:${DEFAULT_TAG}" >/dev/null' EXIT
           sudo env SYFT_FILE_METADATA_SELECTION=none SYFT_CHECK_FOR_APP_UPDATE=false \
-            "${SYFT}" scan "dir:${root}" --quiet \
+            "${SYFT}" scan "dir:${root}" --quiet --select-catalogers rpm,binary \
             --source-name "${IMAGE_REGISTRY}/${IMAGE_NAME}" --source-version "${VERSION}" \
             -o "spdx-json=${file}"
           sudo chown "$(id -u):$(id -g)" "${file}"
