@@ -18,7 +18,7 @@
 
 use cosmic_config::CosmicConfigEntry;
 use cosmic_theme::palette::{Srgb, Srgba};
-use cosmic_theme::{Roundness, Theme, ThemeBuilder};
+use cosmic_theme::{AlphaMap, BlurStrength, Roundness, Theme, ThemeBuilder};
 
 /// Dark theme accent: the middle of the logo orbit gradient (#4f8dff).
 const ACCENT_DARK: Srgb<u8> = Srgb::new(0x4f, 0x8d, 0xff);
@@ -60,6 +60,33 @@ fn slightly_round(builder: ThemeBuilder) -> ThemeBuilder {
     builder.corner_radii(Roundness::SlightlyRound.into())
 }
 
+/// Frosted glass settings of COSMIC Settings (Appearance > Frosted glass):
+/// "Thickness" one notch above COSMIC's middle (High instead of Medium), so
+/// the bright orbit of the wallpaper melts into a soft glow behind windows,
+/// and "Glass opacity" at 0.8 instead of 0.5, which keeps text as readable
+/// as with COSMIC's default (window alpha 0.775 instead of 0.762).
+const THICKNESS: BlurStrength = BlurStrength::High;
+const GLASS_OPACITY: f32 = 0.8;
+
+/// The alpha map COSMIC Settings writes for a "Glass opacity" value (same
+/// formula as cosmic-settings 1.11.0, appearance/mod.rs, Message::Glass).
+fn glass_alpha_map(glass: f32) -> AlphaMap {
+    let alpha_map = AlphaMap::default();
+    let offset = (glass - 0.5) / 0.5
+        * if glass < 0.5 {
+            alpha_map.extremely_high_2
+        } else {
+            1.0 - alpha_map.extremely_low
+        };
+    alpha_map.offset(offset)
+}
+
+fn frosted_glass(mut builder: ThemeBuilder) -> ThemeBuilder {
+    builder.frosted = THICKNESS;
+    builder.alpha_map = glass_alpha_map(GLASS_OPACITY);
+    builder
+}
+
 /// Writes a dark and a light theme (builder and computed theme).
 fn write(dark: ThemeBuilder, light: ThemeBuilder) {
     dark.write_entry(&ThemeBuilder::dark_config().expect("dark builder config"))
@@ -86,11 +113,22 @@ fn write(dark: ThemeBuilder, light: ThemeBuilder) {
 fn main() {
     match std::env::args().nth(1).as_deref() {
         None => write(
-            slightly_round(colors(frosted(ThemeBuilder::dark()), ACCENT_DARK, BG_DARK)),
-            slightly_round(colors(frosted(ThemeBuilder::light()), ACCENT_LIGHT, BG_LIGHT)),
+            frosted_glass(slightly_round(colors(
+                frosted(ThemeBuilder::dark()),
+                ACCENT_DARK,
+                BG_DARK,
+            ))),
+            frosted_glass(slightly_round(colors(
+                frosted(ThemeBuilder::light()),
+                ACCENT_LIGHT,
+                BG_LIGHT,
+            ))),
         ),
         Some("stock") => write(ThemeBuilder::dark(), ThemeBuilder::light()),
-        Some("frosted") => write(frosted(ThemeBuilder::dark()), frosted(ThemeBuilder::light())),
+        Some("frosted") => write(
+            frosted(ThemeBuilder::dark()),
+            frosted(ThemeBuilder::light()),
+        ),
         Some(other) => panic!("unknown theme variant {other}"),
     }
 }
