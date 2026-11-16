@@ -81,17 +81,30 @@ jobs:
           fi
           echo "${REFERENCE_IMAGE}: Fedora ${reference} (${version}), image: Fedora ${base_tag}"
 
-          # Latest versions in the target Fedora release
+          # Latest COSMIC version (cosmic-settings) in a Fedora release
           # (fedora + updates repositories, as in the image build)
-          docker run --rm "registry.fedoraproject.org/fedora:${target_tag}" \
-            dnf5 -q repoquery --latest-limit=1 \
-              --qf '%{name} %{version}-%{release}\n' \
-              cosmic-settings cosmic-comp cosmic-session cosmic-initial-setup \
-            | sort -u > packages.txt
-          cat packages.txt
+          cosmic_in() {
+            docker run --rm "registry.fedoraproject.org/fedora:$1" \
+              dnf5 -q repoquery --latest-limit=1 \
+                --qf '%{name} %{version}-%{release}\n' \
+                cosmic-settings cosmic-comp cosmic-session cosmic-initial-setup \
+              | sort -u > packages.txt
+            cat packages.txt >&2
+            awk '$1 == "cosmic-settings" { sub(/-[^-]*$/, "", $2); print $2 }' packages.txt
+          }
 
-          current="$(awk '$1 == "cosmic-settings" { sub(/-[^-]*$/, "", $2); print $2 }' packages.txt)"
+          current="$(cosmic_in "${target_tag}")"
           test -n "${current}"
+          # A new Fedora release can ship an older COSMIC than the current one
+          # for a while (Fedora 45 came out with COSMIC 1.10 while Fedora 44
+          # had 1.11): wait until it catches up rather than downgrade COSMIC.
+          if [ "${target_tag}" != "${base_tag}" ] &&
+             [ "$(printf '%s\n%s\n' "${current}" "${pinned}" | sort -V | head -n1)" != "${pinned}" ]; then
+            echo "::warning::Fedora ${target_tag} ships COSMIC ${current}, older than ${pinned}: staying on Fedora ${base_tag} for now"
+            target_tag="${base_tag}"
+            current="$(cosmic_in "${target_tag}")"
+            test -n "${current}"
+          fi
           echo "Fedora ${target_tag}: COSMIC ${current}, pinned: ${pinned}"
 
           {

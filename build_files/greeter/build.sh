@@ -8,7 +8,8 @@
 # selected user and for each screen (~/.local/state/cosmic/
 # com.system76.CosmicBackground). Until a user has opened a session once, and
 # on any screen that user never used, cosmic-greeter falls back to the image
-# compiled into it (res/background.jpg, the upstream COSMIC wallpaper). The
+# compiled into it (res/background.jpg up to COSMIC 1.11, res/background.png
+# after it: the upstream COSMIC wallpaper). The
 # lock screen is the same program and uses the same fallback.
 # Usage: build.sh <wallpaper.jpg>
 set -euox pipefail
@@ -37,9 +38,14 @@ while IFS= read -r manifest; do
 done < <(find "${TOPDIR}/BUILD" -name Cargo.toml -not -path '*/vendor/*')
 test -n "${src}"
 
-# The fallback must still be this file, or the replacement would do nothing
-grep -q 'include_bytes!("../res/background.jpg")' "${src}/src/common.rs"
-install -m 0644 "${WALLPAPER}" "${src}/res/background.jpg"
+# The fallback compiled in must be a single res/background.* file, or the
+# replacement would do nothing. The JPEG is copied as is, even over a .png:
+# the greeter (iced) reads the image format from the content, not the name.
+fallback="$(grep -o 'include_bytes!("\.\./res/background\.[a-z]*")' "${src}/src/common.rs" \
+    | sed 's|^include_bytes!("\.\./\(.*\)")$|\1|' | sort -u)"
+test "$(printf '%s\n' "${fallback}" | grep -c .)" = 1
+test -f "${src}/${fallback}"
+install -m 0644 "${WALLPAPER}" "${src}/${fallback}"
 
 # Build only (no new %prep, which would undo the replacement)
 rpmbuild --define "_topdir ${TOPDIR}" -bc --short-circuit "${SPEC}"
