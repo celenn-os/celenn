@@ -44,7 +44,7 @@
         <a class="button primary" href="@ISO_URL@" data-nvidia-href="@ISO_NVIDIA_URL@">Download the live ISO</a>
         <a class="button" href="#install">How to install</a>
       </div>
-      <p class="fine">x86-64 · <span data-main-only>about 3.8 GB</span><span data-nvidia-only hidden>about 4.7 GB</span><!-- checksum --> · <a href="@ISO_URL@.sha256" data-nvidia-href="@ISO_NVIDIA_URL@.sha256">SHA-256</a><!-- /checksum --></p>
+      <p class="fine">x86-64 · <span data-main-only>about 3.8 GB</span><span data-nvidia-only hidden>about 4.7 GB</span><!-- checksum --> · <a href="@ISO_URL@.sha256" data-nvidia-href="@ISO_NVIDIA_URL@.sha256">SHA-256</a> · <a href="@ISO_URL@.sha256.sigstore.json" data-nvidia-href="@ISO_NVIDIA_URL@.sha256.sigstore.json">signature</a><!-- /checksum --></p>
       <p class="fine" data-nvidia-only hidden>With NVIDIA's driver, for GTX 16xx, RTX 20xx and newer cards.
       Older NVIDIA card? Take the AMD or Intel version, which uses the open source driver.</p>
     </div>
@@ -131,6 +131,7 @@ sudo bootc rollback   # go back to the previous version on next boot</code></pre
         <pre><code>cosign verify --key cosign.pub ghcr.io/cosmic-blue-os/<span data-image>cosmic-blue</span>:stable</code></pre>
         <button type="button" class="copy" data-copy>Copy</button>
       </div>
+      <p>The ISO checksums and the package list of each image (SBOM) are signed too: see <a href="docs/#verify">Checking the downloads</a>.</p>
     </section>
   </main>
 

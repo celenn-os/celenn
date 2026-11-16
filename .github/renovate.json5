@@ -50,6 +50,12 @@
       "schedule": ["* 0-7 * * 1"]
     },
     {
+      "description": "titanoboa, the live ISO builder (no releases: latest main commit), once a week",
+      "matchDepNames": ["https://github.com/ublue-os/titanoboa"],
+      "groupName": "titanoboa",
+      "schedule": ["* 0-7 * * 1"]
+    },
+    {
       // Major versions can break the build: open the pull request, a human
       // merges it.
       "matchUpdateTypes": ["major"],
@@ -60,7 +66,8 @@
   // Tela circle is fetched by git at a pinned commit in
   // build_files/icon_theme/tela.sh, the Bibata cursors at a pinned tag in
   // build_files/cursor_theme/bibata.sh, Starship at a pinned release in
-  // build_files/30-packages.sh
+  // build_files/30-packages.sh, titanoboa at a pinned commit in
+  // .github/workflows/build-live-iso.yml
   "customManagers": [
     {
       "customType": "regex",
@@ -86,6 +93,15 @@
         "BIBATA_REPO=\"https://github\\.com/(?<depName>[^\"]+)\\.git\"\\s+BIBATA_VERSION=\"(?<currentValue>[^\"]+)\""
       ],
       "datasourceTemplate": "github-tags"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/build-live-iso\\.yml$/"],
+      "matchStrings": [
+        "TITANOBOA_REPO: \"(?<depName>[^\"]+)\"\\s+TITANOBOA_REF: \"(?<currentDigest>[0-9a-f]{40})\""
+      ],
+      "datasourceTemplate": "git-refs",
+      "currentValueTemplate": "main"
     }
   ],
 

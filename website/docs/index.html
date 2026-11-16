@@ -35,6 +35,7 @@
         <a href="#ujust">ujust commands</a>
         <a href="#look">The look</a>
         <a href="#terminal">Terminal</a>
+        <a href="#verify">Checking the downloads</a>
         <a href="#help">Getting help</a>
         <a href="troubleshooting/">Troubleshooting</a>
       </nav>
@@ -127,6 +128,25 @@ distrobox enter arch</code></pre>
       <p>Each new terminal shows a welcome message with a tip. <code>ff</code> shows the system information. To turn the welcome message off, or back on:</p>
       <div class="code">
         <pre><code>uwelcome toggle</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+    </section>
+
+    <section id="verify" class="block">
+      <h2>Checking the downloads</h2>
+      <p>The checksum of each live ISO is signed with the project key, <a href="https://github.com/cosmic-blue-os/cosmic-blue/blob/main/cosign.pub">cosign.pub</a>. Download the ISO, its <code>.sha256</code> file and its <code>.sha256.sigstore.json</code> signature into the same folder, then check them with <a href="https://github.com/sigstore/cosign">cosign</a> (for the NVIDIA ISO, use the <code>cosmic-blue-nvidia-live-amd64</code> names):</p>
+      <div class="code">
+        <pre><code>cosign verify-blob --key cosign.pub \
+  --bundle cosmic-blue-live-amd64.iso.sha256.sigstore.json \
+  cosmic-blue-live-amd64.iso.sha256
+sha256sum -c cosmic-blue-live-amd64.iso.sha256</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+      <p>System images are signed too, and installed systems refuse unsigned updates. Each image also carries a signed list of its packages (an SPDX SBOM):</p>
+      <div class="code">
+        <pre><code>cosign verify --key cosign.pub ghcr.io/cosmic-blue-os/cosmic-blue:stable
+cosign verify-attestation --key cosign.pub --type spdxjson \
+  --insecure-ignore-tlog=true ghcr.io/cosmic-blue-os/cosmic-blue:stable</code></pre>
         <button type="button" class="copy" data-copy>Copy</button>
       </div>
     </section>
