@@ -40,8 +40,10 @@ fi
 [[ -n "${shots}" ]] && shots+=" shots-info" || shots="no-shots"
 
 # One page per language: index.html (English, default) and fr/index.html,
-# and the same for the documentation (docs/) and the screenshots.
+# and the same for the documentation (docs/, docs/troubleshooting/) and the
+# screenshots.
 for page in index.html fr/index.html docs/index.html fr/docs/index.html \
+            docs/troubleshooting/index.html fr/docs/troubleshooting/index.html \
             screenshots/index.html fr/screenshots/index.html; do
   mkdir -p "$(dirname "${out}/${page}")"
   if [[ -n "${ISO_BASE_URL:-}" ]]; then

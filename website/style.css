@@ -30,6 +30,16 @@ a { color: var(--accent-light); }
 a:hover { color: var(--text); }
 
 code { font-family: var(--mono); font-size: .92em; }
+kbd {
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font: 500 .85em var(--font);
+  white-space: nowrap;
+}
 
 /* Hero */
 
