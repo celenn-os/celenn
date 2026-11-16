@@ -183,9 +183,14 @@ done
 # cosmic-blue recipes (60-custom.just) parse and are listed by ujust
 recipes="$(just --justfile /usr/share/ublue-os/just/00-entry.just --summary)"
 for recipe in toggle-dark-mode reset-cosmic-theme reset-cosmic-config export-cosmic-config \
-              install-microsoft-fonts; do
+              install-microsoft-fonts bug-report; do
     grep -qw -- "${recipe}" <<<"${recipes}"
 done
+
+# `ujust bug-report`: the system details script runs anywhere (here without
+# deployments) and prints the image name
+test -x /usr/libexec/cosmic-blue-system-info
+/usr/libexec/cosmic-blue-system-info | grep "^Image: ${IMAGE_NAME} " >/dev/null
 
 test ! -e /usr/share/flatpak/preinstall.d/bazaar.preinstall
 # FlatPark (Bluefin's second Flatpak remote) is offered but off: not in

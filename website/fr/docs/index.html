@@ -108,6 +108,8 @@ distrobox enter arch</code></pre>
         <dd>Déverrouiller un disque chiffré avec la puce TPM2 au lieu d'un mot de passe.</dd>
         <dt><code>ujust enroll-secure-boot-key</code></dt>
         <dd>Image NVIDIA avec Secure Boot&nbsp;: enregistrer la clé qui permet de charger le pilote.</dd>
+        <dt><code>ujust bug-report</code></dt>
+        <dd>Ouvrir un rapport de bug avec les informations du système déjà remplies.</dd>
       </dl>
     </section>
 
@@ -131,9 +133,11 @@ distrobox enter arch</code></pre>
 
     <section id="help" class="block">
       <h2>Obtenir de l'aide</h2>
-      <p>Quelque chose ne marche pas&nbsp;? La <a href="troubleshooting/">page de dépannage</a> couvre les problèmes courants. Un bug ou quelque chose de pas clair&nbsp;? <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues">Signalez un problème sur GitHub</a> (en anglais de préférence). Dites ce que vous avez fait, ce qui s'est passé, et ajoutez le résultat de&nbsp;:</p>
+      <p>Quelque chose ne marche pas&nbsp;? La <a href="troubleshooting/">page de dépannage</a> couvre les problèmes courants.</p>
+      <p>Une question, ou quelque chose de pas clair&nbsp;? Posez-la dans les <a href="https://github.com/cosmic-blue-os/cosmic-blue/discussions">Discussions</a> (en anglais de préférence).</p>
+      <p>Un bug&nbsp;? Lancez ceci dans un terminal sur l'ordinateur concerné&nbsp;: la commande rassemble les informations du système (aucune donnée personnelle) et ouvre un <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues/new/choose">rapport de bug</a> déjà rempli avec elles. Dites ensuite ce que vous avez fait et ce qui s'est passé.</p>
       <div class="code">
-        <pre><code>sudo bootc status</code></pre>
+        <pre><code>ujust bug-report</code></pre>
         <button type="button" class="copy" data-copy>Copier</button>
       </div>
     </section>

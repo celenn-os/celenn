@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and help
+    url: https://github.com/cosmic-blue-os/cosmic-blue/discussions/categories/q-a
+    about: Ask how to do something or get help with your system.
+  - name: Documentation
+    url: https://cosmic-blue-os.github.io/cosmic-blue/docs/
+    about: The cosmic-blue guide (English and French).
+  - name: Problems in COSMIC itself
+    url: https://github.com/pop-os/cosmic-epoch/issues
+    about: Bugs that also happen with COSMIC on other systems belong to the COSMIC project.

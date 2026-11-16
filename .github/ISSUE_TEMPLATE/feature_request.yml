@@ -1,0 +1,31 @@
+name: Feature request
+description: Suggest a change or something cosmic-blue should include
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please check first that it is not [already suggested](https://github.com/cosmic-blue-os/cosmic-blue/issues?q=is%3Aissue). Ideas still taking shape are welcome in [Discussions](https://github.com/cosmic-blue-os/cosmic-blue/discussions).
+
+        cosmic-blue ships the COSMIC desktop as Fedora packages it. Changes to COSMIC itself (its apps, settings, panel...) belong to the [COSMIC project](https://github.com/pop-os/cosmic-epoch/issues).
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is missing or could be better?
+      description: The problem or the need, more than the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you suggest?
+      description: How you see it working. Links to other systems that do it well help.
+    validations:
+      required: false
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: How do you work around it today?
+      description: Optional. An app, a Flatpak, a Homebrew package, a setting...
+    validations:
+      required: false

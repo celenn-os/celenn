@@ -23,6 +23,7 @@ if [[ "${locale}" == fr* ]]; then
         "Vous avez perdu le style cosmic-blue ? \`ujust reset-cosmic-theme\` le restaure."
         "Passez du thème sombre au thème clair avec \`ujust toggle-dark-mode\`."
         "Le guide de cosmic-blue est en ligne : [documentation](${docs})"
+        "**Un bug ?** \`ujust bug-report\` ouvre un rapport de bug avec les informations du système déjà remplies."
         "Désactivez ce message d'accueil avec \`uwelcome toggle\`."
     )
 else
@@ -39,6 +40,7 @@ else
         "Lost the cosmic-blue look? \`ujust reset-cosmic-theme\` brings it back."
         "Switch between the dark and light themes with \`ujust toggle-dark-mode\`."
         "The cosmic-blue guide is online: [documentation](${docs})"
+        "**Found a bug?** \`ujust bug-report\` opens a bug report with the system details already filled in."
         "Turn this welcome message off with \`uwelcome toggle\`."
     )
 fi

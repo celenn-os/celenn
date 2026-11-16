@@ -147,9 +147,9 @@ ujust toggle-updates</code></pre>
 
     <section id="report" class="block">
       <h2>Report a problem</h2>
-      <p><a href="https://github.com/cosmic-blue-os/cosmic-blue/issues">Open an issue on GitHub</a>. Say what you did, what happened, and add the output of the first command below. If the problem showed up during the previous boot, the errors it logged help too:</p>
+      <p>Run the first command below on the computer with the problem: it collects the system details (no personal data) and opens a <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues/new/choose">bug report</a> with them filled in. Say what you did and what happened. If the problem showed up during the previous boot, add the errors it logged (second command). Questions go to <a href="https://github.com/cosmic-blue-os/cosmic-blue/discussions">Discussions</a>.</p>
       <div class="code">
-        <pre><code>sudo bootc status
+        <pre><code>ujust bug-report
 sudo journalctl -b -1 -p err --no-pager</code></pre>
         <button type="button" class="copy" data-copy>Copy</button>
       </div>
