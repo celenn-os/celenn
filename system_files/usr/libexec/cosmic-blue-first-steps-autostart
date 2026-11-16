@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# Opens the first steps tour (cosmic-blue-first-steps) once, at the first
+# Opens the first steps tour (cosmic-blue-tour) once, at the first
 # login of a new account, right after COSMIC's own first-run assistant.
 #
 # New accounts get ~/.config/cosmic-blue/first-steps-pending from /etc/skel,
@@ -32,4 +32,4 @@ while initial_setup_running; do
 done
 
 rm -f "${pending}"
-exec /usr/libexec/cosmic-blue-first-steps
+exec /usr/libexec/cosmic-blue-tour

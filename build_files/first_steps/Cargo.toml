@@ -1,0 +1,18 @@
+[package]
+name = "cosmic-blue-tour"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+# Same libcosmic and features as COSMIC's first-run assistant
+# (cosmic-initial-setup), so the tours look exactly like it. Cargo.lock is
+# cosmic-initial-setup's epoch-<COSMIC version> Cargo.lock, trimmed by cargo to
+# our dependencies (Containerfile.helpers builds with --locked);
+# check-cosmic-version.yml refreshes it with each COSMIC version.
+[dependencies.libcosmic]
+git = "https://github.com/pop-os/libcosmic.git"
+default-features = false
+features = ["a11y", "dbus-config", "tokio", "winit", "wgpu", "wayland"]
+
+[profile.release]
+lto = "thin"

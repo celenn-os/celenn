@@ -16,6 +16,16 @@ RUN cd /theme && cargo build --release --locked \
     && XDG_CONFIG_HOME=/out/previous/stock /theme/target/release/cosmic-blue-theme stock \
     && XDG_CONFIG_HOME=/out/previous/frosted /theme/target/release/cosmic-blue-theme frosted
 
+# cosmic-blue's tours: "First steps" on installed systems and the live ISO's
+# welcome tour, built with libcosmic like COSMIC's first-run assistant
+# (see build_files/first_steps/src/main.rs)
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS tour
+COPY build_files/first_steps /tour
+RUN dnf5 -y install cargo rust gcc pkgconf-pkg-config libxkbcommon-devel wayland-devel \
+    && cd /tour && cargo build --release --locked \
+    && /tour/target/release/cosmic-blue-tour --check \
+    && install -D -m 0755 /tour/target/release/cosmic-blue-tour /out/cosmic-blue-tour
+
 # COSMIC's first-run assistant, rebuilt from Fedora's source package with the
 # cosmic-blue patches (see build_files/initial_setup/patch.py)
 FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS initial_setup
@@ -52,6 +62,7 @@ RUN /cursor_theme/bibata.sh
 # Only the outputs
 FROM scratch
 COPY --from=theme /out /theme
+COPY --from=tour /out /tour
 COPY --from=initial_setup /out /initial_setup
 COPY --from=greeter /out /greeter
 COPY --from=plymouth /out /plymouth

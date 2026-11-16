@@ -192,6 +192,12 @@ jobs:
           curl -fsSL "${lock_url}" -o build_files/theme/Cargo.lock
           (cd build_files/theme && cargo metadata --format-version 1 >/dev/null)
           grep -q "libcosmic?rev=${rev}#" build_files/theme/Cargo.lock
+          # The tours (build_files/first_steps) follow COSMIC's first-run
+          # assistant: its Cargo.lock for this release, trimmed the same way
+          curl -fsSL "https://raw.githubusercontent.com/pop-os/cosmic-initial-setup/${tag}/Cargo.lock" \
+            -o build_files/first_steps/Cargo.lock
+          (cd build_files/first_steps && cargo metadata --format-version 1 >/dev/null)
+          grep -q 'name = "libcosmic"' build_files/first_steps/Cargo.lock
           if [ "${CURRENT}" != "${PINNED}" ]; then
             sed -i "s|^${PINNED//./\\.}\$|${CURRENT}|" build_files/cosmic-version
           fi
@@ -233,6 +239,7 @@ jobs:
               fi
               echo "- Fedora ${TARGET_TAG} ships COSMIC ${CURRENT} (cosmic-blue was pinned to ${PINNED})."
               echo "- \`build_files/theme/Cargo.toml\` and \`Cargo.lock\`: libcosmic revision and crate versions locked by cosmic-settings ${CURRENT}."
+              echo "- \`build_files/first_steps/Cargo.lock\`: crate versions locked by cosmic-initial-setup ${CURRENT}."
               echo "- \`build_files/cosmic-version\`: ${CURRENT}."
               echo
               if [ "${TARGET_TAG}" != "${BASE_TAG}" ] && [ "${FEDORA_AUTOMERGE}" != "true" ]; then
