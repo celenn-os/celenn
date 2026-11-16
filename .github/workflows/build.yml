@@ -16,6 +16,7 @@ on:
       - main
     paths-ignore:
       - '**/README.md'
+      - 'SECURITY.md'
       - 'docs/**'
       - 'website/**'
       - '.github/renovate.json5'
@@ -38,6 +39,7 @@ on:
       - main
     paths-ignore:
       - '**/README.md'
+      - 'SECURITY.md'
       - 'docs/**'
       - 'website/**'
       - '.github/renovate.json5'
@@ -332,6 +334,43 @@ jobs:
             "${DEFAULT_TAG}" \
             "${ALIAS_TAGS}"
 
+      # Software bill of materials (SPDX) of the image, from its mounted root
+      # file system: the RPMs and the binaries installed outside them, not
+      # every file they own nor the language libraries bundled inside them
+      # (with every cataloger: 10,000 entries, 93 MB, 4.5 minutes). Built for pull
+      # requests too, so a broken step shows before merging; attached to the
+      # published image after it is signed.
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
+        id: syft
+
+      - name: Generate the SBOM
+        id: sbom
+        env:
+          SYFT: ${{ steps.syft.outputs.cmd }}
+        run: |
+          set -euo pipefail
+          file="${RUNNER_TEMP}/sbom.spdx.json"
+          root=$(${ROOT_ENV} podman image mount "localhost/${IMAGE_NAME}:${DEFAULT_TAG}")
+          trap '${ROOT_ENV} podman image unmount "localhost/${IMAGE_NAME}:${DEFAULT_TAG}" >/dev/null' EXIT
+          sudo env SYFT_FILE_METADATA_SELECTION=none SYFT_CHECK_FOR_APP_UPDATE=false \
+            "${SYFT}" scan "dir:${root}" --quiet --select-catalogers rpm,binary \
+            --source-name "${IMAGE_REGISTRY}/${IMAGE_NAME}" --source-version "${VERSION}" \
+            -o "spdx-json=${file}"
+          sudo chown "$(id -u):$(id -g)" "${file}"
+          # Without the file lists Syft copies from the RPM database (every
+          # file of every package: about 80 MB), down to the packages
+          jq -c 'del(.files, .packages[].hasFiles) | .relationships |= map(select(.relationshipType != "CONTAINS"))' \
+            "${file}" > "${file}.tmp"
+          echo "SBOM before trimming: $(du -h "${file}" | cut -f1)"
+          mv "${file}.tmp" "${file}"
+          packages=$(jq '.packages | length' "${file}")
+          rpms=$(jq '[.packages[] | select(.externalRefs[]?.referenceLocator | startswith("pkg:rpm/"))] | length' "${file}")
+          echo "SBOM: ${packages} packages (${rpms} RPMs), $(du -h "${file}" | cut -f1)"
+          # The image has well over a thousand RPMs: far fewer means a broken scan
+          (( rpms > 500 )) || { echo "::error::Only ${rpms} RPMs in the SBOM"; exit 1; }
+          echo "file=${file}" >> "${GITHUB_OUTPUT}"
+
       # Boot smoke test: install the image to a virtual disk, boot it in QEMU
       # and check the login screen comes up. A failing image is not pushed.
       - name: Prepare the boot test
@@ -382,7 +421,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push To GHCR
+      # Installed systems only accept updates signed with the key matching
+      # cosign.pub (/etc/containers/policy.json), so an unsigned image is an error.
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        with:
+          # be careful when upgrading major versions
+          cosign-release: 'v3.1.4'
+
+      # Signed before it is published: the image is first pushed under its
+      # version tag only (44.YYYYMMDD[.N], which nothing follows), signed by
+      # digest, and only then pushed under the tags installed systems follow
+      # (latest, ...). No unsigned latest, even for a moment.
+      - name: Push the version tag
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         id: push-image
         env:
@@ -393,23 +445,12 @@ jobs:
           set -euo pipefail
           # The login above is for cosign; root podman has its own credentials
           ${ROOT_ENV} podman login ghcr.io --username "${REGISTRY_USER}" --password-stdin <<< "${REGISTRY_PASSWORD}"
+          read -r first _ <<< "${ALIAS_TAGS}"
+          [[ "${first}" == "${VERSION}" ]] || { echo "::error::The first build tag (${first}) is not the version (${VERSION})"; exit 1; }
           set -x
-          for tag in ${ALIAS_TAGS}; do
-            ${ROOT_ENV} podman push --digestfile=/tmp/digestfile ${IMAGE_NAME}:${tag} ${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}
-          done
-
+          ${ROOT_ENV} podman push --digestfile=/tmp/digestfile "${IMAGE_NAME}:${first}" "${IMAGE_REGISTRY}/${IMAGE_NAME}:${first}"
           digest=$(< /tmp/digestfile)
-
           echo "digest=${digest}" >> $GITHUB_OUTPUT
-
-      # Installed systems only accept updates signed with the key matching
-      # cosign.pub (/etc/containers/policy.json), so an unsigned image is an error.
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        with:
-          # be careful when upgrading major versions
-          cosign-release: 'v3.1.4'
 
       - name: Sign container image
         id: sign-image
@@ -428,6 +469,42 @@ jobs:
             exit 1
           fi
           cosign sign -y --new-bundle-format=false --use-signing-config=false --key env://COSIGN_PRIVATE_KEY ${IMAGE_REGISTRY}/${IMAGE_NAME}@${DIGEST}
+
+      - name: Push the other tags
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        env:
+          ALIAS_TAGS: ${{ steps.gen-build-tags.outputs.alias_tags }}
+          DIGEST: ${{ steps.push-image.outputs.digest }}
+        run: |
+          set -euo pipefail
+          read -r _ others <<< "${ALIAS_TAGS}"
+          for tag in ${others}; do
+            ${ROOT_ENV} podman push --digestfile=/tmp/digestfile "${IMAGE_NAME}:${tag}" "${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}"
+            # Same manifest as the signed one, or the tag would be unsigned
+            if [[ "$(< /tmp/digestfile)" != "${DIGEST}" ]]; then
+              echo "::error::${tag} was pushed as $(< /tmp/digestfile), not as the signed ${DIGEST}"
+              exit 1
+            fi
+          done
+
+      # The SBOM as a signed attestation of the image (same key, same old
+      # format as the signature), after the tags: it is not needed to install
+      # or update, so a failure here does not hold back the update. Not in
+      # the transparency log: the SBOM of a whole system is larger than its
+      # entries allow. Check with cosign verify-attestation --key cosign.pub
+      # --type spdxjson --insecure-ignore-tlog=true IMAGE
+      - name: Attach the SBOM
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        env:
+          COSIGN_EXPERIMENTAL: false
+          COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+          COSIGN_PASSWORD: ""
+          DIGEST: ${{ steps.push-image.outputs.digest }}
+          SBOM: ${{ steps.sbom.outputs.file }}
+        run: |
+          cosign attest -y --new-bundle-format=false --use-signing-config=false --tlog-upload=false \
+            --key env://COSIGN_PRIVATE_KEY --type spdxjson --predicate "${SBOM}" \
+            "${IMAGE_REGISTRY}/${IMAGE_NAME}@${DIGEST}"
 
   # A failed build of main (daily, merge, by hand) opens an issue, closed by
   # the next build that passes

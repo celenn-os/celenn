@@ -1,0 +1,36 @@
+# Terminal welcome banner (uwelcome). Replaces the Bluefin config.toml of
+# projectbluefin/common: cosmic-blue links and commands, tips from
+# cosmic-blue-tips instead of Bluefin's message of the day.
+version = 1
+color = "auto"
+
+[motd]
+messages = []
+commands = ["cosmic-blue-tips"]
+
+[greeting]
+prefix = "􌬀 "
+
+[[commands]]
+cmd = "ujust --choose"
+desc = "cmd_list"
+
+[[commands]]
+cmd = "uwelcome toggle"
+desc = "banner_toggle"
+
+[[commands]]
+cmd = "ff"
+desc = "sys_info"
+
+[[commands]]
+cmd = "brew help"
+desc = "cli_pkg"
+
+[[links]]
+name = "issues"
+url = "https://github.com/cosmic-blue-os/cosmic-blue/issues"
+
+[[links]]
+name = "docs"
+url = "https://cosmic-blue-os.github.io/cosmic-blue/docs/"

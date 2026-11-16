@@ -22,7 +22,10 @@ env:
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"  # do not edit
   # Installed systems follow this tag. PR test builds use latest.
   DEFAULT_TAG: ${{ github.event_name == 'pull_request' && 'latest' || 'stable' }}
-  # Same titanoboa revision as projectbluefin/iso
+  # The tool that builds the live ISO, at a pinned commit (it has no
+  # releases), moved to the latest main commit by Renovate once a week; the
+  # update pull request builds and install-tests the ISO.
+  TITANOBOA_REPO: "https://github.com/ublue-os/titanoboa"
   TITANOBOA_REF: "840217d97bd0bc9a52466508c54d8dda5c5ba2fd"
 
 concurrency:
@@ -106,7 +109,7 @@ jobs:
           set -euo pipefail
           image_ref="${IMAGE_REGISTRY,,}/${IMAGE_NAME,,}:${DEFAULT_TAG}"
           titanoboa_dir="${RUNNER_TEMP}/titanoboa"
-          git clone --quiet https://github.com/ublue-os/titanoboa "${titanoboa_dir}"
+          git clone --quiet "${TITANOBOA_REPO}" "${titanoboa_dir}"
           git -C "${titanoboa_dir}" checkout --quiet "${TITANOBOA_REF}"
           # just >= 1.57 requires the list language feature used by which()
           sed -i '1a set lists' "${titanoboa_dir}/Justfile"
@@ -269,9 +272,19 @@ jobs:
       # names so each build replaces the previous one (R2 free tier: 10 GB).
       # Only after a passed install test; skipped on pull requests and until
       # the R2 secrets are set.
+      - name: Install Cosign
+        if: github.event_name != 'pull_request' && steps.install-test.outcome == 'success'
+        uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+        with:
+          # be careful when upgrading major versions
+          cosign-release: 'v3.1.4'
+
       - name: Upload ISO to Cloudflare R2
         if: github.event_name != 'pull_request' && steps.install-test.outcome == 'success'
         env:
+          # The checksum file is signed with the image key (cosign.pub)
+          COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+          COSIGN_PASSWORD: ""
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: auto
@@ -299,7 +312,7 @@ jobs:
           others=$(aws s3api list-objects-v2 --endpoint-url "${endpoint}" \
             --bucket "${R2_BUCKET}" --output json \
             | jq --arg own "${ISO_NAME}.iso" \
-              '[.Contents[]? | select(.Key != $own and .Key != ($own + ".sha256")) | .Size] | add // 0')
+              '[.Contents[]? | select(.Key != $own and .Key != ($own + ".sha256") and .Key != ($own + ".sha256.sigstore.json")) | .Size] | add // 0')
           total=$(( size + others ))
           total_gb=$(awk -v s="${total}" 'BEGIN { printf "%.2f", s / 1e9 }')
           echo "R2 bucket after upload: ${total_gb} GB"
@@ -321,9 +334,22 @@ jobs:
           fi
 
           sha256sum "${ISO_NAME}.iso" > "${ISO_NAME}.iso.sha256"
-          # ISO first, then its checksum
+          # Signed checksum: cosign verify-blob --key cosign.pub
+          # --bundle ISO.iso.sha256.sigstore.json ISO.iso.sha256, then
+          # sha256sum -c ISO.iso.sha256
+          if [[ -z "${COSIGN_PRIVATE_KEY}" ]]; then
+            echo "::error::The SIGNING_SECRET secret is missing: the ISO checksum cannot be signed"
+            exit 1
+          fi
+          cosign sign-blob -y --key env://COSIGN_PRIVATE_KEY \
+            --bundle "${ISO_NAME}.iso.sha256.sigstore.json" "${ISO_NAME}.iso.sha256"
+          cosign verify-blob --key "${GITHUB_WORKSPACE}/cosign.pub" \
+            --bundle "${ISO_NAME}.iso.sha256.sigstore.json" "${ISO_NAME}.iso.sha256"
+          # ISO first, then its signed checksum
           aws s3 cp --endpoint-url "${endpoint}" --no-progress \
             "${ISO_NAME}.iso" "s3://${R2_BUCKET}/${ISO_NAME}.iso"
+          aws s3 cp --endpoint-url "${endpoint}" --no-progress \
+            "${ISO_NAME}.iso.sha256.sigstore.json" "s3://${R2_BUCKET}/${ISO_NAME}.iso.sha256.sigstore.json"
           aws s3 cp --endpoint-url "${endpoint}" --no-progress \
             "${ISO_NAME}.iso.sha256" "s3://${R2_BUCKET}/${ISO_NAME}.iso.sha256"
 
