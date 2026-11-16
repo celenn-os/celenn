@@ -105,6 +105,28 @@ def placement(svg: str):
     return best[1:]
 
 
+def neighbors(on: np.ndarray):
+    """For every pixel, whether its upper, lower, left and right neighbors
+    are set."""
+    p = np.pad(on, 1)
+    return p[:-2, 1:-1], p[2:, 1:-1], p[1:-1, :-2], p[1:-1, 2:]
+
+
+def pixel_mask(coverage: np.ndarray, color: np.ndarray) -> np.ndarray:
+    """The pixels drawn: the half covered ones. A lone pixel hanging from a
+    shape (one set neighbor at most), as at each end of the "c", gets a pixel
+    on either side, in its color, so the round end doesn't end in a spike."""
+    on = coverage >= MIN_COVERAGE
+    up, down, left, right = neighbors(on)
+    count = up.astype(int) + down + left + right
+    for y, x in np.argwhere(on & (count <= 1)):
+        for side in (x - 1, x + 1):
+            if 0 <= side < on.shape[1] and not on[y, side]:
+                on[y, side] = True
+                color[y, side] = color[y, x]
+    return on
+
+
 def sgr(kind: int, rgb) -> str:
     r, g, b = (round(255 * c) for c in rgb)
     return f"\x1b[{kind};2;{r};{g};{b}m"
@@ -125,7 +147,7 @@ def cell(top, bottom) -> str:
 
 def render(svg: str, out: pathlib.Path, place) -> None:
     coverage, color = pixels(rasterize(svg, *place))
-    on = coverage >= MIN_COVERAGE
+    on = pixel_mask(coverage, color)
     lines = []
     for row in range(ROWS):
         cells = []
