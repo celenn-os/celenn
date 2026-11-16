@@ -8,6 +8,9 @@
 - apps: the COSMIC dock buttons (launcher, workspaces, applications) and
   the COSMIC Store and Settings in the Tela circle style; the live ISO's
   welcome tour and installer, and the installed system's first steps tour
+- actions: the symbolic icons of the session actions in the panel's power
+  menu (lock, log out, suspend, restart); Tela's and COSMIC's are mixed and
+  hard to read. The shutdown icon stays Tela's, and these follow its style.
 
 The icon theme (build_files/icon_theme/compose.py) puts them in front of
 Tela; every other icon still comes from Tela.
@@ -277,6 +280,31 @@ DOCK = {
     "settings": (SETTINGS, ["com.system76.CosmicSettings"]),
 }
 
+# Session action symbolic icons, 16x16, in Tela's symbolic gray. They are
+# drawn with strokes, then outlined into plain fills: GTK recolors symbolic
+# icons by forcing their fill, which would fill an unoutlined stroke.
+# (names, path); the first name gets the file, the others are links to it.
+SYMBOLIC_COLOR = "#565656"
+ACTIONS = [
+    # A crescent moon
+    (["system-suspend-symbolic"],
+     "M7.31,2.04 C6.12,4.03 6.45,6.57 8.11,8.18 C9.77,9.8 12.32,10.06 14.28,8.82 C14,12.13 11.2,14.66 7.88,14.6 C4.56,14.54 1.86,11.91 1.71,8.59 C1.55,5.27 4,2.4 7.31,2.04 Z"),
+    # An open ring with a clockwise arrowhead, like the shutdown ring
+    (["system-reboot-symbolic", "system-restart-symbolic"],
+     "M14.07,6.17 Q16.18,10.68 12.46,14 Q8.74,17.31 4.5,14.71 Q0.25,12.11 1.52,7.29 Q2.65,3.02 6.69,2.4 L6.63,0.84 Q6.63,0.71 6.7,0.6 Q6.8,0.47 6.96,0.44 Q7.12,0.41 7.26,0.5 L10.74,2.88 Q10.8,2.91 10.83,2.96 Q10.94,3.09 10.92,3.26 Q10.9,3.42 10.77,3.52 L7.46,6.14 Q7.35,6.22 7.22,6.23 Q7.06,6.23 6.94,6.12 Q6.82,6.01 6.81,5.84 L6.76,4.43 Q4.2,4.98 3.45,7.8 Q2.57,11.18 5.54,13.01 Q8.52,14.83 11.13,12.51 Q13.74,10.18 12.26,7.01 Q12.09,6.64 12.23,6.25 Q12.37,5.86 12.74,5.68 Q13.12,5.51 13.51,5.65 Q13.9,5.79 14.07,6.17 Z"),
+    # A door frame with an arrow going out
+    (["system-log-out-symbolic"],
+     "M8,3.5 L4.5,3.5 L4.5,12.5 L8,12.5 Q8.41,12.5 8.71,12.79 Q9,13.09 9,13.5 Q9,13.91 8.71,14.21 Q8.41,14.5 8,14.5 L3.5,14.5 Q3.09,14.5 2.79,14.21 Q2.5,13.91 2.5,13.5 L2.5,2.5 Q2.5,2.09 2.79,1.79 Q3.09,1.5 3.5,1.5 L8,1.5 Q8.41,1.5 8.71,1.79 Q9,2.09 9,2.5 Q9,2.91 8.71,3.21 Q8.41,3.5 8,3.5 Z M7,7 L11.59,7 L10.29,5.71 Q10,5.41 10,5 Q10,4.59 10.29,4.29 Q10.59,4 11,4 Q11.41,4 11.71,4.29 L14.71,7.29 Q15,7.59 15,8 Q15,8.41 14.71,8.71 L11.71,11.71 Q11.41,12 11,12 Q10.59,12 10.29,11.71 Q10,11.41 10,11 Q10,10.59 10.29,10.29 L11.59,9 L7,9 Q6.59,9 6.29,8.71 Q6,8.41 6,8 Q6,7.59 6.29,7.29 Q6.59,7 7,7 Z"),
+    # A closed padlock with a keyhole
+    (["system-lock-screen-symbolic"],
+     "M12,7.09 C12.58,7.29 13,7.85 13,8.5 L13,13.5 C13,14.33 12.33,15 11.5,15 L4.5,15 C3.67,15 3,14.33 3,13.5 L3,8.5 C3,7.85 3.42,7.29 4,7.09 L4,5.5 Q4,1.5 8,1.5 Q12,1.5 12,5.5 L12,7.09 Z M6,7 L10,7 L10,5.5 Q10,3.5 8,3.5 Q6,3.5 6,5.5 L6,7 Z M8,9.2 C7.46,9.2 6.98,9.56 6.84,10.09 C6.7,10.61 6.93,11.17 7.4,11.44 L7.4,13 L8.6,13 L8.6,11.44 C9.07,11.17 9.3,10.61 9.16,10.09 C9.02,9.56 8.54,9.2 8,9.2 Z"),
+]
+
+
+def symbolic(d):
+    return ('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
+            f'<path fill="{SYMBOLIC_COLOR}" fill-rule="evenodd" d="{d}"/></svg>\n')
+
 
 def main():
     shutil.rmtree(LAYER, ignore_errors=True)
@@ -286,6 +314,13 @@ def main():
     places.mkdir(parents=True)
     mimetypes.mkdir()
     apps.mkdir()
+    actions = LAYER / "actions"
+    actions.mkdir()
+
+    for names, d in ACTIONS:
+        (actions / f"{names[0]}.svg").write_text(symbolic(d))
+        for alias in names[1:]:
+            os.symlink(f"{names[0]}.svg", actions / f"{alias}.svg")
 
     for icon, names in DOCK.values():
         (apps / f"{names[0]}.svg").write_text(icon)
