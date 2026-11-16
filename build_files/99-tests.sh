@@ -94,11 +94,10 @@ for combo in '\[Ctrl, Alt\], key: "t"' '\[Super\], key: "e"' \
     if grep -q "${combo}" "${SHORTCUTS}/defaults"; then exit 1; fi
 done
 # Floating top panel (gap from the screen edge, as COSMIC Settings' "Gap"
-# toggle sets it) and a dock with slightly rounded corners
+# toggle sets it)
 PANEL=/usr/share/cosmic/com.system76.CosmicPanel.Panel/v1
 grep -qx true "${PANEL}/anchor_gap"
 grep -qx 4 "${PANEL}/margin"
-grep -qx 'Some(8)' /usr/share/cosmic/com.system76.CosmicPanel.Dock/v1/border_radius_override
 # Firefox defaults (policies), linked into the flatpak's systemconfig
 # extension at boot; Bluefin's prefs and copy hook are gone
 FIREFOX_POLICIES=/usr/share/cosmic-blue/firefox/policies/policies.json
@@ -353,6 +352,12 @@ cmp /ctx/greeter/cosmic-greeter /usr/bin/cosmic-greeter
 for theme in Dark Light; do
     grep -qx true "/usr/share/cosmic/com.system76.CosmicTheme.${theme}/v2/frosted_windows"
     grep -qx true "/usr/share/cosmic/com.system76.CosmicTheme.${theme}.Builder/v2/frosted_panel"
+    # "Slightly round" style: 8 px corners, none of COSMIC's 160 px pill radius
+    for dir in "${theme}" "${theme}.Builder"; do
+        radii="/usr/share/cosmic/com.system76.CosmicTheme.${dir}/v2/corner_radii"
+        grep -q 'radius_xl' "${radii}"
+        if grep -q '160' "${radii}"; then exit 1; fi
+    done
 done
 
 # Icon theme: Tela circle dark (+ COSMIC symbolic icons it lacks), default for COSMIC and GTK
