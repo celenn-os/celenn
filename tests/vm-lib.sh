@@ -389,7 +389,7 @@ desktop_tour() {
 
 # cosmic-blue's first steps tour, which opens once the first-run assistant is
 # closed: one screenshot per page (Alt+Right turns the page), then closed.
-FIRST_STEPS_PAGES=5
+FIRST_STEPS_PAGES=6
 
 first_steps_shots() {
     local page

@@ -2,7 +2,8 @@
 // cosmic-blue first steps: a short tour of the installed system, opened once
 // at the first login of each new account (cosmic-blue-first-steps-autostart),
 // and from the "First steps" launcher at any time.
-// Pages: installing apps, updates and rollback, handy commands, help.
+// Pages: installing apps, updates and rollback, handy commands, tiling
+// windows, help.
 // GTK 4 + libadwaita, in the same style as the live ISO's welcome tour
 // (iso_files/welcome/cosmic-blue-welcome.js).
 //
@@ -55,6 +56,20 @@ const TRANSLATIONS = {
             'Une mise à jour a cassé quelque chose ? Revenez à la version précédente, puis redémarrez',
         'Show the current and previous versions':
             'Afficher la version actuelle et la précédente',
+        'Tile your windows':
+            'Disposez vos fenêtres en mosaïque',
+        'COSMIC can arrange your windows side by side, without overlap, as you open them. It is off by default: turn it on with the tiling button in the panel, or with the keyboard.':
+            'COSMIC peut placer vos fenêtres côte à côte, sans chevauchement, à mesure que vous les ouvrez. C’est désactivé par défaut : activez-le avec le bouton de mosaïque du panneau, ou au clavier.',
+        'Turn tiling on or off':
+            'Activer ou désactiver la mosaïque',
+        'Go to the window on the left, right, above or below':
+            'Aller à la fenêtre de gauche, de droite, du dessus ou du dessous',
+        'Move the window to the left, right, up or down':
+            'Déplacer la fenêtre à gauche, à droite, en haut ou en bas',
+        'Let a window float above the others':
+            'Laisser une fenêtre flotter au-dessus des autres',
+        'COSMIC can be customized much further: Settings → Desktop.':
+            'COSMIC se personnalise bien plus encore : Paramètres → Bureau.',
         'Handy commands':
             'Commandes utiles',
         'ujust runs the shortcuts that come with the system. Type these in a terminal.':
@@ -147,6 +162,13 @@ function column(...children) {
     return new Adw.Clamp({maximum_size: 560, child: box});
 }
 
+// A short line of dimmed text under a page's rows
+function note(text) {
+    const label = new Gtk.Label({label: text, wrap: true, justify: Gtk.Justification.CENTER});
+    label.add_css_class('dim-label');
+    return label;
+}
+
 function pillButton(label, actionName, suggested = false) {
     const button = new Gtk.Button({label, action_name: actionName, halign: Gtk.Align.CENTER});
     button.add_css_class('pill');
@@ -218,6 +240,16 @@ class FirstStepsWindow extends Adw.ApplicationWindow {
                     ['ujust reset-cosmic-theme', _('Bring the cosmic-blue look back: colors, icons, wallpaper')],
                 ]),
                 pillButton(_('Open a terminal'), 'win.terminal'))));
+
+        this._carousel.append(statusPage('view-grid-symbolic',
+            _('Tile your windows'),
+            _('COSMIC can arrange your windows side by side, without overlap, as you open them. It is off by default: turn it on with the tiling button in the panel, or with the keyboard.'),
+            column(this._shortcuts([
+                ['Super + Y', _('Turn tiling on or off')],
+                ['Super + ← ↑ ↓ →', _('Go to the window on the left, right, above or below')],
+                ['Super + Shift + ← ↑ ↓ →', _('Move the window to the left, right, up or down')],
+                ['Super + G', _('Let a window float above the others')],
+            ]), note(_('COSMIC can be customized much further: Settings → Desktop.')))));
 
         this._carousel.append(statusPage('help-browser-symbolic',
             _('Help and feedback'),
@@ -301,6 +333,23 @@ class FirstStepsWindow extends Adw.ApplicationWindow {
                 this._toasts.add_toast(new Adw.Toast({title: _('Copied'), timeout: 2}));
             });
             row.add_suffix(copy);
+            group.add(row);
+        }
+        return group;
+    }
+
+    // Rows of keyboard shortcuts (COSMIC's defaults)
+    _shortcuts(shortcuts) {
+        const group = new Adw.PreferencesGroup();
+        for (const [keys, description] of shortcuts) {
+            const row = new Adw.ActionRow({title: escapeMarkup(description)});
+            const label = new Gtk.Label({
+                label: `<tt>${escapeMarkup(keys)}</tt>`,
+                use_markup: true,
+                valign: Gtk.Align.CENTER,
+            });
+            label.add_css_class('dim-label');
+            row.add_suffix(label);
             group.add(row);
         }
         return group;
