@@ -323,6 +323,12 @@ jobs:
             --source-name "${IMAGE_REGISTRY}/${IMAGE_NAME}" --source-version "${VERSION}" \
             -o "spdx-json=${file}"
           sudo chown "$(id -u):$(id -g)" "${file}"
+          # Without the file lists Syft copies from the RPM database (every
+          # file of every package: about 80 MB), down to the packages
+          jq -c 'del(.files, .packages[].hasFiles) | .relationships |= map(select(.relationshipType != "CONTAINS"))' \
+            "${file}" > "${file}.tmp"
+          echo "SBOM before trimming: $(du -h "${file}" | cut -f1)"
+          mv "${file}.tmp" "${file}"
           packages=$(jq '.packages | length' "${file}")
           rpms=$(jq '[.packages[] | select(.externalRefs[]?.referenceLocator | startswith("pkg:rpm/"))] | length' "${file}")
           echo "SBOM: ${packages} packages (${rpms} RPMs), $(du -h "${file}" | cut -f1)"
