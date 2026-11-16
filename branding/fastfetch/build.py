@@ -52,6 +52,9 @@ LIGHT_SWAPS = {"#e6f3ff": "#1d47c4", "#cfeeff": "#4f98f5"}
 # empty. They are not blended with a background color: the cosmic-blue
 # terminal is translucent, so any blend shows as darker squares on the edges.
 MIN_COVERAGE = 0.5
+# Outer corner pixels of a staircase covered less than this are dropped, so
+# the round ends of the "c" stay round instead of ending in a square corner
+CORNER_COVERAGE = 0.7
 # Two halves closer than this (per channel) are drawn as one color
 SAME_COLOR = 10
 
@@ -105,6 +108,36 @@ def placement(svg: str):
     return best[1:]
 
 
+def neighbors(on: np.ndarray):
+    """For every pixel, whether its upper, lower, left and right neighbors
+    are set."""
+    p = np.pad(on, 1)
+    return p[:-2, 1:-1], p[2:, 1:-1], p[1:-1, :-2], p[1:-1, 2:]
+
+
+def clean(on: np.ndarray) -> np.ndarray:
+    """Drops lone spurs (a pixel with one set neighbor or none) and fills
+    notches (an empty pixel with three set neighbors or more): at the ends of
+    the "c" they show as a stray pixel."""
+    for _ in range(4):
+        count = sum(n.astype(int) for n in neighbors(on))
+        cleaned = (on & (count >= 2)) | (~on & (count >= 3))
+        if (cleaned == on).all():
+            break
+        on = cleaned
+    return on
+
+
+def pixel_mask(coverage: np.ndarray) -> np.ndarray:
+    """The pixels drawn: the half covered ones, without spurs, and without
+    the barely covered outer corners."""
+    on = clean(coverage >= MIN_COVERAGE)
+    up, down, left, right = neighbors(on)
+    count = up.astype(int) + down + left + right
+    corner = (count == 2) & ~((up & down) | (left & right))
+    return clean(on & ~(corner & (coverage < CORNER_COVERAGE)))
+
+
 def sgr(kind: int, rgb) -> str:
     r, g, b = (round(255 * c) for c in rgb)
     return f"\x1b[{kind};2;{r};{g};{b}m"
@@ -125,7 +158,7 @@ def cell(top, bottom) -> str:
 
 def render(svg: str, out: pathlib.Path, place) -> None:
     coverage, color = pixels(rasterize(svg, *place))
-    on = coverage >= MIN_COVERAGE
+    on = pixel_mask(coverage)
     lines = []
     for row in range(ROWS):
         cells = []
