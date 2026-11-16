@@ -100,6 +100,9 @@ done
 PANEL=/usr/share/cosmic/com.system76.CosmicPanel.Panel/v1
 grep -qx true "${PANEL}/anchor_gap"
 grep -qx 4 "${PANEL}/margin"
+# Dock hidden when a window overlaps it, as COSMIC Settings' "Automatically
+# hide dock" toggle sets it
+grep -qx OnOverlap /usr/share/cosmic/com.system76.CosmicPanel.Dock/v1/autohide
 # Firefox defaults (policies), linked into the flatpak's systemconfig
 # extension at boot; Bluefin's prefs and copy hook are gone
 FIREFOX_POLICIES=/usr/share/cosmic-blue/firefox/policies/policies.json
