@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Generate the cosmic-blue icons drawn on top of Tela circle.
 
-- places: folders (a planet-like disk in the logo blues, with a folder tab,
-  inside the logo's orbit), the home, desktop, network and trash icons
+- places: folders (a planet-like disk in the logo blues, with a folder tab),
+  the home, desktop, network and trash icons
 - mimetypes: common file types (a light page whose symbol and folded corner
   take the color of the type)
 - apps: the COSMIC dock buttons (launcher, workspaces, applications) and
-  the COSMIC Store and Settings in the Tela circle style; the live ISO's welcome tour and
-  installer, and the installed system's first steps tour
+  the COSMIC Store and Settings in the Tela circle style; the live ISO's
+  welcome tour and installer, and the installed system's first steps tour
 
 The icon theme (build_files/icon_theme/compose.py) puts them in front of
 Tela; every other icon still comes from Tela.
@@ -97,19 +97,14 @@ FOLDER_DEFS = (
     '<linearGradient id="front" x1=".15" y1="0" x2=".85" y2="1">'
     '<stop offset="0" stop-color="#78aeff"/><stop offset=".55" stop-color="#4f8dff"/>'
     '<stop offset="1" stop-color="#2f6bff"/></linearGradient>'
-    f'<linearGradient id="orbit" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="{ORBIT[0]}"/>'
-    f'<stop offset="1" stop-color="{ORBIT[1]}"/></linearGradient>'
 )
-# The logo's open orbit (the "c"), around the folder
-ORBIT_PATH = "M53.6 13.4A28.5 28.5 0 1 0 53.6 50.6"
 
 
 def folder(name, open_=False):
-    """A planet-like folder inside the logo's orbit.
+    """A planet-like folder, the size of Tela circle's icons.
 
     The folder is a disk: dark inside, the back panel with its tab, the
-    lighter front panel, which starts lower when the folder is open. It is
-    drawn at 56 px and scaled down to fit inside the orbit.
+    lighter front panel, which starts lower when the folder is open.
     """
     front = 22.0 if open_ else 18.6
     disk = (
@@ -121,9 +116,7 @@ def folder(name, open_=False):
         "</g>"
         + glyph(name, 32, front + (60 - front) * 0.45, 1.1, "#ffffff")
     )
-    body = (f'<path d="{ORBIT_PATH}" fill="none" stroke="url(#orbit)" stroke-width="5" stroke-linecap="round"/>'
-            f'<g transform="translate(32 32) scale(.786) translate(-32 -32)">{disk}</g>')
-    return svg(body, FOLDER_DEFS)
+    return svg(disk, FOLDER_DEFS)
 
 
 # Tela's file names: the icon theme also takes every Tela alias of them.
