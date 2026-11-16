@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Generate the cosmic-blue icons drawn on top of Tela circle.
 
-- places: folders (a planet-like disk in the logo blues, with a folder tab,
-  inside the logo's orbit), the home, desktop, network and trash icons
+- places: folders (a planet-like disk in the logo blues, with a folder tab),
+  the home, desktop, network and trash icons
 - mimetypes: common file types (a light page whose symbol and folded corner
   take the color of the type)
-- apps: the live ISO's welcome tour and installer, and the installed
-  system's first steps tour
+- apps: the COSMIC dock buttons (launcher, workspaces, applications) and
+  the COSMIC Store and Settings in the Tela circle style; the live ISO's
+  welcome tour and installer, and the installed system's first steps tour
 
 The icon theme (build_files/icon_theme/compose.py) puts them in front of
 Tela; every other icon still comes from Tela.
@@ -96,19 +97,14 @@ FOLDER_DEFS = (
     '<linearGradient id="front" x1=".15" y1="0" x2=".85" y2="1">'
     '<stop offset="0" stop-color="#78aeff"/><stop offset=".55" stop-color="#4f8dff"/>'
     '<stop offset="1" stop-color="#2f6bff"/></linearGradient>'
-    f'<linearGradient id="orbit" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="{ORBIT[0]}"/>'
-    f'<stop offset="1" stop-color="{ORBIT[1]}"/></linearGradient>'
 )
-# The logo's open orbit (the "c"), around the folder
-ORBIT_PATH = "M53.6 13.4A28.5 28.5 0 1 0 53.6 50.6"
 
 
 def folder(name, open_=False):
-    """A planet-like folder inside the logo's orbit.
+    """A planet-like folder, the size of Tela circle's icons.
 
     The folder is a disk: dark inside, the back panel with its tab, the
-    lighter front panel, which starts lower when the folder is open. It is
-    drawn at 56 px and scaled down to fit inside the orbit.
+    lighter front panel, which starts lower when the folder is open.
     """
     front = 22.0 if open_ else 18.6
     disk = (
@@ -120,9 +116,8 @@ def folder(name, open_=False):
         "</g>"
         + glyph(name, 32, front + (60 - front) * 0.45, 1.1, "#ffffff")
     )
-    body = (f'<path d="{ORBIT_PATH}" fill="none" stroke="url(#orbit)" stroke-width="5" stroke-linecap="round"/>'
-            f'<g transform="translate(32 32) scale(.786) translate(-32 -32)">{disk}</g>')
-    return svg(body, FOLDER_DEFS)
+    # Drawn at 56 px, scaled to the 54 px disk of Tela circle's icons
+    return svg(f'<g transform="translate(32 32) scale({27 / 28:.4f}) translate(-32 -32)">{disk}</g>', FOLDER_DEFS)
 
 
 # Tela's file names: the icon theme also takes every Tela alias of them.
@@ -214,12 +209,88 @@ def app(center):
     )
 
 
+# --- COSMIC dock buttons ------------------------------------------------------
+
+# Drawn like Tela circle's application icons: a disk in the accent, white
+# symbols, the less important parts in translucent white.
+TELA_SHADE = '<path d="M5 32a27 27 0 0 0 54 0z" opacity=".1"/>'
+STORE_COLOR = "#2ec4c4"
+SETTINGS_COLOR = "#5f6b86"
+
+
+def tela_app(body, color="#4f8dff"):
+    return svg(f'<circle cx="32" cy="32" r="27" fill="{color}"/>' + TELA_SHADE + body)
+
+
+def tile(x, y, size, opacity=None, radius=1.6):
+    alpha = f' opacity="{opacity}"' if opacity else ""
+    return f'<rect x="{x}" y="{y}" width="{size}" height="{size}" rx="{radius}" fill="#fff"{alpha}/>'
+
+
+# The app library: a grid of applications
+APPLICATIONS = tela_app("".join(
+    tile(18 + col * 10, 18 + row * 10, 8, None if (row, col) == (1, 1) else ".75")
+    for row in range(3) for col in range(3)
+))
+# Workspaces: two windows, one behind the other
+WORKSPACES = tela_app(
+    '<rect x="15" y="17" width="23" height="17" rx="2" fill="#fff" opacity=".45"/>'
+    '<rect x="26" y="28" width="23" height="19" rx="2" fill="#fff"/>'
+    '<path d="M28 28h19a2 2 0 0 1 2 2v2H26v-2a2 2 0 0 1 2-2z" fill="#2f6bff"/>'
+)
+# The launcher: search over applications
+LAUNCHER = tela_app(
+    tile(16, 16, 9, ".45") + tile(16, 27, 9, ".45") + tile(27, 16, 9, ".45")
+    + '<circle cx="34" cy="34" r="9.5" fill="#4f8dff"/>'
+    '<circle cx="34" cy="34" r="7.5" fill="none" stroke="#fff" stroke-width="3.6"/>'
+    '<path d="M39.6 39.6l7.4 7.4" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/>'
+)
+
+# The store: a shopping bag with the logo's "c"
+STORE = tela_app(
+    '<path d="M25 24v-3a7 7 0 0 1 14 0v3" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>'
+    '<path d="M18.5 24h27a1.5 1.5 0 0 1 1.5 1.6l-1.4 19.6a3 3 0 0 1-3 2.8H21.4a3 3 0 0 1-3-2.8L17 25.6'
+    'a1.5 1.5 0 0 1 1.5-1.6z" fill="#fff"/>'
+    f'<path d="M37.2 31.5A6.5 6.5 0 1 0 37.2 40.5" fill="none" stroke="{STORE_COLOR}" stroke-width="2.6" '
+    'stroke-linecap="round"/>'
+    f'<circle cx="32" cy="36" r="2.4" fill="{STORE_COLOR}"/>',
+    STORE_COLOR,
+)
+# The settings: two sliders
+SETTINGS = tela_app(
+    '<rect x="16" y="21" width="32" height="4" rx="2" fill="#fff" opacity=".45"/>'
+    '<rect x="16" y="39" width="32" height="4" rx="2" fill="#fff" opacity=".45"/>'
+    '<rect x="16" y="21" width="22" height="4" rx="2" fill="#fff"/>'
+    '<rect x="16" y="39" width="10" height="4" rx="2" fill="#fff"/>'
+    '<circle cx="38" cy="23" r="5" fill="#fff"/><circle cx="26" cy="41" r="5" fill="#fff"/>',
+    SETTINGS_COLOR,
+)
+
+# Icon -> names (the desktop entries of the dock buttons and of the apps
+# they open). The first name gets the file, the others are links to it.
+DOCK = {
+    "applications": (APPLICATIONS, ["com.system76.CosmicPanelAppButton", "com.system76.CosmicAppLibrary"]),
+    "workspaces": (WORKSPACES, ["com.system76.CosmicPanelWorkspacesButton", "com.system76.CosmicWorkspaces",
+                                "com.system76.CosmicAppletWorkspaces"]),
+    "launcher": (LAUNCHER, ["com.system76.CosmicPanelLauncherButton", "com.system76.CosmicLauncher"]),
+    "store": (STORE, ["com.system76.CosmicStore"]),
+    "settings": (SETTINGS, ["com.system76.CosmicSettings"]),
+}
+
+
 def main():
     shutil.rmtree(LAYER, ignore_errors=True)
     places = LAYER / "places"
     mimetypes = LAYER / "mimetypes"
+    apps = LAYER / "apps"
     places.mkdir(parents=True)
     mimetypes.mkdir()
+    apps.mkdir()
+
+    for icon, names in DOCK.values():
+        (apps / f"{names[0]}.svg").write_text(icon)
+        for alias in names[1:]:
+            os.symlink(f"{names[0]}.svg", apps / f"{alias}.svg")
 
     for name, symbol in PLACES.items():
         is_open = symbol == "open"
