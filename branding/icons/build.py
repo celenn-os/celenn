@@ -116,7 +116,8 @@ def folder(name, open_=False):
         "</g>"
         + glyph(name, 32, front + (60 - front) * 0.45, 1.1, "#ffffff")
     )
-    return svg(disk, FOLDER_DEFS)
+    # Drawn at 56 px, scaled to the 54 px disk of Tela circle's icons
+    return svg(f'<g transform="translate(32 32) scale({27 / 28:.4f}) translate(-32 -32)">{disk}</g>', FOLDER_DEFS)
 
 
 # Tela's file names: the icon theme also takes every Tela alias of them.
