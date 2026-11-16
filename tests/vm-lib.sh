@@ -393,7 +393,7 @@ FIRST_STEPS_PAGES=6
 
 first_steps_shots() {
     local page
-    if ! wait_for 60 "pgrep -u ${DEMO_USER} -f cosmic-blue-first-steps\$"; then
+    if ! wait_for 60 "pgrep -u ${DEMO_USER} -f cosmic-blue-tour\$"; then
         warn "the first steps tour did not open after the first-run assistant"
         return 1
     fi
@@ -403,7 +403,7 @@ first_steps_shots() {
         monitor "sendkey alt-right"
         sleep 3
     done
-    vm "pkill -u ${DEMO_USER} -f cosmic-blue-first-steps\$" || true
+    vm "pkill -u ${DEMO_USER} -f cosmic-blue-tour\$" || true
     sleep 3
     vm "test ! -e ~${DEMO_USER}/.config/cosmic-blue/first-steps-pending" \
         || warn "the first steps tour would open again at the next login"

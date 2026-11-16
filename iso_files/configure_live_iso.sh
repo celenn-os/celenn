@@ -169,15 +169,26 @@ EOF
 
 ### Welcome tour
 
-# A short tour (iso_files/welcome) that opens with the live session: what
-# cosmic-blue is, trying it live, highlights, and a button for the installer.
-# The workflow copies its files into the titanoboa checkout, mounted at /app.
-dnf install -y gjs gtk4 libadwaita
-install -D -m 0755 /app/cosmic-blue-welcome/cosmic-blue-welcome.js /usr/libexec/cosmic-blue-welcome
-install -D -m 0644 /app/cosmic-blue-welcome/io.github.cosmic_blue_os.Welcome.desktop \
+# A short tour that opens with the live session: what cosmic-blue is, trying
+# it live, highlights, and a button for the installer. It is the image's
+# libcosmic tour (/usr/libexec/cosmic-blue-tour --live), like the installed
+# system's first steps, so both look like COSMIC's own first-run assistant.
+# The workflow copies iso_files/welcome into the titanoboa checkout, mounted
+# at /app: its launcher, and the GJS tour used for images built before
+# cosmic-blue-tour (remove it once every published image has the tour).
+welcome_desktops=(
     /usr/share/applications/io.github.cosmic_blue_os.Welcome.desktop
-install -D -m 0644 /app/cosmic-blue-welcome/io.github.cosmic_blue_os.Welcome.desktop \
     /etc/xdg/autostart/io.github.cosmic_blue_os.Welcome.desktop
+)
+for desktop in "${welcome_desktops[@]}"; do
+    install -D -m 0644 /app/cosmic-blue-welcome/io.github.cosmic_blue_os.Welcome.desktop "${desktop}"
+done
+if [[ -x /usr/libexec/cosmic-blue-tour ]]; then
+    sed -i 's|^Exec=.*|Exec=/usr/libexec/cosmic-blue-tour --live|' "${welcome_desktops[@]}"
+else
+    dnf install -y gjs gtk4 libadwaita
+    install -D -m 0755 /app/cosmic-blue-welcome/cosmic-blue-welcome.js /usr/libexec/cosmic-blue-welcome
+fi
 install -D -m 0644 /app/cosmic-blue-welcome/cosmic-blue-welcome.svg \
     /usr/share/icons/hicolor/scalable/apps/cosmic-blue-welcome.svg
 gtk-update-icon-cache --force /usr/share/icons/hicolor || :

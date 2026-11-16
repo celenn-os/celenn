@@ -168,7 +168,7 @@ helpers-key:
     {
         echo "fedora ${base_tag}"
         # Files read by Containerfile.helpers
-        git ls-files -z Containerfile.helpers build_files/theme build_files/initial_setup \
+        git ls-files -z Containerfile.helpers build_files/theme build_files/first_steps build_files/initial_setup \
             build_files/greeter build_files/plymouth build_files/icon_theme \
             build_files/cursor_theme system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-orbits.jpg \
             | sort -z | xargs -0 sha256sum

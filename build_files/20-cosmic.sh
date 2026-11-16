@@ -47,11 +47,11 @@ systemctl enable cosmic-greeter.service
 mkdir -p /etc/skel/.config
 touch /etc/skel/.config/gnome-initial-setup-done
 
-# cosmic-blue's own first steps tour (GJS + GTK 4 + libadwaita), opened once
-# right after that assistant for each new account: the autostart entry only
-# acts while ~/.config/cosmic-blue/first-steps-pending exists, which new
-# accounts get from /etc/skel (see /usr/libexec/cosmic-blue-first-steps-autostart).
-dnf5 -y install gjs gtk4 libadwaita
+# cosmic-blue's own first steps tour (/usr/libexec/cosmic-blue-tour, built
+# with libcosmic in Containerfile.helpers), opened once right after that
+# assistant for each new account: the autostart entry only acts while
+# ~/.config/cosmic-blue/first-steps-pending exists, which new accounts get
+# from /etc/skel (see /usr/libexec/cosmic-blue-first-steps-autostart).
 mkdir -p /etc/skel/.config/cosmic-blue
 touch /etc/skel/.config/cosmic-blue/first-steps-pending
 
