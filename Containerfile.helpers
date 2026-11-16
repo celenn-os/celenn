@@ -40,6 +40,12 @@ COPY build_files/greeter /greeter
 COPY system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-orbits.jpg /greeter/background.jpg
 RUN /greeter/build.sh /greeter/background.jpg
 
+# COSMIC Store, rebuilt from Fedora's source package with FlatPark as a
+# recommended source, off by default (see build_files/store/patch.py)
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS store
+COPY build_files/store /store
+RUN /store/build.sh
+
 # Boot screen spinner frames, tinted with the logo blue
 # (see build_files/plymouth/tint.py)
 FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS plymouth
@@ -65,6 +71,7 @@ COPY --from=theme /out /theme
 COPY --from=tour /out /tour
 COPY --from=initial_setup /out /initial_setup
 COPY --from=greeter /out /greeter
+COPY --from=store /out /store
 COPY --from=plymouth /out /plymouth
 COPY --from=icons /out /icons
 COPY --from=cursors /out /cursors

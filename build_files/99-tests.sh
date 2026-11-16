@@ -354,6 +354,11 @@ fi
 # background shown before a user has a saved one
 cmp /ctx/greeter/cosmic-greeter /usr/bin/cosmic-greeter
 
+# COSMIC Store: our rebuild, with FlatPark as a recommended source (off) read
+# from the descriptor that `ujust toggle-flatpark` uses too
+cmp /ctx/store/cosmic-store /usr/bin/cosmic-store
+grep -q /usr/share/cosmic-blue/flatpak/flatpark.flatpakrepo /usr/bin/cosmic-store
+
 # Frosted glass on by default, in the theme apps read and in the builder
 for theme in Dark Light; do
     grep -qx true "/usr/share/cosmic/com.system76.CosmicTheme.${theme}/v2/frosted_windows"

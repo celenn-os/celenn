@@ -238,7 +238,10 @@ toggle-flatpark mode="toggle":
     # on Flathub. How far its apps can be trusted is not established yet, so
     # cosmic-blue leaves it off. When on, it has the lowest priority, and its
     # filter hides every app that is also on Flathub: those keep coming from
-    # Flathub. Ask before every change, unless run without a terminal.
+    # Flathub. It is added to your account's Flatpak installation, the one
+    # COSMIC Store manages: FlatPark is listed there under Software
+    # repositories (Recommended Flatpak sources) and can be added or removed
+    # there too. Ask before every change, unless run without a terminal.
     repofile=/usr/share/cosmic-blue/flatpak/flatpark.flatpakrepo
     filter=/usr/share/flatpak/flatpark.filter
     confirm() {
@@ -246,7 +249,7 @@ toggle-flatpark mode="toggle":
         read -r -p "$1 [y/N] " answer
         [[ "${answer}" =~ ^[YyOo] ]]
     }
-    is_on() { flatpak remotes --system --columns=name | grep -qx flatpark; }
+    is_on() { flatpak remotes --user --columns=name | grep -qx flatpark; }
     mode="{{ mode }}"
     if [[ "${mode}" == toggle ]]; then
         if is_on; then mode=off; else mode=on; fi
@@ -257,7 +260,7 @@ toggle-flatpark mode="toggle":
             ;;
         on)
             if is_on; then
-                flatpak remote-modify --system --prio=0 --filter="${filter}" flatpark
+                flatpak remote-modify --user --prio=0 --filter="${filter}" flatpark
                 echo "FlatPark is already on."
                 exit 0
             fi
@@ -265,7 +268,7 @@ toggle-flatpark mode="toggle":
             echo "reviewed the way Flathub's are: install only apps whose authors you trust."
             echo "Apps that are also on Flathub or in the COSMIC repository keep coming from there."
             confirm "Turn FlatPark on?" || { echo "FlatPark stays off."; exit 0; }
-            flatpak remote-add --system --if-not-exists --prio=0 --filter="${filter}" \
+            flatpak remote-add --user --if-not-exists --prio=0 --filter="${filter}" \
                 flatpark "${repofile}"
             echo "FlatPark is on: its apps now show in COSMIC Store."
             echo "Turn it off with: ujust toggle-flatpark off"
@@ -275,7 +278,7 @@ toggle-flatpark mode="toggle":
                 echo "FlatPark is already off."
                 exit 0
             fi
-            readarray -t refs < <(flatpak list --system --columns=ref,origin | awk '$2 == "flatpark" {print $1}')
+            readarray -t refs < <(flatpak list --user --columns=ref,origin | awk '$2 == "flatpark" {print $1}')
             if [[ "${#refs[@]}" -gt 0 ]]; then
                 echo "Installed from FlatPark:"
                 printf '  %s\n' "${refs[@]}"
@@ -284,10 +287,15 @@ toggle-flatpark mode="toggle":
                     exit 1
                 fi
                 confirm "Uninstall them and turn FlatPark off?" || { echo "FlatPark stays on."; exit 0; }
-                flatpak uninstall --system --noninteractive "${refs[@]}"
+                flatpak uninstall --user --noninteractive "${refs[@]}"
             fi
-            flatpak remote-delete --system flatpark
+            flatpak remote-delete --user flatpark
             echo "FlatPark is off."
+            # Turned on system-wide by an older version of this command
+            if flatpak remotes --system --columns=name | grep -qx flatpark \
+                && ! flatpak list --system --columns=origin | grep -qx flatpark; then
+                flatpak remote-delete --system flatpark || true
+            fi
             ;;
         *)
             echo "Usage: ujust toggle-flatpark [toggle|on|off|status]" >&2

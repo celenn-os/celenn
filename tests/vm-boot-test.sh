@@ -47,7 +47,7 @@ grep -qE '^Image: cosmic-blue(-nvidia)? [0-9]' <<<"${bug_report}" \
 # lowest priority with its filter, and off again; the one-time cleanup for
 # systems where older images turned it on removes it when no app uses it.
 flatpark_state() {
-    vm "flatpak remotes --system --columns=name,priority,filter" | awk '$1 == "flatpark" {print $2, $3}'
+    vm "flatpak remotes --user --columns=name,priority,filter" | awk '$1 == "flatpark" {print $2, $3}'
 }
 flatpark_problem() { echo "::error::FlatPark: $*"; errors=1; }
 vm 'test -e /var/lib/cosmic-blue/flatpark-off-done' \

@@ -169,7 +169,7 @@ helpers-key:
         echo "fedora ${base_tag}"
         # Files read by Containerfile.helpers
         git ls-files -z Containerfile.helpers build_files/theme build_files/first_steps build_files/initial_setup \
-            build_files/greeter build_files/plymouth build_files/icon_theme \
+            build_files/greeter build_files/store build_files/plymouth build_files/icon_theme \
             build_files/cursor_theme system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-orbits.jpg \
             | sort -z | xargs -0 sha256sum
         # Base images
@@ -180,9 +180,9 @@ helpers-key:
         packages="$(podman run --rm --pull=newer "${fedora}" \
             dnf5 -q repoquery --enablerepo=fedora-source --enablerepo=updates-source \
             --latest-limit=1 --queryformat '%{full_nevra}\n' \
-            cosmic-greeter cosmic-initial-setup plymouth-theme-spinner | sort)"
-        # All three found, or a stale cache could be used
-        for name in cosmic-greeter cosmic-initial-setup plymouth-theme-spinner; do
+            cosmic-greeter cosmic-initial-setup cosmic-store plymouth-theme-spinner | sort)"
+        # All found, or a stale cache could be used
+        for name in cosmic-greeter cosmic-initial-setup cosmic-store plymouth-theme-spinner; do
             grep -q "^${name}-[0-9]" <<< "${packages}"
         done
         echo "${packages}"
