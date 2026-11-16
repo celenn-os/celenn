@@ -52,9 +52,6 @@ LIGHT_SWAPS = {"#e6f3ff": "#1d47c4", "#cfeeff": "#4f98f5"}
 # empty. They are not blended with a background color: the cosmic-blue
 # terminal is translucent, so any blend shows as darker squares on the edges.
 MIN_COVERAGE = 0.5
-# Outer corner pixels of a staircase covered less than this are dropped, so
-# the round ends of the "c" stay round instead of ending in a square corner
-CORNER_COVERAGE = 0.7
 # Two halves closer than this (per channel) are drawn as one color
 SAME_COLOR = 10
 
@@ -115,27 +112,19 @@ def neighbors(on: np.ndarray):
     return p[:-2, 1:-1], p[2:, 1:-1], p[1:-1, :-2], p[1:-1, 2:]
 
 
-def clean(on: np.ndarray) -> np.ndarray:
-    """Drops lone spurs (a pixel with one set neighbor or none) and fills
-    notches (an empty pixel with three set neighbors or more): at the ends of
-    the "c" they show as a stray pixel."""
-    for _ in range(4):
-        count = sum(n.astype(int) for n in neighbors(on))
-        cleaned = (on & (count >= 2)) | (~on & (count >= 3))
-        if (cleaned == on).all():
-            break
-        on = cleaned
-    return on
-
-
-def pixel_mask(coverage: np.ndarray) -> np.ndarray:
-    """The pixels drawn: the half covered ones, without spurs, and without
-    the barely covered outer corners."""
-    on = clean(coverage >= MIN_COVERAGE)
+def pixel_mask(coverage: np.ndarray, color: np.ndarray) -> np.ndarray:
+    """The pixels drawn: the half covered ones. A lone pixel hanging from a
+    shape (one set neighbor at most), as at each end of the "c", gets a pixel
+    on either side, in its color, so the round end doesn't end in a spike."""
+    on = coverage >= MIN_COVERAGE
     up, down, left, right = neighbors(on)
     count = up.astype(int) + down + left + right
-    corner = (count == 2) & ~((up & down) | (left & right))
-    return clean(on & ~(corner & (coverage < CORNER_COVERAGE)))
+    for y, x in np.argwhere(on & (count <= 1)):
+        for side in (x - 1, x + 1):
+            if 0 <= side < on.shape[1] and not on[y, side]:
+                on[y, side] = True
+                color[y, side] = color[y, x]
+    return on
 
 
 def sgr(kind: int, rgb) -> str:
@@ -158,7 +147,7 @@ def cell(top, bottom) -> str:
 
 def render(svg: str, out: pathlib.Path, place) -> None:
     coverage, color = pixels(rasterize(svg, *place))
-    on = pixel_mask(coverage)
+    on = pixel_mask(coverage, color)
     lines = []
     for row in range(ROWS):
         cells = []
