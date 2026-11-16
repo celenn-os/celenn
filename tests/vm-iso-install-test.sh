@@ -214,8 +214,10 @@ if ! vm 'systemctl cat cosmic-blue-root-mount-options.service' >/dev/null 2>&1; 
     echo "::notice::The installed image has no cosmic-blue-root-mount-options.service yet: running the script of this checkout"
     vm 'bash -s' < "$(dirname "$0")/../system_files/usr/libexec/cosmic-blue-root-mount-options" || true
 fi
-vm 'findmnt -n -o OPTIONS /var | grep -q compress=zstd:1' \
-    || error "btrfs compression (compress=zstd:1) is not active"
+if ! vm 'findmnt -n -o OPTIONS /var | grep -q compress=zstd:1'; then
+    error "btrfs compression (compress=zstd:1) is not active"
+    vm 'systemctl status --no-pager cosmic-blue-root-mount-options.service; journalctl -b --no-pager -o short-monotonic | grep -E "root-mount-options|var.mount|Remount|remount" | tail -n 40' || true
+fi
 vm 'findmnt -n -o FSTYPE /var/home | grep -qx btrfs' || error "/var/home is not on btrfs"
 vm 'cat /etc/fstab; findmnt -o TARGET,SOURCE,FSTYPE,OPTIONS -R /sysroot; findmnt /; findmnt /var; findmnt /var/home; lsblk -f' || true
 
