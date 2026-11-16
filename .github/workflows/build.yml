@@ -231,30 +231,65 @@ jobs:
           ${root_env} podman info --format '{{ json .Store.GraphStatus }}'
 
       # Helper stages (Containerfile.helpers: rebuilt COSMIC programs, recolored
-      # themes): restored from the Actions cache while their inputs do not
-      # change (`just helpers-key`), built otherwise. Caches saved by main
-      # builds are shared with pull requests.
-      - name: Helper stages cache key
+      # themes): each one restored from the Actions cache while its own inputs
+      # do not change (`just helpers-keys`), built otherwise. Keep the list in
+      # line with `just helper-stages`.
+      - name: Helper stages cache keys
         id: helpers
-        run: echo "key=helpers-$(just helpers-key)" >> "${GITHUB_OUTPUT}"
+        run: |
+          set -euo pipefail
+          just helpers-keys | while read -r stage key; do
+            echo "${stage}=helper-${stage}-${key}" >> "${GITHUB_OUTPUT}"
+          done
 
-      - name: Restore the helper stages
-        id: helpers-cache
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - name: Helper stage theme
+        uses: ./.github/actions/helper-stage
         with:
-          path: ${{ runner.temp }}/helpers
-          key: ${{ steps.helpers.outputs.key }}
+          stage: theme
+          key: ${{ steps.helpers.outputs.theme }}
+          dir: ${{ runner.temp }}/helpers
 
-      - name: Build the helper stages
-        if: steps.helpers-cache.outputs.cache-hit != 'true'
-        run: just build-helpers "${RUNNER_TEMP}/helpers"
-
-      - name: Save the helper stages
-        if: steps.helpers-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - name: Helper stage tour
+        uses: ./.github/actions/helper-stage
         with:
-          path: ${{ runner.temp }}/helpers
-          key: ${{ steps.helpers.outputs.key }}
+          stage: tour
+          key: ${{ steps.helpers.outputs.tour }}
+          dir: ${{ runner.temp }}/helpers
+
+      - name: Helper stage initial_setup
+        uses: ./.github/actions/helper-stage
+        with:
+          stage: initial_setup
+          key: ${{ steps.helpers.outputs.initial_setup }}
+          dir: ${{ runner.temp }}/helpers
+
+      - name: Helper stage greeter
+        uses: ./.github/actions/helper-stage
+        with:
+          stage: greeter
+          key: ${{ steps.helpers.outputs.greeter }}
+          dir: ${{ runner.temp }}/helpers
+
+      - name: Helper stage plymouth
+        uses: ./.github/actions/helper-stage
+        with:
+          stage: plymouth
+          key: ${{ steps.helpers.outputs.plymouth }}
+          dir: ${{ runner.temp }}/helpers
+
+      - name: Helper stage icons
+        uses: ./.github/actions/helper-stage
+        with:
+          stage: icons
+          key: ${{ steps.helpers.outputs.icons }}
+          dir: ${{ runner.temp }}/helpers
+
+      - name: Helper stage cursors
+        uses: ./.github/actions/helper-stage
+        with:
+          stage: cursors
+          key: ${{ steps.helpers.outputs.cursors }}
+          dir: ${{ runner.temp }}/helpers
 
       # This actually builds the container image
       - name: Build Image

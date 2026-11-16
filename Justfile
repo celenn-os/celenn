@@ -146,47 +146,92 @@ build $target_image=image_name $tag=default_tag $version="":
 
     podman build "${PODMAN_BUILD_ARGS[@]}" .
 
-# Build the helper stages (Containerfile.helpers) and write their outputs to a
-# directory, used by `just build` as the "helpers" build context
-build-helpers $dest:
+# Helper stages of Containerfile.helpers, in build order
+helper-stages:
+    @echo theme tour initial_setup greeter plymouth icons cursors
+
+# Build helper stages of Containerfile.helpers (all of them, or the ones
+# given) and write the output of each one to <dest>/<stage>, used by `just
+# build` as the "helpers" build context
+build-helpers $dest *stages:
     #!/usr/bin/env bash
     set -euxo pipefail
 
-    mkdir -p "${dest}"
-    podman build --pull=newer --build-arg "BASE_TAG=$(just fedora-version)" \
-        --file Containerfile.helpers --output "type=local,dest=${dest}" .
+    stages="{{ stages }}"
+    [[ -n "${stages}" ]] || stages="$(just helper-stages)"
+    base_tag="$(just fedora-version)"
+    for stage in ${stages}; do
+        rm -rf "${dest:?}/${stage}"
+        mkdir -p "${dest}/${stage}"
+        podman build --pull=newer --build-arg "BASE_TAG=${base_tag}" \
+            --file Containerfile.helpers --target "${stage}" \
+            --output "type=local,dest=${dest}/${stage}" .
+    done
 
-# Cache key of the helper stages: changes with their files, the base images
-# they build from and the Fedora packages they rebuild or recolor (Fedora
-# updates them without any change here)
-helpers-key:
+# Cache keys of the helper stages, one "<stage> <key>" line each. A stage's
+# key changes with its own part of Containerfile.helpers, the files it copies
+# and what it builds from outside the repository: the Fedora release, the
+# Fedora package it rebuilds or recolors (Fedora updates them without any
+# change here), the Rust image of the theme stage. Not the digest of the
+# Fedora image, rebuilt every few days for the same result; the tour, which
+# links to Fedora's libraries without a package of its own to follow, is
+# rebuilt once a week instead.
+helpers-keys:
     #!/usr/bin/env bash
     set -euo pipefail
 
     base_tag="$(just fedora-version)"
     fedora="registry.fedoraproject.org/fedora:${base_tag}"
-    {
-        echo "fedora ${base_tag}"
-        # Files read by Containerfile.helpers
-        git ls-files -z Containerfile.helpers build_files/theme build_files/first_steps build_files/initial_setup \
-            build_files/greeter build_files/plymouth build_files/icon_theme \
-            build_files/cursor_theme system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-orbits.jpg \
-            | sort -z | xargs -0 sha256sum
-        # Base images
-        for image in "${fedora}" docker.io/library/rust:1; do
-            echo "${image} $(skopeo inspect --retry-times 3 --format '{{ '{{.Digest}}' }}' "docker://${image}")"
-        done
-        # Fedora packages: source packages rebuilt, Plymouth spinner recolored
-        packages="$(podman run --rm --pull=newer "${fedora}" \
-            dnf5 -q repoquery --enablerepo=fedora-source --enablerepo=updates-source \
-            --latest-limit=1 --queryformat '%{full_nevra}\n' \
-            cosmic-greeter cosmic-initial-setup plymouth-theme-spinner | sort)"
-        # All three found, or a stale cache could be used
-        for name in cosmic-greeter cosmic-initial-setup plymouth-theme-spinner; do
-            grep -q "^${name}-[0-9]" <<< "${packages}"
-        done
-        echo "${packages}"
-    } | tee /dev/stderr | sha256sum | cut -c1-32
+    # Fedora packages: source packages rebuilt, Plymouth spinner recolored
+    packages="$(podman run --rm --pull=newer "${fedora}" \
+        dnf5 -q repoquery --enablerepo=fedora-source --enablerepo=updates-source \
+        --latest-limit=1 --queryformat '%{full_nevra}\n' \
+        cosmic-greeter cosmic-initial-setup plymouth-theme-spinner | sort)"
+    package() {
+        # Found, or a stale cache could be used
+        grep "^${1}-[0-9]" <<< "${packages}"
+    }
+    files() {
+        git ls-files -z "$@" | sort -z | xargs -0 sha256sum
+    }
+    inputs="$(mktemp)"
+    trap 'rm -f "${inputs}"' EXIT
+    for stage in $(just helper-stages); do
+        {
+            echo "stage ${stage}, fedora ${base_tag}"
+            awk -v build="AS ${stage}-build" -v copy="COPY --from=${stage}-build /out /" \
+                'index($0, build) { on = 1 } on { print } on && $0 == copy { exit }' \
+                Containerfile.helpers
+            case "${stage}" in
+                theme)
+                    files build_files/theme
+                    rust=docker.io/library/rust:1
+                    echo "${rust} $(skopeo inspect --retry-times 3 --format '{{ '{{.Digest}}' }}' "docker://${rust}")" ;;
+                tour)
+                    files build_files/first_steps
+                    echo "week $(date -u +%G-W%V)" ;;
+                initial_setup)
+                    files build_files/initial_setup
+                    package cosmic-initial-setup ;;
+                greeter)
+                    files build_files/greeter system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-orbits.jpg
+                    package cosmic-greeter ;;
+                plymouth)
+                    files build_files/plymouth
+                    package plymouth-theme-spinner ;;
+                icons)
+                    files build_files/icon_theme/tela.sh ;;
+                cursors)
+                    files build_files/cursor_theme ;;
+                *)
+                    echo "No cache key inputs for the helper stage ${stage}" >&2
+                    exit 1 ;;
+            esac
+        } > "${inputs}"
+        # The inputs, for the CI log
+        sed "s/^/${stage}: /" "${inputs}" >&2
+        echo "${stage} $(sha256sum < "${inputs}" | cut -c1-32)"
+    done
 
 # Split the image for smaller updates (New)!
 rechunk $target_image=image_name $tag=default_tag:
