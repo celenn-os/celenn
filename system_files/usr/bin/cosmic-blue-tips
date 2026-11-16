@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # Print one random cosmic-blue tip, in Markdown, for the terminal welcome
-# banner (uwelcome, see /etc/uwelcome/config.json). Replaces Bluefin's umotd,
+# banner (uwelcome, see /etc/uwelcome/config.toml). Replaces Bluefin's umotd,
 # whose tips are about Bluefin, GNOME and apps cosmic-blue does not ship.
 # English, or French when the messages locale is French.
 set -euo pipefail
