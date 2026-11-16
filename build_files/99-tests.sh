@@ -93,6 +93,12 @@ for combo in '\[Ctrl, Alt\], key: "t"' '\[Super\], key: "e"' \
     grep -q "${combo}" "${SHORTCUTS}/custom"
     if grep -q "${combo}" "${SHORTCUTS}/defaults"; then exit 1; fi
 done
+# Floating top panel (gap from the screen edge, as COSMIC Settings' "Gap"
+# toggle sets it) and a dock with slightly rounded corners
+PANEL=/usr/share/cosmic/com.system76.CosmicPanel.Panel/v1
+grep -qx true "${PANEL}/anchor_gap"
+grep -qx 4 "${PANEL}/margin"
+grep -qx 'Some(8)' /usr/share/cosmic/com.system76.CosmicPanel.Dock/v1/border_radius_override
 # Firefox defaults (policies), linked into the flatpak's systemconfig
 # extension at boot; Bluefin's prefs and copy hook are gone
 FIREFOX_POLICIES=/usr/share/cosmic-blue/firefox/policies/policies.json
