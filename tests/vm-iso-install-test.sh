@@ -3,14 +3,15 @@
 # disk, installs cosmic-blue with the live session's Anaconda installer
 # (automated with a kickstart that keeps the ISO's own installer settings:
 # embedded image, partitioning, post-install scripts), then boots the
-# installed system and checks it the way a person would see it: clean boot,
-# image followed for updates, btrfs layout, keyboard layout and clock format
-# chosen in the installer, user created by the installer able to log in.
+# installed system and checks it the way a person would see it, all with
+# Secure Boot on: clean boot, image followed for updates, btrfs layout,
+# keyboard layout and clock format chosen in the installer, user created by
+# the installer able to log in.
 #
 # Usage: tests/vm-iso-install-test.sh <iso> <image ref> <output dir>
 #   <image ref>: the image installed systems should follow, e.g.
 #   ghcr.io/cosmic-blue-os/cosmic-blue:stable
-# Needs: qemu-system-x86_64, OVMF, xorriso, socat, openssh-client, jq, KVM.
+# Needs: qemu-system-x86_64, OVMF, xorriso, mtools, sfdisk, socat, openssh-client, jq, KVM.
 set -euo pipefail
 trap 'echo "::error::Command failed at line ${LINENO}: ${BASH_COMMAND}"' ERR
 
@@ -31,29 +32,50 @@ error() { echo "::error::$*"; errors=1; }
 ssh-keygen -q -t ed25519 -N '' -f "${WORK}/id_ed25519"
 pubkey="$(cat "${WORK}/id_ed25519.pub")"
 
-# 1. Boot the live ISO. Its kernel and initramfs are started directly, with
-# the ISO's own boot arguments (boot/grub/grub.cfg) plus a serial console and
-# SSH for the test. The SSH key reaches root through a systemd credential
-# (QEMU SMBIOS), the live system has no password to log in with.
-log "Reading the boot files of ${ISO##*/}"
+# 1. Boot the live ISO the way a PC boots it from a USB stick: firmware with
+# Secure Boot on, then the ISO's own signed shim, GRUB and kernel. The test
+# boots a copy of the ISO whose GRUB menu adds a serial console and SSH to the
+# kernel arguments and shortens the menu timeout; the signed files are
+# untouched. GRUB's menu is in the ISO and in its EFI partition (FAT), and
+# both copies are edited. The SSH key reaches root through a systemd
+# credential (QEMU SMBIOS), the live system has no password to log in with.
+log "Preparing a copy of ${ISO##*/} with a serial console and SSH"
 mkdir -p "${WORK}/iso"
-xorriso -osirrox on -indev "${ISO}" \
-    -extract /boot/grub/grub.cfg "${WORK}/iso/grub.cfg" \
-    -extract /boot/vmlinuz "${WORK}/iso/vmlinuz" \
-    -extract /boot/initramfs.img "${WORK}/iso/initramfs.img" 2>/dev/null
-live_args="$(awk '$1 == "linux" { $1 = ""; $2 = ""; print; exit }' "${WORK}/iso/grub.cfg")"
-live_args="$(sed -E 's/(^| )(quiet|rhgb)( |$)/ /g; s/  +/ /g; s/^ //' <<< "${live_args}")"
+xorriso -osirrox on -indev "${ISO}" -extract /boot/grub/grub.cfg "${WORK}/iso/grub.cfg" 2>/dev/null
+live_args="$(awk '$1 == "linux" { $1 = ""; $2 = ""; print; exit }' "${WORK}/iso/grub.cfg" | xargs)"
 [[ "${live_args}" == *root=live:* ]] || fail "No live boot entry in the ISO's grub.cfg"
 echo "Live boot arguments: ${live_args}"
+sed -E -e 's/^set timeout=.*/set timeout=1/' \
+    -e '/^[[:space:]]*linux /{s/ (quiet|rhgb)( |$)/\2/g; s/ (quiet|rhgb)( |$)/\2/g; s/ *$/ console=tty0 console=ttyS0,115200 systemd.wants=sshd.service/}' \
+    "${WORK}/iso/grub.cfg" > "${WORK}/iso/grub-test.cfg"
+grep -q 'systemd.wants=sshd.service' "${WORK}/iso/grub-test.cfg" || fail "Could not edit the ISO's grub.cfg"
+LIVE_ISO="${WORK}/live.iso"
+xorriso -indev "${ISO}" -outdev "${LIVE_ISO}" -boot_image any replay \
+    -map "${WORK}/iso/grub-test.cfg" /boot/grub/grub.cfg \
+    -map "${WORK}/iso/grub-test.cfg" /EFI/BOOT/grub.cfg \
+    -map "${WORK}/iso/grub-test.cfg" /EFI/BOOT/BOOT.conf 2>&1 | grep -vE 'UPDATE :' || true
+# The EFI partition, addressed by its byte offset for mtools
+esp_start="$(sfdisk --json "${LIVE_ISO}" 2>/dev/null | jq -r \
+    '.partitiontable.partitions[] | select(.type == "C12A7328-F81F-11D2-BA4B-00A0C93EC93B") | .start' | head -n 1)"
+[[ -n "${esp_start}" ]] || fail "No EFI partition in ${ISO##*/}"
+esp="${LIVE_ISO}@@$(( esp_start * 512 ))"
+for f in grub.cfg BOOT.conf; do
+    if mdir -i "${esp}" "::/EFI/BOOT/${f}" >/dev/null 2>&1; then
+        mcopy -o -i "${esp}" "${WORK}/iso/grub-test.cfg" "::/EFI/BOOT/${f}"
+    fi
+done
+mcopy -n -i "${esp}" ::/EFI/BOOT/grub.cfg - | grep -q 'systemd.wants=sshd.service' \
+    || fail "Could not edit grub.cfg in the ISO's EFI partition"
 
 truncate -s 64G "${WORK}/disk.raw"
-export VM_CDROM="${ISO}" VM_MEMORY=12288 VM_CPUS=4 VM_SERIAL=serial-live.log
-export VM_KERNEL="${WORK}/iso/vmlinuz" VM_INITRD="${WORK}/iso/initramfs.img"
-export VM_APPEND="${live_args} console=tty0 console=ttyS0,115200 systemd.wants=sshd.service"
+export VM_CDROM="${LIVE_ISO}" VM_MEMORY=12288 VM_CPUS=4 VM_SERIAL=serial-live.log
 VM_EXTRA_ARGS=(-smbios "type=11,value=io.systemd.credential:ssh.authorized_keys.root=${pubkey}")
 vm_start
 vm_wait_ssh no-ssh-live
 vm 'cat /proc/cmdline; findmnt -n -o SOURCE,FSTYPE /run/rootfsbase || true'
+live_sb="$(vm 'mokutil --sb-state' 2>&1 || true)"
+echo "Live session: ${live_sb}"
+grep -q 'SecureBoot enabled' <<< "${live_sb}" || error "The live ISO did not start with Secure Boot on (${live_sb})"
 
 # The live desktop, as it opens for a person trying cosmic-blue
 mkdir -p "${OUT}/${SHOTS}"
@@ -88,8 +110,8 @@ bootloader --append="console=tty0 console=ttyS0,115200"
 xconfig --startxonboot
 poweroff
 
-# NVIDIA image: the virtual machine cannot answer the firmware's prompt to
-# enroll the Secure Boot key (it has no Secure Boot), so withdraw the request.
+# NVIDIA image: the test cannot answer the blue screen that asks to enroll
+# the driver's Secure Boot key at the first boot, so withdraw the request.
 %post --nochroot
 mokutil --revoke-import 2>/dev/null || :
 %end
@@ -160,8 +182,7 @@ done
 log "Install finished in $(( (SECONDS - started) / 60 )) minutes"
 
 # 3. Boot the installed system as the firmware chooses (the boot entry made by
-# the installer), with the ISO still in the drive
-unset VM_KERNEL VM_INITRD VM_APPEND
+# the installer), with Secure Boot still on and the ISO still in the drive
 VM_EXTRA_ARGS=()
 export VM_MEMORY=4096 VM_CPUS=2 VM_SERIAL=serial.log
 vm_start
@@ -193,8 +214,10 @@ if ! vm 'systemctl cat cosmic-blue-root-mount-options.service' >/dev/null 2>&1; 
     echo "::notice::The installed image has no cosmic-blue-root-mount-options.service yet: running the script of this checkout"
     vm 'bash -s' < "$(dirname "$0")/../system_files/usr/libexec/cosmic-blue-root-mount-options" || true
 fi
-vm 'findmnt -n -o OPTIONS /var | grep -q compress=zstd:1' \
-    || error "btrfs compression (compress=zstd:1) is not active"
+if ! vm 'findmnt -n -o OPTIONS /var | grep -q compress=zstd:1'; then
+    error "btrfs compression (compress=zstd:1) is not active"
+    vm 'systemctl status --no-pager cosmic-blue-root-mount-options.service; journalctl -b --no-pager -o short-monotonic | grep -E "root-mount-options|var.mount|Remount|remount" | tail -n 40' || true
+fi
 vm 'findmnt -n -o FSTYPE /var/home | grep -qx btrfs' || error "/var/home is not on btrfs"
 vm 'cat /etc/fstab; findmnt -o TARGET,SOURCE,FSTYPE,OPTIONS -R /sysroot; findmnt /; findmnt /var; findmnt /var/home; lsblk -f' || true
 

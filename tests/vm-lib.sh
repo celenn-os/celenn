@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 # Shared helpers of the virtual machine tests (vm-boot-test.sh,
 # vm-update-test.sh, vm-iso-install-test.sh): install an image to a virtual disk with `bootc install`,
-# boot it in QEMU (UEFI, KVM), run commands over SSH, check the system,
+# boot it in QEMU (UEFI with Secure Boot, KVM), run commands over SSH, check the system,
 # reboot, take screenshots and log in to the desktop.
 #
 # Source it after setting OUT (output directory); it sets WORK (scratch
@@ -49,39 +49,39 @@ vm_install() {
     sudo chown "$(id -u):$(id -g)" "${WORK}/disk.raw"
 }
 
-# Boots the disk (UEFI, like most PCs and GNOME Boxes). The UEFI variables
+# Boots the disk (UEFI, like most PCs and GNOME Boxes), with Secure Boot on
+# and Microsoft's keys enrolled, as PCs come from the shop. The UEFI variables
 # (boot entries) are kept from one start to the next, as on a real PC.
 # Optional settings, as environment variables:
 #   VM_MEMORY (MiB, default 4096), VM_CPUS (default 2)
 #   VM_CDROM: an ISO in the CD drive
-#   VM_KERNEL, VM_INITRD, VM_APPEND: boot this kernel directly
 #   VM_SERIAL: serial log file name in OUT (default serial.log)
 #   VM_EXTRA_ARGS: array of more QEMU arguments
 vm_start() {
     local f ovmf_code="" ovmf_vars=""
-    for f in /usr/share/OVMF/OVMF_CODE_4M.fd /usr/share/OVMF/OVMF_CODE.fd \
-            /usr/share/edk2/ovmf/OVMF_CODE.fd; do
+    # Debian/Ubuntu (CI runners), then Fedora
+    for f in /usr/share/OVMF/OVMF_CODE_4M.secboot.fd /usr/share/edk2/ovmf/OVMF_CODE.secboot.fd; do
         if [[ -f "${f}" ]]; then ovmf_code="${f}"; break; fi
     done
-    for f in /usr/share/OVMF/OVMF_VARS_4M.fd /usr/share/OVMF/OVMF_VARS.fd \
-            /usr/share/edk2/ovmf/OVMF_VARS.fd; do
+    for f in /usr/share/OVMF/OVMF_VARS_4M.ms.fd /usr/share/edk2/ovmf/OVMF_VARS.secboot.fd; do
         if [[ -f "${f}" ]]; then ovmf_vars="${f}"; break; fi
     done
-    [[ -n "${ovmf_code}" && -n "${ovmf_vars}" ]] || fail "OVMF firmware not found"
+    [[ -n "${ovmf_code}" && -n "${ovmf_vars}" ]] || fail "OVMF Secure Boot firmware not found"
     [[ -f "${WORK}/vars.fd" ]] || cp "${ovmf_vars}" "${WORK}/vars.fd"
 
     local extra=()
     if [[ -n "${VM_CDROM:-}" ]]; then
         extra+=(-drive file="${VM_CDROM}",media=cdrom,readonly=on)
     fi
-    if [[ -n "${VM_KERNEL:-}" ]]; then
-        extra+=(-kernel "${VM_KERNEL}" -initrd "${VM_INITRD}" -append "${VM_APPEND:-}")
-    fi
     extra+=(${VM_EXTRA_ARGS[@]+"${VM_EXTRA_ARGS[@]}"})
 
     log "Booting the virtual machine"
+    # smm=on and a secure flash: the firmware keeps the Secure Boot keys
+    # out of reach of the system it starts
     qemu-system-x86_64 \
-        -machine q35,accel=kvm -cpu host -smp "${VM_CPUS:-2}" -m "${VM_MEMORY:-4096}" \
+        -machine q35,smm=on,accel=kvm -cpu host -smp "${VM_CPUS:-2}" -m "${VM_MEMORY:-4096}" \
+        -global driver=cfi.pflash01,property=secure,value=on \
+        -global ICH9-LPC.disable_s3=1 \
         -drive if=pflash,format=raw,readonly=on,file="${ovmf_code}" \
         -drive if=pflash,format=raw,file="${WORK}/vars.fd" \
         -drive file="${WORK}/disk.raw",format=raw,if=virtio \
@@ -93,6 +93,31 @@ vm_start() {
         -monitor unix:"${WORK}/monitor.sock",server,nowait \
         -pidfile "${WORK}/qemu.pid" -daemonize \
         "${extra[@]}"
+}
+
+# Checks that the system started with Secure Boot on, and that no kernel
+# module was refused for its signature. Usage: vm_check_secure_boot <label>
+#   Returns 1 if a check failed. NVIDIA image: its driver is signed with a key
+#   the person enrolls at the first boot, which the virtual machine does not
+#   do, so refused NVIDIA modules are expected there (it has no NVIDIA GPU).
+vm_check_secure_boot() {
+    local label="$1" level="${CHECK_LEVEL:-error}" state rejected
+    state="$(vm 'mokutil --sb-state' 2>&1 || true)"
+    echo "${label}: ${state}"
+    if ! grep -q 'SecureBoot enabled' <<< "${state}"; then
+        echo "::${level}::${label}: Secure Boot is not on (${state})"
+        return 1
+    fi
+    rejected="$(vm 'journalctl -k -b --no-pager -o cat' \
+        | grep -iE 'module verification failed|Key was rejected|unsigned module|Lockdown: .*module' || true)"
+    [[ -z "${rejected}" ]] && return 0
+    echo "${rejected}"
+    if vm 'bootc status --json' | jq -e '.status.booted.image.image.image | test("-nvidia[:@]")' >/dev/null; then
+        echo "::notice::${label}: kernel modules refused with Secure Boot on (expected for the NVIDIA driver until its key is enrolled)"
+        return 0
+    fi
+    echo "::${level}::${label}: kernel modules were refused with Secure Boot on"
+    return 1
 }
 
 # True while the virtual machine is running
@@ -193,6 +218,8 @@ vm_check_system() {
         vm 'grep -q nvidia-drm.modeset=1 /proc/cmdline && grep -q modprobe.blacklist=nouveau /proc/cmdline' \
             || { echo "::${level}::${label}: the NVIDIA kernel arguments are missing"; vm 'cat /proc/cmdline' || true; errors=1; }
     fi
+
+    vm_check_secure_boot "${label}" || errors=1
 
     vm 'systemctl is-active cosmic-greeter.service' \
         || { echo "::${level}::${label}: cosmic-greeter.service is not active"; errors=1; }

@@ -430,6 +430,28 @@ AKMODS_CERT=/etc/pki/akmods/certs/akmods-ublue.der
 test -s "${AKMODS_CERT}"
 grep -q '^enroll-secure-boot-key:' /usr/share/ublue-os/just/default.just
 command -v mokutil
+# (PKCS#7 module signatures name the key by its certificate serial number)
+akmods_key="$(openssl x509 -inform der -in "${AKMODS_CERT}" -noout -serial \
+    | cut -d = -f 2 | tr -d ': \n' | tr 'a-f' 'A-F')"
+
+# Secure Boot works with nothing to do on the standard image: Fedora's signed
+# shim, GRUB and kernel, and every kernel module added to Fedora's (outside
+# kernel/) signed by Fedora's key too. Only the NVIDIA image's driver is
+# signed with the akmods key, enrolled by the person at the first boot.
+fedora_module="$(find "/usr/lib/modules/${KVER}/kernel" -name '*.ko*' -print -quit)"
+fedora_signer="$(modinfo -F signer "${fedora_module}")"
+[[ -n "${fedora_signer}" ]] || { echo "${fedora_module} is not signed"; exit 1; }
+while IFS= read -r -d '' module; do
+    signer="$(modinfo -F signer "${module}")"
+    echo "Added kernel module: ${module#"/usr/lib/modules/${KVER}/"} (signer: ${signer:-none})"
+    [[ "${signer}" == "${fedora_signer}" ]] && continue
+    if [[ "${IMAGE_NAME}" == *-nvidia && "${module##*/}" == nvidia* ]] \
+        && [[ "$(modinfo -F sig_key "${module}" | tr -d ': \n' | tr 'a-f' 'A-F')" == "${akmods_key}" ]]; then
+        continue
+    fi
+    echo "${module} is not signed by Fedora's key: it would not load with Secure Boot on"
+    exit 1
+done < <(find "/usr/lib/modules/${KVER}" -path "/usr/lib/modules/${KVER}/kernel" -prune -o -name '*.ko*' -print0)
 
 if [[ "${IMAGE_NAME}" == *-nvidia ]]; then
     jq -e '."image-flavor" == "nvidia-open"' /usr/share/ublue-os/image-info.json >/dev/null
@@ -440,12 +462,9 @@ if [[ "${IMAGE_NAME}" == *-nvidia ]]; then
     # Open modules, signed with the akmods key: Secure Boot accepts them once
     # that key is enrolled
     modinfo -k "${KVER}" -F license nvidia | grep -q 'Dual MIT/GPL'
-    # (PKCS#7 module signatures name the key by its certificate serial number)
     module_key="$(modinfo -k "${KVER}" -F sig_key nvidia | tr -d ': \n' | tr 'a-f' 'A-F')"
-    cert_key="$(openssl x509 -inform der -in "${AKMODS_CERT}" -noout -serial \
-        | cut -d = -f 2 | tr -d ': \n' | tr 'a-f' 'A-F')"
-    [[ -n "${module_key}" && "${module_key}" == "${cert_key}" ]] \
-        || { echo "nvidia.ko is signed by ${module_key:-nothing}, not the akmods key ${cert_key}"; exit 1; }
+    [[ -n "${module_key}" && "${module_key}" == "${akmods_key}" ]] \
+        || { echo "nvidia.ko is signed by ${module_key:-nothing}, not the akmods key ${akmods_key}"; exit 1; }
     # nvidia modules in the initramfs (black screen on boot otherwise), and
     # nouveau kept away
     grep -q 'nvidia-drm' /tmp/initramfs.txt
