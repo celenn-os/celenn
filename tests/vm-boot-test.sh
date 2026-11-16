@@ -46,23 +46,25 @@ grep -qE '^Image: cosmic-blue(-nvidia)? [0-9]' <<<"${bug_report}" \
 # FlatPark is off by default. `ujust toggle-flatpark` turns it on at the
 # lowest priority with its filter, and off again; the one-time cleanup for
 # systems where older images turned it on removes it when no app uses it.
-flatpark_state() {
-    vm "flatpak remotes --user --columns=name,priority,filter" | awk '$1 == "flatpark" {print $2, $3}'
+flatpark_state() { # --user (the installation COSMIC Store manages) or --system
+    vm "flatpak remotes $1 --columns=name,priority,filter" | awk '$1 == "flatpark" {print $2, $3}'
 }
 flatpark_problem() { echo "::error::FlatPark: $*"; errors=1; }
 vm 'test -e /var/lib/cosmic-blue/flatpark-off-done' \
     || flatpark_problem "cosmic-blue-flatpark-off.service did not run"
-[[ -z "$(flatpark_state)" ]] || flatpark_problem "on by default"
+[[ -z "$(flatpark_state --user)$(flatpark_state --system)" ]] || flatpark_problem "on by default"
 vm 'ujust toggle-flatpark on' || flatpark_problem "ujust toggle-flatpark on failed"
-state="$(flatpark_state || true)"
+state="$(flatpark_state --user || true)"
 echo "FlatPark priority and filter: ${state}"
 [[ "${state}" == "0 /usr/share/flatpak/flatpark.filter" ]] \
     || flatpark_problem "not on at priority 0 with its filter after ujust toggle-flatpark on"
 vm 'ujust toggle-flatpark off' || flatpark_problem "ujust toggle-flatpark off failed"
-[[ -z "$(flatpark_state)" ]] || flatpark_problem "still on after ujust toggle-flatpark off"
-vm 'ujust toggle-flatpark on && rm /var/lib/cosmic-blue/flatpark-off-done && systemctl start cosmic-blue-flatpark-off.service' \
+[[ -z "$(flatpark_state --user)" ]] || flatpark_problem "still on after ujust toggle-flatpark off"
+# As older images left it: system-wide, from remotes.d
+vm 'flatpak remote-add --system flatpark /usr/share/cosmic-blue/flatpak/flatpark.flatpakrepo \
+        && rm /var/lib/cosmic-blue/flatpark-off-done && systemctl start cosmic-blue-flatpark-off.service' \
     || flatpark_problem "cosmic-blue-flatpark-off.service failed"
-[[ -z "$(flatpark_state)" ]] || flatpark_problem "cosmic-blue-flatpark-off.service left it on"
+[[ -z "$(flatpark_state --system)" ]] || flatpark_problem "cosmic-blue-flatpark-off.service left it on"
 
 # Let the login screen draw, then take a picture of it
 sleep 20
