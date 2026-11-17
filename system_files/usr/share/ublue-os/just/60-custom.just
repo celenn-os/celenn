@@ -4,6 +4,9 @@
 # COSMIC reads each setting from ~/.config/cosmic first and falls back to the
 # image defaults in /usr/share/cosmic. Resetting a setting therefore means
 # removing the user's copy, so later image updates of the defaults apply again.
+#
+# The reset recipes ask first; `yes` as their argument skips the question
+# (e.g. `ujust reset-cosmic-theme yes` in a script).
 
 # Switch between the dark and light theme (or force one: dark, light)
 [group('Desktop')]
@@ -41,7 +44,7 @@ toggle-dark-mode mode="toggle":
 
 # Restore the cosmic-blue look: colors, dark mode, icons and wallpaper
 [group('Desktop')]
-reset-cosmic-theme:
+reset-cosmic-theme confirm="ask":
     #!/usr/bin/bash
     set -euo pipefail
     config="${XDG_CONFIG_HOME:-${HOME}/.config}/cosmic"
@@ -58,17 +61,24 @@ reset-cosmic-theme:
     )
     echo "This restores the cosmic-blue colors, dark theme, icons, fonts and wallpaper."
     echo "Other COSMIC settings (panel, dock, keyboard, shortcuts...) are kept."
-    if ! gum confirm "Reset the appearance?"; then
+    if [[ "{{ confirm }}" != yes ]] && ! gum confirm "Reset the appearance?"; then
         exit 0
     fi
+    # Each folder is moved aside before it is removed: the running session
+    # can write a setting into it meanwhile, which makes a plain `rm -rf`
+    # fail with "Directory not empty"
+    trash="$(mktemp -d "${config:?}/.reset-cosmic-theme.XXXXXX")"
     for setting in "${settings[@]}"; do
-        rm -rf "${config:?}/${setting}"
+        if [[ -e "${config}/${setting}" ]]; then
+            mv "${config}/${setting}" "${trash}/"
+        fi
     done
+    rm -rf "${trash}"
     echo "Done. Log out and back in to see every change."
 
 # Reset all COSMIC settings to the cosmic-blue defaults (a backup is kept)
 [group('Desktop')]
-reset-cosmic-config:
+reset-cosmic-config confirm="ask":
     #!/usr/bin/bash
     set -euo pipefail
     config="${XDG_CONFIG_HOME:-${HOME}/.config}/cosmic"
@@ -80,7 +90,7 @@ reset-cosmic-config:
     echo "This resets every COSMIC setting: appearance, panel, dock, shortcuts, applets..."
     echo "Your keyboard layout and clock format are kept."
     echo "Current settings will be moved to ${backup}"
-    if ! gum confirm "Reset all COSMIC settings?"; then
+    if [[ "{{ confirm }}" != yes ]] && ! gum confirm "Reset all COSMIC settings?"; then
         exit 0
     fi
     mv "${config}" "${backup}"
@@ -405,3 +415,17 @@ bug-report mode="open":
     else
         echo "Report the bug later at ${form}"
     fi
+
+# NVIDIA image with Secure Boot: enroll the key that signs the driver (password "cosmicblue" at the next boot)
+[group('System')]
+enroll-secure-boot-key:
+    #!/usr/bin/bash
+    set -euo pipefail
+    # The password is not a secret: the firmware's MOK manager asks for it
+    # once, at the machine itself, to confirm that the key was queued on purpose.
+    password="cosmicblue"
+    key=/etc/pki/akmods/certs/akmods-ublue.der
+    sudo mokutil --timeout -1
+    printf '%s\n%s\n' "${password}" "${password}" | sudo mokutil --import "${key}"
+    echo "At the next reboot, a blue screen (MOK manager, QWERTY keyboard layout) shows up:"
+    echo "choose \"Enroll MOK\", then \"Continue\", and type the password \"${password}\"."

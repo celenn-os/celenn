@@ -103,8 +103,10 @@ vm "grep -qx kept ~${DEMO_USER}/update-test" \
     || { echo "::error::A file in the home folder was lost in the update"; errors=1; }
 sleep 20
 screenshot login-screen-after-update
-# Screenshots of the updated system, for the user from the old image
-desktop_tour || true
+# Screenshots of the updated system, for the user from the old image, who
+# must still get a session that does not crash
+desktop_tour || { echo "::error::The test user could not log in after the update"; errors=1; }
+vm_check_crashes after-update || errors=1
 demo_journal after-update
 
 # 5. Rollback to the old image
