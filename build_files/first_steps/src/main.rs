@@ -91,6 +91,10 @@ const FRENCH: &[(&str, &str)] = &[
         "Outils de développement : Docker, VS Code, Podman Desktop…",
     ),
     (
+        "Command line tools: bat, eza, ripgrep, zoxide…",
+        "Outils en ligne de commande : bat, eza, ripgrep, zoxide…",
+    ),
+    (
         "Switch between the dark and light themes",
         "Passer du thème sombre au thème clair",
     ),
@@ -331,6 +335,10 @@ fn pages(mode: Mode) -> Vec<Page> {
                         (
                             "ujust devmode",
                             "Developer tools: Docker, VS Code, Podman Desktop…",
+                        ),
+                        (
+                            "ujust install-cli-tools",
+                            "Command line tools: bat, eza, ripgrep, zoxide…",
                         ),
                         (
                             "ujust toggle-dark-mode",

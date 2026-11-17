@@ -229,6 +229,63 @@ install-microsoft-fonts action="install":
     echo "Installed $(find "${dest}" -name '*.ttf' | wc -l) font files in ${dest}."
     echo "Restart open apps to see them. Remove them with: ujust install-microsoft-fonts remove"
 
+# Install handy command line tools with Homebrew (bat, eza, fd, ripgrep, zoxide...)
+[group('Apps')]
+install-cli-tools action="install":
+    #!/usr/bin/bash
+    set -euo pipefail
+    # The same tools as Bluefin's `ujust bluefin-cli` (its cli.Brewfile), plus
+    # its shell shortcuts ("bling"), added to the shell's startup file between
+    # the same markers so either command can turn them off again.
+    brewfile=/usr/share/ublue-os/homebrew/cli.Brewfile
+    bling_dir=/usr/share/ublue-os/bling
+    case "$(basename "${SHELL}")" in
+        fish) script=bling.fish; rc="${XDG_CONFIG_HOME:-${HOME}/.config}/fish/config.fish" ;;
+        zsh) script=bling.sh; rc="${ZDOTDIR:-${HOME}}/.zshrc" ;;
+        *) script=bling.sh; rc="${HOME}/.bashrc" ;;
+    esac
+    bling_on() { [[ -f "${rc}" ]] && grep -q "source ${bling_dir}/${script}" "${rc}"; }
+    case "{{ action }}" in
+        install)
+            echo "This installs these command line tools for your account with Homebrew:"
+            brew bundle list --file="${brewfile}" --formula | sed 's|.*/||' | paste -sd ' ' | fold -s -w 76 | sed 's/^/  /'
+            echo
+            brew bundle --file="${brewfile}"
+            if ! bling_on; then
+                echo
+                echo "Shortcuts: ls lists files with eza, cat shows files with bat,"
+                echo "z <folder> jumps to a folder you often visit (zoxide)."
+                if gum confirm "Turn on these shortcuts in your terminal?"; then
+                    mkdir -p "$(dirname "${rc}")"
+                    {
+                        echo "### ${script} source start"
+                        echo "test -f ${bling_dir}/${script} && source ${bling_dir}/${script}"
+                        echo "### ${script} source end"
+                    } >>"${rc}"
+                fi
+            fi
+            echo "Done. Open a new terminal to use them."
+            echo "Remove them with: ujust install-cli-tools remove"
+            ;;
+        remove)
+            if bling_on; then
+                sed -i "/### ${script} source start/,/### ${script} source end/d" "${rc}"
+                echo "Shortcuts turned off."
+            fi
+            # A tool another Homebrew package depends on is kept
+            for formula in $(brew bundle list --file="${brewfile}" --formula); do
+                if brew list --formula "${formula##*/}" >/dev/null 2>&1; then
+                    brew uninstall --formula "${formula##*/}" || true
+                fi
+            done
+            echo "Done. Open a new terminal."
+            ;;
+        *)
+            echo "Usage: ujust install-cli-tools [install|remove]" >&2
+            exit 1
+            ;;
+    esac
+
 # Turn the FlatPark app source on or off (off by default; or force one: on, off, status)
 [group('Apps')]
 toggle-flatpark mode="toggle":
