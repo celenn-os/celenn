@@ -71,8 +71,8 @@ ujust toggle-updates enable    # les réactiver plus tard</code></pre>
       <h3>Revenir plus loin en arrière</h3>
       <p>Chaque construction a sa propre version, comme <code>44.20261110</code>&nbsp;: <code>sudo bootc status</code> affiche la vôtre, et la <a href="https://github.com/cosmic-blue-os/cosmic-blue/releases">page des versions</a> liste celles de chaque semaine. Vous pouvez en installer une, puis revenir aux mises à jour normales plus tard. Sur l'image NVIDIA, écrivez <code>cosmic-blue-nvidia</code> au lieu de <code>cosmic-blue</code>.</p>
       <div class="code">
-        <pre><code>sudo bootc switch ghcr.io/cosmic-blue-os/cosmic-blue:44.20261110   # rester sur cette version
-sudo bootc switch ghcr.io/cosmic-blue-os/cosmic-blue:stable        # revenir aux mises à jour hebdomadaires</code></pre>
+        <pre><code>sudo bootc switch --enforce-container-sigpolicy ghcr.io/cosmic-blue-os/cosmic-blue:44.20261110   # rester sur cette version
+sudo bootc switch --enforce-container-sigpolicy ghcr.io/cosmic-blue-os/cosmic-blue:stable        # revenir aux mises à jour hebdomadaires</code></pre>
         <button type="button" class="copy" data-copy>Copier</button>
       </div>
     </section>
@@ -140,7 +140,7 @@ ujust toggle-updates</code></pre>
       </div>
       <p>Vous avez installé l'image standard sur un ordinateur avec une carte NVIDIA&nbsp;? Passez à l'image NVIDIA&nbsp;:</p>
       <div class="code">
-        <pre><code>sudo bootc switch ghcr.io/cosmic-blue-os/cosmic-blue-nvidia:stable</code></pre>
+        <pre><code>sudo bootc switch --enforce-container-sigpolicy ghcr.io/cosmic-blue-os/cosmic-blue-nvidia:stable</code></pre>
         <button type="button" class="copy" data-copy>Copier</button>
       </div>
     </section>

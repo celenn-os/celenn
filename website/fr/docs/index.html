@@ -35,6 +35,8 @@
         <a href="#ujust">Commandes ujust</a>
         <a href="#look">Apparence</a>
         <a href="#terminal">Terminal</a>
+        <a href="#data">Vos données</a>
+        <a href="#privacy">Vie privée</a>
         <a href="#verify">Vérifier les téléchargements</a>
         <a href="#help">Obtenir de l'aide</a>
         <a href="troubleshooting/">Dépannage</a>
@@ -132,6 +134,39 @@ distrobox enter arch</code></pre>
         <pre><code>uwelcome toggle</code></pre>
         <button type="button" class="copy" data-copy>Copier</button>
       </div>
+    </section>
+
+    <section id="data" class="block">
+      <h2>Vos données</h2>
+      <p>Les mises à jour ne remplacent que le système&nbsp;: votre dossier personnel, vos applications et leurs réglages sont conservés, ainsi que vos modifications de <code>/etc</code>.</p>
+      <h3>Chiffrement du disque</h3>
+      <p>Le chiffrement se choisit dans l'installateur&nbsp;: dans <em>Destination de l'installation</em>, cochez <em>Chiffrer mes données</em> et choisissez une phrase de passe. Faites-le sur un portable, qui peut être perdu ou volé. Il ne peut pas être activé plus tard sans réinstaller. Une fois installé, la puce TPM2 peut déverrouiller le disque au démarrage à la place de la phrase de passe&nbsp;:</p>
+      <div class="code">
+        <pre><code>ujust toggle-tpm2</code></pre>
+        <button type="button" class="copy" data-copy>Copier</button>
+      </div>
+      <h3>Sauvegardes</h3>
+      <p>L'application <strong>Sauvegardes</strong> (Déjà Dup) est installée&nbsp;: elle enregistre votre dossier personnel sur un disque externe, un partage réseau ou un stockage en ligne, chiffré si vous le souhaitez, et restaure un fichier ou tout le dossier. En ligne de commande, <code>restic</code>, <code>borg</code> et <code>rclone</code> sont aussi installés.</p>
+      <h3>Venir d'un autre système</h3>
+      <p>Sauvegardez d'abord vos fichiers (Sauvegardes, ou une copie sur un disque externe), installez cosmic-blue, puis recopiez-les dans votre dossier personnel. Réinstallez vos applications depuis COSMIC Store&nbsp;; les applications Flatpak gardent leurs données dans <code>~/.var/app</code>, que vous pouvez recopier depuis un autre système qui utilisait les mêmes Flatpaks.</p>
+    </section>
+
+    <section id="privacy" class="block">
+      <h2>Vie privée</h2>
+      <p>cosmic-blue ne collecte rien sur vous. Ce que le système contacte de lui-même&nbsp;:</p>
+      <ul>
+        <li>Les mises à jour, une fois par jour&nbsp;: les images cosmic-blue sur GitHub, Flathub et le dépôt d'applications COSMIC, et Homebrew si vous l'utilisez (avec les statistiques d'utilisation de Homebrew désactivées).</li>
+        <li>Le comptage anonyme hebdomadaire de Fedora (<code>rpm-ostree-countme</code>)&nbsp;: une requête par semaine aux serveurs de Fedora, avec la version de Fedora et l'âge approximatif du système mais sans identifiant, pour que Fedora sache combien de systèmes l'utilisent.</li>
+        <li>Firefox&nbsp;: télémétrie, études et contenus sponsorisés sont désactivés.</li>
+        <li>Tailscale est installé, pour <code>sudo tailscale up</code>&nbsp;: son service tourne mais ne rejoint aucun réseau tant que vous ne vous êtes pas connecté.</li>
+      </ul>
+      <p>Pour arrêter le comptage de Fedora, ou le service Tailscale si vous ne l'utilisez pas&nbsp;:</p>
+      <div class="code">
+        <pre><code>sudo systemctl mask --now rpm-ostree-countme.timer
+sudo systemctl disable --now tailscaled.service</code></pre>
+        <button type="button" class="copy" data-copy>Copier</button>
+      </div>
+      <p>Le pare-feu (firewalld) est actif&nbsp;; l'application <strong>Pare-feu</strong> change ses réglages. <strong>Flatseal</strong> montre et change ce à quoi chaque application Flatpak a accès (fichiers, périphériques, réseau).</p>
     </section>
 
     <section id="verify" class="block">

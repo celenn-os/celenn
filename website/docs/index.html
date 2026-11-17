@@ -35,6 +35,8 @@
         <a href="#ujust">ujust commands</a>
         <a href="#look">The look</a>
         <a href="#terminal">Terminal</a>
+        <a href="#data">Your data</a>
+        <a href="#privacy">Privacy</a>
         <a href="#verify">Checking the downloads</a>
         <a href="#help">Getting help</a>
         <a href="troubleshooting/">Troubleshooting</a>
@@ -132,6 +134,39 @@ distrobox enter arch</code></pre>
         <pre><code>uwelcome toggle</code></pre>
         <button type="button" class="copy" data-copy>Copy</button>
       </div>
+    </section>
+
+    <section id="data" class="block">
+      <h2>Your data</h2>
+      <p>Updates replace the system only: your home folder, your apps and their settings are kept, and so are your changes to <code>/etc</code>.</p>
+      <h3>Disk encryption</h3>
+      <p>Encryption is chosen in the installer: under <em>Installation Destination</em>, tick <em>Encrypt my data</em> and pick a passphrase. Do it on a laptop, which can be lost or stolen. It cannot be turned on later without reinstalling. Once installed, the TPM2 chip can unlock the disk at startup instead of the passphrase:</p>
+      <div class="code">
+        <pre><code>ujust toggle-tpm2</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+      <h3>Backups</h3>
+      <p>The <strong>Backups</strong> app (Déjà Dup) is installed: it saves your home folder to an external drive, a network share or a cloud storage, encrypted if you want, and restores single files or everything. For the terminal, <code>restic</code>, <code>borg</code> and <code>rclone</code> are installed too.</p>
+      <h3>Coming from another system</h3>
+      <p>Back up your files first (Backups, or a copy to an external drive), install cosmic-blue, then copy them back into your home folder. Install your apps again from COSMIC Store; Flatpak apps keep their data in <code>~/.var/app</code>, which you can copy over from another system that used the same Flatpaks.</p>
+    </section>
+
+    <section id="privacy" class="block">
+      <h2>Privacy</h2>
+      <p>cosmic-blue collects nothing about you. What the system contacts on its own:</p>
+      <ul>
+        <li>Updates, once a day: the cosmic-blue images on GitHub, Flathub and the COSMIC app repository, and Homebrew if you use it (with Homebrew's usage statistics turned off).</li>
+        <li>Fedora's anonymous weekly count (<code>rpm-ostree-countme</code>): one request a week to Fedora's servers, with the Fedora release and a rough age of the system but no identifier, so that Fedora knows how many systems use it.</li>
+        <li>Firefox: telemetry, studies and sponsored content are off.</li>
+        <li>Tailscale is installed, for <code>sudo tailscale up</code>: its service runs but does not join any network until you sign in.</li>
+      </ul>
+      <p>To stop the Fedora count, or the Tailscale service if you do not use it:</p>
+      <div class="code">
+        <pre><code>sudo systemctl mask --now rpm-ostree-countme.timer
+sudo systemctl disable --now tailscaled.service</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+      <p>The firewall (firewalld) is on; the <strong>Firewall</strong> app changes its settings. <strong>Flatseal</strong> shows and changes what each Flatpak app may access (files, devices, network).</p>
     </section>
 
     <section id="verify" class="block">
