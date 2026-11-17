@@ -1,7 +1,5 @@
 <p align="center"><img src="branding/logo/cosmic-blue-logo-horizontal-dark.svg#gh-dark-mode-only" alt="cosmic-blue" width="420"><img src="branding/logo/cosmic-blue-logo-horizontal-light.svg#gh-light-mode-only" alt="cosmic-blue" width="420"></p>
 
-# cosmic-blue
-
 cosmic-blue is an independent Fedora Atomic image with the
 [COSMIC](https://system76.com/cosmic) desktop. It is built on the
 [Universal Blue](https://universal-blue.org/) base images and inspired by
