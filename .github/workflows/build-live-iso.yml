@@ -203,6 +203,9 @@ jobs:
     permissions:
       contents: read
       issues: write  # R2 size alerts
+    # The signing key and the R2 keys live in the "release" environment,
+    # which only the main branch may use (see build.yml)
+    environment: ${{ (github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)) && 'release' || '' }}
     strategy:
       fail-fast: false
       matrix:
