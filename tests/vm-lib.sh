@@ -71,6 +71,7 @@ vm_start() {
 
     local extra=()
     if [[ -n "${VM_CDROM:-}" ]]; then
+        # shellcheck disable=SC2054 # QEMU options are comma-separated
         extra+=(-drive file="${VM_CDROM}",media=cdrom,readonly=on)
     fi
     extra+=(${VM_EXTRA_ARGS[@]+"${VM_EXTRA_ARGS[@]}"})
@@ -271,8 +272,10 @@ vm_check_tuning() {
 }
 
 # Desktop screenshots, to check the look without a PC: logs a test user in
-# through the login screen, then opens a few views and apps. Problems here are
-# warnings, not failures: they don't keep a working image from shipping.
+# through the login screen, then opens a few views and apps. Only a login that
+# does not give a COSMIC session is a failure (desktop_tour returns 1); a
+# missing screenshot or app is a warning: it doesn't keep a working image from
+# shipping.
 # Files are numbered in the order they are taken (tests/screenshot-sheet.py).
 DEMO_USER=demo
 DEMO_PASSWORD=cosmicblue  # letters only: typed as US QWERTY key codes below
@@ -309,18 +312,31 @@ demo_user() {
 }
 
 # Logs the test user in with the keyboard, as a person would, and sets
-# DEMO_ENV to the environment of its session.
+# DEMO_ENV to the environment of its session. The password is typed a second
+# time if the first try gives no session (a key lost by the virtual keyboard
+# is not a broken image).
 # Usage: demo_login <name of the screenshot taken if it fails>
 demo_login() {
     mkdir -p "${OUT}/${SHOTS}"
-    type_text "${DEMO_PASSWORD}"
-    monitor "sendkey ret"
-    if ! wait_for 120 "pgrep -u ${DEMO_USER} -x cosmic-panel"; then
-        screenshot "${SHOTS}/$1"
-        warn "the test user did not get a COSMIC session"
-        vm 'journalctl -b -u cosmic-greeter.service --no-pager -n 60' || true
-        return 1
-    fi
+    local try
+    for try in 1 2; do
+        if (( try == 2 )); then
+            screenshot "${SHOTS}/$1"
+            warn "no COSMIC session after the first try, typing the password again"
+            monitor "sendkey ctrl-a"
+            monitor "sendkey backspace"
+            sleep 1
+        fi
+        type_text "${DEMO_PASSWORD}"
+        monitor "sendkey ret"
+        wait_for 120 "pgrep -u ${DEMO_USER} -x cosmic-panel" && break
+        if (( try == 2 )); then
+            screenshot "${SHOTS}/$1"
+            warn "the test user did not get a COSMIC session"
+            vm 'journalctl -b -u cosmic-greeter.service --no-pager -n 60' || true
+            return 1
+        fi
+    done
     local uid run_dir wayland
     uid="$(vm "id -u ${DEMO_USER}")"
     run_dir="/run/user/${uid}"
@@ -382,9 +398,36 @@ desktop_tour() {
     terminal_shot
 
     # Lock screen
-    vm 'loginctl lock-sessions' || { warn "could not lock the session"; return 1; }
-    sleep 8
-    screenshot "${SHOTS}/08-lock-screen"
+    if vm 'loginctl lock-sessions'; then
+        sleep 8
+        screenshot "${SHOTS}/08-lock-screen"
+    else
+        warn "could not lock the session"
+    fi
+}
+
+# Usage: vm_check_crashes <label>
+#   Programs that crashed since the system started (systemd-coredump). A crash
+#   of a COSMIC or cosmic-blue program is an error (returns 1), any other one
+#   a warning. Run after desktop_tour, which starts the session and some apps.
+vm_check_crashes() {
+    local label="$1" errors=0 crashes line name
+    # One "Process <pid> (<name>) of user <uid> dumped core." line per crash,
+    # followed by its stack trace
+    crashes="$(vm 'journalctl -b --no-pager -o cat MESSAGE_ID=fc2e22bc6ee647b6b90729ab34a250b1' || true)"
+    while IFS= read -r line; do
+        [[ "${line}" =~ ^Process\ [0-9]+\ \((.*)\)\ of\ user ]] || continue
+        name="${BASH_REMATCH[1]}"
+        # (names are cut to 15 characters: cosmic-blue-tou)
+        if [[ "${name}" == cosmic* ]]; then
+            echo "::error::${label}: ${name} crashed (${line})"
+            errors=1
+        else
+            echo "::warning::${label}: ${name} crashed (${line})"
+        fi
+    done <<< "${crashes}"
+    [[ -z "${crashes}" ]] || printf '%s\n' "${crashes}" > "${OUT}/crashes-${label}.log"
+    return "${errors}"
 }
 
 # cosmic-blue's first steps tour, which opens once the first-run assistant is
