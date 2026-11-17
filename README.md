@@ -57,9 +57,10 @@ sudo bootc switch ghcr.io/cosmic-blue-os/cosmic-blue-nvidia:stable
 sudo systemctl reboot
 ```
 
-With Secure Boot on, a blue screen (MOK manager) shows up on the first reboot:
-choose *Enroll MOK*, then *Continue*, and type the password `universalblue`
-(QWERTY keyboard layout).
+Secure Boot: the standard image works with it as is (Fedora's signed kernel).
+Only the NVIDIA image needs its driver's key enrolled once: on the first reboot,
+a blue screen (MOK manager) shows up; choose *Enroll MOK*, then *Continue*, and
+type the password `cosmicblue` (QWERTY keyboard layout).
 
 ## Updates and rollback
 
