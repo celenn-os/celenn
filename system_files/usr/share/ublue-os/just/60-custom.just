@@ -4,9 +4,6 @@
 # COSMIC reads each setting from ~/.config/cosmic first and falls back to the
 # image defaults in /usr/share/cosmic. Resetting a setting therefore means
 # removing the user's copy, so later image updates of the defaults apply again.
-#
-# The reset recipes ask first; `yes` as their argument skips the question
-# (e.g. `ujust reset-cosmic-theme yes` in a script).
 
 # Switch between the dark and light theme (or force one: dark, light)
 [group('Desktop')]
@@ -44,7 +41,7 @@ toggle-dark-mode mode="toggle":
 
 # Restore the cosmic-blue look: colors, dark mode, icons and wallpaper
 [group('Desktop')]
-reset-cosmic-theme confirm="ask":
+reset-cosmic-theme:
     #!/usr/bin/bash
     set -euo pipefail
     config="${XDG_CONFIG_HOME:-${HOME}/.config}/cosmic"
@@ -61,7 +58,7 @@ reset-cosmic-theme confirm="ask":
     )
     echo "This restores the cosmic-blue colors, dark theme, icons, fonts and wallpaper."
     echo "Other COSMIC settings (panel, dock, keyboard, shortcuts...) are kept."
-    if [[ "{{ confirm }}" != yes ]] && ! gum confirm "Reset the appearance?"; then
+    if ! gum confirm "Reset the appearance?"; then
         exit 0
     fi
     for setting in "${settings[@]}"; do
@@ -71,7 +68,7 @@ reset-cosmic-theme confirm="ask":
 
 # Reset all COSMIC settings to the cosmic-blue defaults (a backup is kept)
 [group('Desktop')]
-reset-cosmic-config confirm="ask":
+reset-cosmic-config:
     #!/usr/bin/bash
     set -euo pipefail
     config="${XDG_CONFIG_HOME:-${HOME}/.config}/cosmic"
@@ -83,7 +80,7 @@ reset-cosmic-config confirm="ask":
     echo "This resets every COSMIC setting: appearance, panel, dock, shortcuts, applets..."
     echo "Your keyboard layout and clock format are kept."
     echo "Current settings will be moved to ${backup}"
-    if [[ "{{ confirm }}" != yes ]] && ! gum confirm "Reset all COSMIC settings?"; then
+    if ! gum confirm "Reset all COSMIC settings?"; then
         exit 0
     fi
     mv "${config}" "${backup}"
