@@ -13,8 +13,8 @@
 
   "packageRules": [
     {
-      // Container images are followed by tag, not pinned by digest: base
-      // images are rebuilt every day, and a digest pin would mean one more
+      // Container images are followed by tag, not pinned by digest (except
+      // common and brew, below): base images are rebuilt every day, and a digest pin would mean one more
       // pull request and one more image build each day for the same result
       // as the daily build. Tag updates (rare: Fedora moves are turned off
       // below) come as one grouped pull request.
@@ -23,6 +23,16 @@
       "pinDigests": false,
       "groupName": "base images",
       "schedule": ["* 4 * * *"]
+    },
+    {
+      // Pinned by digest in the Containerfile: upstream changes to these
+      // (scripts, services, ujust recipes) reach the image only through this
+      // weekly pull request, merged once its build and boot test pass.
+      "description": "Bluefin common and Homebrew images, by digest, once a week",
+      "matchManagers": ["dockerfile"],
+      "matchPackageNames": ["ghcr.io/projectbluefin/common", "ghcr.io/ublue-os/brew"],
+      "groupName": "Bluefin common and brew",
+      "schedule": ["* 0-7 * * 1"]
     },
     {
       "description": "GitHub Actions, once a week",
