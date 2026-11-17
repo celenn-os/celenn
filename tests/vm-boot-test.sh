@@ -75,7 +75,9 @@ if (( errors == 0 )); then
     desktop_tour || { echo "::error::The test user could not log in to a COSMIC session"; errors=1; }
     vm_check_crashes boot || errors=1
     if vm "id ${DEMO_USER}" >/dev/null 2>&1; then
-        ujust_checks="$(vm "runuser -u ${DEMO_USER} -- bash -s" < "${TESTS_DIR}/vm-ujust-checks.sh" 2>&1)" \
+        # The user's own runtime folder (just writes there), not root's from SSH
+        ujust_checks="$(vm "runuser -u ${DEMO_USER} -- env -u XDG_RUNTIME_DIR ${DEMO_ENV:-} bash -s" \
+            < "${TESTS_DIR}/vm-ujust-checks.sh" 2>&1)" \
             || ujust_checks="FAIL could not run the checks as ${DEMO_USER}: ${ujust_checks}"
         echo "${ujust_checks}"
         while IFS= read -r line; do
