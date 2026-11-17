@@ -432,7 +432,7 @@ terminal_shot() {
     terminal_checks || true
     # TEMPORARY (PR #117 review, remove before merging): the terminal as it
     # opened before fastfetch was added, for a before/after comparison
-    vm "cp /etc/profile.d/uwelcome.sh /root/uwelcome.sh.orig && sed -i '/^[[:space:]]*ublue-fastfetch\$/d' /etc/profile.d/uwelcome.sh" || true
+    vm "cp /etc/profile.d/uwelcome.sh /root/uwelcome.sh.orig && sed -i 's/^\([[:space:]]*\)ublue-fastfetch\$/\1:/' /etc/profile.d/uwelcome.sh" || true
     vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
             sh -c 'cd ~${DEMO_USER}/${TERMINAL_PROJECT} || cd; exec setsid -f cosmic-term' \
             >/dev/null 2>&1 </dev/null" || true
