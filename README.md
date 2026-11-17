@@ -20,6 +20,7 @@ In the current `stable` image (cosmic-blue 44.20261115.11):
 ![Kernel 7.3.3](https://img.shields.io/badge/Kernel-7.3.3-4f8dff)
 ![COSMIC 1.11.0](https://img.shields.io/badge/COSMIC-1.11.0-4f8dff)
 ![Mesa 26.2.6](https://img.shields.io/badge/Mesa-26.2.6-4f8dff)
+![NVIDIA 620.70.06](https://img.shields.io/badge/NVIDIA-620.70.06-4f8dff)
 <!-- versions:end -->
 
 What changed in each `stable` version (packages, COSMIC, cosmic-blue):
