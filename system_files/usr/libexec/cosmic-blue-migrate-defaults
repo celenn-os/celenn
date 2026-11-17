@@ -99,7 +99,7 @@ migrate_user() {
     manifest_hash="$(sha256sum <"${MANIFEST}" | cut -d' ' -f1)"
 
     local -A current=() seen=() known=() changed_groups=() members=()
-    local hash rel
+    local hash rel line
     if [[ -f "${state}" ]]; then
         # Nothing changed in the image defaults since the last run
         [[ "$(head -n 1 "${state}")" == "manifest ${manifest_hash}" ]] && return 0

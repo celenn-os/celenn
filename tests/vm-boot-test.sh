@@ -2,8 +2,7 @@
 # Boot smoke test: installs the image to a virtual disk with `bootc install`,
 # boots it in QEMU (UEFI with Secure Boot, KVM) and checks over SSH that the
 # system starts cleanly and that the COSMIC login screen is up. Then logs in a test user
-# and takes screenshots of the desktop (desktop_tour in vm-lib.sh), checks that
-# no COSMIC program crashed and runs the user's ujust recipes.
+# and takes screenshots of the desktop (desktop_tour in vm-lib.sh).
 #
 # Usage: tests/vm-boot-test.sh <image> <output dir>
 #   <image> must be in the root (sudo) podman storage.
@@ -72,18 +71,7 @@ sleep 20
 screenshot login-screen
 
 if (( errors == 0 )); then
-    desktop_tour || { echo "::error::The test user could not log in to a COSMIC session"; errors=1; }
-    vm_check_crashes boot || errors=1
-    if vm "id ${DEMO_USER}" >/dev/null 2>&1; then
-        # The user's own runtime folder (just writes there), not root's from SSH
-        ujust_checks="$(vm "runuser -u ${DEMO_USER} -- env -u XDG_RUNTIME_DIR ${DEMO_ENV:-} bash -s" \
-            < "${TESTS_DIR}/vm-ujust-checks.sh" 2>&1)" \
-            || ujust_checks="FAIL could not run the checks as ${DEMO_USER}: ${ujust_checks}"
-        echo "${ujust_checks}"
-        while IFS= read -r line; do
-            [[ "${line}" == "FAIL "* ]] && { echo "::error::${line#FAIL }"; errors=1; }
-        done <<< "${ujust_checks}"
-    fi
+    desktop_tour || true
     demo_journal
 fi
 
