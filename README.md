@@ -56,11 +56,12 @@ sudo bootc rollback   # go back to the previous version on next boot
 ## Versions
 
 <!-- versions:start (written by release-notes.yml on each stable release) -->
-In the current `stable` image (cosmic-blue 44.20261115.11, 2026-11-15):
+In the current `stable` image (cosmic-blue 44.20261115.11):
 
-| Fedora | Kernel | COSMIC | Mesa | NVIDIA driver |
-| :-: | :-: | :-: | :-: | :-: |
-| 44 | 7.3.3 | 1.11.0 | 26.2.6 | - |
+![Fedora 44](https://img.shields.io/badge/Fedora-44-4f8dff)
+![Kernel 7.3.3](https://img.shields.io/badge/Kernel-7.3.3-4f8dff)
+![COSMIC 1.11.0](https://img.shields.io/badge/COSMIC-1.11.0-4f8dff)
+![Mesa 26.2.6](https://img.shields.io/badge/Mesa-26.2.6-4f8dff)
 <!-- versions:end -->
 
 What changed in each `stable` version (packages, COSMIC, cosmic-blue):

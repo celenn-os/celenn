@@ -10,11 +10,12 @@ new image) to the file given with --versions-block.
 
 Usage: release-notes.py --new new.tsv [--old old.tsv] --title TITLE
        [--image REF] [--commits commits.tsv] [--compare-url URL]
-       [--nvidia EVR] [--versions-block FILE --version VERSION --date DATE]
+       [--nvidia EVR] [--versions-block FILE --version VERSION]
 """
 import argparse
 import re
 import sys
+from urllib.parse import quote
 from collections import defaultdict
 
 # Packages that make up the COSMIC desktop (shown first)
@@ -30,6 +31,7 @@ VERSIONS = [
     ("Fedora", "fedora-release-common"), ("Kernel", "kernel"),
     ("COSMIC", "cosmic-settings"), ("Mesa", "mesa-dri-drivers"),
 ]
+BADGE_COLOR = "4f8dff"
 # Not packages: imported signing keys
 IGNORED = {"gpg-pubkey", "gpg-pubkey-release"}
 # GitHub release bodies are limited to 125000 characters
@@ -77,10 +79,21 @@ def version(packages, name):
     return upstream(packages.get(name))
 
 
-def versions_table(new, nvidia_evr):
-    """One-row Markdown table of the main components."""
+def main_versions(new, nvidia_evr):
     rows = [(label, version(new, name)) for label, name in VERSIONS]
-    rows.append(("NVIDIA driver", upstream(nvidia_evr)))
+    return rows + [("NVIDIA", upstream(nvidia_evr))]
+
+
+def badge(label, value):
+    """shields.io badge in the cosmic-blue accent color."""
+    def escape(text):
+        return quote(text.replace("-", "--").replace("_", "__"), safe="")
+    return (f"![{label} {value}](https://img.shields.io/badge/"
+            f"{escape(label)}-{escape(value)}-{BADGE_COLOR})")
+
+
+def versions_table(rows):
+    """One-row Markdown table of the main components."""
     return ["| " + " | ".join(label for label, _ in rows) + " |",
             "| " + " | ".join(":-:" for _ in rows) + " |",
             "| " + " | ".join(value or "-" for _, value in rows) + " |"]
@@ -97,7 +110,6 @@ def main():
     parser.add_argument("--nvidia", help="EVR of the NVIDIA driver in the NVIDIA image")
     parser.add_argument("--versions-block", help="Write the README versions block here")
     parser.add_argument("--version", help="cosmic-blue version, for the versions block")
-    parser.add_argument("--date", help="Release date, for the versions block")
     args = parser.parse_args()
 
     new = read_packages(args.new)
@@ -112,14 +124,14 @@ def main():
         out += [f"Image: `{args.image}`", ""]
     out += ["Installed systems get this version with the next automatic update "
             "(or `ujust update`), then a reboot.", ""]
-    table_lines = versions_table(new, args.nvidia)
-    out += table_lines + [""]
+    rows = main_versions(new, args.nvidia)
+    out += versions_table(rows) + [""]
 
     if args.versions_block:
-        about = "cosmic-blue" + (f" {args.version}" if args.version else "")
-        if args.date:
-            about += f", {args.date}"
-        block = [f"In the current `stable` image ({about}):", ""] + table_lines
+        about = f" (cosmic-blue {args.version})" if args.version else ""
+        block = [f"In the current `stable` image{about}:", "",
+                 # No badge for a version not found (e.g. no NVIDIA image)
+                 "\n".join(badge(label, value) for label, value in rows if value)]
         with open(args.versions_block, "w", encoding="utf-8") as f:
             f.write("\n".join(block) + "\n")
 

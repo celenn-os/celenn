@@ -178,7 +178,6 @@ jobs:
           if [[ "${GITHUB_EVENT_NAME}" == pull_request ]]; then
             title="Preview: latest${VERSION:+ (${VERSION})} compared with stable"
             ref="${image}:latest"
-            date="preview"
           else
             # stable-20261117 -> cosmic-blue 44.20261110 (stable 2026-11-17)
             date="${RELEASE_TAG#stable-}"
@@ -193,7 +192,7 @@ jobs:
           eval "args=($(< "${out}/args"))"
           python3 -I .github/scripts/release-notes.py "${args[@]}" \
             --title "${title}" --image "${ref}" \
-            --versions-block "${out}/versions.md" --version "${VERSION}" --date "${date}" \
+            --versions-block "${out}/versions.md" --version "${VERSION}" \
             > "${out}/notes.md"
           cat "${out}/notes.md" >> "${GITHUB_STEP_SUMMARY}"
           # Check the README block can be replaced, and preview it
