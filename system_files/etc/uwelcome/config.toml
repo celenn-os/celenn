@@ -20,6 +20,10 @@ cmd = "uwelcome toggle"
 desc = "banner_toggle"
 
 [[commands]]
+cmd = "fastfetch"
+desc = "sys_info"
+
+[[commands]]
 cmd = "brew help"
 desc = "cli_pkg"
 

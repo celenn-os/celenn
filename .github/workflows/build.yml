@@ -417,15 +417,6 @@ jobs:
           echo "TERMINAL-JPEG-BEGIN"
           base64 -w 200 "${RUNNER_TEMP}/terminal.jpg"
           echo "TERMINAL-JPEG-END"
-          # TEMPORARY (PR #117 review, remove before merging)
-          before="$(compgen -G "${dir}/06-terminal-before.*" | head -n 1 || true)"
-          if [[ -n "${before}" ]]; then
-            python3 -c 'import sys; from PIL import Image; Image.open(sys.argv[1]).convert("RGB").save(sys.argv[2], "JPEG", quality=85)' \
-              "${before}" "${RUNNER_TEMP}/before.jpg"
-            echo "BEFORE-JPEG-BEGIN"
-            base64 -w 200 "${RUNNER_TEMP}/before.jpg"
-            echo "BEFORE-JPEG-END"
-          fi
 
       # Only the default branch publishes: pull requests and other branches
       # (e.g. the COSMIC update branches) build and test the image only.

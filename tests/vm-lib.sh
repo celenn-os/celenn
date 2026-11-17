@@ -410,9 +410,9 @@ first_steps_shots() {
 }
 
 # The terminal as the test user sees it: the cosmic-blue prompt (Starship) and
-# the welcome banner then fastfetch, which every new terminal shows. Text
-# checks first, as the user's login shell runs them, then COSMIC Terminal
-# opened in a small git project, so the prompt shows its path and git segments.
+# fastfetch. Text checks first, as the user's login shell runs them,
+# then COSMIC Terminal opened in a small git project, so the prompt shows its
+# path and git segments, with `fastfetch` typed in it.
 # The screenshot sheet adds a full-size crop of the window
 # (tests/screenshot-sheet.py).
 TERMINAL_PROJECT=projects/hello
@@ -430,24 +430,16 @@ terminal_checks() {
 
 terminal_shot() {
     terminal_checks || true
-    # TEMPORARY (PR #117 review, remove before merging): the terminal as it
-    # opened before fastfetch was added, for a before/after comparison
-    vm "cp /etc/profile.d/uwelcome.sh /root/uwelcome.sh.orig && sed -i 's/^\([[:space:]]*\)ublue-fastfetch\$/\1:/' /etc/profile.d/uwelcome.sh" || true
-    vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
-            sh -c 'cd ~${DEMO_USER}/${TERMINAL_PROJECT} || cd; exec setsid -f cosmic-term' \
-            >/dev/null 2>&1 </dev/null" || true
-    sleep 15
-    screenshot "${SHOTS}/06-terminal-before"
-    vm "pkill -u ${DEMO_USER} -f '^(/usr/bin/)?cosmic-term'" || true
-    vm "cp /root/uwelcome.sh.orig /etc/profile.d/uwelcome.sh" || true
-    sleep 3
     if ! vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
             sh -c 'cd ~${DEMO_USER}/${TERMINAL_PROJECT} || cd; exec setsid -f cosmic-term' \
             >/dev/null 2>&1 </dev/null"; then
         warn "could not start cosmic-term"
         return 1
     fi
-    sleep 15
+    sleep 12
+    type_text fastfetch
+    monitor "sendkey ret"
+    sleep 6
     screenshot "${SHOTS}/07-terminal"
     vm "pkill -u ${DEMO_USER} -f '^(/usr/bin/)?cosmic-term'" || true
     sleep 3

@@ -71,9 +71,8 @@ writes the JPEG.
 
 ## fastfetch
 
-`ublue-fastfetch` (also run as `fastfetch`) shows the mark as terminal art next
-to the system information, in place of Bluefin's dinosaurs. Each new terminal
-runs it after the welcome banner (`system_files/etc/profile.d/uwelcome.sh`):
+`fastfetch` (an alias of `ublue-fastfetch`) shows the mark as terminal art
+next to the system information, in place of Bluefin's dinosaurs:
 
 - `system_files/usr/share/ublue-os/fastfetch/cosmic-blue-dark.txt` /
   `-light.txt`: the mark as color pixels, two per terminal cell, 20 rows by
