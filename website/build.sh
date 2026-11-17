@@ -17,6 +17,21 @@ iso_name="cosmic-blue-live-amd64.iso"
 iso_nvidia_name="cosmic-blue-nvidia-live-amd64.iso"
 runs="https://github.com/cosmic-blue-os/cosmic-blue/actions/workflows/build-live-iso.yml?query=branch%3Amain+is%3Asuccess"
 
+# Size of each ISO online (Content-Length), shown next to the download button
+declare -A iso_sizes=()
+if [[ -n "${ISO_BASE_URL:-}" ]]; then
+  for kind in main nvidia; do
+    name="${iso_name}"
+    [[ "${kind}" == nvidia ]] && name="${iso_nvidia_name}"
+    bytes="$(curl -fsSIL --retry 2 --max-time 20 "${ISO_BASE_URL%/}/${name}" 2>/dev/null \
+      | tr -d '\r' | awk 'tolower($1) == "content-length:" { n = $2 } END { print n }' || true)"
+    if [[ "${bytes}" =~ ^[0-9]+$ ]] && (( bytes > 100000000 )); then
+      iso_sizes[${kind}]="$(awk -v b="${bytes}" 'BEGIN { printf "%.1f", b / 1e9 }')"
+      echo "${name}: ${iso_sizes[${kind}]} GB"
+    fi
+  done
+fi
+
 # Desktop screenshots for the screenshots page and the home page preview,
 # from SCREENSHOTS_DIR (filled by website/fetch-screenshots.sh in CI). Files
 # are named like 03-desktop.png; the pages show a screenshot only if it is
@@ -50,6 +65,14 @@ for page in index.html fr/index.html docs/index.html fr/docs/index.html \
     sed -e "s|@ISO_NVIDIA_URL@|${ISO_BASE_URL%/}/${iso_nvidia_name}|g" \
         -e "s|@ISO_URL@|${ISO_BASE_URL%/}/${iso_name}|g" \
       "${root}/website/${page}" > "${out}/${page}"
+    # The size of the ISOs online, in GB with one decimal (a decimal comma
+    # in French); the size written in the page stays if it cannot be read
+    for kind in main nvidia; do
+      size="${iso_sizes[${kind}]:-}"
+      [[ -n "${size}" ]] || continue
+      [[ "${page}" == fr/* ]] && size="${size/./,}"
+      sed -i "s|<span data-iso-size=\"${kind}\">[^<]*</span>|<span data-iso-size=\"${kind}\">${size}</span>|" "${out}/${page}"
+    done
   else
     sed -e 's|<!-- checksum -->.*<!-- /checksum -->||' \
         -e "s|@ISO_NVIDIA_URL@|${runs}|g" -e "s|@ISO_URL@|${runs}|g" \

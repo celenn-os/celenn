@@ -1,18 +1,21 @@
 # cosmic-blue: an independent Fedora Atomic image with the COSMIC desktop, built
 # on Universal Blue base images (not affiliated with Universal Blue or Bluefin).
-# See docs/plan.md for the choice of base image and the inventory.
 
 # Fedora release: the one of Bluefin's stable tag. check-cosmic-version.yml
 # opens the pull request that moves BASE_TAG and BASE_IMAGE together when
 # Bluefin stable moves to a new release (in 2026-11, Fedora 45 still broke the
 # live ISO installer: systemd-tmpfiles exited with code 73).
-# Images are followed by tag, not pinned by digest: every daily build takes
-# the latest base, common and brew images (see .github/renovate.json5).
+# The base image is followed by tag: every daily build takes the latest
+# base-main (Fedora package updates). The Bluefin common and brew images are
+# pinned by digest: they bring scripts, services and ujust recipes that
+# change without notice (a common change broke every build on 2026-11-16), so
+# Renovate moves them once a week in a pull request that must build and pass
+# the boot test (see .github/renovate.json5).
 # BASE_TAG is the Fedora release of Containerfile.helpers (`just fedora-version`).
 ARG BASE_TAG="44"
 ARG BASE_IMAGE="ghcr.io/ublue-os/base-main:44"
-ARG COMMON_IMAGE="ghcr.io/projectbluefin/common:latest"
-ARG BREW_IMAGE="ghcr.io/ublue-os/brew:latest"
+ARG COMMON_IMAGE="ghcr.io/projectbluefin/common:latest@sha256:c2799fd6253575b9efb22bf798af335e822d8ad22f798f09c75fcdffcb37c3a8"
+ARG BREW_IMAGE="ghcr.io/ublue-os/brew:latest@sha256:9e0492dbc471258657564c94dae18b58dd96ddb998a06f2b15e8209efb48042b"
 
 # Bluefin shared files (ujust, uupd, setup, signing, udev...) and Homebrew
 FROM ${COMMON_IMAGE} AS common

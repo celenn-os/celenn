@@ -24,6 +24,11 @@ vm_wait_ssh
 errors=0
 vm_check_system boot || errors=1
 vm_check_tuning boot || errors=1
+# Startup time and memory in use at the login screen, to follow over time
+# (a virtual machine: compare runs with each other, not with real computers)
+boot_time="$(vm "systemd-analyze time" 2>/dev/null | head -n 1 || true)"
+memory="$(vm "free -m" 2>/dev/null | awk '/^Mem/ { print $3 " MB used, " $7 " MB available" }' || true)"
+log "Boot: ${boot_time:-unknown}; memory at the login screen: ${memory:-unknown}"
 vm "bootc status --json" | jq -e --arg ref "${TARGET_IMGREF}" \
     '.status.booted.image.image.image == $ref' >/dev/null \
     || { echo "::error::The booted image is not ${TARGET_IMGREF}"; errors=1; }
@@ -36,6 +41,24 @@ signed_updates="$(vm "/usr/libexec/cosmic-blue-signed-updates --dry-run")" || si
 echo "${signed_updates}"
 grep -q 'would turn on the signature check' <<<"${signed_updates}" \
     || { echo "::error::cosmic-blue-signed-updates would not turn on the signature check"; errors=1; }
+
+# Network exposure: the firewall is on, and only known services listen on
+# the network. Desktop firewall zones (such as Fedora Workstation's) let
+# other computers reach any port above 1024, so a new service listening there
+# would be reachable on every network the computer joins. sshd only runs for
+# these tests.
+firewall="$(vm 'firewall-cmd --state && firewall-cmd --list-all' 2>&1)" \
+    || { echo "::error::firewalld is not running: ${firewall}"; errors=1; }
+echo "Firewall (default zone): ${firewall}"
+listeners="$(vm "ss -H -tulnp" 2>&1)" || listeners=""
+echo "${listeners}"
+unexpected="$(awk '$5 !~ /^(127\.|\[::1\]|\[::ffff:127\.)/' <<<"${listeners}" \
+    | grep -vE 'users:\(\("(sshd|sshd-session|avahi-daemon|NetworkManager|chronyd|tailscaled|systemd-resolve|cupsd|cups-browsed)"' || true)"
+if [[ -n "${unexpected}" ]]; then
+    echo "::error::Unexpected services listening on the network:"
+    echo "${unexpected}"
+    errors=1
+fi
 
 # `ujust bug-report` lists the image and the booted deployment
 bug_report="$(vm "ujust bug-report print")" || bug_report=""

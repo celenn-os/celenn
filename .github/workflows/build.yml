@@ -33,10 +33,11 @@ on:
       - '.github/actionlint.yaml'
       - 'tests/lint.sh'
   schedule:
-    # Every day at 06:00 UTC (07:00 in Paris in winter, 08:00 in summer):
+    # Every day at 06:17 UTC (07:17 in Paris in winter, 08:17 in summer):
     # ublue-os/base-main is rebuilt around 01:10 and 04:10 UTC, this leaves
-    # a margin for a late upstream build.
-    - cron: '0 6 * * *'
+    # a margin for a late upstream build. Not on the hour: GitHub delays
+    # scheduled runs most at the top of the hour (up to 9 hours on 2026-11-17).
+    - cron: '17 6 * * *'
   push:
     branches:
       - main
@@ -67,8 +68,14 @@ env:
 
 # Pull requests: a new push cancels the running build. Main: builds queue up
 # instead, so a publishing build is never cut short.
+# The daily build has a group of its own: GitHub keeps only one pending run
+# per group, so a daily run (often hours late) would otherwise replace the
+# pending build of a just merged change, then skip itself as main was built
+# recently, and that change would not be published (2026-11-17, #117). It
+# skips itself while another build of main runs or waits (recent_build),
+# and the version tag push refuses a version another build already took.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'schedule' && 'daily' || github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
@@ -172,9 +179,13 @@ jobs:
       VERSION: ${{ needs.version.outputs.version }}
 
     steps:
-      # Action versions are pinned to commits and updated by Renovate
+      # Action versions are pinned to commits and updated by Renovate.
+      # No git credentials left in the checkout: the build runs the
+      # repository's scripts as root, and nothing here pushes to git.
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
       - name: Maximize build space
         uses: ublue-os/remove-unwanted-software@695eb75bc387dbcd9685a8e72d23439d8686cba6
@@ -460,6 +471,13 @@ jobs:
           ${ROOT_ENV} podman login ghcr.io --username "${REGISTRY_USER}" --password-stdin <<< "${REGISTRY_PASSWORD}"
           read -r first _ <<< "${ALIAS_TAGS}"
           [[ "${first}" == "${VERSION}" ]] || { echo "::error::The first build tag (${first}) is not the version (${VERSION})"; exit 1; }
+          # Two builds of main that ran at the same time (the daily build and
+          # a merge) could pick the same version: the second one stops here
+          # instead of replacing the first one's image under that version.
+          if skopeo inspect --raw "docker://${IMAGE_REGISTRY}/${IMAGE_NAME}:${first}" >/dev/null 2>&1; then
+            echo "::error::${IMAGE_NAME}:${first} is already published by another build"
+            exit 1
+          fi
           set -x
           ${ROOT_ENV} podman push --digestfile=/tmp/digestfile "${IMAGE_NAME}:${first}" "${IMAGE_REGISTRY}/${IMAGE_NAME}:${first}"
           digest=$(< /tmp/digestfile)
