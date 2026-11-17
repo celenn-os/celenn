@@ -27,8 +27,9 @@ name: Promote stable image
 
 on:
   schedule:
-    # Every Tuesday at 12:00 UTC, after the daily image build
-    - cron: '0 12 * * 2'
+    # Every Tuesday at 12:23 UTC, after the daily image build (not on the
+    # hour, when GitHub delays scheduled runs most)
+    - cron: '23 12 * * 2'
   workflow_dispatch:
     inputs:
       source_tag:
@@ -106,6 +107,13 @@ jobs:
             skopeo inspect --creds "${creds}" --format '{{.Digest}}' "docker://${image}:$1" 2>/dev/null
           }
 
+          version_of() {
+            skopeo inspect --creds "${creds}" --format '{{ index .Labels "org.opencontainers.image.version" }}' \
+              "docker://${image}@$1" 2>/dev/null || true
+          }
+
+          previous="$(digest_of stable || true)"
+
           # Pick the source: the given tag, or the most recent daily build
           # that is at least SOAK_DAYS old (a day without a green build has
           # no date tag, so look back up to a week further).
@@ -121,15 +129,36 @@ jobs:
                 break
               fi
             done
-            [[ -n "${source}" ]] || { echo "::error::No daily build found between ${SOAK_DAYS} and $((SOAK_DAYS + 7)) days ago"; exit 1; }
           fi
+
+          # The weekly run never moves stable backwards: after stable was
+          # promoted by hand to a newer build, or when no build is old enough,
+          # stable stays where it is (nothing to do, not a failure). A tag
+          # given by hand is promoted as is, so stable can be rolled back.
+          if [[ -z "${SOURCE_TAG}" && -n "${previous}" ]]; then
+            keep=""
+            if [[ -z "${source}" ]]; then
+              keep="no daily build between ${SOAK_DAYS} and $((SOAK_DAYS + 7)) days ago"
+            else
+              new_version="$(version_of "$(digest_of "${source}")")"
+              stable_version="$(version_of "${previous}")"
+              if [[ -n "${new_version}" && -n "${stable_version}" && "${new_version}" != "${stable_version}" \
+                    && "$(printf '%s\n' "${new_version}" "${stable_version}" | sort -V | tail -n 1)" == "${stable_version}" ]]; then
+                keep="${source} (${new_version}) is older than the current stable (${stable_version})"
+              fi
+            fi
+            if [[ -n "${keep}" ]]; then
+              echo "::notice::stable stays where it is: ${keep}"
+              source=stable
+            fi
+          fi
+          [[ -n "${source}" ]] || { echo "::error::No daily build found between ${SOAK_DAYS} and $((SOAK_DAYS + 7)) days ago"; exit 1; }
           digest="$(digest_of "${source}")"
           echo "Source: ${image}:${source} (${digest})"
 
           # Only promote images signed by build.yml with our key
           cosign verify --key cosign.pub "${image}@${digest}" >/dev/null
 
-          previous="$(digest_of stable || true)"
           {
             echo "image=${image}"
             echo "source=${source}"
