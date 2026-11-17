@@ -28,7 +28,11 @@ vm_check_tuning boot || errors=1
 # (a virtual machine: compare runs with each other, not with real computers)
 boot_time="$(vm "systemd-analyze time" 2>/dev/null | head -n 1 || true)"
 memory="$(vm "free -m" 2>/dev/null | awk '/^Mem/ { print $3 " MB used, " $7 " MB available" }' || true)"
-log "Boot: ${boot_time:-unknown}; memory at the login screen: ${memory:-unknown}"
+greeter="$(vm "systemctl show cosmic-greeter.service -P ActiveEnterTimestampMonotonic" 2>/dev/null || true)"
+[[ "${greeter}" =~ ^[0-9]+$ ]] && greeter="$(awk -v us="${greeter}" 'BEGIN { printf "%.1f s", us / 1e6 }')" || greeter=""
+log "Boot: ${boot_time:-unknown}; login screen started at ${greeter:-unknown} (from power on of the kernel); memory at the login screen: ${memory:-unknown}"
+# What the startup waited for, slowest first
+vm "systemd-analyze critical-chain; systemd-analyze blame | head -n 15" || true
 vm "bootc status --json" | jq -e --arg ref "${TARGET_IMGREF}" \
     '.status.booted.image.image.image == $ref' >/dev/null \
     || { echo "::error::The booted image is not ${TARGET_IMGREF}"; errors=1; }
