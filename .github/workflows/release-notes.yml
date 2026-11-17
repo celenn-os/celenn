@@ -2,11 +2,13 @@
 # Publishes the release notes of a stable image as a GitHub Release: the
 # package changes since the previous stable image (COSMIC first) and the
 # cosmic-blue commits between the two builds. No file is attached (the live
-# ISO is too big for a release).
+# ISO is too big for a release). It then updates the "Versions" block of
+# README.md (Fedora, kernel, COSMIC, Mesa, NVIDIA driver of `stable`) with a
+# commit on the default branch.
 #
 # Called by promote-stable.yml each time `stable` moves. On a pull request
 # that changes it, it only previews the notes of `latest` against `stable`
-# in the run summary, without publishing anything.
+# and the README block in the run summary, without publishing anything.
 name: Release notes
 
 on:
@@ -30,6 +32,7 @@ on:
     paths:
       - '.github/workflows/release-notes.yml'
       - '.github/scripts/release-notes.py'
+      - '.github/scripts/readme-versions.py'
 
 env:
   IMAGE_NAME: ${{ github.event.repository.name }} # output of build.yml, keep in sync
@@ -57,6 +60,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+        with:
+          # be careful when upgrading major versions
+          cosign-release: 'v3.1.4'
 
       - name: List packages and commits
         id: lists
@@ -95,6 +104,25 @@ jobs:
               | grep -xE '[0-9]+\.[0-9]{8}(\.[0-9]+)?' || true
           }
 
+          # NVIDIA driver (EVR) of the NVIDIA image with the same tag, empty
+          # if not found: from its signed SBOM (a few MB, see build.yml),
+          # else from the image itself for the images built without one
+          nvidia_of() {
+            local nv="${image}-nvidia:$1" evr
+            evr="$(cosign verify-attestation --key cosign.pub --type spdxjson \
+                     --insecure-ignore-tlog=true "${nv}" 2>/dev/null \
+                   | head -n 1 \
+                   | jq -r '.payload | @base64d | fromjson | .predicate.packages[]
+                            | select(.name == "nvidia-driver") | .versionInfo' \
+                   | head -n 1)" || evr=""
+            if [[ -z "${evr}" ]] && podman pull -q "${nv}" >/dev/null 2>&1; then
+              evr="$(podman run --rm --pull=never --entrypoint rpm "${nv}" \
+                       -q --qf '%{EPOCH}:%{VERSION}-%{RELEASE}' nvidia-driver 2>/dev/null)" || evr=""
+              podman rmi -f "${nv}" >/dev/null
+            fi
+            echo "${evr}"
+          }
+
           # One image at a time to keep the disk usage down
           packages_of() {
             podman pull -q "$1" >/dev/null
@@ -115,6 +143,12 @@ jobs:
           echo "new_version=$(version_of "${new_ref}")" >> "${GITHUB_OUTPUT}"
 
           args=(--new "${out}/new.tsv")
+          # The NVIDIA image moves to stable in the same run (by tag, not
+          # by digest: it has its own digests)
+          nvidia_tag="${{ github.event_name == 'pull_request' && 'latest' || 'stable' }}"
+          nvidia="$(nvidia_of "${nvidia_tag}")"
+          echo "NVIDIA driver in ${image}-nvidia:${nvidia_tag}: ${nvidia:-not found}"
+          [[ -n "${nvidia}" ]] && args+=(--nvidia "${nvidia}")
           if [[ -n "${OLD}" ]]; then
             old_ref="$(ref_of "${OLD}")"
             packages_of "${old_ref}" "${out}/old.tsv"
@@ -144,6 +178,7 @@ jobs:
           if [[ "${GITHUB_EVENT_NAME}" == pull_request ]]; then
             title="Preview: latest${VERSION:+ (${VERSION})} compared with stable"
             ref="${image}:latest"
+            date="preview"
           else
             # stable-20261117 -> cosmic-blue 44.20261110 (stable 2026-11-17)
             date="${RELEASE_TAG#stable-}"
@@ -157,8 +192,18 @@ jobs:
           fi
           eval "args=($(< "${out}/args"))"
           python3 -I .github/scripts/release-notes.py "${args[@]}" \
-            --title "${title}" --image "${ref}" > "${out}/notes.md"
+            --title "${title}" --image "${ref}" \
+            --versions-block "${out}/versions.md" --version "${VERSION}" --date "${date}" \
+            > "${out}/notes.md"
           cat "${out}/notes.md" >> "${GITHUB_STEP_SUMMARY}"
+          # Check the README block can be replaced, and preview it
+          python3 -I .github/scripts/readme-versions.py "${out}/versions.md" README.md
+          {
+            echo
+            echo "### README versions block"
+            echo
+            cat "${out}/versions.md"
+          } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Publish the release
         if: github.event_name != 'pull_request'
@@ -180,3 +225,33 @@ jobs:
               --title "${title}" --notes-file "${RUNNER_TEMP}/body.md" --latest
           fi
           echo "Release: https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}" >> "${GITHUB_STEP_SUMMARY}"
+
+      # A commit with the default token starts no workflow (and build.yml
+      # ignores README.md anyway). Retried if the branch moved meanwhile.
+      - name: Update the README
+        if: github.event_name != 'pull_request'
+        env:
+          BRANCH: ${{ github.event.repository.default_branch }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          block="${RUNNER_TEMP}/notes/versions.md"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3; do
+            git fetch -q --depth 1 origin "${BRANCH}"
+            git checkout -q -f --detach FETCH_HEAD
+            python3 -I .github/scripts/readme-versions.py "${block}" README.md
+            if git diff --quiet README.md; then
+              echo "README versions already up to date"
+              exit 0
+            fi
+            git commit -q -m "Update README versions for ${RELEASE_TAG}" README.md
+            if git push -q origin "HEAD:refs/heads/${BRANCH}"; then
+              echo "README updated: $(git rev-parse HEAD)" >> "${GITHUB_STEP_SUMMARY}"
+              exit 0
+            fi
+            sleep $((attempt * 10))
+          done
+          echo "::error::Could not push the README update"
+          exit 1

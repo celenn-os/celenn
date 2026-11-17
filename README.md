@@ -53,6 +53,16 @@ ujust update          # update now instead of waiting for the automatic update
 sudo bootc rollback   # go back to the previous version on next boot
 ```
 
+## Versions
+
+<!-- versions:start (written by release-notes.yml on each stable release) -->
+In the current `stable` image (cosmic-blue 44.20261115.11, 2026-11-15):
+
+| Fedora | Kernel | COSMIC | Mesa | NVIDIA driver |
+| :-: | :-: | :-: | :-: | :-: |
+| 44 | 7.3.3 | 1.11.0 | 26.2.6 | - |
+<!-- versions:end -->
+
 What changed in each `stable` version (packages, COSMIC, cosmic-blue):
 [Releases](https://github.com/cosmic-blue-os/cosmic-blue/releases).
 

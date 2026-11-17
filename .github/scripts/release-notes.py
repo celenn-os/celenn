@@ -5,8 +5,12 @@ Compares the package lists of the previous and the new stable image
 (`rpm -qa --qf '%{NAME}\t%{EVR}\n'`, one file each) and lists the
 cosmic-blue commits between the two builds.
 
+It also writes the "Versions" block of README.md (main components of the
+new image) to the file given with --versions-block.
+
 Usage: release-notes.py --new new.tsv [--old old.tsv] --title TITLE
        [--image REF] [--commits commits.tsv] [--compare-url URL]
+       [--nvidia EVR] [--versions-block FILE --version VERSION --date DATE]
 """
 import argparse
 import re
@@ -19,6 +23,12 @@ COSMIC = re.compile(r"^(cosmic-.*|xdg-desktop-portal-cosmic|pop-launcher|pop-ico
 HIGHLIGHTS = [
     "kernel", "mesa-dri-drivers", "linux-firmware", "systemd", "bootc",
     "rpm-ostree", "flatpak", "podman", "NetworkManager", "pipewire",
+]
+# Main components, shown at the top of the notes and in README.md:
+# (name, package)
+VERSIONS = [
+    ("Fedora", "fedora-release-common"), ("Kernel", "kernel"),
+    ("COSMIC", "cosmic-settings"), ("Mesa", "mesa-dri-drivers"),
 ]
 # Not packages: imported signing keys
 IGNORED = {"gpg-pubkey", "gpg-pubkey-release"}
@@ -55,12 +65,25 @@ def rows_for(names, old, new):
             for n in names]
 
 
-def version(packages, name):
-    """Upstream version of a package (EVR without epoch and release)."""
-    evr = packages.get(name)
+def upstream(evr):
+    """Upstream version from an EVR (without epoch and release)."""
     if not evr:
         return None
     return evr.split(":")[-1].rsplit("-", 1)[0]
+
+
+def version(packages, name):
+    """Upstream version of a package."""
+    return upstream(packages.get(name))
+
+
+def versions_table(new, nvidia_evr):
+    """One-row Markdown table of the main components."""
+    rows = [(label, version(new, name)) for label, name in VERSIONS]
+    rows.append(("NVIDIA driver", upstream(nvidia_evr)))
+    return ["| " + " | ".join(label for label, _ in rows) + " |",
+            "| " + " | ".join(":-:" for _ in rows) + " |",
+            "| " + " | ".join(value or "-" for _, value in rows) + " |"]
 
 
 def main():
@@ -71,6 +94,10 @@ def main():
     parser.add_argument("--image")
     parser.add_argument("--commits")
     parser.add_argument("--compare-url")
+    parser.add_argument("--nvidia", help="EVR of the NVIDIA driver in the NVIDIA image")
+    parser.add_argument("--versions-block", help="Write the README versions block here")
+    parser.add_argument("--version", help="cosmic-blue version, for the versions block")
+    parser.add_argument("--date", help="Release date, for the versions block")
     args = parser.parse_args()
 
     new = read_packages(args.new)
@@ -85,6 +112,16 @@ def main():
         out += [f"Image: `{args.image}`", ""]
     out += ["Installed systems get this version with the next automatic update "
             "(or `ujust update`), then a reboot.", ""]
+    table_lines = versions_table(new, args.nvidia)
+    out += table_lines + [""]
+
+    if args.versions_block:
+        about = "cosmic-blue" + (f" {args.version}" if args.version else "")
+        if args.date:
+            about += f", {args.date}"
+        block = [f"In the current `stable` image ({about}):", ""] + table_lines
+        with open(args.versions_block, "w", encoding="utf-8") as f:
+            f.write("\n".join(block) + "\n")
 
     # COSMIC first
     out += ["## COSMIC", ""]
