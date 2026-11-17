@@ -39,7 +39,6 @@ dnf5 config-manager setopt excludepkgs=golang-github-nvidia-container-toolkit
 # modules into the initramfs and enables the CDI and persistenced services.
 # No 32-bit libraries (MULTILIB=0): Steam and games come as flatpaks.
 # IMAGE_NAME=base: no GNOME/KDE-specific extras.
-# shellcheck disable=SC2097,SC2098 # the path is set above; the script reads it from its environment
 IMAGE_NAME=base AKMODNV_PATH="${AKMODNV_PATH}" MULTILIB=0 \
     "${AKMODNV_PATH}/ublue-os/nvidia-install.sh"
 
