@@ -53,6 +53,14 @@ RUN /greeter/build.sh /greeter/background.jpg
 FROM scratch AS greeter
 COPY --from=greeter-build /out /
 
+# COSMIC Store, rebuilt from Fedora's source package with FlatPark as a
+# recommended source, off by default (see build_files/store/patch.py)
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS store-build
+COPY build_files/store /store
+RUN /store/build.sh
+FROM scratch AS store
+COPY --from=store-build /out /
+
 # Boot screen spinner frames, tinted with the logo blue
 # (see build_files/plymouth/tint.py)
 FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS plymouth-build

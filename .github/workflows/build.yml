@@ -272,6 +272,13 @@ jobs:
           key: ${{ steps.helpers.outputs.greeter }}
           dir: ${{ runner.temp }}/helpers
 
+      - name: Helper stage store
+        uses: ./.github/actions/helper-stage
+        with:
+          stage: store
+          key: ${{ steps.helpers.outputs.store }}
+          dir: ${{ runner.temp }}/helpers
+
       - name: Helper stage plymouth
         uses: ./.github/actions/helper-stage
         with:

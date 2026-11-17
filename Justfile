@@ -148,7 +148,7 @@ build $target_image=image_name $tag=default_tag $version="":
 
 # Helper stages of Containerfile.helpers, in build order
 helper-stages:
-    @echo theme tour initial_setup greeter plymouth icons cursors
+    @echo theme tour initial_setup greeter store plymouth icons cursors
 
 # Build helper stages of Containerfile.helpers (all of them, or the ones
 # given) and write the output of each one to <dest>/<stage>, used by `just
@@ -186,7 +186,7 @@ helpers-keys:
     packages="$(podman run --rm --pull=newer "${fedora}" \
         dnf5 -q repoquery --enablerepo=fedora-source --enablerepo=updates-source \
         --latest-limit=1 --queryformat '%{full_nevra}\n' \
-        cosmic-greeter cosmic-initial-setup plymouth-theme-spinner | sort)"
+        cosmic-greeter cosmic-initial-setup cosmic-store plymouth-theme-spinner | sort)"
     package() {
         # Found, or a stale cache could be used
         grep "^${1}-[0-9]" <<< "${packages}"
@@ -216,6 +216,9 @@ helpers-keys:
                 greeter)
                     files build_files/greeter system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-orbits.jpg
                     package cosmic-greeter ;;
+                store)
+                    files build_files/store
+                    package cosmic-store ;;
                 plymouth)
                     files build_files/plymouth
                     package plymouth-theme-spinner ;;
