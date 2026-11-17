@@ -9,7 +9,7 @@ or Bluefin.
 It is an atomic (bootc) system: updates are applied in the background, take
 effect on the next reboot, and can be rolled back.
 
-[![cosmic-blue desktop](https://cosmic-blue-os.github.io/cosmic-blue/img/screenshots/desktop.webp)](https://cosmic-blue-os.github.io/cosmic-blue/screenshots/)
+[![cosmic-blue desktop with a terminal open](https://cosmic-blue-os.github.io/cosmic-blue/img/screenshots/terminal.webp)](https://cosmic-blue-os.github.io/cosmic-blue/screenshots/)
 
 ## Versions
 
