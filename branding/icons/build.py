@@ -7,7 +7,8 @@
   take the color of the type)
 - apps: the COSMIC dock buttons (launcher, workspaces, applications) and
   the COSMIC Store and Settings in the Tela circle style; the live ISO's
-  welcome tour and installer, and the installed system's first steps tour
+  welcome tour and installer, the installed system's first steps tour, and
+  the Documentation launcher
 - actions: the symbolic icons of the suspend and restart buttons in the
   panel's power menu (Tela has none for restart, and its suspend icon is
   hard to read). They follow the style of Tela's shutdown icon, which stays.
@@ -25,7 +26,9 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent
 LAYER = REPO / "build_files" / "icon_theme" / "layer"
 APPS = REPO / "iso_files" / "welcome"
-FIRST_STEPS_ICON = REPO / "system_files/usr/share/icons/hicolor/scalable/apps/cosmic-blue-welcome.svg"
+HICOLOR_APPS = REPO / "system_files/usr/share/icons/hicolor/scalable/apps"
+FIRST_STEPS_ICON = HICOLOR_APPS / "cosmic-blue-welcome.svg"
+DOCS_ICON = HICOLOR_APPS / "cosmic-blue-docs.svg"
 
 # Logo blues (branding/logo/build.py) and the accent (#4f8dff dark, #1d47c4 light)
 ORBIT = ("#7fe0ff", "#2f6bff")
@@ -269,6 +272,17 @@ SETTINGS = tela_app(
     SETTINGS_COLOR,
 )
 
+# The Documentation launcher: an open book with the logo's "c"
+DOCS = tela_app(
+    '<path d="M32 22c-4.5-3.5-10-4.5-15-4.5v24c5 0 10.5 1 15 4.5z" fill="#fff" opacity=".75"/>'
+    '<path d="M32 22c4.5-3.5 10-4.5 15-4.5v24c-5 0-10.5 1-15 4.5z" fill="#fff"/>'
+    '<path d="M21 25.5c2.7 .3 5.2 .9 7.5 1.8M21 30.5c2.7 .3 5.2 .9 7.5 1.8M21 35.5c2.7 .3 5.2 .9 7.5 1.8" '
+    'stroke="#4f8dff" stroke-width="1.8" stroke-linecap="round" fill="none"/>'
+    '<path d="M42.6 27.2A5 5 0 1 0 42.6 34.8" fill="none" stroke="#4f8dff" stroke-width="2.4" '
+    'stroke-linecap="round"/>'
+    '<circle cx="39" cy="31" r="1.9" fill="#4f8dff"/>'
+)
+
 # Icon -> names (the desktop entries of the dock buttons and of the apps
 # they open). The first name gets the file, the others are links to it.
 DOCK = {
@@ -334,6 +348,7 @@ def main():
     (APPS / "cosmic-blue-welcome.svg").write_text(welcome)
     # Also the icon of the installed system's first steps tour
     (FIRST_STEPS_ICON).write_text(welcome)
+    DOCS_ICON.write_text(DOCS)
     (APPS / "cosmic-blue-installer.svg").write_text(app(glyph("download", 30, 32, 0.85, "#ffffff")))
 
 
