@@ -84,6 +84,14 @@ IsRuntime=false
 Branch=stable
 IsRuntime=false
 
+[Flatpak Preinstall com.github.PintaProject.Pinta]
+Branch=stable
+IsRuntime=false
+
+[Flatpak Preinstall org.gnome.Connections]
+Branch=stable
+IsRuntime=false
+
 [Flatpak Preinstall it.mijorus.gearlever]
 Branch=stable
 IsRuntime=false
