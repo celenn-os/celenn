@@ -11,6 +11,20 @@ or Bluefin.
 It is an atomic (bootc) system: updates are applied in the background, take
 effect on the next reboot, and can be rolled back.
 
+## Versions
+
+<!-- versions:start (written by release-notes.yml on each stable release) -->
+In the current `stable` image (cosmic-blue 44.20261115.11):
+
+![Fedora 44](https://img.shields.io/badge/Fedora-44-4f8dff)
+![Kernel 7.3.3](https://img.shields.io/badge/Kernel-7.3.3-4f8dff)
+![COSMIC 1.11.0](https://img.shields.io/badge/COSMIC-1.11.0-4f8dff)
+![Mesa 26.2.6](https://img.shields.io/badge/Mesa-26.2.6-4f8dff)
+<!-- versions:end -->
+
+What changed in each `stable` version (packages, COSMIC, cosmic-blue):
+[Releases](https://github.com/cosmic-blue-os/cosmic-blue/releases).
+
 ## Install
 
 **New install:** download the live ISO from the
@@ -52,20 +66,6 @@ choose *Enroll MOK*, then *Continue*, and type the password `universalblue`
 ujust update          # update now instead of waiting for the automatic update
 sudo bootc rollback   # go back to the previous version on next boot
 ```
-
-## Versions
-
-<!-- versions:start (written by release-notes.yml on each stable release) -->
-In the current `stable` image (cosmic-blue 44.20261115.11):
-
-![Fedora 44](https://img.shields.io/badge/Fedora-44-4f8dff)
-![Kernel 7.3.3](https://img.shields.io/badge/Kernel-7.3.3-4f8dff)
-![COSMIC 1.11.0](https://img.shields.io/badge/COSMIC-1.11.0-4f8dff)
-![Mesa 26.2.6](https://img.shields.io/badge/Mesa-26.2.6-4f8dff)
-<!-- versions:end -->
-
-What changed in each `stable` version (packages, COSMIC, cosmic-blue):
-[Releases](https://github.com/cosmic-blue-os/cosmic-blue/releases).
 
 ## Developer tools
 

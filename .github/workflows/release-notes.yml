@@ -9,6 +9,8 @@
 # Called by promote-stable.yml each time `stable` moves. On a pull request
 # that changes it, it only previews the notes of `latest` against `stable`
 # and the README block in the run summary, without publishing anything.
+# Run by hand, it only refreshes the README block from the current `stable`
+# (e.g. after rolling stable back), without a release.
 name: Release notes
 
 on:
@@ -26,6 +28,7 @@ on:
         description: "Git tag and name of the release (e.g. stable-20261117)"
         type: string
         required: true
+  workflow_dispatch:
   pull_request:
     branches:
       - main
@@ -72,7 +75,7 @@ jobs:
         env:
           # A pull request previews `latest` against the current `stable`
           OLD: ${{ github.event_name == 'pull_request' && 'stable' || inputs.old }}
-          NEW: ${{ github.event_name == 'pull_request' && 'latest' || inputs.new }}
+          NEW: ${{ github.event_name == 'pull_request' && 'latest' || inputs.new || 'stable' }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
@@ -169,7 +172,7 @@ jobs:
 
       - name: Write the notes
         env:
-          RELEASE_TAG: ${{ github.event_name == 'pull_request' && 'preview' || inputs.release_tag }}
+          RELEASE_TAG: ${{ github.event_name == 'pull_request' && 'preview' || inputs.release_tag || 'stable' }}
           VERSION: ${{ steps.lists.outputs.new_version }}
         run: |
           set -euo pipefail
@@ -205,7 +208,8 @@ jobs:
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Publish the release
-        if: github.event_name != 'pull_request'
+        # Not when run by hand (no release tag)
+        if: github.event_name != 'pull_request' && inputs.release_tag != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
