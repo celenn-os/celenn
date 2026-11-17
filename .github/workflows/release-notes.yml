@@ -249,7 +249,7 @@ jobs:
               echo "README versions already up to date"
               exit 0
             fi
-            git commit -q -m "Update README versions for ${RELEASE_TAG}" README.md
+            git commit -q -m "Update README versions for ${RELEASE_TAG:-stable}" README.md
             if git push -q origin "HEAD:refs/heads/${BRANCH}"; then
               echo "README updated: $(git rev-parse HEAD)" >> "${GITHUB_STEP_SUMMARY}"
               exit 0
