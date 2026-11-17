@@ -20,8 +20,8 @@ cmd = "uwelcome toggle"
 desc = "banner_toggle"
 
 [[commands]]
-cmd = "fastfetch"
-desc = "sys_info"
+cmd = "ujust install-cli-tools"
+desc = "term_bling"
 
 [[commands]]
 cmd = "brew help"
@@ -30,6 +30,10 @@ desc = "cli_pkg"
 [[links]]
 name = "issues"
 url = "https://github.com/cosmic-blue-os/cosmic-blue/issues"
+
+[[links]]
+name = "discuss"
+url = "https://github.com/cosmic-blue-os/cosmic-blue/discussions"
 
 [[links]]
 name = "docs"

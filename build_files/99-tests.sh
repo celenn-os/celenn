@@ -52,6 +52,7 @@ grep -q "alias ff='ublue-fastfetch'" /etc/profile.d/cosmic-blue-fastfetch.sh
 # (uwelcome only reads config.toml since projectbluefin/common #1662)
 test ! -e /etc/uwelcome/config.json
 [[ "$(grep -E '^url = ' /etc/uwelcome/config.toml)" == 'url = "https://github.com/cosmic-blue-os/cosmic-blue/issues"
+url = "https://github.com/cosmic-blue-os/cosmic-blue/discussions"
 url = "https://cosmic-blue-os.github.io/cosmic-blue/docs/"' ]]
 grep -qx 'commands = \["cosmic-blue-tips"\]' /etc/uwelcome/config.toml
 test -n "$(LANG=en_US.UTF-8 cosmic-blue-tips)"
