@@ -2,7 +2,7 @@
 
 # cosmic-blue
 
-cosmic-blue is an independent Fedora Atomic image (Fedora 44) with the
+cosmic-blue is an independent Fedora Atomic image with the
 [COSMIC](https://system76.com/cosmic) desktop. It is built on the
 [Universal Blue](https://universal-blue.org/) base images and inspired by
 Bluefin, but it is not part of, affiliated with or endorsed by Universal Blue

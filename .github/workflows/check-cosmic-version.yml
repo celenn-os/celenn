@@ -177,7 +177,6 @@ jobs:
               -e "s|^ARG BASE_TAG=\"${BASE_TAG}\"\$|ARG BASE_TAG=\"${TARGET_TAG}\"|" \
               -e "s|^\(ARG BASE_IMAGE=\"ghcr.io/ublue-os/base-main:\)[^\"]*\"|\1${TARGET_TAG}\"|" \
               Containerfile
-            sed -i "s|based on Fedora ${BASE_TAG}|based on Fedora ${TARGET_TAG}|" README.md
             grep -qx "ARG BASE_TAG=\"${TARGET_TAG}\"" Containerfile
             grep -qx "ARG BASE_IMAGE=\"ghcr.io/ublue-os/base-main:${TARGET_TAG}\"" Containerfile
           fi
@@ -248,7 +247,6 @@ jobs:
                 echo "\`${REFERENCE_IMAGE}\` is now based on Fedora ${TARGET_TAG}: move cosmic-blue from Fedora ${BASE_TAG} to Fedora ${TARGET_TAG}."
                 echo
                 echo "- \`Containerfile\`: \`BASE_TAG\` ${TARGET_TAG}, \`BASE_IMAGE\` \`ghcr.io/ublue-os/base-main:${TARGET_TAG}\`."
-                echo "- \`README.md\`: Fedora ${TARGET_TAG}."
               fi
               echo "- Fedora ${TARGET_TAG} ships COSMIC ${CURRENT} (cosmic-blue was pinned to ${PINNED})."
               echo "- \`build_files/theme/Cargo.toml\` and \`Cargo.lock\`: libcosmic revision and crate versions locked by cosmic-settings ${CURRENT}."
