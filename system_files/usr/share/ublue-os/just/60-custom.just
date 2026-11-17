@@ -348,3 +348,17 @@ bug-report mode="open":
     else
         echo "Report the bug later at ${form}"
     fi
+
+# NVIDIA image with Secure Boot: enroll the key that signs the driver (password "cosmicblue" at the next boot)
+[group('System')]
+enroll-secure-boot-key:
+    #!/usr/bin/bash
+    set -euo pipefail
+    # The password is not a secret: the firmware's MOK manager asks for it
+    # once, at the machine itself, to confirm that the key was queued on purpose.
+    password="cosmicblue"
+    key=/etc/pki/akmods/certs/akmods-ublue.der
+    sudo mokutil --timeout -1
+    printf '%s\n%s\n' "${password}" "${password}" | sudo mokutil --import "${key}"
+    echo "At the next reboot, a blue screen (MOK manager, QWERTY keyboard layout) shows up:"
+    echo "choose \"Enroll MOK\", then \"Continue\", and type the password \"${password}\"."

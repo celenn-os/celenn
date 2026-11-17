@@ -146,13 +146,15 @@ systemctl disable flatpak-add-fedora-repos.service || true
 EOF
 
 # NVIDIA image: queue the Universal Blue akmods key (it signs the NVIDIA
-# modules) for enrollment, as Bluefin's ISO does. With Secure Boot on, the
-# firmware's MOK manager asks to confirm it on the first reboot (password
-# "universalblue"); without Secure Boot, mokutil fails and nothing happens.
+# modules) for enrollment. With Secure Boot on, the firmware's MOK manager asks
+# to confirm it on the first reboot (password "cosmicblue", the same as
+# `ujust enroll-secure-boot-key`); without Secure Boot, mokutil fails and
+# nothing happens. The password is not a secret: it only confirms, once, at
+# the machine itself, that the key was queued on purpose.
 tee /usr/share/anaconda/post-scripts/secureboot-enroll-key.ks <<'EOF'
 %post --erroronfail --nochroot
 set -eu
-readonly ENROLLMENT_PASSWORD="universalblue"
+readonly ENROLLMENT_PASSWORD="cosmicblue"
 readonly SECUREBOOT_KEY="/etc/pki/akmods/certs/akmods-ublue.der"
 if [[ ! -d /sys/firmware/efi ]]; then
     echo "EFI mode not detected. Skipping key enrollment."

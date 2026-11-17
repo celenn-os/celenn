@@ -163,6 +163,12 @@ python3 -I /ctx/build_files/drop-just-recipes.py \
     "${STAGE}/usr/share/ublue-os/just/system.just" \
     bluespeed bluefin-apps bazaar-preview toggle-testing
 
+# `ujust enroll-secure-boot-key` (projectbluefin/common) queues the akmods key
+# with Universal Blue's password: 60-custom.just has cosmic-blue's own, with
+# the password "cosmicblue" that the ISO uses too.
+python3 -I /ctx/build_files/drop-just-recipes.py \
+    "${STAGE}/usr/share/ublue-os/just/default.just" enroll-secure-boot-key
+
 # Bluefin's zsh profile forces every LC_* variable (and LC_ALL) to en_US for
 # zsh login shells, which overrides the language chosen at install time.
 sed -i '/^export LC_[A-Z_]*=en_US/d' "${STAGE}/etc/zsh/zprofile"

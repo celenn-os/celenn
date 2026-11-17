@@ -193,7 +193,7 @@ done
 # cosmic-blue recipes (60-custom.just) parse and are listed by ujust
 recipes="$(just --justfile /usr/share/ublue-os/just/00-entry.just --summary)"
 for recipe in toggle-dark-mode reset-cosmic-theme reset-cosmic-config export-cosmic-config \
-              install-microsoft-fonts bug-report; do
+              install-microsoft-fonts bug-report enroll-secure-boot-key; do
     grep -qw -- "${recipe}" <<<"${recipes}"
 done
 
@@ -457,7 +457,10 @@ test -L /etc/systemd/system/multi-user.target.wants/cosmic-blue-migrate-defaults
 # before switching to cosmic-blue-nvidia
 AKMODS_CERT=/etc/pki/akmods/certs/akmods-ublue.der
 test -s "${AKMODS_CERT}"
-grep -q '^enroll-secure-boot-key:' /usr/share/ublue-os/just/default.just
+grep -q '^enroll-secure-boot-key:' /usr/share/ublue-os/just/60-custom.just
+if grep -rqw universalblue /usr/share/ublue-os/just; then
+    echo "ujust still uses the Universal Blue enrollment password"; exit 1
+fi
 command -v mokutil
 # (PKCS#7 module signatures name the key by its certificate serial number)
 akmods_key="$(openssl x509 -inform der -in "${AKMODS_CERT}" -noout -serial \
