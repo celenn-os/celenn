@@ -37,6 +37,24 @@ echo "${signed_updates}"
 grep -q 'would turn on the signature check' <<<"${signed_updates}" \
     || { echo "::error::cosmic-blue-signed-updates would not turn on the signature check"; errors=1; }
 
+# Network exposure: the firewall is on, and only known services listen on
+# the network. Desktop firewall zones (such as Fedora Workstation's) let
+# other computers reach any port above 1024, so a new service listening there
+# would be reachable on every network the computer joins. sshd only runs for
+# these tests.
+firewall="$(vm 'firewall-cmd --state && firewall-cmd --list-all' 2>&1)" \
+    || { echo "::error::firewalld is not running: ${firewall}"; errors=1; }
+echo "Firewall (default zone): ${firewall}"
+listeners="$(vm "ss -H -tulnp" 2>&1)" || listeners=""
+echo "${listeners}"
+unexpected="$(awk '$5 !~ /^(127\.|\[::1\]|\[::ffff:127\.)/' <<<"${listeners}" \
+    | grep -vE 'users:\(\("(sshd|sshd-session|avahi-daemon|NetworkManager|chronyd|tailscaled|systemd-resolve|cupsd|cups-browsed)"' || true)"
+if [[ -n "${unexpected}" ]]; then
+    echo "::error::Unexpected services listening on the network:"
+    echo "${unexpected}"
+    errors=1
+fi
+
 # `ujust bug-report` lists the image and the booted deployment
 bug_report="$(vm "ujust bug-report print")" || bug_report=""
 echo "${bug_report}"
