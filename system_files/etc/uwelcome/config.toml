@@ -20,7 +20,7 @@ cmd = "uwelcome toggle"
 desc = "banner_toggle"
 
 [[commands]]
-cmd = "ff"
+cmd = "fastfetch"
 desc = "sys_info"
 
 [[commands]]

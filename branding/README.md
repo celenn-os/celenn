@@ -71,7 +71,7 @@ writes the JPEG.
 
 ## fastfetch
 
-`fastfetch` or `ff` (aliases of `ublue-fastfetch`) shows the mark as terminal art
+`fastfetch` (an alias of `ublue-fastfetch`) shows the mark as terminal art
 next to the system information, in place of Bluefin's dinosaurs:
 
 - `system_files/usr/share/ublue-os/fastfetch/cosmic-blue-dark.txt` /

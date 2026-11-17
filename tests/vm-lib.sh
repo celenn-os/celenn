@@ -453,9 +453,9 @@ first_steps_shots() {
 }
 
 # The terminal as the test user sees it: the cosmic-blue prompt (Starship) and
-# fastfetch (`ff`). Text checks first, as the user's login shell runs them,
+# fastfetch. Text checks first, as the user's login shell runs them,
 # then COSMIC Terminal opened in a small git project, so the prompt shows its
-# path and git segments, with `ff` typed in it.
+# path and git segments, with `fastfetch` typed in it.
 # The screenshot sheet adds a full-size crop of the window
 # (tests/screenshot-sheet.py).
 TERMINAL_PROJECT=projects/hello
@@ -480,7 +480,7 @@ terminal_shot() {
         return 1
     fi
     sleep 12
-    type_text ff
+    type_text fastfetch
     monitor "sendkey ret"
     sleep 6
     screenshot "${SHOTS}/07-terminal"

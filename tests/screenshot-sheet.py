@@ -27,7 +27,7 @@ CAPTIONS = {
     "app-library": "App Library",
     "files": "Files",
     "settings": "Settings: Appearance",
-    "terminal": "Terminal: welcome message and system information (ff)",
+    "terminal": "Terminal: welcome message and system information",
     "terminal-zoom": "Terminal, full size",
     "lock-screen": "Lock screen",
 }
