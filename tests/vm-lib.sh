@@ -227,11 +227,15 @@ vm_check_system() {
 
     # The login screen starts through a login shell as its own user: anything
     # /etc/profile.d prints there shows on the screen before it appears
-    # (a "brew: Permission denied" did on 2026-11-17).
+    # (a "brew: Permission denied" did on 2026-11-17). Checked on the text
+    # console the login screen started on (what the user sees) and by running
+    # that login shell again as the login screen's user.
     local profile_output greeter_output
-    profile_output="$(vm 'stat -c "%A %U %n" /home/linuxbrew/.linuxbrew /home/linuxbrew/.linuxbrew/bin/brew 2>&1;
-        echo ---; runuser -u cosmic-greeter -- sh -l -c true 2>&1')" || true
-    echo "Homebrew files and login shell output of the login screen user:"
+    profile_output="$(vm 'stat -c "%A %U %C %n" /home/linuxbrew/.linuxbrew /home/linuxbrew/.linuxbrew/bin/brew 2>&1;
+        journalctl -b _TRANSPORT=audit --no-pager 2>/dev/null | grep -i "avc.*brew" | tail -n 5;
+        echo ---; { tr -s " " < /dev/vcs1; } 2>/dev/null | grep -o "[^ ]*profile\.d[^|]*" | cut -c1-300;
+        runuser -u cosmic-greeter -- sh -l -c true 2>&1')" || true
+    echo "Homebrew files, and login shell messages of the login screen user:"
     echo "${profile_output}"
     greeter_output="$(sed '1,/^---$/d' <<< "${profile_output}")"
     if [[ -n "${greeter_output}" ]]; then
