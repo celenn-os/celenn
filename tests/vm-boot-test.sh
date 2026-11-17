@@ -24,6 +24,11 @@ vm_wait_ssh
 errors=0
 vm_check_system boot || errors=1
 vm_check_tuning boot || errors=1
+# Startup time and memory in use at the login screen, to follow over time
+# (a virtual machine: compare runs with each other, not with real computers)
+boot_time="$(vm "systemd-analyze time" 2>/dev/null | head -n 1 || true)"
+memory="$(vm "free -m" 2>/dev/null | awk '/^Mem/ { print $3 " MB used, " $7 " MB available" }' || true)"
+log "Boot: ${boot_time:-unknown}; memory at the login screen: ${memory:-unknown}"
 vm "bootc status --json" | jq -e --arg ref "${TARGET_IMGREF}" \
     '.status.booted.image.image.image == $ref' >/dev/null \
     || { echo "::error::The booted image is not ${TARGET_IMGREF}"; errors=1; }

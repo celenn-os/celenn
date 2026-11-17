@@ -545,3 +545,6 @@ grep -q '^d /var/lib/systemd/coredump .* 5d$' /usr/lib/tmpfiles.d/coredump.conf
 grep -q 'libcryptsetup-token-systemd-fido2.so' /tmp/initramfs.txt
 # - speech for the screen reader
 systemctl --global is-enabled speech-dispatcher.socket
+
+# Homebrew sends no usage statistics
+grep -qx 'HOMEBREW_NO_ANALYTICS=1' /etc/homebrew/brew.env

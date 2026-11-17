@@ -254,12 +254,19 @@ install-cli-tools action="install":
         zsh) script=bling.sh; rc="${ZDOTDIR:-${HOME}}/.zshrc" ;;
         *) script=bling.sh; rc="${HOME}/.bashrc" ;;
     esac
+    # The tools this recipe installed (not those already there), so that
+    # `remove` leaves the user's own Homebrew tools alone
+    added="${XDG_STATE_HOME:-${HOME}/.local/state}/cosmic-blue/cli-tools.list"
     bling_on() { [[ -f "${rc}" ]] && grep -q "source ${bling_dir}/${script}" "${rc}"; }
     case "{{ action }}" in
         install)
             echo "This installs these command line tools for your account with Homebrew:"
             brew bundle list --file="${brewfile}" --formula | sed 's|.*/||' | paste -sd ' ' | fold -s -w 76 | sed 's/^/  /'
             echo
+            mkdir -p "$(dirname "${added}")"
+            for formula in $(brew bundle list --file="${brewfile}" --formula); do
+                brew list --formula "${formula##*/}" >/dev/null 2>&1 || echo "${formula##*/}" >>"${added}"
+            done
             brew bundle --file="${brewfile}"
             if ! bling_on; then
                 echo
@@ -282,12 +289,18 @@ install-cli-tools action="install":
                 sed -i "/### ${script} source start/,/### ${script} source end/d" "${rc}"
                 echo "Shortcuts turned off."
             fi
-            # A tool another Homebrew package depends on is kept
-            for formula in $(brew bundle list --file="${brewfile}" --formula); do
-                if brew list --formula "${formula##*/}" >/dev/null 2>&1; then
-                    brew uninstall --formula "${formula##*/}" || true
-                fi
-            done
+            # Only the tools this recipe installed; one another Homebrew
+            # package depends on is kept
+            if [[ -f "${added}" ]]; then
+                for formula in $(sort -u "${added}"); do
+                    if brew list --formula "${formula}" >/dev/null 2>&1; then
+                        brew uninstall --formula "${formula}" || true
+                    fi
+                done
+                rm -f "${added}"
+            else
+                echo "No tools were installed with ujust install-cli-tools on this account."
+            fi
             echo "Done. Open a new terminal."
             ;;
         *)

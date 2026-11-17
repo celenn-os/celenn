@@ -187,6 +187,13 @@ mv "${STAGE}/usr/bin/luks-tpm2-autounlock" "${STAGE}/usr/libexec/ublue-luks-tpm2
 cp -a "${STAGE}/." /
 cp -a /ctx/system_files/cosmic-blue/. /
 
+# No Homebrew usage statistics (brew sends them unless told not to), for
+# every shell: brew reads /etc/homebrew/brew.env itself. Appended, as the
+# brew image may ship its own settings in that file.
+install -d /etc/homebrew
+grep -qsx 'HOMEBREW_NO_ANALYTICS=1' /etc/homebrew/brew.env \
+    || echo 'HOMEBREW_NO_ANALYTICS=1' >>/etc/homebrew/brew.env
+
 # Only accept key-signed cosmic-blue images (cosign.pub, signed by build.yml).
 # The scope is the whole namespace, so that switching between cosmic-blue and
 # cosmic-blue-nvidia is verified too.
