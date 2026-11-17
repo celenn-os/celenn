@@ -1,0 +1,89 @@
+---
+# Old image versions on GHCR: every build publishes a new version of each
+# image, and nothing removed them. This lists (and, run by hand with
+# "delete", removes) the versions older than KEEP_DAYS, except:
+#   - any version tagged stable, stable-YYYYMMDD or latest (the weekly stable
+#     images stay available for rollback, whatever their age),
+#   - the cosign signatures and SBOM attestations of the versions kept.
+# The signature and attestation of a removed version go with it. Untagged
+# versions are left alone (they could be parts of a multi-platform image).
+# Run on a schedule it only lists what it would remove (run summary): a
+# removed version cannot be brought back, so deleting stays a manual choice.
+name: Clean old images
+
+on:
+  schedule:
+    # First day of each month, 07:41 UTC
+    - cron: '41 7 1 * *'
+  workflow_dispatch:
+    inputs:
+      delete:
+        description: "Really delete (otherwise only list what would be deleted)"
+        type: boolean
+        required: false
+        default: false
+
+env:
+  KEEP_DAYS: 90
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  clean:
+    name: Clean ${{ matrix.image }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [cosmic-blue, cosmic-blue-nvidia]
+    permissions:
+      packages: write
+    steps:
+      - name: List and remove old versions
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+          IMAGE: ${{ matrix.image }}
+          DELETE: ${{ inputs.delete == true && 'true' || 'false' }}
+        run: |
+          set -euo pipefail
+          api="orgs/${OWNER}/packages/container/${IMAGE}/versions"
+          versions="${RUNNER_TEMP}/versions.json"
+          gh api --paginate "${api}?per_page=100" --jq '.[] | {id, name, created_at, tags: .metadata.container.tags}' \
+            | jq -s . > "${versions}"
+          cutoff="$(date -u -d "-${KEEP_DAYS} days" +%FT%TZ)"
+          # Image versions (not signatures or attestations) to remove: old
+          # and not tagged stable* or latest
+          old="$(jq -r --arg cutoff "${cutoff}" '
+            .[] | select(.created_at < $cutoff and (.tags | length) > 0)
+                | select(any(.tags[]; test("^sha256-.*\\.(sig|att)$")) | not)
+                | select(any(.tags[]; test("^(stable.*|latest)$")) | not)
+                | .name' "${versions}")"
+          # Their signatures and attestations are tagged sha256-<digest>.sig/.att
+          remove="$(jq -r --arg old "${old}" '
+            ($old | split("\n") | map(select(. != ""))) as $digests
+            | .[] | select(
+                (.name as $n | $digests | index($n))
+                or any(.tags[]; (capture("^sha256-(?<d>[0-9a-f]+)\\.(sig|att)$").d // "") as $d
+                       | $d != "" and ($digests | index("sha256:" + $d))))
+            | "\(.id) \(.created_at[0:10]) \(.name[0:19]) \(.tags | join(","))"' "${versions}")"
+          total="$(jq length "${versions}")"
+          count="$(grep -c . <<< "${remove}" || true)"
+          {
+            echo "### ${IMAGE}"
+            echo
+            echo "${total} versions, ${count} older than ${KEEP_DAYS} days and not stable or latest."
+            if [[ "${DELETE}" != true && "${count}" -gt 0 ]]; then
+              echo "Nothing deleted: run this workflow by hand with \"delete\" to remove them."
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"
+          [[ -n "${remove}" ]] || exit 0
+          echo "${remove}"
+          [[ "${DELETE}" == true ]] || exit 0
+          while read -r id _; do
+            gh api -X DELETE "${api}/${id}" >/dev/null
+          done <<< "${remove}"
+          echo "Deleted ${count} versions" >> "${GITHUB_STEP_SUMMARY}"

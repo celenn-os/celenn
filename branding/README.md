@@ -123,3 +123,17 @@ The `cosmic-blue` icon theme is Tela circle, recolored with the accent
 The files are named like Tela's, and the theme also takes every name that
 Tela links to them (`build_files/icon_theme/compose.py`). Regenerate them with
 `python3 icons/build.py` after a change.
+
+## Licenses
+
+The project's own artwork (logo, wallpapers except the photo, icons drawn by
+`icons/build.py`, the prompt font, the Plymouth images) is under the
+repository's Apache-2.0 license. Third-party parts shipped in the image:
+
+| Part | Source | License |
+|------|--------|---------|
+| Wordmark letters (outlines in `logo/glyphs.json`) | Montserrat Light | SIL Open Font License 1.1 |
+| Milky Way photo (`cosmic-blue-milky-way.jpg`) | NASA, ISS064-E-55946 | Public domain |
+| Icon theme base | [Tela circle](https://github.com/vinceliuice/Tela-circle-icon-theme), recolored | No license file in the upstream repository (the author's other themes are GPL-3.0) |
+| Cursor theme | [Bibata](https://github.com/ful1e5/Bibata_Cursor), recolored | GPL-3.0 (its LICENSE ships with the theme) |
+| Boot spinner frames | Fedora's Plymouth spinner theme, tinted | GPL-2.0-or-later |
