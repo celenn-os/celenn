@@ -47,6 +47,10 @@ if LC_ALL=C.UTF-8 grep -q '[▁▂▃▄▅▆▇█▏▎▍▌▋▊▉▐▖�
     echo "fastfetch logo uses glyphs that leave gaps in COSMIC Terminal"; exit 1
 fi
 grep -q "alias ff='ublue-fastfetch'" /etc/profile.d/cosmic-blue-fastfetch.sh
+# New terminals (bash and fish) run fastfetch after the welcome banner:
+# ours replace projectbluefin/common's banner-only scripts
+grep -qx '[[:space:]]*ublue-fastfetch' /etc/profile.d/uwelcome.sh
+grep -qx '[[:space:]]*ublue-fastfetch' /usr/share/fish/vendor_conf.d/fish_greeting.fish
 # Terminal welcome banner (uwelcome): cosmic-blue links and tips, no
 # Bluefin links, launchers or commands left
 # (uwelcome only reads config.toml since projectbluefin/common #1662)

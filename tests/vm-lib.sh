@@ -453,9 +453,9 @@ first_steps_shots() {
 }
 
 # The terminal as the test user sees it: the cosmic-blue prompt (Starship) and
-# fastfetch (`ff`). Text checks first, as the user's login shell runs them,
-# then COSMIC Terminal opened in a small git project, so the prompt shows its
-# path and git segments, with `ff` typed in it.
+# the welcome banner then fastfetch, which every new terminal shows. Text
+# checks first, as the user's login shell runs them, then COSMIC Terminal
+# opened in a small git project, so the prompt shows its path and git segments.
 # The screenshot sheet adds a full-size crop of the window
 # (tests/screenshot-sheet.py).
 TERMINAL_PROJECT=projects/hello
@@ -479,10 +479,7 @@ terminal_shot() {
         warn "could not start cosmic-term"
         return 1
     fi
-    sleep 12
-    type_text ff
-    monitor "sendkey ret"
-    sleep 6
+    sleep 15
     screenshot "${SHOTS}/07-terminal"
     vm "pkill -u ${DEMO_USER} -f '^(/usr/bin/)?cosmic-term'" || true
     sleep 3
