@@ -63,6 +63,8 @@ fi
 test ! -e /usr/share/applications/discourse.desktop
 test ! -e /usr/share/applications/io.projectbluefin.Report.desktop
 grep -q '^Exec=/usr/bin/cosmic-blue-docs$' /usr/share/applications/documentation.desktop
+grep -qx 'Icon=cosmic-blue-docs' /usr/share/applications/documentation.desktop
+test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-docs.svg
 # No ChairLift (Bluefin's Control Center) or its helpers
 if compgen -G '/usr/share/applications/*chairlift*' >/dev/null \
     || compgen -G '/usr/share/polkit-1/actions/*chairlift*' >/dev/null \
