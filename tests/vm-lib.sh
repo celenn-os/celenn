@@ -225,6 +225,20 @@ vm_check_system() {
     vm 'systemctl is-active cosmic-greeter.service' \
         || { echo "::${level}::${label}: cosmic-greeter.service is not active"; errors=1; }
 
+    # The login screen starts through a login shell as its own user: anything
+    # /etc/profile.d prints there shows on the screen before it appears
+    # (a "brew: Permission denied" did on 2026-11-17).
+    local profile_output greeter_output
+    profile_output="$(vm 'stat -c "%A %U %n" /home/linuxbrew/.linuxbrew /home/linuxbrew/.linuxbrew/bin/brew 2>&1;
+        echo ---; runuser -u cosmic-greeter -- sh -l -c true 2>&1')" || true
+    echo "Homebrew files and login shell output of the login screen user:"
+    echo "${profile_output}"
+    greeter_output="$(sed '1,/^---$/d' <<< "${profile_output}")"
+    if [[ -n "${greeter_output}" ]]; then
+        echo "::${level}::${label}: the login screen's login shell prints messages: ${greeter_output}"
+        errors=1
+    fi
+
     # The login screen runs its own compositor
     deadline=$((SECONDS + 120))
     until vm 'pgrep -x cosmic-comp' >/dev/null; do
