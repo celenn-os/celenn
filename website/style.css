@@ -463,17 +463,16 @@ main {
 
 .brand { white-space: nowrap; }
 
-/* Phones: keep the top bar on one line. The GitHub link is also in the
-   footer, and the globe alone stands for the language switch. */
+/* Phones: keep the top bar on one line. The globe alone stands for the
+   language switch. */
 @media (max-width: 520px) {
   .top { padding: 16px 12px 16px 16px; gap: 6px; }
   .top .links { gap: 0; }
   .top .text { padding: 0 6px; font-size: .95rem; }
-  .top .icon > span,
-  .top .icon[href^="https://github.com"] { display: none; }
+  .top .icon > span { display: none; }
 }
 
-@media (max-width: 359px) {
+@media (max-width: 400px) {
   .brand { font-size: 0; gap: 0; }
 }
 
