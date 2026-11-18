@@ -88,6 +88,17 @@ EVERYDAY_PACKAGES=(
     cups-pk-helper
     foomatic
     foomatic-db-ppds
+    # Printer drivers of Fedora Workstation's printing group, for printers
+    # without driverless (IPP Everywhere) printing: Epson inkjets, Gutenprint
+    # (older Canon, Epson and others), Brother label printers. HP (hplip),
+    # Brother lasers (brlaser) and several others are in the list above.
+    epson-inkjet-printer-escpr
+    epson-inkjet-printer-escpr2
+    gutenprint-cups
+    ptouch-driver
+    # Scanners: the SANE drivers of most USB scanners (sane-airscan already
+    # covers network scanners). Document Scanner is a first-boot flatpak.
+    sane-backends-drivers-scanners
     # Fonts metric-compatible with Calibri and Cambria, so Office documents
     # keep their layout (Liberation already covers Arial, Times and Courier)
     google-carlito-fonts

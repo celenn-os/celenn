@@ -811,6 +811,82 @@ switch-channel channel="status":
         echo "To go back: ujust switch-channel ${tag}"
     fi
 
+# Install firmware updates (BIOS/UEFI, SSD, dock...)
+[group('System')]
+update-firmware:
+    #!/usr/bin/bash
+    set -euo pipefail
+    # fwupd lists the devices that can be updated; the updates come from the
+    # LVFS (fwupd.org), signed by the device makers. Nothing installs on its
+    # own: the Firmware app shows the same updates.
+    echo "Downloading the list of firmware updates..."
+    if ! fwupdmgr refresh --force >/dev/null; then
+        echo "Could not download the list of firmware updates (no network?)." >&2
+        exit 1
+    fi
+    # Exit code 2: nothing to update
+    status=0
+    fwupdmgr update --no-unreported-check || status=$?
+    case "${status}" in
+        0) ;;
+        2) echo "No firmware updates for this computer." ;;
+        *) exit "${status}" ;;
+    esac
+
+# Stop charging the laptop at 80% so the battery lasts longer
+[group('System')]
+toggle-battery-limit mode="toggle":
+    #!/usr/bin/bash
+    set -euo pipefail
+    # UPower (the battery service behind COSMIC's battery applet) caps the
+    # charge, on laptops whose driver allows it (ThinkPad, ASUS, Dell,
+    # Framework, Huawei, LG, Samsung, MSI...): charging stops at 80% and
+    # starts again below 75%, unless the laptop maker set other values in
+    # UPower's hardware database. UPower keeps the setting across reboots.
+    property() { # device name
+        busctl get-property org.freedesktop.UPower "$1" org.freedesktop.UPower.Device "$2" 2>/dev/null \
+            | awk '{print $2}'
+    }
+    # The laptop's own battery, not a mouse's or a headset's
+    battery=""
+    for device in $(upower --enumerate | grep '/battery_'); do
+        if [[ "$(property "${device}" PowerSupply)" == true ]]; then
+            battery="${device}"
+            break
+        fi
+    done
+    if [[ -z "${battery}" ]]; then
+        echo "No laptop battery found: nothing to do."
+        exit 0
+    fi
+    if [[ "$(property "${battery}" ChargeThresholdSupported)" != true ]]; then
+        echo "This laptop does not let the system limit its charge."
+        echo "Some laptops offer it in their firmware settings: ujust reboot-to-bios"
+        exit 0
+    fi
+    enabled="$(property "${battery}" ChargeThresholdEnabled)"
+    case "{{ mode }}" in
+        on) wanted=true ;;
+        off) wanted=false ;;
+        toggle) if [[ "${enabled}" == true ]]; then wanted=false; else wanted=true; fi ;;
+        status) wanted="${enabled}" ;;
+        *)
+            echo "Usage: ujust toggle-battery-limit [toggle|on|off|status]" >&2
+            exit 1
+            ;;
+    esac
+    if [[ "${wanted}" != "${enabled}" ]]; then
+        busctl call org.freedesktop.UPower "${battery}" org.freedesktop.UPower.Device \
+            EnableChargeThreshold b "${wanted}"
+    fi
+    if [[ "${wanted}" == true ]]; then
+        start="$(property "${battery}" ChargeStartThreshold)"
+        end="$(property "${battery}" ChargeEndThreshold)"
+        echo "Battery limit on: charging stops at ${end:-80}% and starts again below ${start:-75}%."
+    else
+        echo "Battery limit off: the battery charges to 100%."
+    fi
+
 # Earlier names (cosmic-blue's and Bluefin's, renamed in build_files/10-system-files.sh),
 # still accepted but not listed
 [private]

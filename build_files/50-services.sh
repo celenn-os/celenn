@@ -30,6 +30,13 @@ systemctl enable \
     tuned.service \
     tuned-ppd.service
 
+# Printing and scanning, already in base-main and enabled by Fedora's
+# presets; enabled here too, like power management. Avahi finds the network
+# printers and scanners (driverless IPP, eSCL) that CUPS and sane-airscan use.
+systemctl enable \
+    avahi-daemon.service \
+    cups.socket
+
 # podman.socket: rootless Docker-compatible API, used by the docker CLI through
 # the "podman" context (user-setup hook 30-docker-podman.sh)
 systemctl --global enable \
