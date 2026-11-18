@@ -200,7 +200,7 @@ done
 recipes="$(just --justfile /usr/share/ublue-os/just/00-entry.just --summary)"
 for recipe in toggle-dark-mode reset-cosmic-theme reset-cosmic-config export-cosmic-config \
               install-microsoft-fonts install-cli-tools bug-report enroll-secure-boot-key \
-              switch-channel; do
+              switch-channel install-gaming; do
     grep -qw -- "${recipe}" <<<"${recipes}"
 done
 

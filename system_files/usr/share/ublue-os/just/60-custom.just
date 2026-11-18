@@ -309,6 +309,45 @@ install-cli-tools action="install":
             ;;
     esac
 
+# Install Steam and Heroic (Epic, GOG and Amazon games) from Flathub; `remove` takes them away
+[group('Apps')]
+install-gaming action="install":
+    #!/usr/bin/bash
+    set -euo pipefail
+    # Both are Flathub apps, installed system-wide like the first-boot apps.
+    # Flatpak adds the graphics driver parts they need (NVIDIA included) by
+    # itself. Removing them keeps the games and saves in ~/.var/app.
+    apps=(com.valvesoftware.Steam com.heroicgameslauncher.hgl)
+    case "{{ action }}" in
+        install)
+            echo "This installs from Flathub:"
+            echo "  Steam   - Valve's game store and launcher (Proton runs Windows games)"
+            echo "  Heroic  - games from Epic Games, GOG and Amazon Prime Gaming"
+            echo "The download is about 1.5 GB, games not included."
+            if [[ -t 0 ]] && ! gum confirm "Install them?"; then
+                echo "Nothing installed."
+                exit 0
+            fi
+            flatpak install --system --noninteractive flathub "${apps[@]}"
+            echo "Done: Steam and Heroic are in the app list."
+            echo "Remove them with: ujust install-gaming remove"
+            ;;
+        remove)
+            readarray -t installed < <(flatpak list --system --app --columns=application | grep -xF -f <(printf '%s\n' "${apps[@]}") || true)
+            if [[ "${#installed[@]}" -eq 0 ]]; then
+                echo "Steam and Heroic are not installed."
+                exit 0
+            fi
+            flatpak uninstall --system --noninteractive "${installed[@]}"
+            echo "Removed. Your games and saves stay in ~/.var/app; delete"
+            echo "~/.var/app/com.valvesoftware.Steam or ~/.var/app/com.heroicgameslauncher.hgl to free the space."
+            ;;
+        *)
+            echo "Usage: ujust install-gaming [install|remove]" >&2
+            exit 1
+            ;;
+    esac
+
 # Turn the FlatPark app source on or off (off by default; or force one: on, off, status)
 [group('Apps')]
 toggle-flatpark mode="toggle":
