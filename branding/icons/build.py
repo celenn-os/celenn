@@ -262,16 +262,14 @@ INSTALLER = tela_app(
     '<rect x="29.5" y="15" width="5" height="17" rx="2.5" fill="#fff"/>'
     '<path d="M22.5 28.5a2.2 2.2 0 0 1 3.1-3.1L32 31.8l6.4-6.4a2.2 2.2 0 0 1 3.1 3.1l-8 8a2.1 2.1 0 0 1-3 0z" fill="#fff"/>')
 
-# The welcome tour (live ISO) and first steps tour (installed system): sparkles
-def star(cx, cy, r, op=None):
-    """A four-pointed star centered on cx, cy."""
-    k = r * .28
-    a = f' opacity="{op}"' if op else ""
-    return (f'<path d="M{cx} {cy-r}C{cx+k*.6} {cy-k} {cx+k} {cy-k*.6} {cx+r} {cy}C{cx+k} {cy+k*.6} {cx+k*.6} {cy+k} {cx} {cy+r}'
-            f'C{cx-k*.6} {cy+k} {cx-k} {cy+k*.6} {cx-r} {cy}C{cx-k} {cy-k*.6} {cx-k*.6} {cy-k} {cx} {cy-r}z" fill="#fff"{a}/>')
-
-
-WELCOME = tela_app(star(29, 34, 14) + star(42.5, 20.5, 6, ".45") + star(43, 42, 3.6, ".45"))
+# The welcome tour (live ISO) and first steps tour (installed system): a rocket
+WELCOME = tela_app(
+    '<g transform="translate(32 32) rotate(45) scale(1.05)">'
+    '<path d="M-7.5 1L-13 7.5V13L-7.5 9.5zM7.5 1L13 7.5V13L7.5 9.5z" fill="#fff" opacity=".45"/>'
+    '<path d="M-4 11.5h8C4 15 2 18 0 20.5C-2 18 -4 15 -4 11.5z" fill="#fff" opacity=".45"/>'
+    '<path d="M0 -17C6 -12 7.5 -5 7.5 2V9h-15V2C-7.5 -5 -6 -12 0 -17z" fill="#fff"/>'
+    '<circle cx="0" cy="-3" r="3.6" fill="#4f8dff"/></g>'
+)
 
 # Icon -> names (the desktop entries of the dock buttons and of the apps
 # they open). The first name gets the file, the others are links to it.
