@@ -385,6 +385,12 @@ cmp /ctx/greeter/cosmic-greeter /usr/bin/cosmic-greeter
 cmp /ctx/store/cosmic-store /usr/bin/cosmic-store
 grep -q /usr/share/cosmic-blue/flatpak/flatpark.flatpakrepo /usr/bin/cosmic-store
 
+# COSMIC Files: our rebuild, which gives the user folders their own icons
+# under /var/home (build_files/filemanager/patch.py)
+for bin in /ctx/filemanager/bin/*; do
+    cmp "${bin}" "/usr/bin/$(basename "${bin}")"
+done
+
 # Frosted glass on by default, in the theme apps read and in the builder
 for theme in Dark Light; do
     grep -qx true "/usr/share/cosmic/com.system76.CosmicTheme.${theme}/v2/frosted_windows"
