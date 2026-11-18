@@ -315,6 +315,12 @@ wait_for() {
     done
 }
 warn() { echo "::warning::Desktop screenshots: $*"; }
+# A problem the boot test fails on but the update test only warns about (its
+# account was made by the previous image): what a new account gets at its
+# first login (COSMIC's first-run assistant, cosmic-blue's tour) and the
+# Firefox policies. Kept in DESKTOP_PROBLEMS for the boot test.
+DESKTOP_PROBLEMS=()
+desktop_problem() { warn "$*"; DESKTOP_PROBLEMS+=("$*"); }
 
 # Creates the test user if needed and shows it on the login screen (the
 # login screen reads the accounts when it starts)
@@ -382,7 +388,7 @@ desktop_tour() {
     sleep 30
     if vm "pgrep -u ${DEMO_USER} -f cosmic-initial-setup" >/dev/null; then
         screenshot "${SHOTS}/02-first-run"
-        warn "COSMIC's first-run assistant opened at the first login"
+        desktop_problem "COSMIC's first-run assistant opened at the first login"
         vm "pkill -u ${DEMO_USER} -f cosmic-initial-setup" || true
         sleep 8
     fi
@@ -398,9 +404,10 @@ desktop_tour() {
     monitor "sendkey esc"
     sleep 3
 
-    # Files (folder icons), Settings (accent, theme)
+    # Files (folder icons), Settings (accent, theme), COSMIC Store (our
+    # rebuild, which no other step starts: a crash fails vm_check_crashes)
     local entry name cmd
-    for entry in "05-files|cosmic-files" "06-settings|cosmic-settings appearance"; do
+    for entry in "05-files|cosmic-files" "06-settings|cosmic-settings appearance" "06-store|cosmic-store"; do
         name="${entry%%|*}"
         cmd="${entry#*|}"
         if ! vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
@@ -413,6 +420,11 @@ desktop_tour() {
         vm "pkill -u ${DEMO_USER} -f '^(/usr/bin/)?${cmd%% *}'" || true
         sleep 3
     done
+
+    # Firefox, a first-boot flatpak in the dock, with the cosmic-blue
+    # policies it reads from its systemconfig extension (mounted at
+    # /app/etc/firefox in its sandbox, see cosmic-blue-firefox.conf)
+    firefox_shot
 
     # Terminal: prompt and fastfetch
     terminal_shot
@@ -457,7 +469,7 @@ FIRST_STEPS_PAGES=6
 first_steps_shots() {
     local page
     if ! wait_for 60 "pgrep -u ${DEMO_USER} -f cosmic-blue-tour\$"; then
-        warn "the first steps tour did not open at the first login"
+        desktop_problem "the first steps tour did not open at the first login"
         return 1
     fi
     sleep 8
@@ -469,7 +481,7 @@ first_steps_shots() {
     vm "pkill -u ${DEMO_USER} -f cosmic-blue-tour\$" || true
     sleep 3
     vm "test ! -e ~${DEMO_USER}/.config/cosmic-blue/first-steps-pending" \
-        || warn "the first steps tour would open again at the next login"
+        || desktop_problem "the first steps tour would open again at the next login"
 }
 
 # The terminal as the test user sees it: the cosmic-blue prompt (Starship) and
@@ -511,6 +523,24 @@ terminal_shot() {
     sleep 6
     screenshot "${SHOTS}/07-terminal"
     vm "pkill -u ${DEMO_USER} -f '^(/usr/bin/)?cosmic-term'" || true
+    sleep 3
+}
+
+FIREFOX=org.mozilla.firefox
+firefox_shot() {
+    local policies
+    policies="$(vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} flatpak run --command=cat ${FIREFOX} \
+        /app/etc/firefox/policies/policies.json" 2>&1)" || policies=""
+    jq -e '.policies.DisableTelemetry' <<<"${policies}" >/dev/null 2>&1 \
+        || desktop_problem "Firefox does not see the cosmic-blue policies: $(head -c 300 <<<"${policies}")"
+    if ! vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
+            setsid -f flatpak run ${FIREFOX} >/dev/null 2>&1 </dev/null"; then
+        warn "could not start Firefox"
+        return 1
+    fi
+    sleep 20
+    screenshot "${SHOTS}/06-web-browser"
+    vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} flatpak kill ${FIREFOX}" || true
     sleep 3
 }
 
