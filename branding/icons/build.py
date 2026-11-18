@@ -8,7 +8,7 @@
 - apps: the COSMIC dock buttons (launcher, workspaces, applications) and
   the COSMIC Store and Settings in the Tela circle style, as are the
   Documentation launcher, the live ISO's welcome tour and installer, and
-  the installed system's first steps tour
+  the installed system's first steps tour and the System Update launcher
 - actions: the symbolic icons of the suspend and restart buttons in the
   panel's power menu (Tela has none for restart, and its suspend icon is
   hard to read). They follow the style of Tela's shutdown icon, which stays.
@@ -18,6 +18,7 @@ Tela; every other icon still comes from Tela.
 
 Usage: python3 build.py  (rewrites build_files/icon_theme/layer/)
 """
+import math
 import os
 import shutil
 from pathlib import Path
@@ -29,6 +30,7 @@ APPS = REPO / "iso_files" / "welcome"
 HICOLOR_APPS = REPO / "system_files/usr/share/icons/hicolor/scalable/apps"
 FIRST_STEPS_ICON = HICOLOR_APPS / "cosmic-blue-welcome.svg"
 DOCS_ICON = HICOLOR_APPS / "cosmic-blue-docs.svg"
+UPDATE_ICON = HICOLOR_APPS / "cosmic-blue-update.svg"
 
 def stroke(d, width=2.2):
     return (f'<path d="{d}" fill="none" stroke="currentColor" stroke-width="{width}" '
@@ -271,6 +273,31 @@ WELCOME = tela_app(
     '<circle cx="0" cy="-3" r="3.6" fill="#4f8dff"/></g>'
 )
 
+def circle_arrow(r, start, end, opacity=None, head=6.2):
+    """A clockwise arc around the center, from angle start to end (degrees,
+    counterclockwise from the right), ending in an arrowhead."""
+    def at(angle, radius=r):
+        a = math.radians(angle)
+        return 32 + radius * math.cos(a), 32 - radius * math.sin(a)
+    (x0, y0), (x1, y1) = at(start), at(end)
+    a = math.radians(end)
+    tip = (x1 + math.sin(a) * head * 1.05, y1 + math.cos(a) * head * 1.05)
+    (bx1, by1), (bx2, by2) = at(end, r + head), at(end, r - head)
+    alpha = f' opacity="{opacity}"' if opacity else ""
+    return (f'<g{alpha}><path d="M{x0:.2f} {y0:.2f}A{r} {r} 0 0 1 {x1:.2f} {y1:.2f}" fill="none" '
+            'stroke="#fff" stroke-width="4.2" stroke-linecap="round"/>'
+            f'<path d="M{tip[0]:.2f} {tip[1]:.2f}L{bx1:.2f} {by1:.2f}L{bx2:.2f} {by2:.2f}z" fill="#fff" '
+            'stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></g>')
+
+
+# The System Update launcher: an arrow going down inside two circling arrows
+UPDATE = tela_app(
+    circle_arrow(15.5, 165, 40) + circle_arrow(15.5, 345, 220, ".45")
+    + '<rect x="29.8" y="22" width="4.4" height="13" rx="2.2" fill="#fff"/>'
+    '<path d="M25.2 31.2a1.9 1.9 0 0 1 2.7-2.7L32 32.6l4.1-4.1a1.9 1.9 0 0 1 2.7 2.7l-5.4 5.4a2 2 0 0 1-2.8 0z" '
+    'fill="#fff"/>'
+)
+
 # Icon -> names (the desktop entries of the dock buttons and of the apps
 # they open). The first name gets the file, the others are links to it.
 DOCK = {
@@ -336,6 +363,7 @@ def main():
     # Also the icon of the installed system's first steps tour
     FIRST_STEPS_ICON.write_text(WELCOME)
     DOCS_ICON.write_text(DOCS)
+    UPDATE_ICON.write_text(UPDATE)
     (APPS / "cosmic-blue-installer.svg").write_text(INSTALLER)
 
 

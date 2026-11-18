@@ -106,12 +106,16 @@ GNOME_ONLY+=(
 )
 # Bluefin's community and help launchers, and its Report a Problem app, which
 # files issues in Bluefin's repositories. cosmic-blue's own Documentation
-# launcher (system_files) opens the cosmic-blue guide instead.
+# launcher (system_files) opens the cosmic-blue guide instead. Bluefin's
+# icons of these launchers and of System Update go too: ours have their own.
 GNOME_ONLY+=(
     usr/share/applications/discourse.desktop
     usr/share/applications/bluefin-help.desktop
     usr/share/applications/io.projectbluefin.Report.desktop
     usr/share/icons/hicolor/scalable/apps/io.projectbluefin.Report.svg
+    usr/share/icons/hicolor/scalable/places/ublue-discourse.svg
+    usr/share/icons/hicolor/scalable/places/ublue-docs.svg
+    usr/share/icons/hicolor/scalable/places/ublue-update.svg
     usr/share/ublue-os/just/60-report.just
     usr/share/ublue-os/homebrew/preinstall.d/bluefin-report.Brewfile
 )
