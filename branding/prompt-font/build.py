@@ -95,11 +95,20 @@ ARROW_TIP = 1000
 # Its back edge starts inside the cell before, a space of the arrow's own color,
 # so antialiasing leaves no seam between the segment and its arrow
 ARROW_BACK = -150
+# The slanted sides start at the cell edge, exactly where the segment's
+# background ends: starting them at the back edge would leave a small step at
+# the segment's corners. They start a little before the cell edge, so they
+# cross the line's real top and bottom (the cell edges above are 15 units
+# further out) right on it
+ARROW_MID = round((CELL_TOP + CELL_BOTTOM) / 2)
+ARROW_START = round(-ARROW_TIP * 15 / (CELL_TOP - ARROW_MID - 15))
 
 
 def arrow(pen):
     polygon(pen, [(ARROW_BACK, round(CELL_TOP)),
-                  (ARROW_TIP, round((CELL_TOP + CELL_BOTTOM) / 2)),
+                  (ARROW_START, round(CELL_TOP)),
+                  (ARROW_TIP, ARROW_MID),
+                  (ARROW_START, round(CELL_BOTTOM)),
                   (ARROW_BACK, round(CELL_BOTTOM))])
 
 
