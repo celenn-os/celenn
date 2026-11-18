@@ -342,6 +342,7 @@ systemctl is-enabled cosmic-blue-user-defaults.service
 # instead, with its welcome illustration); VM agent
 test -f /etc/skel/.config/cosmic-initial-setup-done
 test -f /usr/share/cosmic-blue/tour-welcome.svg
+test -f /usr/share/cosmic-blue/tour-banner.svg
 rpm -q spice-vdagent
 
 # First steps tour: opened once for new accounts, at the first login;

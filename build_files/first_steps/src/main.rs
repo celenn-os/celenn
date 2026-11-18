@@ -30,6 +30,9 @@ const ISSUES: &str = "https://github.com/cosmic-blue-os/cosmic-blue/issues";
 const LOGO: &str = "/usr/share/icons/hicolor/scalable/apps/cosmic-blue-logo.svg";
 /// Welcome page illustration: the default wallpaper in miniature
 const HERO: &str = "/usr/share/cosmic-blue/tour-welcome.svg";
+/// The same sky (600 x 100), behind the icon of the other pages
+/// (both from branding/tour/build.py)
+const BANNER: &str = "/usr/share/cosmic-blue/tour-banner.svg";
 const INSTALLERS: [&str; 2] = [
     "/usr/share/applications/liveinst.desktop",
     "/usr/share/applications/anaconda.desktop",
@@ -93,10 +96,9 @@ const FRENCH: &[(&str, &str)] = &[
     ),
     ("Handy commands", "Commandes utiles"),
     (
-        "ujust runs the shortcuts that come with the system. Type these in a terminal.",
-        "ujust lance les raccourcis fournis avec le système. Tapez-les dans un terminal.",
+        "ujust runs the shortcuts that come with the system: type ujust in a terminal to list them all. A few of them:",
+        "ujust lance les raccourcis fournis avec le système : tapez ujust dans un terminal pour tous les lister. En voici quelques-uns :",
     ),
-    ("List all the shortcuts", "Lister tous les raccourcis"),
     (
         "Developer tools: Docker, VS Code, Podman Desktop…",
         "Outils de développement : Docker, VS Code, Podman Desktop…",
@@ -254,8 +256,8 @@ enum Body {
 }
 
 struct Page {
-    /// Icon of the icon theme shown above the title, in color like the
-    /// app icons (cosmic-blue's Tela circle theme)
+    /// Icon of the icon theme shown above the title on the BANNER sky, in
+    /// color like the app icons (cosmic-blue's Tela circle theme)
     icon: Option<&'static str>,
     title: &'static str,
     description: Option<&'static str>,
@@ -351,10 +353,9 @@ fn pages(mode: Mode) -> Vec<Page> {
                 ..Page::new(
                     "Handy commands",
                     Some(
-                        "ujust runs the shortcuts that come with the system. Type these in a terminal.",
+                        "ujust runs the shortcuts that come with the system: type ujust in a terminal to list them all. A few of them:",
                     ),
                     Body::Commands(vec![
-                        ("ujust", "List all the shortcuts"),
                         (
                             "ujust devmode",
                             "Developer tools: Docker, VS Code, Podman Desktop…",
@@ -572,6 +573,7 @@ struct App<T: Tour> {
     toasts: Toasts<Message>,
     /// Welcome illustration, or the logo when it is missing
     welcome: Option<widget::svg::Handle>,
+    banner: Option<widget::svg::Handle>,
 }
 
 impl<T: Tour> Application for App<T> {
@@ -605,6 +607,9 @@ impl<T: Tour> Application for App<T> {
                 .into_iter()
                 .find(|path| Path::new(path).exists())
                 .map(widget::svg::Handle::from_path),
+            banner: Path::new(BANNER)
+                .exists()
+                .then(|| widget::svg::Handle::from_path(BANNER)),
         };
         let title = if mode == Mode::Live {
             "Welcome to cosmic-blue"
@@ -713,12 +718,58 @@ impl<T: Tour> Application for App<T> {
         });
 
         let title = text::title2(tr(page.title)).center().width(Length::Fill);
-        let icon = page.icon.map(|name| {
-            widget::icon::from_name(name)
-                .size(56)
+        let icon = page.icon.map(|name| -> Element<'_, Message> {
+            let icon = widget::icon::from_name(name).size(64);
+            match &self.banner {
+                Some(banner) => cosmic::iced::widget::stack![
+                    widget::svg(banner.clone()).width(600).height(100),
+                    widget::container(icon).center(Length::Fill),
+                ]
+                .width(600)
+                .height(100)
                 .apply(widget::container)
                 .center_x(Length::Fill)
+                .into(),
+                None => widget::container(icon).center_x(Length::Fill).into(),
+            }
         });
+        // Where we are in the tour: one dot per page, the current one in
+        // the accent color
+        let dots = self
+            .pages
+            .iter()
+            .enumerate()
+            .fold(
+                widget::row::with_capacity(self.pages.len()).spacing(space_xxs),
+                |row, (i, _)| {
+                    let current = i == self.page_i;
+                    row.push(
+                        widget::container(widget::space::horizontal().width(Length::Fixed(0.0)))
+                            .width(if current { 20 } else { 8 })
+                            .height(8)
+                            .class(theme::Container::custom(move |theme| {
+                                let cosmic = theme.cosmic();
+                                let color = if current {
+                                    cosmic.accent_color()
+                                } else {
+                                    let mut color = cosmic.on_bg_color();
+                                    color.alpha = 0.25;
+                                    color
+                                };
+                                cosmic::iced::widget::container::Style {
+                                    background: Some(cosmic::iced::Color::from(color).into()),
+                                    border: cosmic::iced::Border {
+                                        radius: 4.0.into(),
+                                        ..Default::default()
+                                    },
+                                    ..Default::default()
+                                }
+                            })),
+                    )
+                },
+            )
+            .apply(widget::container)
+            .center_x(Length::Fill);
 
         let mut content = widget::column::with_capacity(6)
             .spacing(space_m)
@@ -749,7 +800,7 @@ impl<T: Tour> Application for App<T> {
             .apply(widget::container)
             .height(Length::Fill);
 
-        let page_view = widget::column::with_capacity(9)
+        let page_view = widget::column::with_capacity(11)
             .push(widget::space::vertical().height(if icon.is_some() { space_s } else { space_xl }))
             .push_maybe(icon)
             .push_maybe(
@@ -758,12 +809,14 @@ impl<T: Tour> Application for App<T> {
             )
             .push(title)
             .push(widget::space::vertical().height(if page.icon.is_some() {
-                space_m
+                space_s
             } else {
                 space_l
             }))
             .push(content)
-            .push(widget::space::vertical().height(space_m))
+            .push(widget::space::vertical().height(space_s))
+            .push(dots)
+            .push(widget::space::vertical().height(space_s))
             .push(button_row)
             .push(widget::space::vertical().height(space_l))
             .max_width(640.0)
