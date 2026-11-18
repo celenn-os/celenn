@@ -383,6 +383,64 @@ toggle-flatpark mode="toggle":
             ;;
     esac
 
+# Follow the stable images (weekly, tested further) or the latest ones (daily); `status` shows which
+[group('System')]
+switch-channel channel="status":
+    #!/usr/bin/bash
+    set -euo pipefail
+    # The image the next boot starts (the first deployment), as rpm-ostree
+    # records it: "ostree-image-signed:docker://<image>" when signatures are
+    # checked, "ostree-unverified-registry:<image>" otherwise. Readable
+    # without root.
+    ref="$(rpm-ostree status --json | jq -r '.deployments[0]."container-image-reference" // empty')"
+    image="${ref#*docker://}"
+    image="${image#ostree-unverified-registry:}"
+    repo="${image%:*}"
+    tag="${image##*:}"
+    if [[ "${repo}" != ghcr.io/cosmic-blue-os/* || "${repo}" == "${image}" ]]; then
+        echo "This system does not follow a cosmic-blue image (${ref:-none}): nothing to switch." >&2
+        exit 1
+    fi
+    case "{{ channel }}" in
+        status)
+            case "${tag}" in
+                stable) echo "Channel: stable (updated once a week, after more tests)." ;;
+                latest) echo "Channel: latest (updated every day)." ;;
+                *) echo "Pinned to ${image}: no automatic updates to newer images." ;;
+            esac
+            echo "Switch with: ujust switch-channel stable  or  ujust switch-channel latest"
+            exit 0
+            ;;
+        stable|latest) ;;
+        *)
+            echo "Usage: ujust switch-channel [status|stable|latest]" >&2
+            exit 1
+            ;;
+    esac
+    target="${repo}:{{ channel }}"
+    if [[ "${tag}" == "{{ channel }}" ]]; then
+        echo "Already on the {{ channel }} channel (${target})."
+        exit 0
+    fi
+    if [[ "{{ channel }}" == stable ]]; then
+        echo "stable gets a new image once a week, after the update and install tests."
+        echo "It can be a few days older than the image you have now: that is fine,"
+        echo "your files and settings are kept."
+    else
+        echo "latest gets a new image every day, as soon as it passes the build tests."
+    fi
+    echo "The ${target} image is downloaded now, its signature is checked,"
+    echo "and it starts at the next reboot."
+    if [[ -t 0 ]] && ! gum confirm "Switch to ${target}?"; then
+        echo "Nothing changed."
+        exit 0
+    fi
+    sudo bootc switch --enforce-container-sigpolicy "${target}"
+    echo "Done. Reboot to start the {{ channel }} image."
+    if [[ "${tag}" == stable || "${tag}" == latest ]]; then
+        echo "To go back: ujust switch-channel ${tag}"
+    fi
+
 # Collect your system details and open a new bug report with them filled in
 [group('System')]
 bug-report mode="open":

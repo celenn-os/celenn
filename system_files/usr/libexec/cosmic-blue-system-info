@@ -74,6 +74,8 @@ done
 if [[ -r /sys/module/nvidia/version ]]; then
     line "NVIDIA driver" "$(cat /sys/module/nvidia/version)"
 fi
+# /var holds the home folders and the apps, on the same disk as the system
+line "Free disk space" "$(df -h --output=avail /var 2>/dev/null | tail -n 1)"
 line "Virtual machine" "$(systemd-detect-virt 2>/dev/null || echo no)"
 if [[ -d /sys/firmware/efi ]]; then
     line "Firmware" "UEFI, $(mokutil --sb-state 2>/dev/null | head -n 1 || echo 'Secure Boot state unknown')"

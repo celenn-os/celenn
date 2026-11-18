@@ -199,7 +199,8 @@ done
 # cosmic-blue recipes (60-custom.just) parse and are listed by ujust
 recipes="$(just --justfile /usr/share/ublue-os/just/00-entry.just --summary)"
 for recipe in toggle-dark-mode reset-cosmic-theme reset-cosmic-config export-cosmic-config \
-              install-microsoft-fonts install-cli-tools bug-report enroll-secure-boot-key; do
+              install-microsoft-fonts install-cli-tools bug-report enroll-secure-boot-key \
+              switch-channel; do
     grep -qw -- "${recipe}" <<<"${recipes}"
 done
 
