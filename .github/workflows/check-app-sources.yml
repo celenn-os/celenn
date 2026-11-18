@@ -1,0 +1,89 @@
+name: Check app sources
+# Every week, checks that the apps and tools the image installs on request
+# (first-boot flatpaks, the install-* ujust recipes, the Brewfiles) still
+# exist on Flathub and Homebrew (tests/check-app-sources.sh). Those recipes
+# download too much to run in the boot test. Runs on Mondays, the day before
+# the stable promotion; a failure opens a "CI failure" issue.
+on:
+  schedule:
+    - cron: '41 4 * * 1'
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'tests/check-app-sources.sh'
+      - '.github/workflows/check-app-sources.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # The latest published image: most recipes and Brewfiles come from
+  # projectbluefin/common and ublue-os/brew, not from this repository
+  IMAGE: ghcr.io/cosmic-blue-os/cosmic-blue:latest
+
+jobs:
+  check:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Copy the image's lists and recipes
+        run: |
+          mkdir -p "${RUNNER_TEMP}/image/usr/share/flatpak"
+          podman pull -q "${IMAGE}"
+          podman create --name image "${IMAGE}" true >/dev/null
+          podman cp image:/usr/share/ublue-os "${RUNNER_TEMP}/image/usr/share/"
+          podman cp image:/usr/share/flatpak/preinstall.d "${RUNNER_TEMP}/image/usr/share/flatpak/"
+          podman rm image >/dev/null
+          podman rmi -f "${IMAGE}" >/dev/null
+
+      - name: Flathub and Homebrew
+        run: |
+          command -v flatpak >/dev/null || { sudo apt-get update -q && sudo apt-get install -y -q flatpak; }
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          if ! command -v brew >/dev/null; then
+            [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]] \
+              || NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            /home/linuxbrew/.linuxbrew/bin/brew shellenv | sed -n 's/^export \(HOMEBREW_[A-Z_]*\)="\(.*\)";$/\1=\2/p' >> "${GITHUB_ENV}"
+            echo /home/linuxbrew/.linuxbrew/bin >> "${GITHUB_PATH}"
+          fi
+
+      - name: Check the sources
+        working-directory: ${{ runner.temp }}
+        env:
+          HOMEBREW_NO_ANALYTICS: '1'
+          HOMEBREW_NO_AUTO_UPDATE: '1'
+        run: ${{ github.workspace }}/tests/check-app-sources.sh "${RUNNER_TEMP}/image"
+
+  report:
+    name: Report the result
+    needs: check
+    if: always() && github.event_name != 'pull_request'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: .github/actions
+          persist-credentials: false
+
+      - name: Report the result
+        uses: ./.github/actions/failure-issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          result: ${{ needs.check.result }}

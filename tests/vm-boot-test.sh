@@ -1,7 +1,8 @@
 #!/usr/bin/bash
 # Boot smoke test: installs the image to a virtual disk with `bootc install`,
 # boots it in QEMU (UEFI with Secure Boot, KVM) and checks over SSH that the
-# system starts cleanly and that the COSMIC login screen is up. Then logs in a test user
+# system starts cleanly, that the first-boot apps are installed and that the
+# COSMIC login screen is up. Then logs in a test user
 # and takes screenshots of the desktop (desktop_tour in vm-lib.sh), checks that
 # no COSMIC program crashed and runs the user's ujust recipes.
 #
@@ -16,6 +17,7 @@ OUT="$(realpath -m "$2")"
 TARGET_IMGREF="${TARGET_IMGREF:-ghcr.io/cosmic-blue-os/cosmic-blue:latest}"
 # shellcheck source=tests/vm-lib.sh
 source "$(dirname "$0")/vm-lib.sh"
+SYSTEM_FILES="$(dirname "$0")/../system_files"
 
 vm_install "${IMAGE}" "${TARGET_IMGREF}"
 vm_start
@@ -64,6 +66,27 @@ if [[ -n "${unexpected}" ]]; then
     errors=1
 fi
 
+# First-boot apps (flatpak-preinstall.service): every app of the image's list
+# (this checkout's, which the image was built from) is installed, and every
+# default application (Papers, Loupe, Gear Lever for AppImages...) has its
+# launcher
+preinstall_problem() { echo "::error::First-boot apps: $*"; errors=1; }
+wait_for 600 '[ "$(systemctl show -P ActiveState flatpak-preinstall.service)" != activating ]' \
+    || preinstall_problem "flatpak-preinstall.service still runs after 10 minutes"
+wanted="$(awk '/^\[Flatpak Preinstall / { app = substr($3, 1, length($3) - 1) }
+    /^IsRuntime=false/ { print app }' "${SYSTEM_FILES}/usr/share/flatpak/preinstall.d/cosmic-blue.preinstall" | sort -u)"
+installed="$(vm 'flatpak list --system --app --columns=application' | sort -u)" || installed=""
+echo "Installed flatpaks:"
+echo "${installed}"
+[[ -n "${wanted}" ]] || preinstall_problem "no app in the list of first-boot apps"
+missing="$(comm -23 <(echo "${wanted}") <(echo "${installed}") | xargs)"
+[[ -z "${missing}" ]] || preinstall_problem "not installed: ${missing}"
+for launcher in $(sed -n '/^\[Default Applications\]/,/^\[/{s/^[a-z][^=]*=//p}' \
+        "${SYSTEM_FILES}/etc/xdg/mimeapps.list" | tr ';' '\n' | sort -u); do
+    vm "test -e /usr/share/applications/${launcher} || test -e /var/lib/flatpak/exports/share/applications/${launcher}" \
+        || preinstall_problem "the default application ${launcher} has no launcher"
+done
+
 # `ujust report-bug` lists the image and the booted deployment
 bug_report="$(vm "ujust report-bug print")" || bug_report=""
 echo "${bug_report}"
@@ -109,6 +132,11 @@ screenshot login-screen
 
 if (( errors == 0 )); then
     desktop_tour || { echo "::error::The test user could not log in to a COSMIC session"; errors=1; }
+    # A new account: its first login and Firefox must be right (vm-lib.sh)
+    for problem in "${DESKTOP_PROBLEMS[@]}"; do
+        echo "::error::${problem}"
+        errors=1
+    done
     vm_check_crashes boot || errors=1
     if vm "id ${DEMO_USER}" >/dev/null 2>&1; then
         # The user's own runtime folder (just writes there), not root's from SSH

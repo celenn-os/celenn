@@ -27,6 +27,8 @@ CAPTIONS = {
     "app-library": "App Library",
     "files": "Files",
     "settings": "Settings: Appearance",
+    "store": "COSMIC Store",
+    "web-browser": "Firefox",
     "terminal": "Terminal: welcome message and system information",
     "terminal-zoom": "Terminal, full size",
     "lock-screen": "Lock screen",
