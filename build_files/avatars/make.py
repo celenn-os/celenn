@@ -10,7 +10,7 @@ import json, math, random, pathlib
 OUT = pathlib.Path(__file__).parent / "svg"; OUT.mkdir(exist_ok=True)
 W = "#fff"
 # One hue per avatar, spread around the colour wheel (degrees), so that no two
-# accounts look alike; the planet keeps cosmic-blue's own blue, the shooting
+# accounts look alike; the shooting
 # star is the one neutral (slate). Gradient from light (top left) to dark.
 import colorsys
 HUES = {"astronaut": 0, "rover": 15, "rocket": 32, "constellation": 46, "ufo": 75,
@@ -24,12 +24,11 @@ def colors(name):
     if name == "shooting-star":
         return ("#94a3b8", "#1e293b")
     h = HUES[name]
-    if name == "planet":
-        return ("#4f8dff", "#1d47c4")
     # yellows and greens look lighter: darker so the white drawing stands out
-    dim = .08 if 40 <= h <= 140 else 0
-    sat = .58 if 90 <= h <= 150 else .72
-    return (hsl(h, sat, .60 - dim), hsl(h, sat, .30 - dim / 2))
+    dim = .06 if 40 <= h <= 140 else 0
+    # Muted, night-sky tones: moderate saturation, same depth for all
+    sat = .36 if 90 <= h <= 150 else .44
+    return (hsl(h, sat, .56 - dim), hsl(h, sat + .06, .26 - dim / 2))
 def planet(d): return f'''<ellipse cx="128" cy="128" rx="84" ry="22" fill="none" stroke="{W}" stroke-width="9" opacity=".55" transform="rotate(-18 128 128)"/>
 <circle cx="128" cy="128" r="46" fill="{W}"/><path d="M96 110c8-10 20-15 32-15" stroke="{d}" stroke-width="6" stroke-linecap="round" fill="none" opacity=".2"/>
 <path d="M44 128A84 22 0 0 0 212 128" fill="none" stroke="{W}" stroke-width="9" stroke-linecap="round" transform="rotate(-18 128 128)"/>'''
@@ -39,9 +38,10 @@ def moon(d): return f'''<mask id="m"><rect width="256" height="256" fill="#fff"/
 def comet(d): return f'''<path d="M150 88L52 196" stroke="{W}" stroke-width="22" stroke-linecap="round" opacity=".25"/>
 <path d="M156 96L76 194" stroke="{W}" stroke-width="12" stroke-linecap="round" opacity=".45"/><path d="M168 100L112 176" stroke="{W}" stroke-width="6" stroke-linecap="round" opacity=".7"/>
 <circle cx="168" cy="88" r="26" fill="{W}"/>'''
-def rocket(d): return f'''<g transform="rotate(35 128 128)"><path d="M128 40c26 22 34 56 30 104h-60c-4-48 4-82 30-104z" fill="{W}"/>
-<path d="M100 112L76 146v22l24-14zM156 112l24 34v22l-24-14z" fill="{W}" opacity=".75"/><circle cx="128" cy="96" r="13" fill="{d}"/>
-<path d="M112 150h32l-16 42z" fill="{W}" opacity=".55"/></g>'''
+def rocket(d): return f'''<g transform="rotate(35 128 128)">
+<path d="M118 108L84 146q-4 5-4 11v15l38-20zM138 108l34 38q4 5 4 11v15l-38-20z" fill="{W}"/>
+<path d="M128 40c26 22 34 56 30 104h-60c-4-48 4-82 30-104z" fill="{W}"/><circle cx="128" cy="96" r="13" fill="{d}"/>
+<path d="M112 150h32c0 16-8 30-16 40-8-10-16-24-16-40z" fill="{W}" opacity=".5"/></g>'''
 def satellite(d): return f'''<g transform="rotate(-30 128 128)"><rect x="110" y="104" width="36" height="48" rx="6" fill="{W}"/>
 <rect x="40" y="112" width="60" height="32" rx="4" fill="{W}" opacity=".75"/><rect x="156" y="112" width="60" height="32" rx="4" fill="{W}" opacity=".75"/>
 <path d="M60 112v32M80 112v32M176 112v32M196 112v32" stroke="{d}" stroke-width="3" opacity=".35"/><path d="M100 128h10M146 128h10" stroke="{W}" stroke-width="5"/>
@@ -58,19 +58,37 @@ def constellation(d):
     l=" ".join(f"{'M' if i==0 else 'L'}{x} {y}" for i,(x,y) in enumerate(p[:5]))
     return f'''<path d="{l}M140 132L150 190" fill="none" stroke="{W}" stroke-width="4" opacity=".55"/>'''+"".join(f'<circle cx="{x}" cy="{y}" r="{r}" fill="{W}"/>' for (x,y),r in zip(p,[9,11,8,13,9,10]))
 def galaxy(d):
-    arms=""
-    for rot in (0,180):
-        pts=[]
-        for i in range(60):
-            t=i/59*3.4; r=10+t*24; a=t*1.2+math.radians(rot)
-            pts.append((128+r*math.cos(a), 128+0.62*r*math.sin(a)))
-        path="M"+" L".join(f"{x:.1f} {y:.1f}" for x,y in pts)
-        arms+=f'<path d="{path}" fill="none" stroke="{W}" stroke-width="12" stroke-linecap="round" opacity=".55" transform="rotate(-20 128 128)"/>'
-        arms+=f'<path d="{path}" fill="none" stroke="{W}" stroke-width="4" stroke-linecap="round" transform="rotate(-20 128 128)"/>'
-    return arms+f'<circle cx="128" cy="128" r="20" fill="{W}"/>'
-def aurora(d): return f'''<path d="M56 112c24-26 44 6 72-14s48-22 72-36" stroke="{W}" stroke-width="16" stroke-linecap="round" fill="none" opacity=".35"/>
-<path d="M56 136c24-22 44 6 72-12s48-18 72-30" stroke="{W}" stroke-width="10" stroke-linecap="round" fill="none" opacity=".6"/>
-<path d="M50 196l48-62 24 28 30-42 54 76z" fill="{W}" stroke="{W}" stroke-width="6" stroke-linejoin="round"/>'''
+    # Two tapered arms (filled), turning around a bright core
+    arms = ""
+    for rot in (0, math.pi):
+        left, right = [], []
+        n = 70
+        for i in range(n):
+            t = i / (n - 1)
+            a = rot + t * 3.0
+            r = 14 + t * 70
+            w = 18 * math.sin(math.pi * min(1, t * 1.15)) ** 0.8 + 2.5
+            x, y = r * math.cos(a), r * math.sin(a)
+            nx, ny = math.cos(a), math.sin(a)
+            left.append((x + nx * w / 2, y + ny * w / 2))
+            right.append((x - nx * w / 2, y - ny * w / 2))
+        pts = left + right[::-1]
+        path = "M" + " L".join(f"{128 + x:.1f} {128 + 0.6 * y:.1f}" for x, y in pts) + "z"
+        arms += f'<path d="{path}" fill="{W}" opacity=".9" transform="rotate(-25 128 128)"/>'
+    return (f'<ellipse cx="128" cy="128" rx="44" ry="26" fill="{W}" opacity=".2" transform="rotate(-25 128 128)"/>'
+            + arms + f'<circle cx="128" cy="128" r="17" fill="{W}"/>')
+def ribbon(x0, x1, y, amp, thick, phase):
+    # Wavy band with tapered ends
+    top, bot = [], []
+    for i in range(41):
+        x = x0 + (x1 - x0) * i / 40
+        c = y + amp * math.sin(phase + (x - x0) / (x1 - x0) * 2.4 * math.pi) - (x - x0) * 0.25
+        t = thick * math.sin(math.pi * i / 40) ** 0.6
+        top.append((x, c - t / 2)); bot.append((x, c + t / 2))
+    return "M" + " L".join(f"{x:.1f} {y:.1f}" for x, y in top + bot[::-1]) + "z"
+def aurora(d): return (f'<path d="{ribbon(50, 206, 112, 9, 26, 0.3)}" fill="{W}" opacity=".3"/>'
+    f'<path d="{ribbon(56, 200, 132, 8, 14, 0.8)}" fill="{W}" opacity=".6"/>'
+    f'<path d="M50 196l48-62 24 28 30-42 54 76z" fill="{W}" stroke="{W}" stroke-width="6" stroke-linejoin="round"/>')
 def orbit(d): return f'''<ellipse cx="128" cy="128" rx="88" ry="40" fill="none" stroke="{W}" stroke-width="6" opacity=".5" transform="rotate(-25 128 128)"/>
 <ellipse cx="128" cy="128" rx="58" ry="24" fill="none" stroke="{W}" stroke-width="5" opacity=".75" transform="rotate(30 128 128)"/>
 <circle cx="128" cy="128" r="24" fill="{W}"/><circle cx="206" cy="92" r="12" fill="{W}"/><circle cx="82" cy="100" r="8" fill="{W}"/>'''
