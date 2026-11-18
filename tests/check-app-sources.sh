@@ -61,14 +61,16 @@ done < flatpaks.txt
 echo "Homebrew taps: $(xargs < taps.txt)"
 echo "Homebrew formulas and casks to check: $(wc -l < brew.txt)"
 while IFS= read -r tap; do
-    brew tap "${tap}" >/dev/null 2>&1 || problem "Homebrew tap ${tap} could not be added"
+    brew tap "${tap}" 2>&1 | tail -n 3 || problem "Homebrew tap ${tap} could not be added"
 done < taps.txt
 while read -r kind name; do
     # Brewfiles name a tap's formula as owner/tap/name; the casks of the dev
     # tools list come from the ublue-os tap
-    brew info "--${kind}" "${name}" >/dev/null 2>&1 \
-        || { [[ "${name}" != */* ]] && brew info "--${kind}" "ublue-os/tap/${name}" >/dev/null 2>&1; } \
-        || problem "Homebrew has no ${kind} ${name}"
+    error="$(brew info "--${kind}" "${name}" 2>&1 >/dev/null)" && continue
+    if [[ "${name}" != */* ]]; then
+        error="$(brew info "--${kind}" "ublue-os/tap/${name}" 2>&1 >/dev/null)" && continue
+    fi
+    problem "Homebrew has no ${kind} ${name}: $(tail -n 2 <<<"${error}" | xargs)"
 done < brew.txt
 
 if (( problems > 0 )); then
