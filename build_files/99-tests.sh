@@ -232,16 +232,16 @@ for path in /etc/bazaar \
     test ! -e "${path}"
 done
 for recipe in contribute bluespeed bluefin-apps bazaar-preview toggle-testing changelogs \
-              bluefin-cli devmode bug-report; do
+              bluefin-cli devmode toggle-devmode bug-report; do
     # (`! cmd` never stops a set -e script: use if ... exit 1)
     if tr ' ' '\n' <<<"${recipes}" | grep -qx -- "${recipe}"; then echo "ujust ${recipe} left in place"; exit 1; fi
 done
-# The earlier names devmode and bug-report still run, unlisted; the docs name
-# toggle-devmode
-for recipe in toggle-devmode devmode bug-report; do
+# The earlier names devmode, toggle-devmode and bug-report still run,
+# unlisted
+for recipe in install-dev-tools devmode toggle-devmode bug-report; do
     just --justfile /usr/share/ublue-os/just/00-entry.just --show "${recipe}" >/dev/null
 done
-tr ' ' '\n' <<<"${recipes}" | grep -qx toggle-devmode
+tr ' ' '\n' <<<"${recipes}" | grep -qx install-dev-tools
 if grep -q '^export LC_' /etc/zsh/zprofile; then exit 1; fi
 # Default applications: ours, and each one names an app the system has: a
 # launcher of the image, or a first-boot flatpak (whose launcher only exists
@@ -339,7 +339,7 @@ for package in cosmic-session cosmic-comp; do
 done
 
 systemctl is-enabled cosmic-greeter.service
-# docker CLI works through the rootless Podman socket (ujust toggle-devmode installs docker)
+# docker CLI works through the rootless Podman socket (ujust install-dev-tools installs docker)
 systemctl --global is-enabled podman.socket
 test -x /usr/share/ublue-os/user-setup.hooks.d/30-docker-podman.sh
 test "$(systemctl get-default)" = graphical.target

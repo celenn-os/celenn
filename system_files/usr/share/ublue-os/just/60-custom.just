@@ -1,6 +1,6 @@
 # vim: set ft=make :
 # cosmic-blue commands, listed by `ujust` under "Desktop", "Apps" and "System".
-# Names are verb-object: install-<thing> (with a `remove` argument),
+# Names are verb-object: install-<thing> (with a `remove` argument when it can),
 # toggle-<thing> (on/off), reset-, export-, switch-, report-, enroll-.
 #
 # COSMIC reads each setting from ~/.config/cosmic first and falls back to the
@@ -487,8 +487,10 @@ switch-channel channel="status":
 alias bug-report := report-bug
 
 [private]
-devmode:
-    @ujust toggle-devmode
+alias devmode := install-dev-tools
+
+[private]
+alias toggle-devmode := install-dev-tools
 
 # Collect your system details and open a new bug report with them filled in
 [group('System')]

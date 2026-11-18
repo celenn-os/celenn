@@ -161,13 +161,27 @@ done
 # `bluefin-apps` (alias of install-system-flatpaks), `bazaar-preview`, and
 # `toggle-testing`, which switches to a "testing" tag that cosmic-blue does
 # not publish. Also `bluefin-cli`, which `ujust install-cli-tools` replaces,
-# and `devmode`, which 60-custom.just keeps as a hidden name of
-# `toggle-devmode` (ujust names are verb-object: install-, toggle-, reset-...).
+# and `devmode`, an alias of `toggle-devmode`.
 python3 -I /ctx/build_files/drop-just-recipes.py \
     "${STAGE}/usr/share/ublue-os/just/shared.just" contribute
 python3 -I /ctx/build_files/drop-just-recipes.py \
     "${STAGE}/usr/share/ublue-os/just/system.just" \
     bluespeed bluefin-apps bazaar-preview toggle-testing bluefin-cli devmode
+# `toggle-devmode` turns nothing on or off: it is a menu that installs
+# developer tools. It becomes `install-dev-tools`, like cosmic-blue's other
+# install- commands (60-custom.just keeps devmode and toggle-devmode as
+# hidden names). Fails if upstream renames it.
+python3 -I - "${STAGE}/usr/share/ublue-os/just/system.just" <<'PY'
+import pathlib, sys
+path = pathlib.Path(sys.argv[1])
+text = path.read_text()
+old = "# Set up the Developer Experience\n[group('System')]\ntoggle-devmode:\n"
+new = ("# Install developer tools from a menu: Docker, Podman Desktop, VS Code, Lima...\n"
+       "[group('Apps')]\ninstall-dev-tools:\n")
+if text.count(old) != 1:
+    sys.exit(f"{path}: toggle-devmode recipe not found")
+path.write_text(text.replace(old, new))
+PY
 
 # `ujust enroll-secure-boot-key` (projectbluefin/common) queues the akmods key
 # with Universal Blue's password: 60-custom.just has cosmic-blue's own, with

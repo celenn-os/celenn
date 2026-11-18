@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# Point the docker CLI (from `ujust toggle-devmode` or Homebrew) at the user's rootless
+# Point the docker CLI (from `ujust install-dev-tools` or Homebrew) at the user's rootless
 # Podman socket, through a "podman" docker context, so that docker, docker
 # compose and VS Code devcontainers work without a Docker daemon.
 # An existing docker configuration is left alone; `docker context use default`
