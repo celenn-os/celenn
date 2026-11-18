@@ -10,7 +10,8 @@
   Documentation launcher, the System Update launcher, the live ISO's
   welcome tour and installer, and the installed system's first steps tour.
   The Documentation and System Update icons also replace Tela's help-browser
-  and system-software-update, which the first steps tour shows.
+  and system-software-update, which the first steps tour shows, and the
+  tour's commands and tiling pages get icons in the same style.
 - actions: the symbolic icons of the suspend and restart buttons in the
   panel's power menu (Tela has none for restart, and its suspend icon is
   hard to read). They follow the style of Tela's shutdown icon, which stays.
@@ -275,6 +276,7 @@ WELCOME = tela_app(
     '<circle cx="0" cy="-3" r="3.6" fill="#4f8dff"/></g>'
 )
 
+
 def circle_arrow(r, start, end, opacity=None, head=6.2, width=5):
     """A clockwise arc around the center, from angle start to end (degrees,
     counterclockwise from the right), ending in an arrowhead."""
@@ -296,6 +298,21 @@ def circle_arrow(r, start, end, opacity=None, head=6.2, width=5):
 # the lower one translucent
 UPDATE = tela_app(circle_arrow(13.5, 165, 40) + circle_arrow(13.5, 345, 220, ".45"))
 
+# The first steps tour's commands page: a prompt in a terminal window
+COMMANDS = tela_app(
+    '<rect x="15" y="18" width="34" height="28" rx="4" fill="none" stroke="#fff" stroke-opacity=".45" '
+    'stroke-width="3.5"/>'
+    '<path d="M22.5 26.5l5.5 5-5.5 5" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" '
+    'stroke-linejoin="round"/>'
+    '<rect x="31" y="35" width="11" height="3.6" rx="1.8" fill="#fff"/>'
+)
+# The tour's tiling page: three windows side by side
+TILING = tela_app(
+    '<rect x="16" y="17" width="15" height="30" rx="2.5" fill="#fff"/>'
+    '<rect x="33" y="17" width="15" height="14" rx="2.5" fill="#fff" opacity=".45"/>'
+    '<rect x="33" y="33" width="15" height="14" rx="2.5" fill="#fff" opacity=".45"/>'
+)
+
 # Icon -> names (the desktop entries of the dock buttons and of the apps
 # they open). The first name gets the file, the others are links to it.
 DOCK = {
@@ -309,6 +326,10 @@ DOCK = {
     "update": (UPDATE, ["system-software-update"]),
     # Tela's help icon, which the first steps tour shows on its last page
     "help": (DOCS, ["help-browser"]),
+    # The icons the tour shows on its commands and tiling pages. Only these
+    # names, which nothing else installed uses: the terminal app keeps its icon.
+    "commands": (COMMANDS, ["org.gnome.Terminal"]),
+    "tiling": (TILING, ["cs-tiling"]),
 }
 
 # Session action symbolic icons, 16x16, in Tela's symbolic gray. They are
