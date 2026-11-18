@@ -17,6 +17,16 @@ dnf5 -y install \
     cosmic-store \
     cosmic-term
 
+# The COSMIC version cosmic-blue is tested against (also checked by
+# `just helpers-keys` before the helper stages): a new version comes through
+# the pull request of check-cosmic-version.yml, which moves cosmic-version.
+pinned="$(grep -v '^#' /ctx/build_files/cosmic-version | tr -d '[:space:]')"
+installed="$(rpm -q --qf '%{VERSION}' cosmic-settings)"
+if [[ "${installed}" != "${pinned}" ]]; then
+    echo "COSMIC ${installed} installed, but cosmic-blue is pinned to ${pinned} (build_files/cosmic-version)" >&2
+    exit 1
+fi
+
 # (no power-profiles-daemon: base-main already ships tuned-ppd)
 # Desktop pieces that Fedora's Atomic image brings and base-main may lack
 dnf5 -y install --skip-unavailable \
