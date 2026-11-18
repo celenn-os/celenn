@@ -15,6 +15,7 @@ for step in \
     20-cosmic.sh \
     23-greeter.sh \
     24-store.sh \
+    24-filemanager.sh \
     25-icon-theme.sh \
     30-packages.sh \
     35-nvidia.sh \

@@ -300,6 +300,13 @@ jobs:
           key: ${{ steps.helpers.outputs.store }}
           dir: ${{ runner.temp }}/helpers
 
+      - name: Helper stage filemanager
+        uses: ./.github/actions/helper-stage
+        with:
+          stage: filemanager
+          key: ${{ steps.helpers.outputs.filemanager }}
+          dir: ${{ runner.temp }}/helpers
+
       - name: Helper stage plymouth
         uses: ./.github/actions/helper-stage
         with:

@@ -441,6 +441,12 @@ cmp /ctx/greeter/cosmic-greeter /usr/bin/cosmic-greeter
 cmp /ctx/store/cosmic-store /usr/bin/cosmic-store
 grep -q /usr/share/cosmic-blue/flatpak/flatpark.flatpakrepo /usr/bin/cosmic-store
 
+# COSMIC Files: our rebuild, which gives the user folders their own icons
+# under /var/home (build_files/filemanager/patch.py)
+for bin in /ctx/filemanager/bin/*; do
+    cmp "${bin}" "/usr/bin/$(basename "${bin}")"
+done
+
 # Frosted glass on by default, in the theme apps read and in the builder
 for theme in Dark Light; do
     grep -qx true "/usr/share/cosmic/com.system76.CosmicTheme.${theme}/v2/frosted_windows"
@@ -463,14 +469,14 @@ grep -qx '"cosmic-blue"' /usr/share/cosmic/com.system76.CosmicTk/v1/icon_theme
 test "$(GSETTINGS_BACKEND=memory gsettings get org.gnome.desktop.interface icon-theme)" = "'cosmic-blue'"
 test -n "$(find /usr/share/icons/cosmic-blue/tela/symbolic -name 'audio-volume-high-symbolic.svg' -print -quit)"
 test -n "$(find /usr/share/icons/cosmic-blue/cosmic -name '*-symbolic.svg' -print -quit)"
-test -n "$(find /usr/share/icons/cosmic-blue/tela -name 'com.system76.CosmicFiles.svg' -print -quit)"
+test -n "$(find /usr/share/icons/cosmic-blue/tela -name 'com.system76.CosmicEdit.svg' -print -quit)"
 # cosmic-blue layer (branding/icons/build.py) in front of Tela, with Tela's aliases
 grep -q '^\[layer/places\]' /usr/share/icons/cosmic-blue/index.theme
 grep -q '^\[layer/mimetypes\]' /usr/share/icons/cosmic-blue/index.theme
 grep -q '^\[layer/apps\]' /usr/share/icons/cosmic-blue/index.theme
 for icon in apps/com.system76.CosmicPanelAppButton apps/com.system76.CosmicPanelWorkspacesButton \
     apps/com.system76.CosmicPanelLauncherButton apps/com.system76.CosmicAppLibrary \
-    apps/com.system76.CosmicStore apps/com.system76.CosmicSettings \
+    apps/com.system76.CosmicStore apps/com.system76.CosmicSettings apps/com.system76.CosmicFiles \
     places/default-folder places/folder places/folder-download places/inode-directory \
     places/user-home places/user-trash mimetypes/text-plain mimetypes/image-jpeg mimetypes/application-zip; do
     test -s "/usr/share/icons/cosmic-blue/layer/${icon}.svg"
