@@ -6,7 +6,7 @@
 - mimetypes: common file types (a light page whose symbol and folded corner
   take the color of the type)
 - apps: the COSMIC dock buttons (launcher, workspaces, applications) and
-  the COSMIC Store and Settings in the Tela circle style, as are the
+  COSMIC Files, Store and Settings in the Tela circle style, as are the
   Documentation launcher, the System Update launcher, the live ISO's
   welcome tour and installer, and the installed system's first steps tour.
   The Documentation and System Update icons also replace Tela's help-browser
@@ -339,6 +339,14 @@ TILING = tela_app(
 
 # Icon -> names (the desktop entries of the dock buttons and of the apps
 # they open). The first name gets the file, the others are links to it.
+# COSMIC Files: a folder, its back panel with the tab in translucent white
+FILES = tela_app(
+    '<path d="M15 20a2.5 2.5 0 0 1 2.5-2.5h9l3.5 3.5h17.5a2.5 2.5 0 0 1 2.5 2.5v20a2.5 2.5 0 0 1'
+    '-2.5 2.5h-30a2.5 2.5 0 0 1-2.5-2.5z" fill="#fff" opacity=".45"/>'
+    '<path d="M15 27.5a2.5 2.5 0 0 1 2.5-2.5h30a2.5 2.5 0 0 1 2.5 2.5v16a2.5 2.5 0 0 1'
+    '-2.5 2.5h-30a2.5 2.5 0 0 1-2.5-2.5z" fill="#fff"/>'
+)
+
 DOCK = {
     "applications": (APPLICATIONS, ["com.system76.CosmicPanelAppButton", "com.system76.CosmicAppLibrary"]),
     "workspaces": (WORKSPACES, ["com.system76.CosmicPanelWorkspacesButton", "com.system76.CosmicWorkspaces",
@@ -346,6 +354,7 @@ DOCK = {
     "launcher": (LAUNCHER, ["com.system76.CosmicPanelLauncherButton", "com.system76.CosmicLauncher"]),
     "store": (STORE, ["com.system76.CosmicStore"]),
     "settings": (SETTINGS, ["com.system76.CosmicSettings"]),
+    "files": (FILES, ["com.system76.CosmicFiles"]),
     # Tela's update icon, which the first steps tour shows on its updates page
     "update": (UPDATE, ["system-software-update"]),
     # Tela's help icon, which the first steps tour shows on its last page
