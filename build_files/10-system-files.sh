@@ -54,6 +54,11 @@ GNOME_ONLY+=(
     usr/share/pixmaps/fedora_whitelogo_med.png
     usr/share/pixmaps/system-logo-white.png
 )
+# Bluefin's profile pictures (photos): cosmic-blue ships its own avatars
+# (system_files/usr/share/pixmaps/faces, made by build_files/avatars).
+GNOME_ONLY+=(
+    usr/share/pixmaps/faces
+)
 # Bluefin's fastfetch logos (dinosaurs and a chicken), its global config and
 # its Bluefin and Bazaar user counters: cosmic-blue ships its own fastfetch
 # (system_files/usr/bin/ublue-fastfetch and usr/share/ublue-os/fastfetch*).
@@ -235,6 +240,8 @@ install -d "${STAGE}/usr/libexec"
 mv "${STAGE}/usr/bin/luks-tpm2-autounlock" "${STAGE}/usr/libexec/ublue-luks-tpm2-autounlock"
 
 cp -a "${STAGE}/." /
+# Only cosmic-blue's avatars in the profile picture folder
+rm -rf /usr/share/pixmaps/faces
 cp -a /ctx/system_files/cosmic-blue/. /
 
 # No Homebrew usage statistics (brew sends them unless told not to), for
@@ -262,9 +269,3 @@ docker:
     use-sigstore-attachments: true
 EOF
 
-# Bluefin faces (avatars) ship in a subfolder; move them up, as Bluefin does
-if [[ -d /usr/share/pixmaps/faces/bluefin ]]; then
-    rm -f /usr/share/pixmaps/faces/*.{png,jpg,svg} || true
-    mv /usr/share/pixmaps/faces/bluefin/* /usr/share/pixmaps/faces/
-    rmdir /usr/share/pixmaps/faces/bluefin
-fi

@@ -6,6 +6,19 @@ set -euox pipefail
 jq -e '.transports.docker."ghcr.io/ublue-os"' /etc/containers/policy.json >/dev/null
 # No Bluefin wallpapers
 test ! -e /usr/share/backgrounds/bluefin
+# Profile pictures: the 18 cosmic-blue avatars only (512x512 PNG), and the
+# picture COSMIC Settings uses for accounts without one (pop-robot.png, a
+# Pop!_OS file) is the planet avatar
+faces=/usr/share/pixmaps/faces
+test ! -e "${faces}/bluefin"
+test "$(find "${faces}" -maxdepth 1 -type f -name '*.png' | wc -l)" -eq 18
+test "$(find "${faces}" -mindepth 1 -maxdepth 1 ! -name '*.png' | wc -l)" -eq 0
+test "$(readlink -f "${faces}/pop-robot.png")" = "${faces}/planet.png"
+for face in "${faces}"/*.png; do
+    # PNG signature, then the IHDR width and height (bytes 16-23)
+    test "$(od -An -tx1 -N8 "${face}" | tr -d ' ')" = 89504e470d0a1a0a
+    test "$(od -An -tu1 -j16 -N8 "${face}" | tr -s ' ')" = " 0 0 2 0 0 0 2 0"
+done
 # cosmic-blue wallpapers: orbits is the COSMIC default, the logo scene, waves
 # and the Milky Way are extras. No light duplicates.
 bg=/usr/share/backgrounds/cosmic-blue
