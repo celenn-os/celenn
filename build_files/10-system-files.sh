@@ -185,20 +185,20 @@ python3 -I /ctx/build_files/rename-just-recipes.py "${STAGE}"/usr/share/ublue-os
     "install-asus=_bluefin-asus>install-asus" \
     "install-jetbrains-toolbox=_bluefin-jetbrains-toolbox>install-jetbrains-toolbox" \
     "install-opentabletdriver=_bluefin-opentabletdriver>install-opentabletdriver" \
-    "install-system-flatpaks=reset-default-apps@Apps|Install the default apps again (those removed by mistake)" \
-    "bios=reboot-to-bios@System|Restart into this computer's firmware settings (BIOS/UEFI)" \
-    "bios-info=show-bios-info@System|Show the motherboard and firmware (BIOS/UEFI) version" \
-    "logs-this-boot=show-logs@System|Show the system messages since this startup" \
+    "install-system-flatpaks=reset-default-apps@Apps|Reinstall the default apps" \
+    "bios=reboot-to-bios@System|Restart into the firmware settings (BIOS/UEFI)" \
+    "bios-info=show-bios-info@System|Show the motherboard and firmware version" \
+    "logs-this-boot=show-logs@System|Show the system messages since startup" \
     "logs-last-boot=show-previous-logs@System|Show the system messages of the previous startup" \
     "benchmark=run-benchmark@System|Run a one minute processor benchmark" \
-    "check-sb-key=check-secure-boot@System|Show whether Secure Boot is on and which keys are enrolled" \
-    "powerwash=reset-system@System|Factory reset this computer: erases everything (experimental)" \
-    "check-local-overrides@System|Show the system settings changed on this computer (in /etc)" \
-    "check-idle-power-draw@System|Measure the power drawn while idle" \
-    "clean-system@System|Free disk space: unused containers, old Flatpak runtimes, Homebrew caches" \
+    "check-sb-key=check-secure-boot@System|Show the Secure Boot state and keys" \
+    "powerwash=reset-system@System|Factory reset: erases everything (experimental)" \
+    "check-local-overrides@System|List the system settings changed in /etc" \
+    "check-idle-power-draw@System|Measure the power used while idle" \
+    "clean-system@System|Free disk space (containers, Flatpak, Homebrew)" \
     "update@System|Update the system, apps and Homebrew packages now" \
     "toggle-updates@System|Turn automatic updates on or off" \
-    "toggle-tpm2|Turn on or off unlocking the encrypted disk with the TPM2 chip (no password at startup)" \
+    "toggle-tpm2|Turn on or off disk unlocking with the TPM2 chip (no password)" \
     -jetbrains-toolbox -toggle-user-motd -device-info -toggle-vms
 
 # `ujust enroll-secure-boot-key` (projectbluefin/common) queues the akmods key

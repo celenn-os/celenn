@@ -11,7 +11,7 @@
 # The reset recipes ask first; `yes` as their argument skips the question
 # (e.g. `ujust reset-cosmic-theme yes` in a script).
 
-# Switch between the dark and light theme (or force one: dark, light)
+# Switch between the dark and light themes
 [group('Desktop')]
 toggle-dark-mode mode="toggle":
     #!/usr/bin/bash
@@ -45,7 +45,7 @@ toggle-dark-mode mode="toggle":
     write_setting is_dark "${is_dark}"
     if [[ "${is_dark}" == true ]]; then echo "Dark theme on."; else echo "Light theme on."; fi
 
-# Restore the cosmic-blue look: colors, dark mode, icons and wallpaper
+# Bring back the cosmic-blue look
 [group('Desktop')]
 reset-cosmic-theme confirm="ask":
     #!/usr/bin/bash
@@ -79,7 +79,7 @@ reset-cosmic-theme confirm="ask":
     rm -rf "${trash}"
     echo "Done. Log out and back in to see every change."
 
-# Reset all COSMIC settings to the cosmic-blue defaults (a backup is kept)
+# Reset all COSMIC settings (a backup is kept)
 [group('Desktop')]
 reset-cosmic-config confirm="ask":
     #!/usr/bin/bash
@@ -111,7 +111,7 @@ reset-cosmic-config confirm="ask":
     echo "Done. Log out and back in to finish the reset."
     echo "To undo it: rm -rf '${config}' && mv '${backup}' '${config}', then log out."
 
-# Save your COSMIC settings to one text file, to share them or propose them as defaults
+# Save your COSMIC settings to a text file
 [group('Desktop')]
 export-cosmic-config:
     #!/usr/bin/bash
@@ -186,11 +186,11 @@ export-cosmic-config:
     fi
     echo "It is plain text: read it before sharing it."
 
-# Install Microsoft's core fonts (Arial, Times New Roman, Verdana...) for your account
+# Install Microsoft fonts: Arial, Times New Roman...
 [group('Apps')]
 install-microsoft-fonts: (_microsoft-fonts "install")
 
-# Remove Microsoft's core fonts
+# Remove the Microsoft fonts
 [group('Apps')]
 remove-microsoft-fonts: (_microsoft-fonts "remove")
 
@@ -253,11 +253,11 @@ _microsoft-fonts action:
     echo "Installed $(find "${dest}" -name '*.ttf' | wc -l) font files in ${dest}."
     echo "Restart open apps to see them. Remove them with: ujust remove-microsoft-fonts"
 
-# Install handy command line tools with Homebrew (bat, eza, fd, ripgrep, zoxide...)
+# Install command line tools: bat, eza, fd, ripgrep, zoxide...
 [group('Apps')]
 install-cli-tools: (_cli-tools "install")
 
-# Remove the command line tools and their shortcuts
+# Remove the command line tools
 [group('Apps')]
 remove-cli-tools: (_cli-tools "remove")
 
@@ -330,11 +330,11 @@ _cli-tools action:
             ;;
     esac
 
-# Install Steam and Heroic (Epic, GOG and Amazon games) from Flathub
+# Install Steam and Heroic
 [group('Apps')]
 install-gaming: (_gaming "install")
 
-# Remove Steam and Heroic (games and saves are kept)
+# Remove Steam and Heroic (games are kept)
 [group('Apps')]
 remove-gaming: (_gaming "remove")
 
@@ -381,7 +381,7 @@ _gaming action:
 # and add the removal they lack (remove-*). Removing never deletes your own files
 # (projects, virtual machine disks are only removed after a question).
 
-# Install developer tools from a menu: Docker, Podman Desktop, VS Code, Lima...
+# Install developer tools from a menu: Docker, VS Code...
 [group('Apps')]
 install-dev-tools: (_dev-tools "install")
 
@@ -454,7 +454,7 @@ _dev-tools action:
     fi
     echo "Done. Your projects and settings are kept."
 
-# Install virtual machines (virt-manager, with UEFI, TPM and USB passthrough)
+# Install virt-manager, to run virtual machines
 [group('Apps')]
 install-vms: (_vms "install")
 
@@ -484,11 +484,11 @@ _vms action:
         *) echo "Usage: ujust install-vms or ujust remove-vms" >&2; exit 1 ;;
     esac
 
-# Install Lima, a lightweight Ubuntu virtual machine for containers
+# Install Lima, a light Ubuntu virtual machine
 [group('Apps')]
 install-lima: (_lima "install")
 
-# Remove Lima and its Ubuntu virtual machine (asks first)
+# Remove Lima and its virtual machine
 [group('Apps')]
 remove-lima: (_lima "remove")
 
@@ -521,11 +521,11 @@ _lima action:
         *) echo "Usage: ujust install-lima or ujust remove-lima" >&2; exit 1 ;;
     esac
 
-# Install Kubernetes and cloud native tools (CNCF) with Homebrew
+# Install Kubernetes and cloud native tools
 [group('Apps')]
 install-cncf-tools: (_cncf-tools "install")
 
-# Remove the Kubernetes and cloud native tools
+# Remove the cloud native tools
 [group('Apps')]
 remove-cncf-tools: (_cncf-tools "remove")
 
@@ -552,11 +552,11 @@ _cncf-tools action:
         *) echo "Usage: ujust install-cncf-tools or ujust remove-cncf-tools" >&2; exit 1 ;;
     esac
 
-# Install Goose, an AI assistant for the terminal, with read-only system diagnostics
+# Install Goose, an AI assistant for the terminal
 [group('Apps')]
 install-ai-tools: (_ai-tools "install")
 
-# Remove Goose and its configuration
+# Remove Goose
 [group('Apps')]
 remove-ai-tools: (_ai-tools "remove")
 
@@ -592,7 +592,7 @@ _ai-tools action:
         *) echo "Usage: ujust install-ai-tools or ujust remove-ai-tools" >&2; exit 1 ;;
     esac
 
-# Install the ASUS laptop tools (asusctl and ROG Control Center)
+# Install the ASUS laptop tools (asusctl, ROG Control Center)
 [group('Apps')]
 install-asus: (_asus "install")
 
@@ -623,11 +623,11 @@ _asus action:
         *) echo "Usage: ujust install-asus or ujust remove-asus" >&2; exit 1 ;;
     esac
 
-# Install JetBrains Toolbox, to install JetBrains IDEs
+# Install JetBrains Toolbox, to get JetBrains IDEs
 [group('Apps')]
 install-jetbrains-toolbox: (_jetbrains-toolbox "install")
 
-# Remove JetBrains Toolbox (the IDEs it installed are kept)
+# Remove JetBrains Toolbox
 [group('Apps')]
 remove-jetbrains-toolbox: (_jetbrains-toolbox "remove")
 
@@ -653,7 +653,7 @@ _jetbrains-toolbox action:
 [group('Apps')]
 install-opentabletdriver: (_opentabletdriver "install")
 
-# Remove OpenTabletDriver and its tablet settings
+# Remove OpenTabletDriver
 [group('Apps')]
 remove-opentabletdriver: (_opentabletdriver "remove")
 
@@ -679,7 +679,7 @@ _opentabletdriver action:
         *) echo "Usage: ujust install-opentabletdriver or ujust remove-opentabletdriver" >&2; exit 1 ;;
     esac
 
-# Turn the FlatPark app source on or off (off by default; or force one: on, off, status)
+# Turn the FlatPark app source on or off (off by default)
 [group('Apps')]
 toggle-flatpark mode="toggle":
     #!/usr/bin/bash
@@ -753,7 +753,7 @@ toggle-flatpark mode="toggle":
             ;;
     esac
 
-# Follow the stable images (weekly, tested further) or the latest ones (daily); `status` shows which
+# Switch between stable (weekly) and latest (daily) images
 [group('System')]
 switch-channel channel="status":
     #!/usr/bin/bash
@@ -855,7 +855,7 @@ alias check-sb-key := check-secure-boot
 [private]
 alias powerwash := reset-system
 
-# Collect your system details and open a new bug report with them filled in
+# Open a bug report with your system details filled in
 [group('System')]
 report-bug mode="open":
     #!/usr/bin/bash
@@ -901,7 +901,7 @@ report-bug mode="open":
         echo "Report the bug later at ${form}"
     fi
 
-# NVIDIA image with Secure Boot: enroll the key that signs the driver (password "cosmicblue" at the next boot)
+# NVIDIA with Secure Boot: enroll the driver key (password "cosmicblue")
 [group('System')]
 enroll-secure-boot-key:
     #!/usr/bin/bash
