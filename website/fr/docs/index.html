@@ -84,7 +84,7 @@ distrobox enter arch</code></pre>
       <h3>Outils de développement</h3>
       <p>Le mode développeur ajoute Docker, Podman Desktop, VS Code et d'autres IDE, Lima et plus encore. Choisissez ce que vous voulez dans un menu&nbsp;:</p>
       <div class="code">
-        <pre><code>ujust devmode</code></pre>
+        <pre><code>ujust toggle-devmode</code></pre>
         <button type="button" class="copy" data-copy>Copier</button>
       </div>
     </section>
@@ -97,7 +97,7 @@ distrobox enter arch</code></pre>
         <dd>Mettre à jour le système, les applications Flatpak et les paquets Homebrew tout de suite.</dd>
         <dt><code>ujust toggle-updates</code></dt>
         <dd>Activer ou couper les mises à jour automatiques.</dd>
-        <dt><code>ujust devmode</code></dt>
+        <dt><code>ujust toggle-devmode</code></dt>
         <dd>Installer des outils de développement.</dd>
         <dt><code>ujust toggle-dark-mode</code></dt>
         <dd>Passer du thème sombre au thème clair, et inversement.</dd>
@@ -119,7 +119,7 @@ distrobox enter arch</code></pre>
         <dd>Déverrouiller un disque chiffré avec la puce TPM2 au lieu d'un mot de passe.</dd>
         <dt><code>ujust enroll-secure-boot-key</code></dt>
         <dd>Image NVIDIA avec Secure Boot&nbsp;: enregistrer la clé qui permet de charger le pilote.</dd>
-        <dt><code>ujust bug-report</code></dt>
+        <dt><code>ujust report-bug</code></dt>
         <dd>Ouvrir un rapport de bug avec les informations du système déjà remplies.</dd>
       </dl>
     </section>
@@ -200,7 +200,7 @@ cosign verify-attestation --key cosign.pub --type spdxjson \
       <p>Une question, ou quelque chose de pas clair&nbsp;? Posez-la dans les <a href="https://github.com/cosmic-blue-os/cosmic-blue/discussions">Discussions</a> (en anglais de préférence).</p>
       <p>Un bug&nbsp;? Lancez ceci dans un terminal sur l'ordinateur concerné&nbsp;: la commande rassemble les informations du système (aucune donnée personnelle) et ouvre un <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues/new/choose">rapport de bug</a> déjà rempli avec elles. Dites ensuite ce que vous avez fait et ce qui s'est passé.</p>
       <div class="code">
-        <pre><code>ujust bug-report</code></pre>
+        <pre><code>ujust report-bug</code></pre>
         <button type="button" class="copy" data-copy>Copier</button>
       </div>
     </section>

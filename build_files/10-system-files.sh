@@ -160,12 +160,14 @@ done
 # build hive), `bluespeed` (Bluefin's AI stack, `install-ai-tools` remains),
 # `bluefin-apps` (alias of install-system-flatpaks), `bazaar-preview`, and
 # `toggle-testing`, which switches to a "testing" tag that cosmic-blue does
-# not publish.
+# not publish. Also `bluefin-cli`, which `ujust install-cli-tools` replaces,
+# and `devmode`, which 60-custom.just keeps as a hidden name of
+# `toggle-devmode` (ujust names are verb-object: install-, toggle-, reset-...).
 python3 -I /ctx/build_files/drop-just-recipes.py \
     "${STAGE}/usr/share/ublue-os/just/shared.just" contribute
 python3 -I /ctx/build_files/drop-just-recipes.py \
     "${STAGE}/usr/share/ublue-os/just/system.just" \
-    bluespeed bluefin-apps bazaar-preview toggle-testing
+    bluespeed bluefin-apps bazaar-preview toggle-testing bluefin-cli devmode
 
 # `ujust enroll-secure-boot-key` (projectbluefin/common) queues the akmods key
 # with Universal Blue's password: 60-custom.just has cosmic-blue's own, with

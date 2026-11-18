@@ -199,12 +199,12 @@ done
 # cosmic-blue recipes (60-custom.just) parse and are listed by ujust
 recipes="$(just --justfile /usr/share/ublue-os/just/00-entry.just --summary)"
 for recipe in toggle-dark-mode reset-cosmic-theme reset-cosmic-config export-cosmic-config \
-              install-microsoft-fonts install-cli-tools bug-report enroll-secure-boot-key \
+              install-microsoft-fonts install-cli-tools report-bug enroll-secure-boot-key \
               switch-channel install-gaming; do
     grep -qw -- "${recipe}" <<<"${recipes}"
 done
 
-# `ujust bug-report`: the system details script runs anywhere (here without
+# `ujust report-bug`: the system details script runs anywhere (here without
 # deployments) and prints the image name
 test -x /usr/libexec/cosmic-blue-system-info
 /usr/libexec/cosmic-blue-system-info | grep "^Image: ${IMAGE_NAME} " >/dev/null
@@ -231,10 +231,17 @@ for path in /etc/bazaar \
     /usr/share/ublue-os/just/changelog.just /usr/share/ublue-os/homebrew/full-desktop.Brewfile; do
     test ! -e "${path}"
 done
-for recipe in contribute bluespeed bluefin-apps bazaar-preview toggle-testing changelogs; do
+for recipe in contribute bluespeed bluefin-apps bazaar-preview toggle-testing changelogs \
+              bluefin-cli devmode bug-report; do
     # (`! cmd` never stops a set -e script: use if ... exit 1)
-    if grep -qw -- "${recipe}" <<<"${recipes}"; then echo "ujust ${recipe} left in place"; exit 1; fi
+    if tr ' ' '\n' <<<"${recipes}" | grep -qx -- "${recipe}"; then echo "ujust ${recipe} left in place"; exit 1; fi
 done
+# The earlier names devmode and bug-report still run, unlisted; the docs name
+# toggle-devmode
+for recipe in toggle-devmode devmode bug-report; do
+    just --justfile /usr/share/ublue-os/just/00-entry.just --show "${recipe}" >/dev/null
+done
+tr ' ' '\n' <<<"${recipes}" | grep -qx toggle-devmode
 if grep -q '^export LC_' /etc/zsh/zprofile; then exit 1; fi
 # Default applications: ours, and each one names an app the system has: a
 # launcher of the image, or a first-boot flatpak (whose launcher only exists
@@ -332,7 +339,7 @@ for package in cosmic-session cosmic-comp; do
 done
 
 systemctl is-enabled cosmic-greeter.service
-# docker CLI works through the rootless Podman socket (ujust devmode installs docker)
+# docker CLI works through the rootless Podman socket (ujust toggle-devmode installs docker)
 systemctl --global is-enabled podman.socket
 test -x /usr/share/ublue-os/user-setup.hooks.d/30-docker-podman.sh
 test "$(systemctl get-default)" = graphical.target

@@ -357,7 +357,7 @@ fn pages(mode: Mode) -> Vec<Page> {
                     ),
                     Body::Commands(vec![
                         (
-                            "ujust devmode",
+                            "ujust toggle-devmode",
                             "Developer tools: Docker, VS Code, Podman Desktop…",
                         ),
                         (

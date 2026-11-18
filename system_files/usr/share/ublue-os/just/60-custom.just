@@ -1,5 +1,7 @@
 # vim: set ft=make :
 # cosmic-blue commands, listed by `ujust` under "Desktop", "Apps" and "System".
+# Names are verb-object: install-<thing> (with a `remove` argument),
+# toggle-<thing> (on/off), reset-, export-, switch-, report-, enroll-.
 #
 # COSMIC reads each setting from ~/.config/cosmic first and falls back to the
 # image defaults in /usr/share/cosmic. Resetting a setting therefore means
@@ -480,9 +482,17 @@ switch-channel channel="status":
         echo "To go back: ujust switch-channel ${tag}"
     fi
 
+# Earlier names, still accepted but not listed
+[private]
+alias bug-report := report-bug
+
+[private]
+devmode:
+    @ujust toggle-devmode
+
 # Collect your system details and open a new bug report with them filled in
 [group('System')]
-bug-report mode="open":
+report-bug mode="open":
     #!/usr/bin/bash
     set -euo pipefail
     # The details (cosmic-blue-system-info) hold no personal data. They go
@@ -497,7 +507,7 @@ bug-report mode="open":
             exit 0
             ;;
         *)
-            echo "Usage: ujust bug-report [open|print]" >&2
+            echo "Usage: ujust report-bug [open|print]" >&2
             exit 1
             ;;
     esac

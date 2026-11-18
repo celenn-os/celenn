@@ -84,7 +84,7 @@ distrobox enter arch</code></pre>
       <h3>Developer tools</h3>
       <p>Developer mode adds Docker, Podman Desktop, VS Code and other IDEs, Lima and more. Pick what you want from a menu:</p>
       <div class="code">
-        <pre><code>ujust devmode</code></pre>
+        <pre><code>ujust toggle-devmode</code></pre>
         <button type="button" class="copy" data-copy>Copy</button>
       </div>
     </section>
@@ -97,7 +97,7 @@ distrobox enter arch</code></pre>
         <dd>Update the system, Flatpak apps and Homebrew packages now.</dd>
         <dt><code>ujust toggle-updates</code></dt>
         <dd>Turn automatic updates on or off.</dd>
-        <dt><code>ujust devmode</code></dt>
+        <dt><code>ujust toggle-devmode</code></dt>
         <dd>Install developer tools.</dd>
         <dt><code>ujust toggle-dark-mode</code></dt>
         <dd>Switch between the dark and light themes.</dd>
@@ -119,7 +119,7 @@ distrobox enter arch</code></pre>
         <dd>Unlock an encrypted disk with the TPM2 chip instead of a password.</dd>
         <dt><code>ujust enroll-secure-boot-key</code></dt>
         <dd>NVIDIA image with Secure Boot: enroll the key that lets the driver load.</dd>
-        <dt><code>ujust bug-report</code></dt>
+        <dt><code>ujust report-bug</code></dt>
         <dd>Open a bug report with your system details already filled in.</dd>
       </dl>
     </section>
@@ -200,7 +200,7 @@ cosign verify-attestation --key cosign.pub --type spdxjson \
       <p>A question, or something unclear? Ask in <a href="https://github.com/cosmic-blue-os/cosmic-blue/discussions">Discussions</a>.</p>
       <p>Found a bug? Run this in a terminal on the computer with the problem: it collects the system details (no personal data) and opens a <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues/new/choose">bug report</a> with them filled in. Then say what you did and what happened.</p>
       <div class="code">
-        <pre><code>ujust bug-report</code></pre>
+        <pre><code>ujust report-bug</code></pre>
         <button type="button" class="copy" data-copy>Copy</button>
       </div>
     </section>

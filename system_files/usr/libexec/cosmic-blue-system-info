@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # Print the system details that a cosmic-blue bug report needs, as plain
-# "Name: value" lines (used by `ujust bug-report`).
+# "Name: value" lines (used by `ujust report-bug`).
 #
 # No personal data: no user or host name, no serial numbers, no network
 # addresses, no file paths of the home folder. Runs as any user.
