@@ -1,0 +1,70 @@
+{
+ "alien": [
+  0,
+  8
+ ],
+ "astronaut": [
+  0,
+  -3
+ ],
+ "black-hole": [
+  0,
+  0
+ ],
+ "comet": [
+  10,
+  -6
+ ],
+ "constellation": [
+  -3,
+  -8
+ ],
+ "eclipse": [
+  0,
+  0
+ ],
+ "moon": [
+  -5,
+  -4
+ ],
+ "orbit": [
+  -2,
+  0
+ ],
+ "planet": [
+  0,
+  0
+ ],
+ "satellite": [
+  0,
+  0
+ ],
+ "shooting-star": [
+  6,
+  -8
+ ],
+ "telescope": [
+  2,
+  -4
+ ],
+ "ufo": [
+  0,
+  -23
+ ],
+ "rover": [
+  2,
+  -10
+ ],
+ "earth": [
+  -10,
+  6
+ ],
+ "aurora": [
+  0,
+  -5
+ ],
+ "rocket": [
+  6,
+  5
+ ]
+}
