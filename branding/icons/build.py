@@ -7,8 +7,11 @@
   take the color of the type)
 - apps: the COSMIC dock buttons (launcher, workspaces, applications) and
   the COSMIC Store and Settings in the Tela circle style, as are the
-  Documentation launcher, the live ISO's welcome tour and installer, and
-  the installed system's first steps tour
+  Documentation launcher, the System Update launcher, the live ISO's
+  welcome tour and installer, and the installed system's first steps tour.
+  The Documentation and System Update icons also replace Tela's help-browser
+  and system-software-update, which the first steps tour shows, and the
+  tour's commands and tiling pages get icons in the same style.
 - actions: the symbolic icons of the suspend and restart buttons in the
   panel's power menu (Tela has none for restart, and its suspend icon is
   hard to read). They follow the style of Tela's shutdown icon, which stays.
@@ -18,6 +21,7 @@ Tela; every other icon still comes from Tela.
 
 Usage: python3 build.py  (rewrites build_files/icon_theme/layer/)
 """
+import math
 import os
 import shutil
 from pathlib import Path
@@ -29,6 +33,8 @@ APPS = REPO / "iso_files" / "welcome"
 HICOLOR_APPS = REPO / "system_files/usr/share/icons/hicolor/scalable/apps"
 FIRST_STEPS_ICON = HICOLOR_APPS / "cosmic-blue-welcome.svg"
 DOCS_ICON = HICOLOR_APPS / "cosmic-blue-docs.svg"
+UPDATE_ICON = HICOLOR_APPS / "cosmic-blue-update.svg"
+TOUR_STORE_ICON = HICOLOR_APPS / "cosmic-blue-tour-store.svg"
 
 def stroke(d, width=2.2):
     return (f'<path d="{d}" fill="none" stroke="currentColor" stroke-width="{width}" '
@@ -224,16 +230,24 @@ LAUNCHER = tela_app(
     '<path d="M39.6 39.6l7.4 7.4" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/>'
 )
 
-# The store: a shopping bag with the logo's "c"
-STORE = tela_app(
-    '<path d="M25 24v-3a7 7 0 0 1 14 0v3" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>'
-    '<path d="M18.5 24h27a1.5 1.5 0 0 1 1.5 1.6l-1.4 19.6a3 3 0 0 1-3 2.8H21.4a3 3 0 0 1-3-2.8L17 25.6'
-    'a1.5 1.5 0 0 1 1.5-1.6z" fill="#fff"/>'
-    f'<path d="M37.2 31.5A6.5 6.5 0 1 0 37.2 40.5" fill="none" stroke="{STORE_COLOR}" stroke-width="2.6" '
-    'stroke-linecap="round"/>'
-    f'<circle cx="32" cy="36" r="2.4" fill="{STORE_COLOR}"/>',
-    STORE_COLOR,
-)
+
+def store(color):
+    """The store: a shopping bag with the logo's "c"."""
+    return tela_app(
+        '<path d="M25 24v-3a7 7 0 0 1 14 0v3" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>'
+        '<path d="M18.5 24h27a1.5 1.5 0 0 1 1.5 1.6l-1.4 19.6a3 3 0 0 1-3 2.8H21.4a3 3 0 0 1-3-2.8L17 25.6'
+        'a1.5 1.5 0 0 1 1.5-1.6z" fill="#fff"/>'
+        f'<path d="M37.2 31.5A6.5 6.5 0 1 0 37.2 40.5" fill="none" stroke="{color}" stroke-width="2.6" '
+        'stroke-linecap="round"/>'
+        f'<circle cx="32" cy="36" r="2.4" fill="{color}"/>',
+        color,
+    )
+
+
+STORE = store(STORE_COLOR)
+# The same bag in the accent, for the first steps tour's apps page, where
+# every page icon is blue. The dock keeps the teal one.
+TOUR_STORE = store("#4f8dff")
 # The settings: two sliders
 SETTINGS = tela_app(
     '<rect x="16" y="21" width="32" height="4" rx="2" fill="#fff" opacity=".45"/>'
@@ -271,6 +285,43 @@ WELCOME = tela_app(
     '<circle cx="0" cy="-3" r="3.6" fill="#4f8dff"/></g>'
 )
 
+
+def circle_arrow(r, start, end, opacity=None, head=6.2, width=5):
+    """A clockwise arc around the center, from angle start to end (degrees,
+    counterclockwise from the right), ending in an arrowhead."""
+    def at(angle, radius=r):
+        a = math.radians(angle)
+        return 32 + radius * math.cos(a), 32 - radius * math.sin(a)
+    (x0, y0), (x1, y1) = at(start), at(end)
+    a = math.radians(end)
+    tip = (x1 + math.sin(a) * head * 1.05, y1 + math.cos(a) * head * 1.05)
+    (bx1, by1), (bx2, by2) = at(end, r + head), at(end, r - head)
+    alpha = f' opacity="{opacity}"' if opacity else ""
+    return (f'<g{alpha}><path d="M{x0:.2f} {y0:.2f}A{r} {r} 0 0 1 {x1:.2f} {y1:.2f}" fill="none" '
+            f'stroke="#fff" stroke-width="{width}" stroke-linecap="round"/>'
+            f'<path d="M{tip[0]:.2f} {tip[1]:.2f}L{bx1:.2f} {by1:.2f}L{bx2:.2f} {by2:.2f}z" fill="#fff" '
+            'stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></g>')
+
+
+# The System Update launcher and the tour's updates page: two circling arrows,
+# the lower one translucent
+UPDATE = tela_app(circle_arrow(13.5, 165, 40) + circle_arrow(13.5, 345, 220, ".45"))
+
+# The first steps tour's commands page: a prompt in a terminal window
+COMMANDS = tela_app(
+    '<rect x="15" y="18" width="34" height="28" rx="4" fill="none" stroke="#fff" stroke-opacity=".45" '
+    'stroke-width="3.5"/>'
+    '<path d="M22.5 26.5l5.5 5-5.5 5" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" '
+    'stroke-linejoin="round"/>'
+    '<rect x="31" y="35" width="11" height="3.6" rx="1.8" fill="#fff"/>'
+)
+# The tour's tiling page: three windows side by side
+TILING = tela_app(
+    '<rect x="16" y="17" width="15" height="30" rx="2.5" fill="#fff"/>'
+    '<rect x="33" y="17" width="15" height="14" rx="2.5" fill="#fff" opacity=".45"/>'
+    '<rect x="33" y="33" width="15" height="14" rx="2.5" fill="#fff" opacity=".45"/>'
+)
+
 # Icon -> names (the desktop entries of the dock buttons and of the apps
 # they open). The first name gets the file, the others are links to it.
 DOCK = {
@@ -280,6 +331,14 @@ DOCK = {
     "launcher": (LAUNCHER, ["com.system76.CosmicPanelLauncherButton", "com.system76.CosmicLauncher"]),
     "store": (STORE, ["com.system76.CosmicStore"]),
     "settings": (SETTINGS, ["com.system76.CosmicSettings"]),
+    # Tela's update icon, which the first steps tour shows on its updates page
+    "update": (UPDATE, ["system-software-update"]),
+    # Tela's help icon, which the first steps tour shows on its last page
+    "help": (DOCS, ["help-browser"]),
+    # The icons the tour shows on its commands and tiling pages. Only these
+    # names, which nothing else installed uses: the terminal app keeps its icon.
+    "commands": (COMMANDS, ["org.gnome.Terminal"]),
+    "tiling": (TILING, ["cs-tiling"]),
 }
 
 # Session action symbolic icons, 16x16, in Tela's symbolic gray. They are
@@ -336,6 +395,8 @@ def main():
     # Also the icon of the installed system's first steps tour
     FIRST_STEPS_ICON.write_text(WELCOME)
     DOCS_ICON.write_text(DOCS)
+    UPDATE_ICON.write_text(UPDATE)
+    TOUR_STORE_ICON.write_text(TOUR_STORE)
     (APPS / "cosmic-blue-installer.svg").write_text(INSTALLER)
 
 

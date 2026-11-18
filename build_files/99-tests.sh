@@ -241,6 +241,14 @@ for app in com.system76.CosmicStore com.system76.CosmicPlayer noop; do
     test -f "/usr/share/applications/${app}.desktop"
 done
 grep -q cosmic-blue /usr/share/applications/system-update.desktop
+grep -qx 'Icon=cosmic-blue-update' /usr/share/applications/system-update.desktop
+test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-update.svg
+test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-tour-store.svg
+test ! -e /usr/share/icons/hicolor/scalable/places/ublue-update.svg
+test -s /usr/share/icons/cosmic-blue/layer/apps/system-software-update.svg
+for icon in help-browser org.gnome.Terminal cs-tiling; do
+    test -s "/usr/share/icons/cosmic-blue/layer/apps/${icon}.svg"
+done
 if grep -q Bazaar /usr/share/ublue-os/homebrew/system-flatpaks.Brewfile; then exit 1; fi
 for remote in flathub cosmic; do
     grep -q '^\[Flatpak Repo\]' "/usr/share/flatpak/remotes.d/${remote}.flatpakrepo"
