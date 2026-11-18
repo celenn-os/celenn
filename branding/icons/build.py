@@ -3,7 +3,7 @@
 
 - places: folders (a planet-like disk in the logo blues, with a folder tab),
   the home, desktop, network and trash icons; places-small: the same icons
-  for 16 to 32 px, in the style of the dock buttons (a plain white folder,
+  below 24 px, in the style of the dock buttons (a plain white folder,
   or the symbol, on the accent disk), as the planet folder reads as a plain disk there
 - mimetypes: common file types (a light page whose symbol and folded corner
   take the color of the type)
@@ -129,9 +129,9 @@ def folder(name, open_=False):
     return svg(f'<g transform="translate(32 32) scale({27 / 28:.4f}) translate(-32 -32)">{disk}</g>', FOLDER_DEFS)
 
 
-# Small sizes (16 to 32 px, the list views of the file manager): the planet
-# folder reads as a plain disk there, so these are drawn in the style of the
-# dock buttons instead: the accent disk with a plain white folder (no symbol,
+# Small sizes (16 to 23 px, the zoomed-out list view of the file manager):
+# the planet folder reads as a plain disk there, so these are drawn in the
+# style of the dock buttons instead: the accent disk with a plain white folder (no symbol,
 # too small to read), whose back panel is translucent. The other places keep
 # their symbol, in white on the disk.
 # Places that are not folders: their symbol alone on the disk
