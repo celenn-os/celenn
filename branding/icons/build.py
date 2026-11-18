@@ -2,9 +2,7 @@
 """Generate the cosmic-blue icons drawn on top of Tela circle.
 
 - places: folders (a planet-like disk in the logo blues, with a folder tab),
-  the home, desktop, network and trash icons; places-small: the same icons
-  below 24 px, where every folder is the plain planet folder (the symbols
-  are too small to read)
+  the home, desktop, network and trash icons
 - mimetypes: common file types (a light page whose symbol and folded corner
   take the color of the type)
 - apps: the COSMIC dock buttons (launcher, workspaces, applications) and
@@ -127,18 +125,6 @@ def folder(name, open_=False):
     )
     # Drawn at 56 px, scaled to the 54 px disk of Tela circle's icons
     return svg(f'<g transform="translate(32 32) scale({27 / 28:.4f}) translate(-32 -32)">{disk}</g>', FOLDER_DEFS)
-
-
-# Small sizes (16 to 23 px, the zoomed-out list view of the file manager):
-# the symbols are too small to read there, so every folder is the plain
-# planet folder (open or not). The other places keep their icon.
-NOT_FOLDERS = ("desktop", "home", "network", "trash", "trash-full")
-
-
-def small_place(name):
-    if name in NOT_FOLDERS:
-        return folder(name)
-    return folder(None, open_=name == "open")
 
 
 # Tela's file names: the icon theme also takes every Tela alias of them.
@@ -396,8 +382,6 @@ def main():
     mimetypes = LAYER / "mimetypes"
     apps = LAYER / "apps"
     places.mkdir(parents=True)
-    small_places = LAYER / "places-small"
-    small_places.mkdir()
     mimetypes.mkdir()
     apps.mkdir()
     actions = LAYER / "actions"
@@ -416,7 +400,6 @@ def main():
     for name, symbol in PLACES.items():
         is_open = symbol == "open"
         (places / f"{name}.svg").write_text(folder(None if is_open else symbol, open_=is_open))
-        (small_places / f"{name}.svg").write_text(small_place(symbol))
 
     for symbol, (color, names) in MIMETYPES.items():
         (mimetypes / f"{names[0]}.svg").write_text(page(symbol, color))
