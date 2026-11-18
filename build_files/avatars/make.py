@@ -9,9 +9,27 @@ shifts that centre it in the picture (ground lines excluded).
 import json, math, random, pathlib
 OUT = pathlib.Path(__file__).parent / "svg"; OUT.mkdir(exist_ok=True)
 W = "#fff"
-COLORS = [("#4f8dff","#1d47c4"),("#a78bfa","#5b21b6"),("#2dd4bf","#0f5f63"),("#fb923c","#b4430c"),
-          ("#f472b6","#9d174d"),("#4ade80","#166534"),("#f87171","#991b1b"),("#fbbf24","#a16207"),
-          ("#818cf8","#312e81"),("#22d3ee","#0e7490"),("#e879f9","#86198f"),("#94a3b8","#1e293b"),("#a3e635","#3f6212"),("#fb7185","#9f1239"),("#d6a77a","#7c4a1e"),("#60a5fa","#0b1a4a"),("#34d399","#065f46"),("#ff8a65","#b4361a")]
+# One hue per avatar, spread around the colour wheel (degrees), so that no two
+# accounts look alike; the planet keeps cosmic-blue's own blue, the shooting
+# star is the one neutral (slate). Gradient from light (top left) to dark.
+import colorsys
+HUES = {"astronaut": 0, "rover": 15, "rocket": 32, "constellation": 46, "ufo": 75,
+        "alien": 100, "telescope": 128, "comet": 152, "earth": 175, "aurora": 193,
+        "planet": 220, "galaxy": 243, "moon": 263, "black-hole": 283, "orbit": 303,
+        "satellite": 325, "eclipse": 345}
+def hsl(h, s, l):
+    r, g, b = colorsys.hls_to_rgb(h / 360, l, s)
+    return "#%02x%02x%02x" % (round(r * 255), round(g * 255), round(b * 255))
+def colors(name):
+    if name == "shooting-star":
+        return ("#94a3b8", "#1e293b")
+    h = HUES[name]
+    if name == "planet":
+        return ("#4f8dff", "#1d47c4")
+    # yellows and greens look lighter: darker so the white drawing stands out
+    dim = .08 if 40 <= h <= 140 else 0
+    sat = .58 if 90 <= h <= 150 else .72
+    return (hsl(h, sat, .60 - dim), hsl(h, sat, .30 - dim / 2))
 def planet(d): return f'''<ellipse cx="128" cy="128" rx="84" ry="22" fill="none" stroke="{W}" stroke-width="9" opacity=".55" transform="rotate(-18 128 128)"/>
 <circle cx="128" cy="128" r="46" fill="{W}"/><path d="M96 110c8-10 20-15 32-15" stroke="{d}" stroke-width="6" stroke-linecap="round" fill="none" opacity=".2"/>
 <path d="M44 128A84 22 0 0 0 212 128" fill="none" stroke="{W}" stroke-width="9" stroke-linecap="round" transform="rotate(-18 128 128)"/>'''
@@ -77,7 +95,7 @@ def rover(d): return f'''<rect x="70" y="120" width="112" height="40" rx="8" fil
 # Land: Natural Earth 1:110m (public domain), orthographic view (earth-ortho.py)
 LAND=(pathlib.Path(__file__).parent/"earth-land.txt").read_text().strip()
 def earth(d): return f'''<clipPath id="e"><circle cx="128" cy="128" r="60"/></clipPath><circle cx="128" cy="128" r="60" fill="{W}"/>
-<path d="{LAND}" fill="{d}" opacity=".55" clip-path="url(#e)"/><circle cx="196" cy="68" r="12" fill="{W}"/>'''
+<path d="{LAND}" fill="{d}" stroke="{d}" stroke-width="5" stroke-linejoin="round" opacity=".55" clip-path="url(#e)"/><circle cx="196" cy="68" r="12" fill="{W}"/>'''
 def alien(d): return f'''<path d="M110 74L94 46M146 74L162 46" stroke="{W}" stroke-width="6" stroke-linecap="round"/><circle cx="92" cy="42" r="9" fill="{W}"/><circle cx="164" cy="42" r="9" fill="{W}"/>
 <path d="M128 64c40 0 64 28 64 60 0 38-34 82-64 82s-64-44-64-82c0-32 24-60 64-60z" fill="{W}"/>
 <path d="M90 128c14-4 28 6 30 22-14 4-28-6-30-22zM166 128c-14-4-28 6-30 22 14 4 28-6 30-22z" fill="{d}"/><path d="M118 180c7 4 13 4 20 0" stroke="{d}" stroke-width="5" stroke-linecap="round" fill="none"/>'''
@@ -86,7 +104,8 @@ GLYPHS=[("planet",planet),("moon",moon),("comet",comet),("rocket",rocket),("sate
 # Ground drawn edge to edge, outside the centred drawing
 GROUND={"rover":'<path d="M-10 190c50-16 90-10 140-4s80 4 136-8v90H-10z" fill="#fff" opacity=".3"/>'}
 OFF={k:tuple(v) for k,v in json.loads((pathlib.Path(__file__).parent/"offsets.json").read_text()).items()} if (pathlib.Path(__file__).parent/"offsets.json").exists() else {}
-for (name,fn),(c1,c2) in zip(GLYPHS,COLORS):
+for name,fn in GLYPHS:
+    c1,c2=colors(name)
     random.seed(name); stars="".join(f'<circle cx="{random.uniform(8,248):.0f}" cy="{random.uniform(8,248):.0f}" r="{random.choice([1,1.3,1.8])}" fill="#fff" opacity="{random.uniform(.25,.6):.2f}"/>' for _ in range(22))
     svg=f'''<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><defs><radialGradient id="g" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="{c1}"/><stop offset="1" stop-color="{c2}"/></radialGradient></defs>
 <rect width="256" height="256" fill="url(#g)"/>{stars}<g class="ground">{GROUND.get(name,"").replace("{d}",c2)}</g><g transform="translate({OFF.get(name,(0,0))[0]} {OFF.get(name,(0,0))[1]})">{fn(c2)}</g></svg>'''
