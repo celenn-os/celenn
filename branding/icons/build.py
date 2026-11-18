@@ -34,6 +34,7 @@ HICOLOR_APPS = REPO / "system_files/usr/share/icons/hicolor/scalable/apps"
 FIRST_STEPS_ICON = HICOLOR_APPS / "cosmic-blue-welcome.svg"
 DOCS_ICON = HICOLOR_APPS / "cosmic-blue-docs.svg"
 UPDATE_ICON = HICOLOR_APPS / "cosmic-blue-update.svg"
+TOUR_STORE_ICON = HICOLOR_APPS / "cosmic-blue-tour-store.svg"
 
 def stroke(d, width=2.2):
     return (f'<path d="{d}" fill="none" stroke="currentColor" stroke-width="{width}" '
@@ -229,16 +230,24 @@ LAUNCHER = tela_app(
     '<path d="M39.6 39.6l7.4 7.4" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/>'
 )
 
-# The store: a shopping bag with the logo's "c"
-STORE = tela_app(
-    '<path d="M25 24v-3a7 7 0 0 1 14 0v3" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>'
-    '<path d="M18.5 24h27a1.5 1.5 0 0 1 1.5 1.6l-1.4 19.6a3 3 0 0 1-3 2.8H21.4a3 3 0 0 1-3-2.8L17 25.6'
-    'a1.5 1.5 0 0 1 1.5-1.6z" fill="#fff"/>'
-    f'<path d="M37.2 31.5A6.5 6.5 0 1 0 37.2 40.5" fill="none" stroke="{STORE_COLOR}" stroke-width="2.6" '
-    'stroke-linecap="round"/>'
-    f'<circle cx="32" cy="36" r="2.4" fill="{STORE_COLOR}"/>',
-    STORE_COLOR,
-)
+
+def store(color):
+    """The store: a shopping bag with the logo's "c"."""
+    return tela_app(
+        '<path d="M25 24v-3a7 7 0 0 1 14 0v3" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>'
+        '<path d="M18.5 24h27a1.5 1.5 0 0 1 1.5 1.6l-1.4 19.6a3 3 0 0 1-3 2.8H21.4a3 3 0 0 1-3-2.8L17 25.6'
+        'a1.5 1.5 0 0 1 1.5-1.6z" fill="#fff"/>'
+        f'<path d="M37.2 31.5A6.5 6.5 0 1 0 37.2 40.5" fill="none" stroke="{color}" stroke-width="2.6" '
+        'stroke-linecap="round"/>'
+        f'<circle cx="32" cy="36" r="2.4" fill="{color}"/>',
+        color,
+    )
+
+
+STORE = store(STORE_COLOR)
+# The same bag in the accent, for the first steps tour's apps page, where
+# every page icon is blue. The dock keeps the teal one.
+TOUR_STORE = store("#4f8dff")
 # The settings: two sliders
 SETTINGS = tela_app(
     '<rect x="16" y="21" width="32" height="4" rx="2" fill="#fff" opacity=".45"/>'
@@ -387,6 +396,7 @@ def main():
     FIRST_STEPS_ICON.write_text(WELCOME)
     DOCS_ICON.write_text(DOCS)
     UPDATE_ICON.write_text(UPDATE)
+    TOUR_STORE_ICON.write_text(TOUR_STORE)
     (APPS / "cosmic-blue-installer.svg").write_text(INSTALLER)
 
 

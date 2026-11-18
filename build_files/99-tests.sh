@@ -243,6 +243,7 @@ done
 grep -q cosmic-blue /usr/share/applications/system-update.desktop
 grep -qx 'Icon=cosmic-blue-update' /usr/share/applications/system-update.desktop
 test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-update.svg
+test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-tour-store.svg
 test ! -e /usr/share/icons/hicolor/scalable/places/ublue-update.svg
 test -s /usr/share/icons/cosmic-blue/layer/apps/system-software-update.svg
 for icon in help-browser org.gnome.Terminal cs-tiling; do
