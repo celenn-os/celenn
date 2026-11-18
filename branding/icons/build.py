@@ -3,8 +3,8 @@
 
 - places: folders (a planet-like disk in the logo blues, with a folder tab),
   the home, desktop, network and trash icons; places-small: the same icons
-  below 24 px, in the style of the dock buttons (a plain white folder,
-  or the symbol, on the accent disk), as the planet folder reads as a plain disk there
+  below 24 px, where every folder is the plain planet folder (the symbols
+  are too small to read)
 - mimetypes: common file types (a light page whose symbol and folded corner
   take the color of the type)
 - apps: the COSMIC dock buttons (launcher, workspaces, applications) and
@@ -130,30 +130,15 @@ def folder(name, open_=False):
 
 
 # Small sizes (16 to 23 px, the zoomed-out list view of the file manager):
-# the planet folder reads as a plain disk there, so these are drawn in the
-# style of the dock buttons instead: the accent disk with a plain white folder (no symbol,
-# too small to read), whose back panel is translucent. The other places keep
-# their symbol, in white on the disk.
-# Places that are not folders: their symbol alone on the disk
+# the symbols are too small to read there, so every folder is the plain
+# planet folder (open or not). The other places keep their icon.
 NOT_FOLDERS = ("desktop", "home", "network", "trash", "trash-full")
-
-
-def small_folder(open_=False):
-    back = ('<path d="M13 18a2.5 2.5 0 0 1 2.5-2.5h10l3.5 3.5h19.5a2.5 2.5 0 0 1 2.5 2.5v24a2.5 2.5 0 0 1'
-            '-2.5 2.5h-33a2.5 2.5 0 0 1-2.5-2.5z" fill="#fff" opacity=".45"/>')
-    if open_:
-        front = ('<path d="M17 27H52.5L48.9 45.6A2.5 2.5 0 0 1 46.4 47.6H15.6A2.5 2.5 0 0 1 13.1 45.6'
-                 'L13.5 30.4A3.5 3.5 0 0 1 17 27z" fill="#fff"/>')
-    else:
-        front = ('<path d="M13 25.5a2.5 2.5 0 0 1 2.5-2.5h33a2.5 2.5 0 0 1 2.5 2.5v19.5a2.5 2.5 0 0 1'
-                 '-2.5 2.5h-33a2.5 2.5 0 0 1-2.5-2.5z" fill="#fff"/>')
-    return tela_app(back + front)
 
 
 def small_place(name):
     if name in NOT_FOLDERS:
-        return tela_app(glyph(name, 32, 32, 1.25, "#ffffff"))
-    return small_folder(open_=name == "open")
+        return folder(name)
+    return folder(None, open_=name == "open")
 
 
 # Tela's file names: the icon theme also takes every Tela alias of them.

@@ -33,8 +33,8 @@ LAYER = os.environ.get("LAYER_DIR", os.path.join(os.path.dirname(os.path.abspath
 LAYER_CONTEXTS = {"places": "Places", "places-small": "Places", "mimetypes": "MimeTypes",
                   "apps": "Applications", "actions": "Actions"}
 # Nominal size and size range of the layer icons: the symbolic action icons
-# are 16x16, and the places have their own icons below 24 px (the planet
-# folder reads as a plain disk there), so the others start at 24 px.
+# are 16x16, and the places have their own icons below 24 px (plain folders,
+# the symbols are too small to read there), so the others start at 24 px.
 LAYER_SIZES = {"actions": ("16", "16", "512"), "places": ("64", "24", "512"), "places-small": ("16", "16", "23")}
 # Tela directory whose aliases a layer directory takes
 TELA_SUBDIRS = {"places-small": "places"}
