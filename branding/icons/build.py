@@ -202,12 +202,20 @@ APP_DEFS = (
 )
 
 
+# The logo mark in the app icons: its orbit and moon together are centered
+# on the disk (the orbit itself sits a little left of the disk's center),
+# with some room to the disk's rim.
+MARK_X = 32.5
+MARK_SCALE = 0.46
+
+
 def app(center):
-    """The logo mark on a night-blue disk, with `center` inside the orbit."""
+    """The logo mark on a night-blue disk, with `center` inside the orbit
+    (drawn at MARK_X, 32)."""
     return svg(
         '<circle cx="32" cy="32" r="28" fill="url(#night)"/>'
         '<circle cx="32" cy="32" r="27.4" fill="none" stroke="#4f8dff" stroke-opacity=".35" stroke-width="1.2"/>'
-        '<g transform="translate(31 32) scale(.5)">'
+        f'<g transform="translate({MARK_X} 32) scale({MARK_SCALE})">'
         '<path d="M30.3 -25.4A40 40 0 1 0 30.3 25.4" fill="none" stroke="url(#orbit)" '
         'stroke-width="13" stroke-linecap="round"/>'
         f'<circle cx="38" cy="0" r="6.5" fill="{MOON}"/></g>' + center,
@@ -344,12 +352,12 @@ def main():
         for alias in names[1:]:
             os.symlink(f"{names[0]}.svg", mimetypes / f"{alias}.svg")
 
-    welcome = app('<circle cx="30" cy="32" r="6.5" fill="url(#planet)"/>')
+    welcome = app(f'<circle cx="{MARK_X}" cy="32" r="6" fill="url(#planet)"/>')
     (APPS / "cosmic-blue-welcome.svg").write_text(welcome)
     # Also the icon of the installed system's first steps tour
     (FIRST_STEPS_ICON).write_text(welcome)
     DOCS_ICON.write_text(DOCS)
-    (APPS / "cosmic-blue-installer.svg").write_text(app(glyph("download", 30, 32, 0.85, "#ffffff")))
+    (APPS / "cosmic-blue-installer.svg").write_text(app(glyph("download", MARK_X, 32, 0.78, "#ffffff")))
 
 
 if __name__ == "__main__":
