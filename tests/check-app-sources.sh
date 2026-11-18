@@ -6,7 +6,7 @@
 #
 # Reads the image's files (not this checkout's: most install recipes and
 # Brewfiles come from projectbluefin/common and ublue-os/brew):
-#   - Flatpak: first-boot apps (preinstall.d), Brewfile `flatpak` lines, and
+#   - Flatpak (end-of-life apps are only warnings): first-boot apps (preinstall.d), Brewfile `flatpak` lines, and
 #     the app ids on the flatpak lines and app lists of the ujust recipes
 #   - Homebrew: Brewfile `brew`, `cask` and `tap` lines, and the formulas and
 #     casks of the install-dev-tools list (60-custom.just)
@@ -45,7 +45,8 @@ while IFS= read -r ref; do
     # Apps only (extensions and runtimes have several branches)
     info="$(flatpak remote-info --user flathub "app/${ref}/x86_64/stable" 2>/dev/null)" || continue
     if grep -qiE '^ *end-of-life' <<<"${info}"; then
-        problem "${ref} is end-of-life on Flathub: $(grep -iE '^ *end-of-life' <<<"${info}" | head -n 2 | xargs)"
+        # Still installs (with a notice): a warning, the app should be replaced
+        echo "::warning::${ref} is end-of-life on Flathub: $(grep -iE '^ *end-of-life' <<<"${info}" | head -n 2 | xargs)"
     fi
 done < flatpaks.txt
 
@@ -63,14 +64,30 @@ echo "Homebrew formulas and casks to check: $(wc -l < brew.txt)"
 while IFS= read -r tap; do
     brew tap "${tap}" 2>&1 | tail -n 3 || problem "Homebrew tap ${tap} could not be added"
 done < taps.txt
-while read -r kind name; do
-    # Brewfiles name a tap's formula as owner/tap/name; the casks of the dev
-    # tools list come from the ublue-os tap
-    error="$(brew info "--${kind}" "${name}" 2>&1 >/dev/null)" && continue
-    if [[ "${name}" != */* ]]; then
-        error="$(brew info "--${kind}" "ublue-os/tap/${name}" 2>&1 >/dev/null)" && continue
+# A tap's formula or cask is looked up as a file of its git clone: loading
+# it would run the tap's code, which Homebrew refuses for untrusted taps
+taps_dir="$(brew --repository)/Library/Taps"
+in_tap() { # kind owner/tap/name
+    local owner="${2%%/*}" rest="${2#*/}"
+    local dir="${taps_dir}/${owner}/homebrew-${rest%%/*}" file="${rest#*/}.rb"
+    if [[ "$1" == cask ]]; then
+        find "${dir}" -path '*/Casks/*' -name "${file}" -print -quit 2>/dev/null | grep -q .
+    else
+        find "${dir}" -name "${file}" -not -path '*/Casks/*' -print -quit 2>/dev/null | grep -q .
     fi
-    problem "Homebrew has no ${kind} ${name}: $(tail -n 2 <<<"${error}" | xargs)"
+}
+error=""
+while read -r kind name; do
+    if [[ "${name}" == */*/* ]]; then
+        in_tap "${kind}" "${name}" && continue
+    else
+        # Homebrew's own formulas and casks, else the ublue-os tap (the dev
+        # tools list names its casks without the tap)
+        error="$(brew info "--${kind}" "${name}" 2>&1 >/dev/null)" && continue
+        in_tap "${kind}" "ublue-os/tap/${name}" && continue
+    fi
+    problem "Homebrew has no ${kind} ${name}${error:+: $(tail -n 1 <<<"${error}")}"
+    error=""
 done < brew.txt
 
 if (( problems > 0 )); then
