@@ -482,7 +482,8 @@ switch-channel channel="status":
         echo "To go back: ujust switch-channel ${tag}"
     fi
 
-# Earlier names, still accepted but not listed
+# Earlier names (cosmic-blue's and Bluefin's, renamed in build_files/10-system-files.sh),
+# still accepted but not listed
 [private]
 alias bug-report := report-bug
 
@@ -491,6 +492,39 @@ alias devmode := install-dev-tools
 
 [private]
 alias toggle-devmode := install-dev-tools
+
+[private]
+alias setup-vms := install-vms
+
+[private]
+alias setup-lima := install-lima
+
+[private]
+alias install-system-flatpaks := install-default-apps
+
+[private]
+alias cncf := install-cncf-tools
+
+[private]
+alias bios := reboot-to-bios
+
+[private]
+alias bios-info := show-bios-info
+
+[private]
+alias logs-this-boot := show-logs
+
+[private]
+alias logs-last-boot := show-previous-logs
+
+[private]
+alias benchmark := run-benchmark
+
+[private]
+alias check-sb-key := check-secure-boot
+
+[private]
+alias powerwash := reset-system
 
 # Collect your system details and open a new bug report with them filled in
 [group('System')]

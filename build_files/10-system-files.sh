@@ -167,21 +167,36 @@ python3 -I /ctx/build_files/drop-just-recipes.py \
 python3 -I /ctx/build_files/drop-just-recipes.py \
     "${STAGE}/usr/share/ublue-os/just/system.just" \
     bluespeed bluefin-apps bazaar-preview toggle-testing bluefin-cli devmode
-# `toggle-devmode` turns nothing on or off: it is a menu that installs
-# developer tools. It becomes `install-dev-tools`, like cosmic-blue's other
-# install- commands (60-custom.just keeps devmode and toggle-devmode as
-# hidden names). Fails if upstream renames it.
-python3 -I - "${STAGE}/usr/share/ublue-os/just/system.just" <<'PY'
-import pathlib, sys
-path = pathlib.Path(sys.argv[1])
-text = path.read_text()
-old = "# Set up the Developer Experience\n[group('System')]\ntoggle-devmode:\n"
-new = ("# Install developer tools from a menu: Docker, Podman Desktop, VS Code, Lima...\n"
-       "[group('Apps')]\ninstall-dev-tools:\n")
-if text.count(old) != 1:
-    sys.exit(f"{path}: toggle-devmode recipe not found")
-path.write_text(text.replace(old, new))
-PY
+# Every listed ujust command reads verb-object, like cosmic-blue's own in
+# 60-custom.just: install- (adds apps or tools), toggle- (on/off), reset-,
+# check-, show-, switch-, report-... Bluefin's names that do not are renamed,
+# regrouped (Apps installs things, System looks after the computer) or hidden
+# when another command covers them; 60-custom.just keeps every old name as a
+# hidden alias. `toggle-devmode` turns nothing on or off: it is a menu that
+# installs developer tools. Fails if upstream renames a recipe.
+python3 -I /ctx/build_files/rename-just-recipes.py "${STAGE}"/usr/share/ublue-os/just/{apps,default,shared,system,update}.just -- \
+    "toggle-devmode=install-dev-tools@Apps|Install developer tools from a menu: Docker, Podman Desktop, VS Code, Lima..." \
+    "setup-vms=install-vms@Apps|Install virtual machines (virt-manager, with UEFI, TPM and USB passthrough)" \
+    "setup-lima=install-lima@Apps|Install Lima, a lightweight Ubuntu virtual machine for containers" \
+    "install-system-flatpaks=install-default-apps@Apps|Install the default apps again (those removed by mistake)" \
+    "cncf=install-cncf-tools@Apps|Install Kubernetes and cloud native tools (CNCF) with Homebrew" \
+    "bios=reboot-to-bios@System|Restart into this computer's firmware settings (BIOS/UEFI)" \
+    "bios-info=show-bios-info@System|Show the motherboard and firmware (BIOS/UEFI) version" \
+    "logs-this-boot=show-logs@System|Show the system messages since this startup" \
+    "logs-last-boot=show-previous-logs@System|Show the system messages of the previous startup" \
+    "benchmark=run-benchmark@System|Run a one minute processor benchmark" \
+    "powerwash=reset-system@System|Factory reset this computer: erases everything (experimental)" \
+    "check-local-overrides@System|Show the system settings changed on this computer (in /etc)" \
+    "check-idle-power-draw@System|Measure the power drawn while idle" \
+    "clean-system@System|Free disk space: unused containers, old Flatpak runtimes, Homebrew caches" \
+    "update@System" \
+    "toggle-updates@System|Turn automatic updates on or off" \
+    "toggle-tpm2|Unlock the encrypted disk with the TPM2 chip instead of a password, or stop" \
+    "check-sb-key=check-secure-boot@System|Show whether Secure Boot is on and which keys are enrolled" \
+    "install-ai-tools|Install Goose, an AI assistant for the terminal, with read-only system diagnostics" \
+    "install-asus|Install the ASUS laptop tools (asusctl and ROG Control Center)" \
+    "install-jetbrains-toolbox|Install JetBrains Toolbox, to install JetBrains IDEs" \
+    -jetbrains-toolbox -toggle-user-motd -device-info -toggle-vms
 
 # `ujust enroll-secure-boot-key` (projectbluefin/common) queues the akmods key
 # with Universal Blue's password: 60-custom.just has cosmic-blue's own, with

@@ -60,7 +60,7 @@ grep -qx 'commands = \["cosmic-blue-tips"\]' /etc/uwelcome/config.toml
 grep -qx 'case \$- in' /etc/profile.d/uwelcome.sh
 test -n "$(LANG=en_US.UTF-8 cosmic-blue-tips)"
 test -n "$(LANG=fr_FR.UTF-8 cosmic-blue-tips)"
-if grep -rlE 'projectbluefin\.io|bluefin-cli|ujust report' /etc/uwelcome \
+if grep -rlE 'projectbluefin\.io|bluefin-cli|ujust report([^-]|$)' /etc/uwelcome \
     || grep -rl 'projectbluefin\.io' /usr/share/ublue-os/just /usr/share/applications; then
     echo "Bluefin links or commands left in the welcome banner, ujust or launchers"; exit 1
 fi
@@ -232,16 +232,26 @@ for path in /etc/bazaar \
     test ! -e "${path}"
 done
 for recipe in contribute bluespeed bluefin-apps bazaar-preview toggle-testing changelogs \
-              bluefin-cli devmode toggle-devmode bug-report; do
+              bluefin-cli; do
     # (`! cmd` never stops a set -e script: use if ... exit 1)
     if tr ' ' '\n' <<<"${recipes}" | grep -qx -- "${recipe}"; then echo "ujust ${recipe} left in place"; exit 1; fi
 done
-# The earlier names devmode, toggle-devmode and bug-report still run,
-# unlisted
-for recipe in install-dev-tools devmode toggle-devmode bug-report; do
+# Every listed command reads verb-object (build_files/10-system-files.sh
+# renames Bluefin's that do not); the earlier names still run, unlisted
+odd="$(tr ' ' '\n' <<<"${recipes}" \
+    | grep -vE '^(install|toggle|reset|export|switch|report|enroll|check|show|run|reboot|clean|update)(-|$)' || true)"
+if [[ -n "${odd}" ]]; then echo "ujust commands not named verb-object:" ${odd}; exit 1; fi
+for recipe in install-dev-tools install-vms install-lima install-default-apps install-cncf-tools \
+              reboot-to-bios show-bios-info show-logs show-previous-logs run-benchmark \
+              check-secure-boot reset-system report-bug; do
+    tr ' ' '\n' <<<"${recipes}" | grep -qx -- "${recipe}"
+done
+for recipe in devmode toggle-devmode bug-report setup-vms setup-lima install-system-flatpaks cncf \
+              bios bios-info logs-this-boot logs-last-boot benchmark check-sb-key powerwash \
+              jetbrains-toolbox toggle-user-motd device-info toggle-vms; do
+    if tr ' ' '\n' <<<"${recipes}" | grep -qx -- "${recipe}"; then echo "ujust ${recipe} still listed"; exit 1; fi
     just --justfile /usr/share/ublue-os/just/00-entry.just --show "${recipe}" >/dev/null
 done
-tr ' ' '\n' <<<"${recipes}" | grep -qx install-dev-tools
 if grep -q '^export LC_' /etc/zsh/zprofile; then exit 1; fi
 # Default applications: ours, and each one names an app the system has: a
 # launcher of the image, or a first-boot flatpak (whose launcher only exists
@@ -271,7 +281,7 @@ for remote in flathub cosmic; do
     flatpak remotes --system --columns=name | grep -qx "${remote}"
 done
 test -f /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall
-# First-boot flatpaks and `ujust install-system-flatpaks` install the same apps
+# First-boot flatpaks and `ujust install-default-apps` install the same apps
 diff <(sed -n 's/^\[Flatpak Preinstall \(.*\)\]$/\1/p' /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall | sort) \
      <(sed -n 's/^flatpak "\(.*\)"$/\1/p' /usr/share/ublue-os/homebrew/system-flatpaks.Brewfile | sort)
 # No flatpak that duplicates a COSMIC app or needs GNOME
