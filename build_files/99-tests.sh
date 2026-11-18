@@ -410,13 +410,15 @@ test -n "$(find /usr/share/icons/cosmic-blue/cosmic -name '*-symbolic.svg' -prin
 test -n "$(find /usr/share/icons/cosmic-blue/tela -name 'com.system76.CosmicFiles.svg' -print -quit)"
 # cosmic-blue layer (branding/icons/build.py) in front of Tela, with Tela's aliases
 grep -q '^\[layer/places\]' /usr/share/icons/cosmic-blue/index.theme
+grep -q '^\[layer/places-small\]' /usr/share/icons/cosmic-blue/index.theme
 grep -q '^\[layer/mimetypes\]' /usr/share/icons/cosmic-blue/index.theme
 grep -q '^\[layer/apps\]' /usr/share/icons/cosmic-blue/index.theme
 for icon in apps/com.system76.CosmicPanelAppButton apps/com.system76.CosmicPanelWorkspacesButton \
     apps/com.system76.CosmicPanelLauncherButton apps/com.system76.CosmicAppLibrary \
     apps/com.system76.CosmicStore apps/com.system76.CosmicSettings \
     places/default-folder places/folder places/folder-download places/inode-directory \
-    places/user-home places/user-trash mimetypes/text-plain mimetypes/image-jpeg mimetypes/application-zip; do
+    places/user-home places/user-trash places-small/folder places-small/folder-documents \
+    places-small/user-home mimetypes/text-plain mimetypes/image-jpeg mimetypes/application-zip; do
     test -s "/usr/share/icons/cosmic-blue/layer/${icon}.svg"
 done
 # Every link of the theme points to an existing icon

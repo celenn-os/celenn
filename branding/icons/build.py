@@ -2,7 +2,9 @@
 """Generate the cosmic-blue icons drawn on top of Tela circle.
 
 - places: folders (a planet-like disk in the logo blues, with a folder tab),
-  the home, desktop, network and trash icons
+  the home, desktop, network and trash icons; places-small: the same icons
+  for 16 to 32 px, in the style of the dock buttons (a white folder or
+  symbol on the accent disk), as the planet folder reads as a plain disk there
 - mimetypes: common file types (a light page whose symbol and folded corner
   take the color of the type)
 - apps: the COSMIC dock buttons (launcher, workspaces, applications) and
@@ -125,6 +127,33 @@ def folder(name, open_=False):
     )
     # Drawn at 56 px, scaled to the 54 px disk of Tela circle's icons
     return svg(f'<g transform="translate(32 32) scale({27 / 28:.4f}) translate(-32 -32)">{disk}</g>', FOLDER_DEFS)
+
+
+# Small sizes (16 to 32 px, the list views of the file manager): the planet
+# folder reads as a plain disk there, so these are drawn in the style of the
+# dock buttons instead: the accent disk with a white folder, whose back panel
+# is translucent. The other places keep their symbol, in white on the disk.
+SMALL_GLYPH_COLOR = "#2f6bff"
+# Places that are not folders: their symbol alone on the disk
+NOT_FOLDERS = ("desktop", "home", "network", "trash", "trash-full")
+
+
+def small_folder(name, open_=False):
+    back = ('<path d="M13 18a2.5 2.5 0 0 1 2.5-2.5h10l3.5 3.5h19.5a2.5 2.5 0 0 1 2.5 2.5v24a2.5 2.5 0 0 1'
+            '-2.5 2.5h-33a2.5 2.5 0 0 1-2.5-2.5z" fill="#fff" opacity=".45"/>')
+    if open_:
+        front = ('<path d="M17 27H52.5L48.9 45.6A2.5 2.5 0 0 1 46.4 47.6H15.6A2.5 2.5 0 0 1 13.1 45.6'
+                 'L13.5 30.4A3.5 3.5 0 0 1 17 27z" fill="#fff"/>')
+    else:
+        front = ('<path d="M13 25.5a2.5 2.5 0 0 1 2.5-2.5h33a2.5 2.5 0 0 1 2.5 2.5v19.5a2.5 2.5 0 0 1'
+                 '-2.5 2.5h-33a2.5 2.5 0 0 1-2.5-2.5z" fill="#fff"/>')
+    return tela_app(back + front + glyph(name, 32, 35.3, 0.82, SMALL_GLYPH_COLOR))
+
+
+def small_place(name):
+    if name in NOT_FOLDERS:
+        return tela_app(glyph(name, 32, 32, 1.25, "#ffffff"))
+    return small_folder(None if name == "open" else name, open_=name == "open")
 
 
 # Tela's file names: the icon theme also takes every Tela alias of them.
@@ -367,6 +396,8 @@ def main():
     mimetypes = LAYER / "mimetypes"
     apps = LAYER / "apps"
     places.mkdir(parents=True)
+    small_places = LAYER / "places-small"
+    small_places.mkdir()
     mimetypes.mkdir()
     apps.mkdir()
     actions = LAYER / "actions"
@@ -385,6 +416,7 @@ def main():
     for name, symbol in PLACES.items():
         is_open = symbol == "open"
         (places / f"{name}.svg").write_text(folder(None if is_open else symbol, open_=is_open))
+        (small_places / f"{name}.svg").write_text(small_place(symbol))
 
     for symbol, (color, names) in MIMETYPES.items():
         (mimetypes / f"{names[0]}.svg").write_text(page(symbol, color))
