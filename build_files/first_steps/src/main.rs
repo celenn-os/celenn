@@ -28,10 +28,15 @@ use std::sync::OnceLock;
 const SITE: &str = "https://cosmic-blue-os.github.io/cosmic-blue/";
 const ISSUES: &str = "https://github.com/cosmic-blue-os/cosmic-blue/issues";
 const LOGO: &str = "/usr/share/icons/hicolor/scalable/apps/cosmic-blue-logo.svg";
+/// Welcome page illustration: the default wallpaper in miniature
+const HERO: &str = "/usr/share/cosmic-blue/tour-welcome.svg";
 const INSTALLERS: [&str; 2] = [
     "/usr/share/applications/liveinst.desktop",
     "/usr/share/applications/anaconda.desktop",
 ];
+
+const ACCESSIBILITY: &str =
+    "Screen reader: Super + Alt + S. Zoom: Super + = and Super + -. More in the settings.";
 
 /// English text -> French text
 const FRENCH: &[(&str, &str)] = &[
@@ -43,6 +48,12 @@ const FRENCH: &[(&str, &str)] = &[
     ("Copy", "Copier"),
     ("Copied", "Copié"),
     ("Welcome to cosmic-blue", "Bienvenue dans cosmic-blue"),
+    ("Accessibility", "Accessibilité"),
+    (
+        "Screen reader: Super + Alt + S. Zoom: Super + = and Super + -. More in the settings.",
+        "Lecteur d’écran : Super + Alt + S. Zoom : Super + = et Super + -. Plus d’options dans les paramètres.",
+    ),
+    ("Settings", "Paramètres"),
     // First steps
     ("First steps", "Premiers pas"),
     (
@@ -219,15 +230,18 @@ fn tr(text: &'static str) -> &'static str {
 
 #[derive(Clone, Debug)]
 enum Action {
-    Launch(&'static str),
+    /// A program and its arguments
+    Launch(&'static [&'static str]),
     OpenUri(String),
     Install,
 }
 
 /// What a page shows under its description
 enum Body {
-    Logo,
-    /// A large symbolic icon, as an illustration
+    /// The welcome illustration (HERO, or the logo when it is missing),
+    /// with the accessibility row under it
+    Welcome,
+    /// A large icon of the icon theme, as an illustration
     Icon(&'static str),
     /// Terminal commands, each with a button that copies it
     Commands(Vec<(&'static str, &'static str)>),
@@ -240,6 +254,9 @@ enum Body {
 }
 
 struct Page {
+    /// Icon of the icon theme shown above the title, in color like the
+    /// app icons (cosmic-blue's Tela circle theme)
+    icon: Option<&'static str>,
     title: &'static str,
     description: Option<&'static str>,
     /// Button above the rows
@@ -254,6 +271,7 @@ struct Page {
 impl Page {
     fn new(title: &'static str, description: Option<&'static str>, body: Body) -> Self {
         Self {
+            icon: None,
             title,
             description,
             button_before: None,
@@ -285,10 +303,11 @@ fn pages(mode: Mode) -> Vec<Page> {
                 Some(
                     "Your system is installed and ready. Here are a few things worth knowing to get started.",
                 ),
-                Body::Logo,
+                Body::Welcome,
             ),
             Page {
-                button_before: Some(("Open COSMIC Store", Action::Launch("cosmic-store"))),
+                icon: Some("com.system76.CosmicStore"),
+                button_before: Some(("Open COSMIC Store", Action::Launch(&["cosmic-store"]))),
                 ..Page::new(
                     "Install apps",
                     Some(
@@ -306,25 +325,29 @@ fn pages(mode: Mode) -> Vec<Page> {
                     ]),
                 )
             },
-            Page::new(
-                "Updates and rollback",
-                Some(
-                    "The system, your apps and Homebrew packages update by themselves in the background. A system update applies at the next restart, without interrupting you.",
-                ),
-                Body::Commands(vec![
-                    ("ujust update", "Update everything now, without waiting"),
-                    (
-                        "sudo bootc rollback",
-                        "An update broke something? Go back to the previous version, then restart",
-                    ),
-                    (
-                        "sudo bootc status",
-                        "Show the current and previous versions",
-                    ),
-                ]),
-            ),
             Page {
-                button_after: Some(("Open a terminal", Action::Launch("cosmic-term"))),
+                icon: Some("system-software-update"),
+                ..Page::new(
+                    "Updates and rollback",
+                    Some(
+                        "The system, your apps and Homebrew packages update by themselves in the background. A system update applies at the next restart, without interrupting you.",
+                    ),
+                    Body::Commands(vec![
+                        ("ujust update", "Update everything now, without waiting"),
+                        (
+                            "sudo bootc rollback",
+                            "An update broke something? Go back to the previous version, then restart",
+                        ),
+                        (
+                            "sudo bootc status",
+                            "Show the current and previous versions",
+                        ),
+                    ]),
+                )
+            },
+            Page {
+                icon: Some("org.gnome.Terminal"),
+                button_after: Some(("Open a terminal", Action::Launch(&["cosmic-term"]))),
                 ..Page::new(
                     "Handy commands",
                     Some(
@@ -352,6 +375,7 @@ fn pages(mode: Mode) -> Vec<Page> {
                 )
             },
             Page {
+                icon: Some("cs-tiling"),
                 note: Some("COSMIC can be customized much further: Settings → Desktop."),
                 ..Page::new(
                     "Tile your windows",
@@ -372,24 +396,27 @@ fn pages(mode: Mode) -> Vec<Page> {
                     ]),
                 )
             },
-            Page::new(
-                "Help and feedback",
-                Some(
-                    "Everything else is in the cosmic-blue guide. You can open this tour again from the app library: look for First steps.",
-                ),
-                Body::Links(vec![
-                    (
-                        "Documentation",
-                        "Updates, software, commands and tips",
-                        docs_url(),
+            Page {
+                icon: Some("help-browser"),
+                ..Page::new(
+                    "Help and feedback",
+                    Some(
+                        "Everything else is in the cosmic-blue guide. You can open this tour again from the app library: look for First steps.",
                     ),
-                    (
-                        "Report a problem",
-                        "Found a bug or something unclear? Tell us on GitHub",
-                        ISSUES.to_owned(),
-                    ),
-                ]),
-            ),
+                    Body::Links(vec![
+                        (
+                            "Documentation",
+                            "Updates, software, commands and tips",
+                            docs_url(),
+                        ),
+                        (
+                            "Report a problem",
+                            "Found a bug or something unclear? Tell us on GitHub",
+                            ISSUES.to_owned(),
+                        ),
+                    ]),
+                )
+            },
         ],
         Mode::Live => vec![
             Page::new(
@@ -397,14 +424,14 @@ fn pages(mode: Mode) -> Vec<Page> {
                 Some(
                     "cosmic-blue is Fedora Atomic with the COSMIC desktop, made in the spirit of Bluefin: a desktop that stays out of your way and keeps itself up to date.",
                 ),
-                Body::Logo,
+                Body::Welcome,
             ),
             Page::new(
                 "Try it live",
                 Some(
                     "cosmic-blue is running from the live media. Nothing is written to your disk, and your changes are lost when you shut down. You can start the installer at any time from the desktop or the dock.",
                 ),
-                Body::Icon("media-optical-symbolic"),
+                Body::Icon("cosmic-blue-welcome"),
             ),
             Page::new(
                 "What you get",
@@ -429,7 +456,7 @@ fn pages(mode: Mode) -> Vec<Page> {
                 Some(
                     "The installer copies cosmic-blue to your disk. After that, it updates itself from the cosmic-blue image registry.",
                 ),
-                Body::Icon("drive-harddisk-symbolic"),
+                Body::Icon("cosmic-blue-installer"),
             ),
         ],
     }
@@ -449,6 +476,9 @@ fn all_texts() -> Vec<&'static str> {
         "Get started",
         "Install cosmic-blue",
         "Keep trying",
+        "Accessibility",
+        ACCESSIBILITY,
+        "Settings",
     ];
     for mode in [Mode::FirstSteps, Mode::Live] {
         for page in pages(mode) {
@@ -473,7 +503,7 @@ fn all_texts() -> Vec<&'static str> {
                             .flat_map(|(title, subtitle, _)| [title, subtitle]),
                     );
                 }
-                Body::Logo | Body::Icon(_) => {}
+                Body::Welcome | Body::Icon(_) => {}
             }
         }
     }
@@ -540,7 +570,8 @@ struct App<T: Tour> {
     pages: Vec<Page>,
     page_i: usize,
     toasts: Toasts<Message>,
-    logo: Option<widget::svg::Handle>,
+    /// Welcome illustration, or the logo when it is missing
+    welcome: Option<widget::svg::Handle>,
 }
 
 impl<T: Tour> Application for App<T> {
@@ -570,9 +601,10 @@ impl<T: Tour> Application for App<T> {
             pages: pages(mode),
             page_i: 0,
             toasts: Toasts::new(Message::CloseToast),
-            logo: Path::new(LOGO)
-                .exists()
-                .then(|| widget::svg::Handle::from_path(LOGO)),
+            welcome: [HERO, LOGO]
+                .into_iter()
+                .find(|path| Path::new(path).exists())
+                .map(widget::svg::Handle::from_path),
         };
         let title = if mode == Mode::Live {
             "Welcome to cosmic-blue"
@@ -681,6 +713,12 @@ impl<T: Tour> Application for App<T> {
         });
 
         let title = text::title2(tr(page.title)).center().width(Length::Fill);
+        let icon = page.icon.map(|name| {
+            widget::icon::from_name(name)
+                .size(56)
+                .apply(widget::container)
+                .center_x(Length::Fill)
+        });
 
         let mut content = widget::column::with_capacity(6)
             .spacing(space_m)
@@ -711,10 +749,19 @@ impl<T: Tour> Application for App<T> {
             .apply(widget::container)
             .height(Length::Fill);
 
-        let page_view = widget::column::with_capacity(7)
-            .push(widget::space::vertical().height(space_xl))
+        let page_view = widget::column::with_capacity(9)
+            .push(widget::space::vertical().height(if icon.is_some() { space_s } else { space_xl }))
+            .push_maybe(icon)
+            .push_maybe(
+                page.icon
+                    .map(|_| widget::space::vertical().height(space_xxs)),
+            )
             .push(title)
-            .push(widget::space::vertical().height(space_l))
+            .push(widget::space::vertical().height(if page.icon.is_some() {
+                space_m
+            } else {
+                space_l
+            }))
             .push(content)
             .push(widget::space::vertical().height(space_m))
             .push(button_row)
@@ -732,17 +779,36 @@ impl<T: Tour> Application for App<T> {
 impl<T: Tour> App<T> {
     fn body<'a>(&'a self, body: &'a Body, space_s: u16) -> Option<Element<'a, Message>> {
         let rows = match body {
-            Body::Logo => {
-                let logo: Element<'a, Message> = match &self.logo {
-                    Some(handle) => widget::svg(handle.clone()).width(160).height(160).into(),
+            Body::Welcome => {
+                let illustration: Element<'a, Message> = match &self.welcome {
+                    // HERO is 600 x 220 (the logo is square: it keeps its ratio)
+                    Some(handle) => widget::svg(handle.clone()).width(600).height(220).into(),
                     None => widget::icon::from_name("computer-symbolic")
                         .size(128)
                         .into(),
                 };
+                // Accessibility, from the first page: what COSMIC's first-run
+                // assistant (skipped, see build_files/20-cosmic.sh) offered
+                let accessibility = settings::item_row(vec![
+                    widget::icon::from_name("preferences-desktop-accessibility")
+                        .size(40)
+                        .into(),
+                    two_lines(text::body(tr("Accessibility")).into(), tr(ACCESSIBILITY)),
+                    action_button(
+                        "Settings",
+                        &Action::Launch(&["cosmic-settings", "accessibility"]),
+                    ),
+                ])
+                .spacing(space_s);
                 return Some(
-                    widget::container(logo)
-                        .padding([space_s, 0])
-                        .center_x(Length::Fill)
+                    widget::column::with_capacity(2)
+                        .spacing(theme::spacing().space_m)
+                        .push(
+                            widget::container(illustration)
+                                .padding([space_s, 0])
+                                .center_x(Length::Fill),
+                        )
+                        .push(settings::section().add(accessibility))
                         .into(),
                 );
             }
@@ -825,7 +891,7 @@ fn two_lines<'a>(first: Element<'a, Message>, caption: &'static str) -> Element<
 
 fn action_button<'a>(label: &'static str, action: &Action) -> Element<'a, Message> {
     let available = match action {
-        Action::Launch(program) => in_path(program),
+        Action::Launch(command) => in_path(command[0]),
         _ => true,
     };
     let button = widget::button::standard(tr(label));
@@ -854,7 +920,7 @@ fn spawn(program: &str, args: &[&str]) {
 
 fn run(action: &Action) {
     match action {
-        Action::Launch(program) => spawn(program, &[]),
+        Action::Launch(command) => spawn(command[0], &command[1..]),
         Action::OpenUri(uri) => spawn("xdg-open", &[uri]),
         Action::Install => {
             if let Some(desktop) = installer() {

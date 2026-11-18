@@ -375,12 +375,14 @@ desktop_tour() {
     screenshot "${SHOTS}/01-login-screen"
     demo_login 02-login-failed || return 1
 
-    # First login: COSMIC's first-run assistant (cosmic-initial-setup).
-    # Closed without finishing it, so the desktop keeps the image defaults.
-    # (It does not start again for a user who already logged in.)
+    # First login: COSMIC's first-run assistant (cosmic-initial-setup) must
+    # not open (new accounts skip it, build_files/20-cosmic.sh); our tour
+    # opens instead. (The update test's account comes from the stable
+    # image, see vm-update-test.sh.)
     sleep 30
     if vm "pgrep -u ${DEMO_USER} -f cosmic-initial-setup" >/dev/null; then
         screenshot "${SHOTS}/02-first-run"
+        warn "COSMIC's first-run assistant opened at the first login"
         vm "pkill -u ${DEMO_USER} -f cosmic-initial-setup" || true
         sleep 8
     fi
@@ -448,14 +450,14 @@ vm_check_crashes() {
     return "${errors}"
 }
 
-# cosmic-blue's first steps tour, which opens once the first-run assistant is
-# closed: one screenshot per page (Alt+Right turns the page), then closed.
+# cosmic-blue's first steps tour, which opens at the first login of a new
+# account: one screenshot per page (Alt+Right turns the page), then closed.
 FIRST_STEPS_PAGES=6
 
 first_steps_shots() {
     local page
     if ! wait_for 60 "pgrep -u ${DEMO_USER} -f cosmic-blue-tour\$"; then
-        warn "the first steps tour did not open after the first-run assistant"
+        warn "the first steps tour did not open at the first login"
         return 1
     fi
     sleep 8
