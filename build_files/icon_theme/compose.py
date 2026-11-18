@@ -41,11 +41,10 @@ SKIP_DIRS = ("/panel",)
 INHERITS = [TELA, "Cosmic", "Pop", "Adwaita", "hicolor"]
 
 # Tela has no icons for the COSMIC applications (their IDs are
-# com.system76.*). Point them to the matching Tela icon. The Store and
-# Settings have their own icons in the layer instead.
+# com.system76.*). Point them to the matching Tela icon. COSMIC
+# Files, Store and Settings have their own icons in the layer instead.
 COSMIC_APPS = {
     "com.system76.CosmicEdit": "accessories-text-editor",
-    "com.system76.CosmicFiles": "system-file-manager",
     "com.system76.CosmicPlayer": "multimedia-video-player",
     "com.system76.CosmicScreenshot": "applets-screenshooter",
     "com.system76.CosmicTerm": "utilities-terminal",

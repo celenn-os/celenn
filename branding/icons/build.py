@@ -6,7 +6,7 @@
 - mimetypes: common file types (a light page whose symbol and folded corner
   take the color of the type)
 - apps: the COSMIC dock buttons (launcher, workspaces, applications) and
-  the COSMIC Store and Settings in the Tela circle style, as are the
+  COSMIC Files, Store and Settings in the Tela circle style, as are the
   Documentation launcher, the System Update launcher, the live ISO's
   welcome tour and installer, and the installed system's first steps tour.
   The Documentation and System Update icons also replace Tela's help-browser
@@ -197,13 +197,28 @@ def page(name, color):
 
 # Drawn like Tela circle's application icons: a disk in the accent, white
 # symbols, the less important parts in translucent white.
-TELA_SHADE = '<path d="M5 32a27 27 0 0 0 54 0z" opacity=".1"/>'
+# The disk darkens slightly towards the bottom, as Tela's lower half does, but
+# in the disk's own fill: a shape laid over the disk would add a second
+# anti-aliased edge (a darker rim) and a seam across the middle.
+def shaded(color, amount=0.1):
+    rgb = [int(color[i:i + 2], 16) for i in (1, 3, 5)]
+    return "#" + "".join(f"{round(c * (1 - amount)):02x}" for c in rgb)
+
+
+def disk(color, r=27):
+    defs = ('<linearGradient id="disk-fill" x1="0" y1="0" x2="0" y2="1">'
+            f'<stop offset=".5" stop-color="{color}"/><stop offset="1" stop-color="{shaded(color)}"/>'
+            '</linearGradient>')
+    return defs, f'<circle cx="32" cy="32" r="{r}" fill="url(#disk-fill)"/>'
+
+
 STORE_COLOR = "#2ec4c4"
 SETTINGS_COLOR = "#5f6b86"
 
 
 def tela_app(body, color="#4f8dff"):
-    return svg(f'<circle cx="32" cy="32" r="27" fill="{color}"/>' + TELA_SHADE + body)
+    defs, circle = disk(color)
+    return svg(circle + body, defs)
 
 
 def tile(x, y, size, opacity=None, radius=1.6):
@@ -324,6 +339,14 @@ TILING = tela_app(
 
 # Icon -> names (the desktop entries of the dock buttons and of the apps
 # they open). The first name gets the file, the others are links to it.
+# COSMIC Files: a folder, its back panel with the tab in translucent white
+FILES = tela_app(
+    '<path d="M15 20a2.5 2.5 0 0 1 2.5-2.5h9l3.5 3.5h17.5a2.5 2.5 0 0 1 2.5 2.5v20a2.5 2.5 0 0 1'
+    '-2.5 2.5h-30a2.5 2.5 0 0 1-2.5-2.5z" fill="#fff" opacity=".45"/>'
+    '<path d="M15 27.5a2.5 2.5 0 0 1 2.5-2.5h30a2.5 2.5 0 0 1 2.5 2.5v16a2.5 2.5 0 0 1'
+    '-2.5 2.5h-30a2.5 2.5 0 0 1-2.5-2.5z" fill="#fff"/>'
+)
+
 DOCK = {
     "applications": (APPLICATIONS, ["com.system76.CosmicPanelAppButton", "com.system76.CosmicAppLibrary"]),
     "workspaces": (WORKSPACES, ["com.system76.CosmicPanelWorkspacesButton", "com.system76.CosmicWorkspaces",
@@ -331,6 +354,7 @@ DOCK = {
     "launcher": (LAUNCHER, ["com.system76.CosmicPanelLauncherButton", "com.system76.CosmicLauncher"]),
     "store": (STORE, ["com.system76.CosmicStore"]),
     "settings": (SETTINGS, ["com.system76.CosmicSettings"]),
+    "files": (FILES, ["com.system76.CosmicFiles"]),
     # Tela's update icon, which the first steps tour shows on its updates page
     "update": (UPDATE, ["system-software-update"]),
     # Tela's help icon, which the first steps tour shows on its last page
