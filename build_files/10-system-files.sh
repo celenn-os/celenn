@@ -168,13 +168,13 @@ python3 -I /ctx/build_files/drop-just-recipes.py \
     "${STAGE}/usr/share/ublue-os/just/system.just" \
     bluespeed bluefin-apps bazaar-preview toggle-testing bluefin-cli devmode
 # Every listed ujust command reads verb-object, like cosmic-blue's own in
-# 60-custom.just: install- (adds apps or tools, and `remove` takes them away),
+# 60-custom.just: install- (adds apps or tools) and remove-,
 # toggle- (on/off), reset-, check-, show-, switch-, report-... Bluefin's names
 # that do not are renamed, regrouped (Apps installs things, System looks
 # after the computer) or hidden when another command covers them.
 # Bluefin's installers have no `remove`: they become hidden _bluefin-*
-# recipes, which 60-custom.just's install-* commands run to install, next to
-# their own removal. 60-custom.just keeps every old name as a hidden alias.
+# recipes, which 60-custom.just's install-* commands run, next to its own
+# remove-* commands. 60-custom.just keeps every old name as a hidden alias.
 # Fails if upstream renames a recipe.
 python3 -I /ctx/build_files/rename-just-recipes.py "${STAGE}"/usr/share/ublue-os/just/{apps,default,shared,system,update}.just -- \
     "toggle-devmode=_bluefin-dev-tools>install-dev-tools" \
@@ -196,9 +196,9 @@ python3 -I /ctx/build_files/rename-just-recipes.py "${STAGE}"/usr/share/ublue-os
     "check-local-overrides@System|Show the system settings changed on this computer (in /etc)" \
     "check-idle-power-draw@System|Measure the power drawn while idle" \
     "clean-system@System|Free disk space: unused containers, old Flatpak runtimes, Homebrew caches" \
-    "update@System" \
+    "update@System|Update the system, apps and Homebrew packages now" \
     "toggle-updates@System|Turn automatic updates on or off" \
-    "toggle-tpm2|Unlock the encrypted disk with the TPM2 chip instead of a password, or stop" \
+    "toggle-tpm2|Turn on or off unlocking the encrypted disk with the TPM2 chip (no password at startup)" \
     -jetbrains-toolbox -toggle-user-motd -device-info -toggle-vms
 
 # `ujust enroll-secure-boot-key` (projectbluefin/common) queues the akmods key

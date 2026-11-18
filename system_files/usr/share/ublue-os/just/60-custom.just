@@ -1,7 +1,8 @@
 # vim: set ft=make :
 # cosmic-blue commands, listed by `ujust` under "Desktop", "Apps" and "System".
-# Names are verb-object: install-<thing> (with a `remove` argument when it can),
-# toggle-<thing> (on/off), reset-, export-, switch-, report-, enroll-.
+# Names are verb-object: install-<thing> and remove-<thing>, toggle-<thing>
+# (on/off), reset-, export-, switch-, report-, enroll-, and for Bluefin's
+# (build_files/10-system-files.sh) check-, show-, run-, reboot-, clean-.
 #
 # COSMIC reads each setting from ~/.config/cosmic first and falls back to the
 # image defaults in /usr/share/cosmic. Resetting a setting therefore means
@@ -185,9 +186,16 @@ export-cosmic-config:
     fi
     echo "It is plain text: read it before sharing it."
 
-# Install Microsoft's core fonts (Arial, Times New Roman, Verdana...) for your account; `remove` takes them away
+# Install Microsoft's core fonts (Arial, Times New Roman, Verdana...) for your account
 [group('Apps')]
-install-microsoft-fonts action="install":
+install-microsoft-fonts: (_microsoft-fonts "install")
+
+# Remove Microsoft's core fonts
+[group('Apps')]
+remove-microsoft-fonts: (_microsoft-fonts "remove")
+
+[private]
+_microsoft-fonts action:
     #!/usr/bin/bash
     set -euo pipefail
     # The fonts are free to download and use but may not be redistributed, so
@@ -202,7 +210,7 @@ install-microsoft-fonts action="install":
         echo "Microsoft core fonts removed."
         exit 0
     elif [[ "{{ action }}" != install ]]; then
-        echo "Usage: ujust install-microsoft-fonts [install|remove]" >&2
+        echo "Usage: ujust install-microsoft-fonts or ujust remove-microsoft-fonts" >&2
         exit 1
     fi
     declare -A installers=(
@@ -239,11 +247,18 @@ install-microsoft-fonts action="install":
     install -m 0644 "${tmp}"/fonts/*.ttf "${dest}/"
     fc-cache -f "${dest}"
     echo "Installed $(find "${dest}" -name '*.ttf' | wc -l) font files in ${dest}."
-    echo "Restart open apps to see them. Remove them with: ujust install-microsoft-fonts remove"
+    echo "Restart open apps to see them. Remove them with: ujust remove-microsoft-fonts"
 
-# Install handy command line tools with Homebrew (bat, eza, fd, ripgrep, zoxide...); `remove` takes them away
+# Install handy command line tools with Homebrew (bat, eza, fd, ripgrep, zoxide...)
 [group('Apps')]
-install-cli-tools action="install":
+install-cli-tools: (_cli-tools "install")
+
+# Remove the command line tools and their shortcuts
+[group('Apps')]
+remove-cli-tools: (_cli-tools "remove")
+
+[private]
+_cli-tools action:
     #!/usr/bin/bash
     set -euo pipefail
     # The same tools as Bluefin's `ujust bluefin-cli` (its cli.Brewfile), plus
@@ -284,7 +299,7 @@ install-cli-tools action="install":
                 fi
             fi
             echo "Done. Open a new terminal to use them."
-            echo "Remove them with: ujust install-cli-tools remove"
+            echo "Remove them with: ujust remove-cli-tools"
             ;;
         remove)
             if bling_on; then
@@ -306,14 +321,21 @@ install-cli-tools action="install":
             echo "Done. Open a new terminal."
             ;;
         *)
-            echo "Usage: ujust install-cli-tools [install|remove]" >&2
+            echo "Usage: ujust install-cli-tools or ujust remove-cli-tools" >&2
             exit 1
             ;;
     esac
 
-# Install Steam and Heroic (Epic, GOG and Amazon games) from Flathub; `remove` takes them away
+# Install Steam and Heroic (Epic, GOG and Amazon games) from Flathub
 [group('Apps')]
-install-gaming action="install":
+install-gaming: (_gaming "install")
+
+# Remove Steam and Heroic (games and saves are kept)
+[group('Apps')]
+remove-gaming: (_gaming "remove")
+
+[private]
+_gaming action:
     #!/usr/bin/bash
     set -euo pipefail
     # Both are Flathub apps, installed system-wide like the first-boot apps.
@@ -332,7 +354,7 @@ install-gaming action="install":
             fi
             flatpak install --system --noninteractive flathub "${apps[@]}"
             echo "Done: Steam and Heroic are in the app list."
-            echo "Remove them with: ujust install-gaming remove"
+            echo "Remove them with: ujust remove-gaming"
             ;;
         remove)
             readarray -t installed < <(flatpak list --system --app --columns=application | grep -xF -f <(printf '%s\n' "${apps[@]}") || true)
@@ -345,37 +367,44 @@ install-gaming action="install":
             echo "~/.var/app/com.valvesoftware.Steam or ~/.var/app/com.heroicgameslauncher.hgl to free the space."
             ;;
         *)
-            echo "Usage: ujust install-gaming [install|remove]" >&2
+            echo "Usage: ujust install-gaming or ujust remove-gaming" >&2
             exit 1
             ;;
     esac
 
 # Bluefin's installers (projectbluefin/common), renamed _bluefin-* at build
 # time (build_files/10-system-files.sh): these commands run them to install,
-# and add the `remove` they lack. Removing never deletes your own files
+# and add the removal they lack (remove-*). Removing never deletes your own files
 # (projects, virtual machine disks are only removed after a question).
 
-# Install developer tools from a menu: Docker, Podman Desktop, VS Code, Lima...; `remove` picks which to take away
+# Install developer tools from a menu: Docker, Podman Desktop, VS Code, Lima...
 [group('Apps')]
-install-dev-tools action="install":
+install-dev-tools: (_dev-tools "install")
+
+# Remove developer tools, picked from a menu
+[group('Apps')]
+remove-dev-tools: (_dev-tools "remove")
+
+[private]
+_dev-tools action:
     #!/usr/bin/bash
     set -euo pipefail
     case "{{ action }}" in
         install) exec ujust _bluefin-dev-tools ;;
         remove) ;;
-        *) echo "Usage: ujust install-dev-tools [install|remove]" >&2; exit 1 ;;
+        *) echo "Usage: ujust install-dev-tools or ujust remove-dev-tools" >&2; exit 1 ;;
     esac
     # What the menu installs: "Label|kind|names" (kind: formula, cask, flatpak, ujust)
     tools=(
         "devcontainer CLI|formula|devcontainer"
         "Docker|formula|docker docker-compose lazydocker dive"
         "Podman Desktop|flatpak|io.podman_desktop.PodmanDesktop"
-        "Lima|ujust|install-lima"
+        "Lima|ujust|lima"
         "VS Code|cask|visual-studio-code-linux"
         "VSCodium|cask|vscodium-linux"
         "Antigravity|cask|antigravity-linux"
         "Zed|cask|zed"
-        "JetBrains Toolbox|ujust|install-jetbrains-toolbox"
+        "JetBrains Toolbox|ujust|jetbrains-toolbox"
         "Neovim|formula|neovim"
         "Helix|formula|helix"
         "vim|formula|vim"
@@ -388,8 +417,8 @@ install-dev-tools action="install":
             flatpak) flatpak info --system "$2" >/dev/null 2>&1 ;;
             ujust)
                 case "$2" in
-                    install-lima) brew list --formula lima >/dev/null 2>&1 ;;
-                    install-jetbrains-toolbox) brew list --cask jetbrains-toolbox-linux >/dev/null 2>&1 ;;
+                    lima) brew list --formula lima >/dev/null 2>&1 ;;
+                    jetbrains-toolbox) brew list --cask jetbrains-toolbox-linux >/dev/null 2>&1 ;;
                 esac
                 ;;
         esac
@@ -413,7 +442,7 @@ install-dev-tools action="install":
             formula) read -ra formulas <<<"${names}"; brew uninstall --formula "${formulas[@]}" || true ;;
             cask) brew uninstall --cask "${names}" || true ;;
             flatpak) flatpak uninstall --system --noninteractive "${names}" || true ;;
-            ujust) ujust "${names}" remove ;;
+            ujust) ujust "remove-${names}" ;;
         esac
     done
     if [[ "${#installed[@]}" -eq "$(grep -c . <<<"${chosen}")" ]]; then
@@ -421,9 +450,16 @@ install-dev-tools action="install":
     fi
     echo "Done. Your projects and settings are kept."
 
-# Install virtual machines (virt-manager, with UEFI, TPM and USB passthrough); `remove` takes them away
+# Install virtual machines (virt-manager, with UEFI, TPM and USB passthrough)
 [group('Apps')]
-install-vms action="install":
+install-vms: (_vms "install")
+
+# Remove virt-manager (virtual machine disks are kept)
+[group('Apps')]
+remove-vms: (_vms "remove")
+
+[private]
+_vms action:
     #!/usr/bin/bash
     set -euo pipefail
     case "{{ action }}" in
@@ -441,12 +477,19 @@ install-vms action="install":
             sed -i '/uri_default.*session/d' "${HOME}/.config/libvirt/libvirt.conf" 2>/dev/null || true
             echo "virt-manager removed."
             ;;
-        *) echo "Usage: ujust install-vms [install|remove]" >&2; exit 1 ;;
+        *) echo "Usage: ujust install-vms or ujust remove-vms" >&2; exit 1 ;;
     esac
 
-# Install Lima, a lightweight Ubuntu virtual machine for containers; `remove` takes it away
+# Install Lima, a lightweight Ubuntu virtual machine for containers
 [group('Apps')]
-install-lima action="install":
+install-lima: (_lima "install")
+
+# Remove Lima and its Ubuntu virtual machine (asks first)
+[group('Apps')]
+remove-lima: (_lima "remove")
+
+[private]
+_lima action:
     #!/usr/bin/bash
     set -euo pipefail
     case "{{ action }}" in
@@ -471,12 +514,19 @@ install-lima action="install":
             sed -i '\|^Include ~/.lima/\*/ssh.config$|d' "${HOME}/.ssh/config" 2>/dev/null || true
             echo "Lima removed."
             ;;
-        *) echo "Usage: ujust install-lima [install|remove]" >&2; exit 1 ;;
+        *) echo "Usage: ujust install-lima or ujust remove-lima" >&2; exit 1 ;;
     esac
 
-# Install Kubernetes and cloud native tools (CNCF) with Homebrew; `remove` takes them away
+# Install Kubernetes and cloud native tools (CNCF) with Homebrew
 [group('Apps')]
-install-cncf-tools action="install":
+install-cncf-tools: (_cncf-tools "install")
+
+# Remove the Kubernetes and cloud native tools
+[group('Apps')]
+remove-cncf-tools: (_cncf-tools "remove")
+
+[private]
+_cncf-tools action:
     #!/usr/bin/bash
     set -euo pipefail
     brewfile=/usr/share/ublue-os/homebrew/cncf.Brewfile
@@ -490,12 +540,19 @@ install-cncf-tools action="install":
             done
             echo "Done. A tool that another Homebrew package needs is kept."
             ;;
-        *) echo "Usage: ujust install-cncf-tools [install|remove]" >&2; exit 1 ;;
+        *) echo "Usage: ujust install-cncf-tools or ujust remove-cncf-tools" >&2; exit 1 ;;
     esac
 
-# Install Goose, an AI assistant for the terminal, with read-only system diagnostics; `remove` takes it away
+# Install Goose, an AI assistant for the terminal, with read-only system diagnostics
 [group('Apps')]
-install-ai-tools action="install":
+install-ai-tools: (_ai-tools "install")
+
+# Remove Goose and its configuration
+[group('Apps')]
+remove-ai-tools: (_ai-tools "remove")
+
+[private]
+_ai-tools action:
     #!/usr/bin/bash
     set -euo pipefail
     brewfile=/usr/share/ublue-os/homebrew/ai-tools.Brewfile
@@ -519,12 +576,19 @@ install-ai-tools action="install":
             fi
             echo "Done."
             ;;
-        *) echo "Usage: ujust install-ai-tools [install|remove]" >&2; exit 1 ;;
+        *) echo "Usage: ujust install-ai-tools or ujust remove-ai-tools" >&2; exit 1 ;;
     esac
 
-# Install the ASUS laptop tools (asusctl and ROG Control Center); `remove` takes them away
+# Install the ASUS laptop tools (asusctl and ROG Control Center)
 [group('Apps')]
-install-asus action="install":
+install-asus: (_asus "install")
+
+# Remove the ASUS laptop tools
+[group('Apps')]
+remove-asus: (_asus "remove")
+
+[private]
+_asus action:
     #!/usr/bin/bash
     set -euo pipefail
     case "{{ action }}" in
@@ -539,12 +603,19 @@ install-asus action="install":
             done
             echo "ASUS tools removed."
             ;;
-        *) echo "Usage: ujust install-asus [install|remove]" >&2; exit 1 ;;
+        *) echo "Usage: ujust install-asus or ujust remove-asus" >&2; exit 1 ;;
     esac
 
-# Install JetBrains Toolbox, to install JetBrains IDEs; `remove` takes it away
+# Install JetBrains Toolbox, to install JetBrains IDEs
 [group('Apps')]
-install-jetbrains-toolbox action="install":
+install-jetbrains-toolbox: (_jetbrains-toolbox "install")
+
+# Remove JetBrains Toolbox (the IDEs it installed are kept)
+[group('Apps')]
+remove-jetbrains-toolbox: (_jetbrains-toolbox "remove")
+
+[private]
+_jetbrains-toolbox action:
     #!/usr/bin/bash
     set -euo pipefail
     case "{{ action }}" in
@@ -556,12 +627,19 @@ install-jetbrains-toolbox action="install":
             echo "JetBrains Toolbox removed. IDEs it installed stay in"
             echo "~/.local/share/JetBrains: delete that folder to remove them too."
             ;;
-        *) echo "Usage: ujust install-jetbrains-toolbox [install|remove]" >&2; exit 1 ;;
+        *) echo "Usage: ujust install-jetbrains-toolbox or ujust remove-jetbrains-toolbox" >&2; exit 1 ;;
     esac
 
-# Install OpenTabletDriver, for drawing tablets; `remove` takes it away
+# Install OpenTabletDriver, for drawing tablets
 [group('Apps')]
-install-opentabletdriver action="install":
+install-opentabletdriver: (_opentabletdriver "install")
+
+# Remove OpenTabletDriver and its tablet settings
+[group('Apps')]
+remove-opentabletdriver: (_opentabletdriver "remove")
+
+[private]
+_opentabletdriver action:
     #!/usr/bin/bash
     set -euo pipefail
     case "{{ action }}" in
@@ -574,7 +652,7 @@ install-opentabletdriver action="install":
             flatpak uninstall --system --noninteractive net.opentabletdriver.OpenTabletDriver 2>/dev/null || true
             echo "OpenTabletDriver removed. Restart to use the usual tablet drivers again."
             ;;
-        *) echo "Usage: ujust install-opentabletdriver [install|remove]" >&2; exit 1 ;;
+        *) echo "Usage: ujust install-opentabletdriver or ujust remove-opentabletdriver" >&2; exit 1 ;;
     esac
 
 # Turn the FlatPark app source on or off (off by default; or force one: on, off, status)

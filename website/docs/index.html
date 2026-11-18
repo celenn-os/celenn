@@ -91,30 +91,30 @@ distrobox enter arch</code></pre>
 
     <section id="ujust" class="block">
       <h2>ujust commands</h2>
-      <p><code>ujust</code> runs the shortcuts that come with the system. Run <code>ujust</code> alone to list them all, or <code>ujust --choose</code> to pick one from a menu. The most useful ones:</p>
+      <p><code>ujust</code> runs the shortcuts that come with the system. Run <code>ujust</code> alone to list them all, or <code>ujust --choose</code> to pick one from a menu. Each <code>install-…</code> command has a <code>remove-…</code> command that takes it away. The most useful ones:</p>
       <dl class="commands">
         <dt><code>ujust update</code></dt>
         <dd>Update the system, Flatpak apps and Homebrew packages now.</dd>
         <dt><code>ujust toggle-updates</code></dt>
         <dd>Turn automatic updates on or off.</dd>
+        <dt><code>ujust switch-channel</code></dt>
+        <dd>Follow <code>stable</code> (a new image once a week, after more tests; the default) or <code>latest</code> (every daily build): <code>ujust switch-channel latest</code>. Alone, it shows the channel in use.</dd>
         <dt><code>ujust install-dev-tools</code></dt>
-        <dd>Install developer tools from a menu: Docker, VS Code, Podman Desktop, Lima... Remove them with <code>ujust install-dev-tools remove</code>.</dd>
+        <dd>Install developer tools from a menu: Docker, VS Code, Podman Desktop, Lima... Remove them with <code>ujust remove-dev-tools</code>.</dd>
+        <dt><code>ujust install-cli-tools</code></dt>
+        <dd>Install handy command line tools with Homebrew (bat, eza, fd, ripgrep, zoxide, yq...) and, if you want, shortcuts that use them in the terminal. Remove them with <code>ujust remove-cli-tools</code>.</dd>
+        <dt><code>ujust install-microsoft-fonts</code></dt>
+        <dd>Download Microsoft's core fonts (Arial, Times New Roman, Verdana...) for your account, after accepting their license. Remove them with <code>ujust remove-microsoft-fonts</code>.</dd>
+        <dt><code>ujust install-gaming</code></dt>
+        <dd>Install Steam and Heroic (games from Epic Games, GOG and Amazon) from Flathub. Remove them with <code>ujust remove-gaming</code>; your games and saves are kept.</dd>
+        <dt><code>ujust toggle-flatpark</code></dt>
+        <dd>Turn FlatPark, an extra source of apps that are not on Flathub, on or off. It is off by default because its apps are not reviewed like Flathub's; when on, apps also on Flathub keep coming from Flathub. It can also be added or removed in COSMIC Store, under Software repositories.</dd>
         <dt><code>ujust toggle-dark-mode</code></dt>
         <dd>Switch between the dark and light themes.</dd>
         <dt><code>ujust reset-cosmic-theme</code></dt>
         <dd>Restore the cosmic-blue look: colors, icons, wallpaper.</dd>
         <dt><code>ujust reset-cosmic-config</code></dt>
         <dd>Reset all COSMIC settings to the cosmic-blue defaults (a backup is kept).</dd>
-        <dt><code>ujust install-cli-tools</code></dt>
-        <dd>Install handy command line tools with Homebrew (bat, eza, fd, ripgrep, zoxide, yq...) and, if you want, shortcuts that use them in the terminal. Remove them with <code>ujust install-cli-tools remove</code>.</dd>
-        <dt><code>ujust install-microsoft-fonts</code></dt>
-        <dd>Download Microsoft's core fonts (Arial, Times New Roman, Verdana...) for your account, after accepting their license.</dd>
-        <dt><code>ujust install-gaming</code></dt>
-        <dd>Install Steam and Heroic (games from Epic Games, GOG and Amazon) from Flathub. Remove them with <code>ujust install-gaming remove</code>; your games and saves are kept.</dd>
-        <dt><code>ujust toggle-flatpark</code></dt>
-        <dd>Turn FlatPark, an extra source of apps that are not on Flathub, on or off. It is off by default because its apps are not reviewed like Flathub's; when on, apps also on Flathub keep coming from Flathub. It can also be added or removed in COSMIC Store, under Software repositories.</dd>
-        <dt><code>ujust switch-channel</code></dt>
-        <dd>Follow <code>stable</code> (a new image once a week, after more tests; the default) or <code>latest</code> (every daily build): <code>ujust switch-channel latest</code>. Alone, it shows the channel in use.</dd>
         <dt><code>ujust toggle-tpm2</code></dt>
         <dd>Unlock an encrypted disk with the TPM2 chip instead of a password.</dd>
         <dt><code>ujust enroll-secure-boot-key</code></dt>

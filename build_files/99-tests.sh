@@ -237,14 +237,15 @@ for recipe in contribute bluespeed bluefin-apps bazaar-preview toggle-testing ch
     if tr ' ' '\n' <<<"${recipes}" | grep -qx -- "${recipe}"; then echo "ujust ${recipe} left in place"; exit 1; fi
 done
 # Every listed command reads verb-object (build_files/10-system-files.sh
-# renames Bluefin's that do not), and every install- command takes `remove`;
-# the earlier names and Bluefin's own installers still run, unlisted
+# renames Bluefin's that do not), and every install-<thing> has its
+# remove-<thing>; the earlier names and Bluefin's own installers still run,
+# unlisted
 for recipe in $(tr ' ' '\n' <<<"${recipes}" | grep '^install-'); do
-    just --justfile /usr/share/ublue-os/just/00-entry.just --show "${recipe}" | grep -q '^'"${recipe}"' action="install":' \
-        || { echo "ujust ${recipe} takes no install/remove argument"; exit 1; }
+    tr ' ' '\n' <<<"${recipes}" | grep -qx -- "remove-${recipe#install-}" \
+        || { echo "ujust ${recipe} has no remove-${recipe#install-}"; exit 1; }
 done
 odd="$(tr ' ' '\n' <<<"${recipes}" \
-    | grep -vE '^(install|toggle|reset|export|switch|report|enroll|check|show|run|reboot|clean|update)(-|$)' || true)"
+    | grep -vE '^(install|remove|toggle|reset|export|switch|report|enroll|check|show|run|reboot|clean|update)(-|$)' || true)"
 if [[ -n "${odd}" ]]; then echo "ujust commands not named verb-object:" ${odd}; exit 1; fi
 for recipe in install-dev-tools install-vms install-lima reset-default-apps install-cncf-tools \
               install-ai-tools install-asus install-jetbrains-toolbox install-opentabletdriver reboot-to-bios show-bios-info show-logs show-previous-logs run-benchmark \

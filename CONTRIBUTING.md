@@ -5,7 +5,7 @@ built, tested and published by CI from this repository.
 
 ## Reporting
 
-- Bugs: run `ujust bug-report` on the affected computer, it opens a filled-in
+- Bugs: run `ujust report-bug` on the affected computer, it opens a filled-in
   issue. Bugs that also happen with COSMIC on other systems belong to
   [COSMIC](https://github.com/pop-os/cosmic-epoch/issues).
 - Questions and ideas: [Discussions](https://github.com/cosmic-blue-os/cosmic-blue/discussions).
