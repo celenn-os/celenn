@@ -334,7 +334,7 @@ done
 
 # Everyday pieces: printing, scanning, codecs, fonts, disks, file previews
 rpm -q cups cups-pk-helper foomatic-db-ppds system-config-printer hplip \
-    epson-inkjet-printer-escpr epson-inkjet-printer-escpr2 gutenprint-cups \
+    gutenprint-cups \
     ptouch-driver printer-driver-brlaser foo2zjs nss-mdns \
     sane-backends sane-backends-drivers-scanners sane-airscan ipp-usb \
     fwupd upower \
