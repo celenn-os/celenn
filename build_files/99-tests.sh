@@ -358,8 +358,8 @@ test -f /usr/share/icons/hicolor/scalable/apps/cosmic-blue-welcome.svg
 # as app icons of the cosmic-blue icon theme (its layer, Tela) or hicolor
 for icon in com.system76.CosmicStore system-software-update org.gnome.Terminal \
     cs-tiling help-browser preferences-desktop-accessibility cosmic-blue-welcome; do
-    find -L /usr/share/icons/cosmic-blue /usr/share/icons/Tela-circle-4f8dff \
-        /usr/share/icons/hicolor -path "*/apps/${icon}.svg" -print -quit | grep -q . \
+    [[ -n "$(find /usr/share/icons/cosmic-blue /usr/share/icons/Tela-circle-4f8dff \
+        /usr/share/icons/hicolor -path "*/apps/${icon}.svg" -print -quit)" ]] \
         || { echo "Tour icon ${icon} not found" >&2; exit 1; }
 done
 # (libcosmic binary: its libraries resolve, and the check needs no display)
