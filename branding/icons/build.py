@@ -6,9 +6,9 @@
 - mimetypes: common file types (a light page whose symbol and folded corner
   take the color of the type)
 - apps: the COSMIC dock buttons (launcher, workspaces, applications) and
-  the COSMIC Store and Settings in the Tela circle style; the live ISO's
-  welcome tour and installer, the installed system's first steps tour, and
-  the Documentation launcher
+  the COSMIC Store and Settings in the Tela circle style, as are the
+  Documentation launcher, the live ISO's welcome tour and installer, and
+  the installed system's first steps tour
 - actions: the symbolic icons of the suspend and restart buttons in the
   panel's power menu (Tela has none for restart, and its suspend icon is
   hard to read). They follow the style of Tela's shutdown icon, which stays.
@@ -29,11 +29,6 @@ APPS = REPO / "iso_files" / "welcome"
 HICOLOR_APPS = REPO / "system_files/usr/share/icons/hicolor/scalable/apps"
 FIRST_STEPS_ICON = HICOLOR_APPS / "cosmic-blue-welcome.svg"
 DOCS_ICON = HICOLOR_APPS / "cosmic-blue-docs.svg"
-
-# Logo blues (branding/logo/build.py) and the accent (#4f8dff dark, #1d47c4 light)
-ORBIT = ("#7fe0ff", "#2f6bff")
-MOON = "#e6f3ff"
-
 
 def stroke(d, width=2.2):
     return (f'<path d="{d}" fill="none" stroke="currentColor" stroke-width="{width}" '
@@ -192,37 +187,6 @@ def page(name, color):
 
 # --- Applications ------------------------------------------------------------
 
-APP_DEFS = (
-    '<linearGradient id="night" x1="0" y1="0" x2="0" y2="1">'
-    '<stop offset="0" stop-color="#1a2d6b"/><stop offset="1" stop-color="#0b1736"/></linearGradient>'
-    f'<linearGradient id="orbit" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="{ORBIT[0]}"/>'
-    f'<stop offset="1" stop-color="{ORBIT[1]}"/></linearGradient>'
-    '<linearGradient id="planet" x1=".2" y1="1" x2=".8" y2="0"><stop offset="0" stop-color="#cfeeff"/>'
-    '<stop offset=".45" stop-color="#4f98f5"/><stop offset="1" stop-color="#14399e"/></linearGradient>'
-)
-
-
-# The logo mark in the app icons: its orbit and moon together are centered
-# on the disk (the orbit itself sits a little left of the disk's center),
-# with some room to the disk's rim.
-MARK_X = 32.5
-MARK_SCALE = 0.46
-
-
-def app(center):
-    """The logo mark on a night-blue disk, with `center` inside the orbit
-    (drawn at MARK_X, 32)."""
-    return svg(
-        '<circle cx="32" cy="32" r="28" fill="url(#night)"/>'
-        '<circle cx="32" cy="32" r="27.4" fill="none" stroke="#4f8dff" stroke-opacity=".35" stroke-width="1.2"/>'
-        f'<g transform="translate({MARK_X} 32) scale({MARK_SCALE})">'
-        '<path d="M30.3 -25.4A40 40 0 1 0 30.3 25.4" fill="none" stroke="url(#orbit)" '
-        'stroke-width="13" stroke-linecap="round"/>'
-        f'<circle cx="38" cy="0" r="6.5" fill="{MOON}"/></g>' + center,
-        APP_DEFS,
-    )
-
-
 # --- COSMIC dock buttons ------------------------------------------------------
 
 # Drawn like Tela circle's application icons: a disk in the accent, white
@@ -291,6 +255,24 @@ DOCS = tela_app(
     '<circle cx="39" cy="31" r="1.9" fill="#4f8dff"/>'
 )
 
+# The live ISO installer: an arrow going down into a tray
+INSTALLER = tela_app(
+    '<path d="M17 36v6a4 4 0 0 0 4 4h22a4 4 0 0 0 4-4v-6" fill="none" stroke="#fff" stroke-opacity=".75" '
+    'stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>'
+    '<rect x="29.5" y="15" width="5" height="17" rx="2.5" fill="#fff"/>'
+    '<path d="M22.5 28.5a2.2 2.2 0 0 1 3.1-3.1L32 31.8l6.4-6.4a2.2 2.2 0 0 1 3.1 3.1l-8 8a2.1 2.1 0 0 1-3 0z" fill="#fff"/>')
+
+# The welcome tour (live ISO) and first steps tour (installed system): sparkles
+def star(cx, cy, r, op=None):
+    """A four-pointed star centered on cx, cy."""
+    k = r * .28
+    a = f' opacity="{op}"' if op else ""
+    return (f'<path d="M{cx} {cy-r}C{cx+k*.6} {cy-k} {cx+k} {cy-k*.6} {cx+r} {cy}C{cx+k} {cy+k*.6} {cx+k*.6} {cy+k} {cx} {cy+r}'
+            f'C{cx-k*.6} {cy+k} {cx-k} {cy+k*.6} {cx-r} {cy}C{cx-k} {cy-k*.6} {cx-k*.6} {cy-k} {cx} {cy-r}z" fill="#fff"{a}/>')
+
+
+WELCOME = tela_app(star(29, 34, 14) + star(42.5, 20.5, 6, ".75") + star(43, 42, 3.6, ".45"), "#2f6bff")
+
 # Icon -> names (the desktop entries of the dock buttons and of the apps
 # they open). The first name gets the file, the others are links to it.
 DOCK = {
@@ -352,12 +334,11 @@ def main():
         for alias in names[1:]:
             os.symlink(f"{names[0]}.svg", mimetypes / f"{alias}.svg")
 
-    welcome = app(f'<circle cx="{MARK_X}" cy="32" r="6" fill="url(#planet)"/>')
-    (APPS / "cosmic-blue-welcome.svg").write_text(welcome)
+    (APPS / "cosmic-blue-welcome.svg").write_text(WELCOME)
     # Also the icon of the installed system's first steps tour
-    (FIRST_STEPS_ICON).write_text(welcome)
+    FIRST_STEPS_ICON.write_text(WELCOME)
     DOCS_ICON.write_text(DOCS)
-    (APPS / "cosmic-blue-installer.svg").write_text(app(glyph("download", MARK_X, 32, 0.78, "#ffffff")))
+    (APPS / "cosmic-blue-installer.svg").write_text(INSTALLER)
 
 
 if __name__ == "__main__":
