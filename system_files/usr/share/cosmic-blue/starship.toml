@@ -15,7 +15,7 @@ add_newline = false
 
 format = """\
 ($status[\U0010cb01](fg:#c9403a bg:#1d47c4))\
-$username$hostname\
+$username$hostname$container\
 [\U0010cb01](fg:#1d47c4 bg:#4f8dff)\
 $directory\
 ([\U0010cb01](fg:#4f8dff bg:#a9c8ff)$git_branch$git_status$git_state\
@@ -37,6 +37,11 @@ style_root = "bold fg:#ffd479 bg:#1d47c4"
 [hostname]
 ssh_only = true
 format = "[@$hostname ]($style)"
+style = "fg:#c9dbff bg:#1d47c4"
+
+# Inside a container (Distrobox, toolbox): its name, in the user segment
+[container]
+format = "[\\[$name\\] ]($style)"
 style = "fg:#c9dbff bg:#1d47c4"
 
 [directory]
