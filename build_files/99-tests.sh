@@ -55,6 +55,9 @@ test ! -e /etc/uwelcome/config.json
 url = "https://github.com/cosmic-blue-os/cosmic-blue/discussions"
 url = "https://cosmic-blue-os.github.io/cosmic-blue/docs/"' ]]
 grep -qx 'commands = \["cosmic-blue-tips"\]' /etc/uwelcome/config.toml
+# The banner's guard is only set in interactive shells (not in the shell
+# that starts the desktop session, whose environment every terminal inherits)
+grep -qx 'case \$- in' /etc/profile.d/uwelcome.sh
 test -n "$(LANG=en_US.UTF-8 cosmic-blue-tips)"
 test -n "$(LANG=fr_FR.UTF-8 cosmic-blue-tips)"
 if grep -rlE 'projectbluefin\.io|bluefin-cli|ujust report' /etc/uwelcome \

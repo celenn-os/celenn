@@ -483,6 +483,12 @@ terminal_checks() {
     result="$(vm "runuser -u ${DEMO_USER} -- bash -l -s -- ${TERMINAL_PROJECT}" \
         < "${TESTS_DIR}/vm-terminal-checks.sh" 2>&1)" \
         || result="FAIL could not run the checks as ${DEMO_USER}: ${result}"
+    # Terminals opened from the desktop inherit the session's environment:
+    # the welcome banner's guard must not be in it, or no terminal greets
+    if vm "tr '\\0' '\\n' < /proc/\$(pgrep -u ${DEMO_USER} -x cosmic-panel | head -n 1)/environ" \
+            | grep -q '^UWELCOME_SHOWN='; then
+        result+=$'\nFAIL the desktop session exports UWELCOME_SHOWN, so terminals show no welcome banner'
+    fi
     while IFS= read -r line; do
         [[ "${line}" == "FAIL "* ]] && warn "terminal: ${line#FAIL }"
     done <<< "${result}"
