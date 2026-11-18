@@ -245,6 +245,7 @@ grep -qx 'Icon=cosmic-blue-update' /usr/share/applications/system-update.desktop
 test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-update.svg
 test ! -e /usr/share/icons/hicolor/scalable/places/ublue-update.svg
 test -s /usr/share/icons/cosmic-blue/layer/apps/system-software-update.svg
+test -s /usr/share/icons/cosmic-blue/layer/apps/help-browser.svg
 if grep -q Bazaar /usr/share/ublue-os/homebrew/system-flatpaks.Brewfile; then exit 1; fi
 for remote in flathub cosmic; do
     grep -q '^\[Flatpak Repo\]' "/usr/share/flatpak/remotes.d/${remote}.flatpakrepo"

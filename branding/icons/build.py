@@ -7,9 +7,10 @@
   take the color of the type)
 - apps: the COSMIC dock buttons (launcher, workspaces, applications) and
   the COSMIC Store and Settings in the Tela circle style, as are the
-  Documentation launcher, the live ISO's welcome tour and installer, and
-  the installed system's first steps tour, and the System Update launcher
-  (also in place of Tela's system-software-update, shown by the tour)
+  Documentation launcher, the System Update launcher, the live ISO's
+  welcome tour and installer, and the installed system's first steps tour.
+  The Documentation and System Update icons also replace Tela's help-browser
+  and system-software-update, which the first steps tour shows.
 - actions: the symbolic icons of the suspend and restart buttons in the
   panel's power menu (Tela has none for restart, and its suspend icon is
   hard to read). They follow the style of Tela's shutdown icon, which stays.
@@ -306,6 +307,8 @@ DOCK = {
     "settings": (SETTINGS, ["com.system76.CosmicSettings"]),
     # Tela's update icon, which the first steps tour shows on its updates page
     "update": (UPDATE, ["system-software-update"]),
+    # Tela's help icon, which the first steps tour shows on its last page
+    "help": (DOCS, ["help-browser"]),
 }
 
 # Session action symbolic icons, 16x16, in Tela's symbolic gray. They are
