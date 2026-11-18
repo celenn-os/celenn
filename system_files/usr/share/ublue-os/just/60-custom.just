@@ -205,6 +205,10 @@ _microsoft-fonts action:
     # which Flatpak apps also read.
     dest="${XDG_DATA_HOME:-${HOME}/.local/share}/fonts/microsoft-core-fonts"
     if [[ "{{ action }}" == remove ]]; then
+        if [[ ! -d "${dest}" ]]; then
+            echo "Microsoft core fonts are not installed."
+            exit 0
+        fi
         rm -rf "${dest}"
         fc-cache -f
         echo "Microsoft core fonts removed."
@@ -316,7 +320,7 @@ _cli-tools action:
                 done
                 rm -f "${added}"
             else
-                echo "No tools were installed with ujust install-cli-tools on this account."
+                echo "No tools from ujust install-cli-tools are installed on this account."
             fi
             echo "Done. Open a new terminal."
             ;;
@@ -533,11 +537,16 @@ _cncf-tools action:
     case "{{ action }}" in
         install) exec ujust _bluefin-cncf-tools ;;
         remove)
-            for formula in $(brew bundle list --file="${brewfile}" --formula); do
-                if brew list --formula "${formula##*/}" >/dev/null 2>&1; then
-                    brew uninstall --formula "${formula##*/}" || true
-                fi
-            done
+            removed=0
+            if command -v brew >/dev/null; then
+                for formula in $(brew bundle list --file="${brewfile}" --formula); do
+                    if brew list --formula "${formula##*/}" >/dev/null 2>&1; then
+                        brew uninstall --formula "${formula##*/}" || true
+                        removed=1
+                    fi
+                done
+            fi
+            if [[ "${removed}" -eq 0 ]]; then echo "No cloud native tools are installed."; exit 0; fi
             echo "Done. A tool that another Homebrew package needs is kept."
             ;;
         *) echo "Usage: ujust install-cncf-tools or ujust remove-cncf-tools" >&2; exit 1 ;;
@@ -559,6 +568,10 @@ _ai-tools action:
     case "{{ action }}" in
         install) exec ujust _bluefin-ai-tools ;;
         remove)
+            if ! command -v goose >/dev/null && [[ ! -f "${XDG_CONFIG_HOME:-${HOME}/.config}/goose/config.yaml" ]]; then
+                echo "Goose is not installed."
+                exit 0
+            fi
             for formula in $(brew bundle list --file="${brewfile}" --formula); do
                 if brew list --formula "${formula##*/}" >/dev/null 2>&1; then
                     brew uninstall --formula "${formula##*/}" || true
@@ -594,6 +607,10 @@ _asus action:
     case "{{ action }}" in
         install) exec ujust _bluefin-asus ;;
         remove)
+            if ! command -v brew >/dev/null || ! brew list --cask asusctl-linux >/dev/null 2>&1; then
+                echo "The ASUS laptop tools are not installed."
+                exit 0
+            fi
             systemctl --user disable --now asusd-user.service 2>/dev/null || true
             sudo systemctl disable --now asusd.service asus-shutdown.service 2>/dev/null || true
             for cask in rog-control-center-linux asusctl-linux; do
@@ -621,9 +638,11 @@ _jetbrains-toolbox action:
     case "{{ action }}" in
         install) exec ujust _bluefin-jetbrains-toolbox ;;
         remove)
-            if brew list --cask jetbrains-toolbox-linux >/dev/null 2>&1; then
-                brew uninstall --cask jetbrains-toolbox-linux
+            if ! command -v brew >/dev/null || ! brew list --cask jetbrains-toolbox-linux >/dev/null 2>&1; then
+                echo "JetBrains Toolbox is not installed."
+                exit 0
             fi
+            brew uninstall --cask jetbrains-toolbox-linux
             echo "JetBrains Toolbox removed. IDEs it installed stay in"
             echo "~/.local/share/JetBrains: delete that folder to remove them too."
             ;;
@@ -645,6 +664,11 @@ _opentabletdriver action:
     case "{{ action }}" in
         install) exec ujust _bluefin-opentabletdriver ;;
         remove)
+            if ! flatpak info --system net.opentabletdriver.OpenTabletDriver >/dev/null 2>&1 \
+                && [[ ! -e "${HOME}/.config/systemd/user/opentabletdriver.service" ]]; then
+                echo "OpenTabletDriver is not installed."
+                exit 0
+            fi
             systemctl --user disable --now opentabletdriver.service 2>/dev/null || true
             rm -f "${HOME}/.config/systemd/user/opentabletdriver.service"
             systemctl --user daemon-reload

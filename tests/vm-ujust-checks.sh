@@ -56,3 +56,13 @@ fi
 [[ "$(setting "${keyboard}")" == "${keyboard_before}" ]] \
     || fail "ujust reset-cosmic-config did not keep the keyboard layout"
 rm -rf "${backup:-/nonexistent}"
+
+# remove-* commands, with nothing installed: each runs, says so and exits
+# cleanly without asking anything (no terminal here, so no password prompt
+# either). The install-* commands download too much to run here.
+for recipe in $(ujust --summary | tr ' ' '\n' | grep '^remove-'); do
+    output="$(ujust "${recipe}" </dev/null 2>&1)" \
+        || { fail "ujust ${recipe} failed with nothing installed: ${output}"; continue; }
+    grep -qiE 'not installed|no .* (are|is) installed|nothing' <<<"${output}" \
+        || fail "ujust ${recipe} did not say that nothing is installed: ${output}"
+done
