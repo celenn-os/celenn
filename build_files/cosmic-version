@@ -1,7 +1,7 @@
 # COSMIC version that cosmic-blue is built and tested against (Fedora's
 # cosmic-settings package). The theme tool (build_files/theme/Cargo.toml pins
-# the matching libcosmic revision) and the cosmic-initial-setup patches
-# (build_files/initial_setup/patch.py) follow it.
+# the matching libcosmic revision) and the tours (build_files/first_steps,
+# same libcosmic and Cargo.lock as cosmic-initial-setup) follow it.
 # When Fedora ships another version, .github/workflows/check-cosmic-version.yml
 # opens a pull request that updates the libcosmic revision and this line, and
 # merges it once the image builds. Until then the build stops when Fedora

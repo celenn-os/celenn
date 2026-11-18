@@ -286,13 +286,6 @@ jobs:
           key: ${{ steps.helpers.outputs.tour }}
           dir: ${{ runner.temp }}/helpers
 
-      - name: Helper stage initial_setup
-        uses: ./.github/actions/helper-stage
-        with:
-          stage: initial_setup
-          key: ${{ steps.helpers.outputs.initial_setup }}
-          dir: ${{ runner.temp }}/helpers
-
       - name: Helper stage greeter
         uses: ./.github/actions/helper-stage
         with:

@@ -31,7 +31,8 @@ Each exported setting is reviewed, never copied as is:
 - **Hardware-specific**: displays, scaling, touchpad, power and anything that
   depends on one machine is dropped.
 - **Per-user**: keyboard layout, clock format, language and anything personal
-  stays with the installer and `cosmic-initial-setup`.
+  stays with the installer (COSMIC's own first-run assistant,
+  `cosmic-initial-setup`, is skipped).
 - **Panel, dock, applets, shortcuts, window management, app settings**: taken
   when they suit most users, and checked against the image (applets and apps
   must be installed, shortcuts must not clash).

@@ -201,8 +201,10 @@ fi
 install -D -m 0644 /app/cosmic-blue-welcome/cosmic-blue-welcome.svg \
     /usr/share/icons/hicolor/scalable/apps/cosmic-blue-welcome.svg
 gtk-update-icon-cache --force /usr/share/icons/hicolor || :
-# COSMIC's first-run assistant is for installed systems: skip it in the live
-# session so that it does not open on top of the tour.
+# COSMIC's first-run assistant is skipped in the live session too. Newer
+# images already give new accounts ~/.config/cosmic-initial-setup-done
+# (build_files/20-cosmic.sh); kept here for the image the ISO is built from,
+# which can be older (pull requests build the ISO from the published image).
 mkdir -p /etc/skel/.config
 touch /etc/skel/.config/cosmic-initial-setup-done
 # The installed system's first steps tour (updates, rollback, ujust...) is not

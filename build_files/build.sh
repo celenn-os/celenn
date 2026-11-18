@@ -13,7 +13,6 @@ export FEDORA_MAJOR_VERSION
 for step in \
     10-system-files.sh \
     20-cosmic.sh \
-    22-initial-setup.sh \
     23-greeter.sh \
     24-store.sh \
     25-icon-theme.sh \

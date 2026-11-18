@@ -346,13 +346,14 @@ test -f /usr/lib/tuned/profiles/balanced-battery/tuned.conf ||
 test -x /usr/libexec/cosmic-blue-user-defaults
 systemctl is-enabled cosmic-blue-user-defaults.service
 
-# First-run assistant: no second language/keyboard/time zone prompt; VM agent
-test -f /etc/skel/.config/gnome-initial-setup-done
-# First-run assistant: our patched build (keeps the theme, no screen reader at start)
-cmp /ctx/initial_setup/cosmic-initial-setup /usr/bin/cosmic-initial-setup
+# COSMIC's first-run assistant is skipped for new accounts (our tour opens
+# instead, with its welcome illustration); VM agent
+test -f /etc/skel/.config/cosmic-initial-setup-done
+test -f /usr/share/cosmic-blue/tour-welcome.svg
+test -f /usr/share/cosmic-blue/tour-banner.svg
 rpm -q spice-vdagent
 
-# First steps tour: opened once for new accounts, after the first-run assistant;
+# First steps tour: opened once for new accounts, at the first login;
 # it runs and every text has its French translation
 test -f /etc/skel/.config/cosmic-blue/first-steps-pending
 test -x /usr/libexec/cosmic-blue-tour
@@ -361,6 +362,14 @@ grep -qx 'Exec=/usr/libexec/cosmic-blue-first-steps-autostart' \
     /etc/xdg/autostart/io.github.cosmic_blue_os.FirstSteps.desktop
 test -f /usr/share/applications/io.github.cosmic_blue_os.FirstSteps.desktop
 test -f /usr/share/icons/hicolor/scalable/apps/cosmic-blue-welcome.svg
+# Color icons of the tour pages (build_files/first_steps/src/main.rs), found
+# as app icons of the cosmic-blue icon theme (its layer, Tela) or hicolor
+for icon in system-software-update org.gnome.Terminal \
+    cs-tiling help-browser preferences-desktop-accessibility cosmic-blue-welcome; do
+    [[ -n "$(find /usr/share/icons/cosmic-blue /usr/share/icons/Tela-circle-4f8dff \
+        /usr/share/icons/hicolor -path "*/apps/${icon}.svg" -print -quit)" ]] \
+        || { echo "Tour icon ${icon} not found" >&2; exit 1; }
+done
 # (libcosmic binary: its libraries resolve, and the check needs no display)
 if ldd /usr/libexec/cosmic-blue-tour | grep 'not found'; then
     echo "cosmic-blue-tour: missing libraries"; exit 1

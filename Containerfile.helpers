@@ -35,14 +35,6 @@ RUN dnf5 -y install cargo rust gcc pkgconf-pkg-config libxkbcommon-devel wayland
 FROM scratch AS tour
 COPY --from=tour-build /out /
 
-# COSMIC's first-run assistant, rebuilt from Fedora's source package with the
-# cosmic-blue patches (see build_files/initial_setup/patch.py)
-FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS initial_setup-build
-COPY build_files/initial_setup /initial_setup
-RUN /initial_setup/build.sh
-FROM scratch AS initial_setup
-COPY --from=initial_setup-build /out /
-
 # Login and lock screens, rebuilt from Fedora's source package with the
 # cosmic-blue wallpaper as their built-in background
 # (see build_files/greeter/build.sh)

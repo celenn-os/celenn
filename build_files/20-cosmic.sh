@@ -49,17 +49,20 @@ dnf5 -y install --skip-unavailable \
 
 systemctl enable cosmic-greeter.service
 
-# COSMIC's first-run assistant (cosmic-initial-setup) asks again for the
-# language, keyboard layout and time zone, which Anaconda has already set.
-# When ~/.config/gnome-initial-setup-done exists it skips those pages (and the
-# Wi-Fi and account ones) and keeps accessibility, appearance, panel layout and
-# the COSMIC introduction. New accounts get that file from /etc/skel.
+# COSMIC's first-run assistant (cosmic-initial-setup) does not open: the
+# installer has already set the language, keyboard layout, time zone and the
+# account, and cosmic-blue sets the appearance and panel layout. It exits at
+# once when ~/.config/cosmic-initial-setup-done exists, which new accounts get
+# from /etc/skel. Its accessibility page is replaced by the accessibility row
+# on the first page of our tour below. (Its OEM mode, run by a
+# "cosmic-initial-setup" system user whose home is not made from /etc/skel,
+# is not used on cosmic-blue: Anaconda creates the account.)
 mkdir -p /etc/skel/.config
-touch /etc/skel/.config/gnome-initial-setup-done
+touch /etc/skel/.config/cosmic-initial-setup-done
 
 # cosmic-blue's own first steps tour (/usr/libexec/cosmic-blue-tour, built
-# with libcosmic in Containerfile.helpers), opened once right after that
-# assistant for each new account: the autostart entry only acts while
+# with libcosmic in Containerfile.helpers), opened once at the first login
+# of each new account: the autostart entry only acts while
 # ~/.config/cosmic-blue/first-steps-pending exists, which new accounts get
 # from /etc/skel (see /usr/libexec/cosmic-blue-first-steps-autostart).
 mkdir -p /etc/skel/.config/cosmic-blue

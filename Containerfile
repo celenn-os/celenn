@@ -33,7 +33,6 @@ COPY system_files /system_files/cosmic-blue
 COPY --from=helpers /theme/cosmic /system_files/cosmic-blue/usr/share/cosmic
 COPY --from=helpers /theme/previous /previous_defaults/theme
 COPY --from=helpers /tour/cosmic-blue-tour /system_files/cosmic-blue/usr/libexec/cosmic-blue-tour
-COPY --from=helpers /initial_setup /initial_setup
 COPY --from=helpers /greeter /greeter
 COPY --from=helpers /store /store
 COPY --from=helpers /plymouth /system_files/cosmic-blue/usr/share/plymouth/themes/cosmic-blue
