@@ -53,7 +53,9 @@ vm_install() {
 # and Microsoft's keys enrolled, as PCs come from the shop. The UEFI variables
 # (boot entries) are kept from one start to the next, as on a real PC.
 # Optional settings, as environment variables:
-#   VM_MEMORY (MiB, default 4096), VM_CPUS (default 2)
+#   VM_MEMORY (MiB, default 4096: a modest PC), VM_CPUS (default: the
+#   machine's processors, at most 4; CI runners have 4, so the tests run
+#   faster without testing anything less)
 #   VM_CDROM: an ISO in the CD drive
 #   VM_SERIAL: serial log file name in OUT (default serial.log)
 #   VM_EXTRA_ARGS: array of more QEMU arguments
@@ -80,7 +82,7 @@ vm_start() {
     # smm=on and a secure flash: the firmware keeps the Secure Boot keys
     # out of reach of the system it starts
     qemu-system-x86_64 \
-        -machine q35,smm=on,accel=kvm -cpu host -smp "${VM_CPUS:-2}" -m "${VM_MEMORY:-4096}" \
+        -machine q35,smm=on,accel=kvm -cpu host -smp "${VM_CPUS:-$(( $(nproc) < 4 ? $(nproc) : 4 ))}" -m "${VM_MEMORY:-4096}" \
         -global driver=cfi.pflash01,property=secure,value=on \
         -global ICH9-LPC.disable_s3=1 \
         -drive if=pflash,format=raw,readonly=on,file="${ovmf_code}" \

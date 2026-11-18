@@ -133,6 +133,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
       suffixes: ${{ steps.images.outputs.suffixes }}
+      full: ${{ steps.full.outputs.full }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -143,6 +144,30 @@ jobs:
         uses: ./.github/actions/pr-images
         env:
           GH_TOKEN: ${{ github.token }}
+
+      # The rechunk and the SBOM only change how the image is published, not
+      # what it holds: pull requests skip them (about 11 minutes), unless they
+      # change these steps (Justfile, this workflow) or the base image whose
+      # rpm-ostree does the rechunk (Renovate). Main builds always run them,
+      # and boot-test the rechunked image before publishing it.
+      - name: Pick the publishing steps to test
+        id: full
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          full=true
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" && "${HEAD_REF}" != renovate/* ]]; then
+            # A diff too large for the API: run them
+            if files="$(gh pr diff "${PR}" --repo "${GITHUB_REPOSITORY}" --name-only)" \
+               && ! grep -qxE 'Justfile|Containerfile|\.github/workflows/build\.yml' <<< "${files}"; then
+              full=false
+              echo "::notice::The pull request does not touch the Justfile, the Containerfile or this workflow: no rechunk nor SBOM (main builds run them)"
+            fi
+          fi
+          echo "full=${full}" >> "${GITHUB_OUTPUT}"
 
       - name: Install just
         uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 #v4.0.0
@@ -278,6 +303,7 @@ jobs:
           stage: theme
           key: ${{ steps.helpers.outputs.theme }}
           dir: ${{ runner.temp }}/helpers
+          cargo-lock: build_files/theme/Cargo.lock
 
       - name: Helper stage tour
         uses: ./.github/actions/helper-stage
@@ -285,6 +311,7 @@ jobs:
           stage: tour
           key: ${{ steps.helpers.outputs.tour }}
           dir: ${{ runner.temp }}/helpers
+          cargo-lock: build_files/first_steps/Cargo.lock
 
       - name: Helper stage greeter
         uses: ./.github/actions/helper-stage
@@ -342,6 +369,7 @@ jobs:
       # Smaller delta updates for installed systems
       - name: Rechunk with rpm-ostree
         id: rechunk
+        if: needs.version.outputs.full == 'true'
         run: |
           ${ROOT_ENV} just ostree-rechunk \
             ${IMAGE_NAME} \
@@ -372,39 +400,30 @@ jobs:
       # Software bill of materials (SPDX) of the image, from its mounted root
       # file system: the RPMs and the binaries installed outside them, not
       # every file they own nor the language libraries bundled inside them
-      # (with every cataloger: 10,000 entries, 93 MB, 4.5 minutes). Built for pull
-      # requests too, so a broken step shows before merging; attached to the
-      # published image after it is signed.
+      # (with every cataloger: 10,000 entries, 93 MB, 4.5 minutes). Made in
+      # the background while the boot test runs (about 4 minutes saved), and
+      # for pull requests only when they change it (see the version job);
+      # attached to the published image after it is signed.
       - name: Install Syft
+        if: needs.version.outputs.full == 'true'
         uses: anchore/sbom-action/download-syft@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
         id: syft
 
-      - name: Generate the SBOM
-        id: sbom
+      - name: Start the SBOM
+        if: needs.version.outputs.full == 'true'
         env:
           SYFT: ${{ steps.syft.outputs.cmd }}
         run: |
           set -euo pipefail
-          file="${RUNNER_TEMP}/sbom.spdx.json"
+          dir="${RUNNER_TEMP}/sbom"
+          mkdir -p "${dir}"
           root=$(${ROOT_ENV} podman image mount "localhost/${IMAGE_NAME}:${DEFAULT_TAG}")
-          trap '${ROOT_ENV} podman image unmount "localhost/${IMAGE_NAME}:${DEFAULT_TAG}" >/dev/null' EXIT
-          sudo env SYFT_FILE_METADATA_SELECTION=none SYFT_CHECK_FOR_APP_UPDATE=false \
+          # At the lowest priority, so it slows the virtual machine the least
+          nohup sudo nice -n 19 env SYFT_FILE_METADATA_SELECTION=none SYFT_CHECK_FOR_APP_UPDATE=false \
+            sh -c '"$0" "$@"; echo $? > "'"${dir}"'/status"' \
             "${SYFT}" scan "dir:${root}" --quiet --select-catalogers rpm,binary \
             --source-name "${IMAGE_REGISTRY}/${IMAGE_NAME}" --source-version "${VERSION}" \
-            -o "spdx-json=${file}"
-          sudo chown "$(id -u):$(id -g)" "${file}"
-          # Without the file lists Syft copies from the RPM database (every
-          # file of every package: about 80 MB), down to the packages
-          jq -c 'del(.files, .packages[].hasFiles) | .relationships |= map(select(.relationshipType != "CONTAINS"))' \
-            "${file}" > "${file}.tmp"
-          echo "SBOM before trimming: $(du -h "${file}" | cut -f1)"
-          mv "${file}.tmp" "${file}"
-          packages=$(jq '.packages | length' "${file}")
-          rpms=$(jq '[.packages[] | select(.externalRefs[]?.referenceLocator | startswith("pkg:rpm/"))] | length' "${file}")
-          echo "SBOM: ${packages} packages (${rpms} RPMs), $(du -h "${file}" | cut -f1)"
-          # The image has well over a thousand RPMs: far fewer means a broken scan
-          (( rpms > 500 )) || { echo "::error::Only ${rpms} RPMs in the SBOM"; exit 1; }
-          echo "file=${file}" >> "${GITHUB_OUTPUT}"
+            -o "spdx-json=${dir}/sbom.spdx.json" > "${dir}/syft.log" 2>&1 &
 
       # Boot smoke test: install the image to a virtual disk, boot it in QEMU
       # and check the login screen comes up. A failing image is not pushed.
@@ -432,6 +451,35 @@ jobs:
       # The terminal crop (prompt and fastfetch) as base64 in the log, for
       # tools that can read job logs but not download artifacts (branches and
       # pull requests only, to keep the main build logs short)
+      - name: Finish the SBOM
+        id: sbom
+        if: needs.version.outputs.full == 'true'
+        run: |
+          set -euo pipefail
+          dir="${RUNNER_TEMP}/sbom"
+          file="${dir}/sbom.spdx.json"
+          trap '${ROOT_ENV} podman image unmount "localhost/${IMAGE_NAME}:${DEFAULT_TAG}" >/dev/null || true' EXIT
+          for (( i = 0; i < 180; i++ )); do
+            [[ -s "${dir}/status" ]] && break
+            sleep 5
+          done
+          cat "${dir}/syft.log" || true
+          status="$(cat "${dir}/status" 2>/dev/null || echo "none")"
+          [[ "${status}" == 0 ]] || { echo "::error::Syft failed or did not finish (status: ${status})"; exit 1; }
+          sudo chown "$(id -u):$(id -g)" "${file}"
+          # Without the file lists Syft copies from the RPM database (every
+          # file of every package: about 80 MB), down to the packages
+          jq -c 'del(.files, .packages[].hasFiles) | .relationships |= map(select(.relationshipType != "CONTAINS"))' \
+            "${file}" > "${file}.tmp"
+          echo "SBOM before trimming: $(du -h "${file}" | cut -f1)"
+          mv "${file}.tmp" "${file}"
+          packages=$(jq '.packages | length' "${file}")
+          rpms=$(jq '[.packages[] | select(.externalRefs[]?.referenceLocator | startswith("pkg:rpm/"))] | length' "${file}")
+          echo "SBOM: ${packages} packages (${rpms} RPMs), $(du -h "${file}" | cut -f1)"
+          # The image has well over a thousand RPMs: far fewer means a broken scan
+          (( rpms > 500 )) || { echo "::error::Only ${rpms} RPMs in the SBOM"; exit 1; }
+          echo "file=${file}" >> "${GITHUB_OUTPUT}"
+
       - name: Print the terminal screenshot
         if: always() && matrix.image_suffix == '' && github.ref != format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
