@@ -334,11 +334,20 @@ done
 
 # Everyday pieces: printing, scanning, codecs, fonts, disks, file previews
 rpm -q cups cups-pk-helper foomatic-db-ppds system-config-printer hplip \
-    sane-backends sane-airscan ipp-usb \
+    gutenprint-cups \
+    ptouch-driver printer-driver-brlaser foo2zjs nss-mdns \
+    sane-backends sane-backends-drivers-scanners sane-airscan ipp-usb \
+    fwupd upower \
     ffmpeg gstreamer1-plugin-libav gstreamer1-plugins-good \
     liberation-sans-fonts google-carlito-fonts google-crosextra-caladea-fonts \
     gnome-disk-utility papers-thumbnailer gnome-epub-thumbnailer cabextract
 systemctl is-enabled cups.socket
+systemctl is-enabled avahi-daemon.service
+# Printers are added without the terminal: Print Settings
+# (system-config-printer, through cups-pk-helper) is in the app list
+grep -q '^Exec=system-config-printer' /usr/share/applications/system-config-printer.desktop
+! grep -qE '^(NoDisplay=true|OnlyShowIn=)' /usr/share/applications/system-config-printer.desktop \
+    || { echo "Print Settings is hidden from the app list"; exit 1; }
 rpm -ql papers-thumbnailer | grep '^/usr/share/thumbnailers/.*\.thumbnailer$' >/dev/null
 # Microsoft core fonts are never shipped in the image (their license forbids
 # redistribution): users fetch them with `ujust install-microsoft-fonts`

@@ -32,6 +32,7 @@
       <nav class="toc" aria-label="Contents">
         <a href="#updates">Updates and rollback</a>
         <a href="#apps">Installing software</a>
+        <a href="#hardware">Printers, firmware, battery</a>
         <a href="#ujust">ujust commands</a>
         <a href="#look">The look</a>
         <a href="#terminal">Terminal</a>
@@ -89,6 +90,24 @@ distrobox enter arch</code></pre>
       </div>
     </section>
 
+    <section id="hardware" class="block">
+      <h2>Printers, firmware, battery</h2>
+      <h3>Printers and scanners</h3>
+      <p>Most network and USB printers work right away, without a driver. To add one by hand, open <strong>Print Settings</strong>: drivers for HP, Epson, Brother, Canon and others are installed. <strong>Document Scanner</strong> scans with network and USB scanners.</p>
+      <h3>Firmware updates</h3>
+      <p>The <strong>Firmware</strong> app updates the firmware of the computer and its devices (BIOS/UEFI, SSD, dock…), when their maker publishes it on fwupd.org. Or from the terminal:</p>
+      <div class="code">
+        <pre><code>ujust update-firmware</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+      <h3>Laptop battery</h3>
+      <p>A battery that stays plugged in lasts longer when it is not always full. On laptops that allow it, this stops charging at 80%:</p>
+      <div class="code">
+        <pre><code>ujust toggle-battery-limit</code></pre>
+        <button type="button" class="copy" data-copy>Copy</button>
+      </div>
+    </section>
+
     <section id="ujust" class="block">
       <h2>ujust commands</h2>
       <p><code>ujust</code> runs the shortcuts that come with the system. Type <code>ujust</code> to list them all, or <code>ujust --choose</code> to pick one from a menu. Each <code>install-…</code> command has a matching <code>remove-…</code>. The most useful:</p>
@@ -97,6 +116,8 @@ distrobox enter arch</code></pre>
         <dd>Update the system, apps and Homebrew packages now.</dd>
         <dt><code>ujust toggle-updates</code></dt>
         <dd>Turn automatic updates on or off.</dd>
+        <dt><code>ujust update-firmware</code></dt>
+        <dd>Install firmware updates (BIOS/UEFI, SSD, dock…).</dd>
         <dt><code>ujust switch-channel</code></dt>
         <dd>Switch between the <code>stable</code> images (weekly, the default) and <code>latest</code> (daily).</dd>
         <dt><code>ujust install-dev-tools</code></dt>
@@ -115,6 +136,8 @@ distrobox enter arch</code></pre>
         <dd>Bring back the cosmic-blue look.</dd>
         <dt><code>ujust reset-cosmic-config</code></dt>
         <dd>Reset all COSMIC settings (a backup is kept).</dd>
+        <dt><code>ujust toggle-battery-limit</code></dt>
+        <dd>Stop charging the laptop at 80% so the battery lasts longer.</dd>
         <dt><code>ujust toggle-tpm2</code></dt>
         <dd>Unlock the encrypted disk with the TPM2 chip, without a password.</dd>
         <dt><code>ujust enroll-secure-boot-key</code></dt>

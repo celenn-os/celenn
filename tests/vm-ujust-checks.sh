@@ -66,3 +66,10 @@ for recipe in $(ujust --summary | tr ' ' '\n' | grep '^remove-'); do
     grep -qiE 'not installed|no .* (are|is) installed|nothing' <<<"${output}" \
         || fail "ujust ${recipe} did not say that nothing is installed: ${output}"
 done
+
+# toggle-battery-limit: the virtual machine has no battery, so it says so and
+# changes nothing
+output="$(ujust toggle-battery-limit status </dev/null 2>&1)" \
+    || fail "ujust toggle-battery-limit status failed: ${output}"
+grep -q 'No laptop battery found' <<<"${output}" \
+    || fail "ujust toggle-battery-limit status did not report the missing battery: ${output}"

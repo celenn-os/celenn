@@ -81,7 +81,11 @@ dnf5 -y install "${FEDORA_PACKAGES[@]}"
 
 # Everyday pieces that Fedora Workstation (and so Bluefin) has but our
 # base-main + COSMIC image lacks. Codecs, CUPS, SANE, Liberation and the
-# default Fedora fonts already come with base-main and the COSMIC group.
+# default Fedora fonts already come with base-main and the COSMIC group, and
+# so do the Gutenprint (older Canon, Epson...), Brother label printer
+# (ptouch-driver) and USB scanner (sane-backends-drivers-scanners) drivers;
+# 99-tests.sh checks them. Most recent printers and scanners need no driver
+# (IPP Everywhere, eSCL). Fedora has no Epson ESC/P-R driver package.
 EVERYDAY_PACKAGES=(
     # Printing: rootless printer setup through polkit (system-config-printer),
     # and the PPD drivers Fedora Workstation ships for older printers
