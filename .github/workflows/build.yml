@@ -113,8 +113,10 @@ jobs:
 
   # One version for all the images of this build, as in Bluefin:
   # <Fedora>.<YYYYMMDD>, then .1, .2... if an image of the day is already on
-  # GHCR (`just version`). Builds of main never run at the same time (see
-  # concurrency above), so two published builds cannot get the same version.
+  # GHCR (`just version`). Builds of main triggered by pushes queue up, but
+  # the daily build has a concurrency group of its own (see above): a merge
+  # while it runs can pick the same version. The later push then stops, and
+  # the report job starts a new build of main, which picks the next version.
   version:
     name: Pick the version
     needs: recent_build
@@ -179,6 +181,10 @@ jobs:
     # requests and other branches run without an environment (and never
     # sign). An empty name means no environment.
     environment: ${{ (github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)) && 'release' || '' }}
+
+    # "true" when another build of main published this version first
+    outputs:
+      version_taken: ${{ steps.push-image.outputs.version_taken }}
 
     env:
       VERSION: ${{ needs.version.outputs.version }}
@@ -480,7 +486,8 @@ jobs:
           # a merge) could pick the same version: the second one stops here
           # instead of replacing the first one's image under that version.
           if skopeo inspect --raw "docker://${IMAGE_REGISTRY}/${IMAGE_NAME}:${first}" >/dev/null 2>&1; then
-            echo "::error::${IMAGE_NAME}:${first} is already published by another build"
+            echo "::error::${IMAGE_NAME}:${first} is already published by another build: a new build of main starts (report job)"
+            echo "version_taken=true" >> "${GITHUB_OUTPUT}"
             exit 1
           fi
           set -x
@@ -543,7 +550,9 @@ jobs:
             "${IMAGE_REGISTRY}/${IMAGE_NAME}@${DIGEST}"
 
   # A failed build of main (daily, merge, by hand) opens an issue, closed by
-  # the next build that passes
+  # the next build that passes. A build that lost its version to another one
+  # (see the version job) is started again, so the change it carries is
+  # published: re-running only the failed jobs would reuse the taken version.
   report:
     name: Report the result
     needs: [recent_build, version, build_push]
@@ -553,9 +562,21 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 10
     permissions:
+      actions: write  # start a new build of main
       contents: read
       issues: write
     steps:
+      - name: Start a new build of main
+        # Not for the daily build: the build that took its version is newer
+        if: needs.build_push.outputs.version_taken == 'true' && github.event_name != 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          echo "::notice::This build's version was taken by another build: starting a new build of ${BRANCH}"
+          gh workflow run build.yml --ref "${BRANCH}"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:

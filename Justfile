@@ -182,11 +182,23 @@ helpers-keys:
 
     base_tag="$(just fedora-version)"
     fedora="registry.fedoraproject.org/fedora:${base_tag}"
-    # Fedora packages: source packages rebuilt, Plymouth spinner recolored
+    # Fedora packages: source packages rebuilt, Plymouth spinner recolored,
+    # and cosmic-settings for the COSMIC version
     packages="$(podman run --rm --pull=newer "${fedora}" \
         dnf5 -q repoquery --enablerepo=fedora-source --enablerepo=updates-source \
         --latest-limit=1 --queryformat '%{full_nevra}\n' \
-        cosmic-greeter cosmic-initial-setup cosmic-store plymouth-theme-spinner | sort)"
+        cosmic-greeter cosmic-initial-setup cosmic-settings cosmic-store plymouth-theme-spinner | sort)"
+    # COSMIC must be the version cosmic-blue is tested against
+    # (build_files/cosmic-version): a new one first goes through the pull
+    # request of check-cosmic-version.yml, which moves that file. Checked here,
+    # before the helper stages that patch COSMIC programs, so the build stops
+    # with this message rather than a patch that no longer applies.
+    pinned="$(grep -v '^#' build_files/cosmic-version | tr -d '[:space:]')"
+    fedora_cosmic="$(sed -nE 's/^cosmic-settings-([0-9]+:)?([^-]+)-.*/\2/p' <<< "${packages}" | sort -u)"
+    if [[ "${fedora_cosmic}" != "${pinned}" ]]; then
+        echo "::error::Fedora ${base_tag} now ships COSMIC ${fedora_cosmic:-?}, but cosmic-blue is pinned to ${pinned} (build_files/cosmic-version): merge the COSMIC update pull request of check-cosmic-version.yml first" >&2
+        exit 1
+    fi
     package() {
         # Found, or a stale cache could be used
         grep "^${1}-[0-9]" <<< "${packages}"

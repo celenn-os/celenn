@@ -42,6 +42,16 @@
       "schedule": ["* 0-7 * * 1"]
     },
     {
+      // Supply chain: a compromised release of an action (or of Starship, or
+      // the Bibata cursors) is usually found and pulled within days. Wait 3
+      // days before proposing it, as the build job that runs the actions
+      // holds the image signing key. Only for sources with release dates
+      // (git refs and container digests have none).
+      "description": "Releases from GitHub: wait 3 days before updating",
+      "matchDatasources": ["github-tags", "github-releases"],
+      "minimumReleaseAge": "3 days"
+    },
+    {
       // Moving to a new Fedora release is a deliberate choice (see the
       // Containerfile): never propose it.
       "description": "Stay on the current Fedora release",
