@@ -240,6 +240,12 @@ impl Operation {
         match &self.kind {
             OperationKind::Install => "install",
             OperationKind::Uninstall { .. } => "uninstall",
+            // The rpm-ostree row is the system itself
+            OperationKind::Update
+                if self.infos.first().is_some_and(|info| info.source_id == "rpm-ostree") =>
+            {
+                "update-system"
+            }
             OperationKind::Update => "update",
             OperationKind::RepositoryAdd(_) => "add-repositories",
             OperationKind::RepositoryRemove(..) => "remove-repositories",
@@ -328,6 +334,7 @@ operation-pending = { $kind ->
     [uninstall] Uninstalling { $name } from { $source } ({ $percent }%)...
     [add-repositories] Adding repositories { $name } ({ $percent }%)...
     [remove-repositories] Removing repositories { $name } ({ $percent }%)...
+    [update-system] Updating the system ({ $percent }%)...
    *[update] Updating { $name } from { $source } ({ $percent }%)...
 }
 operation-completed = { $kind ->
@@ -335,6 +342,7 @@ operation-completed = { $kind ->
     [uninstall] Uninstalled { $name } from { $source }
     [add-repositories] Added repositories { $name }
     [remove-repositories] Removed repositories { $name }
+    [update-system] System updated: the new version starts at the next restart
    *[update] Updated { $name } from { $source }
 }
 operation-failed = { $kind ->
@@ -342,6 +350,7 @@ operation-failed = { $kind ->
     [uninstall] Failed to uninstall { $name } from { $source }
     [add-repositories] Failed to add repositories { $name }
     [remove-repositories] Failed to remove repositories { $name }
+    [update-system] Failed to update the system
    *[update] Failed to update { $name } from { $source }
 }
 """)
@@ -356,6 +365,7 @@ operation-pending = { $kind ->
     [uninstall] Désinstallation de { $name } ({ $source }, { $percent } %)...
     [add-repositories] Ajout des dépôts { $name } ({ $percent } %)...
     [remove-repositories] Suppression des dépôts { $name } ({ $percent } %)...
+    [update-system] Mise à jour du système ({ $percent } %)...
    *[update] Mise à jour de { $name } depuis { $source } ({ $percent } %)...
 }
 operation-completed = { $kind ->
@@ -363,6 +373,7 @@ operation-completed = { $kind ->
     [uninstall] { $name } désinstallé ({ $source })
     [add-repositories] Dépôts { $name } ajoutés
     [remove-repositories] Dépôts { $name } supprimés
+    [update-system] Système mis à jour : la nouvelle version démarre au prochain redémarrage
    *[update] { $name } mis à jour depuis { $source }
 }
 operation-failed = { $kind ->
@@ -370,6 +381,7 @@ operation-failed = { $kind ->
     [uninstall] Impossible de désinstaller { $name } ({ $source })
     [add-repositories] Impossible d'ajouter les dépôts { $name }
     [remove-repositories] Impossible de supprimer les dépôts { $name }
+    [update-system] Impossible de mettre à jour le système
    *[update] Impossible de mettre à jour { $name } depuis { $source }
 }
 """)
