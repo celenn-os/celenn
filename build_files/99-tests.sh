@@ -237,18 +237,25 @@ for recipe in contribute bluespeed bluefin-apps bazaar-preview toggle-testing ch
     if tr ' ' '\n' <<<"${recipes}" | grep -qx -- "${recipe}"; then echo "ujust ${recipe} left in place"; exit 1; fi
 done
 # Every listed command reads verb-object (build_files/10-system-files.sh
-# renames Bluefin's that do not); the earlier names still run, unlisted
+# renames Bluefin's that do not), and every install- command takes `remove`;
+# the earlier names and Bluefin's own installers still run, unlisted
+for recipe in $(tr ' ' '\n' <<<"${recipes}" | grep '^install-'); do
+    just --justfile /usr/share/ublue-os/just/00-entry.just --show "${recipe}" | grep -q '^'"${recipe}"' action="install":' \
+        || { echo "ujust ${recipe} takes no install/remove argument"; exit 1; }
+done
 odd="$(tr ' ' '\n' <<<"${recipes}" \
     | grep -vE '^(install|toggle|reset|export|switch|report|enroll|check|show|run|reboot|clean|update)(-|$)' || true)"
 if [[ -n "${odd}" ]]; then echo "ujust commands not named verb-object:" ${odd}; exit 1; fi
-for recipe in install-dev-tools install-vms install-lima install-default-apps install-cncf-tools \
-              reboot-to-bios show-bios-info show-logs show-previous-logs run-benchmark \
+for recipe in install-dev-tools install-vms install-lima reset-default-apps install-cncf-tools \
+              install-ai-tools install-asus install-jetbrains-toolbox install-opentabletdriver reboot-to-bios show-bios-info show-logs show-previous-logs run-benchmark \
               check-secure-boot reset-system report-bug; do
     tr ' ' '\n' <<<"${recipes}" | grep -qx -- "${recipe}"
 done
 for recipe in devmode toggle-devmode bug-report setup-vms setup-lima install-system-flatpaks cncf \
               bios bios-info logs-this-boot logs-last-boot benchmark check-sb-key powerwash \
-              jetbrains-toolbox toggle-user-motd device-info toggle-vms; do
+              jetbrains-toolbox toggle-user-motd device-info toggle-vms _bluefin-dev-tools _bluefin-vms \
+              _bluefin-lima _bluefin-cncf-tools _bluefin-ai-tools _bluefin-asus _bluefin-jetbrains-toolbox \
+              _bluefin-opentabletdriver; do
     if tr ' ' '\n' <<<"${recipes}" | grep -qx -- "${recipe}"; then echo "ujust ${recipe} still listed"; exit 1; fi
     just --justfile /usr/share/ublue-os/just/00-entry.just --show "${recipe}" >/dev/null
 done
@@ -281,7 +288,7 @@ for remote in flathub cosmic; do
     flatpak remotes --system --columns=name | grep -qx "${remote}"
 done
 test -f /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall
-# First-boot flatpaks and `ujust install-default-apps` install the same apps
+# First-boot flatpaks and `ujust reset-default-apps` install the same apps
 diff <(sed -n 's/^\[Flatpak Preinstall \(.*\)\]$/\1/p' /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall | sort) \
      <(sed -n 's/^flatpak "\(.*\)"$/\1/p' /usr/share/ublue-os/homebrew/system-flatpaks.Brewfile | sort)
 # No flatpak that duplicates a COSMIC app or needs GNOME

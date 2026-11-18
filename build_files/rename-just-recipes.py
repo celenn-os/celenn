@@ -8,6 +8,8 @@ Each OP is one of:
   old=new@Group   rename it and put it in [group('Group')]
   name@Group      put it in [group('Group')]
   -name           hide it from `ujust` ([private]); it still runs
+  old=new>public  rename it, but make `ujust old` calls use `public`
+                  (for a hidden _name that a public command now wraps)
   ...|Text        (after any of the above) new description, shown by `ujust`
 
 Used on projectbluefin/common's ujust files so that every listed command
@@ -35,7 +37,9 @@ def parse_ops(ops):
         if "@" in op:
             op, group = op.split("@", 1)
         old, _, new = op.partition("=")
-        plan[old] = {"new": new or old, "group": group, "private": private, "doc": doc}
+        new, _, public = new.partition(">")
+        plan[old] = {"new": new or old, "public": public or new or old,
+                     "group": group, "private": private, "doc": doc}
     return plan
 
 
@@ -75,8 +79,13 @@ def rewrite_calls(text, plan):
         if spec["new"] == old:
             continue
         text = re.sub(
-            r'((?:\bujust|\bjust --justfile (?:"[^"]*"|\S+))\s+)' + re.escape(old) + r"(?![\w-])",
+            r'(\bjust --justfile (?:"[^"]*"|\S+)\s+)' + re.escape(old) + r"(?![\w-])",
             lambda m: m.group(1) + spec["new"],
+            text,
+        )
+        text = re.sub(
+            r"(\bujust\s+)" + re.escape(old) + r"(?![\w-])",
+            lambda m: m.group(1) + spec["public"],
             text,
         )
     return text

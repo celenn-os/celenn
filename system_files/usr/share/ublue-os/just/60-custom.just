@@ -185,7 +185,7 @@ export-cosmic-config:
     fi
     echo "It is plain text: read it before sharing it."
 
-# Install Microsoft's core fonts (Arial, Times New Roman, Verdana...) for your account
+# Install Microsoft's core fonts (Arial, Times New Roman, Verdana...) for your account; `remove` takes them away
 [group('Apps')]
 install-microsoft-fonts action="install":
     #!/usr/bin/bash
@@ -241,7 +241,7 @@ install-microsoft-fonts action="install":
     echo "Installed $(find "${dest}" -name '*.ttf' | wc -l) font files in ${dest}."
     echo "Restart open apps to see them. Remove them with: ujust install-microsoft-fonts remove"
 
-# Install handy command line tools with Homebrew (bat, eza, fd, ripgrep, zoxide...)
+# Install handy command line tools with Homebrew (bat, eza, fd, ripgrep, zoxide...); `remove` takes them away
 [group('Apps')]
 install-cli-tools action="install":
     #!/usr/bin/bash
@@ -348,6 +348,233 @@ install-gaming action="install":
             echo "Usage: ujust install-gaming [install|remove]" >&2
             exit 1
             ;;
+    esac
+
+# Bluefin's installers (projectbluefin/common), renamed _bluefin-* at build
+# time (build_files/10-system-files.sh): these commands run them to install,
+# and add the `remove` they lack. Removing never deletes your own files
+# (projects, virtual machine disks are only removed after a question).
+
+# Install developer tools from a menu: Docker, Podman Desktop, VS Code, Lima...; `remove` picks which to take away
+[group('Apps')]
+install-dev-tools action="install":
+    #!/usr/bin/bash
+    set -euo pipefail
+    case "{{ action }}" in
+        install) exec ujust _bluefin-dev-tools ;;
+        remove) ;;
+        *) echo "Usage: ujust install-dev-tools [install|remove]" >&2; exit 1 ;;
+    esac
+    # What the menu installs: "Label|kind|names" (kind: formula, cask, flatpak, ujust)
+    tools=(
+        "devcontainer CLI|formula|devcontainer"
+        "Docker|formula|docker docker-compose lazydocker dive"
+        "Podman Desktop|flatpak|io.podman_desktop.PodmanDesktop"
+        "Lima|ujust|install-lima"
+        "VS Code|cask|visual-studio-code-linux"
+        "VSCodium|cask|vscodium-linux"
+        "Antigravity|cask|antigravity-linux"
+        "Zed|cask|zed"
+        "JetBrains Toolbox|ujust|install-jetbrains-toolbox"
+        "Neovim|formula|neovim"
+        "Helix|formula|helix"
+        "vim|formula|vim"
+        "micro|formula|micro"
+    )
+    present() { # kind names
+        case "$1" in
+            formula) brew list --formula "${2%% *}" >/dev/null 2>&1 ;;
+            cask) brew list --cask "$2" >/dev/null 2>&1 ;;
+            flatpak) flatpak info --system "$2" >/dev/null 2>&1 ;;
+            ujust)
+                case "$2" in
+                    install-lima) brew list --formula lima >/dev/null 2>&1 ;;
+                    install-jetbrains-toolbox) brew list --cask jetbrains-toolbox-linux >/dev/null 2>&1 ;;
+                esac
+                ;;
+        esac
+    }
+    installed=()
+    for tool in "${tools[@]}"; do
+        IFS='|' read -r label kind names <<<"${tool}"
+        if present "${kind}" "${names}"; then installed+=("${label}"); fi
+    done
+    if [[ "${#installed[@]}" -eq 0 ]]; then
+        echo "No tools from ujust install-dev-tools are installed."
+        exit 0
+    fi
+    chosen="$(gum choose --no-limit --header "Which tools do you want to remove? (space to select)" "${installed[@]}" || true)"
+    [[ -n "${chosen}" ]] || { echo "Nothing removed."; exit 0; }
+    for tool in "${tools[@]}"; do
+        IFS='|' read -r label kind names <<<"${tool}"
+        grep -qxF -- "${label}" <<<"${chosen}" || continue
+        echo "Removing ${label}..."
+        case "${kind}" in
+            formula) read -ra formulas <<<"${names}"; brew uninstall --formula "${formulas[@]}" || true ;;
+            cask) brew uninstall --cask "${names}" || true ;;
+            flatpak) flatpak uninstall --system --noninteractive "${names}" || true ;;
+            ujust) ujust "${names}" remove ;;
+        esac
+    done
+    if [[ "${#installed[@]}" -eq "$(grep -c . <<<"${chosen}")" ]]; then
+        rm -f "${HOME}/.config/bluefin/devmode"
+    fi
+    echo "Done. Your projects and settings are kept."
+
+# Install virtual machines (virt-manager, with UEFI, TPM and USB passthrough); `remove` takes them away
+[group('Apps')]
+install-vms action="install":
+    #!/usr/bin/bash
+    set -euo pipefail
+    case "{{ action }}" in
+        install) exec ujust _bluefin-vms ;;
+        remove)
+            if ! flatpak info --system org.virt_manager.virt-manager >/dev/null 2>&1; then
+                echo "Virtual machines (virt-manager) are not installed."
+                exit 0
+            fi
+            echo "This removes virt-manager. Your virtual machines' disks are kept"
+            echo "(in ~/.local/share/libvirt): installing it again finds them."
+            if [[ -t 0 ]] && ! gum confirm "Remove virt-manager?"; then echo "Nothing removed."; exit 0; fi
+            flatpak uninstall --system --noninteractive \
+                org.virt_manager.virt-manager org.virt_manager.virt_manager.Extension.Qemu || true
+            sed -i '/uri_default.*session/d' "${HOME}/.config/libvirt/libvirt.conf" 2>/dev/null || true
+            echo "virt-manager removed."
+            ;;
+        *) echo "Usage: ujust install-vms [install|remove]" >&2; exit 1 ;;
+    esac
+
+# Install Lima, a lightweight Ubuntu virtual machine for containers; `remove` takes it away
+[group('Apps')]
+install-lima action="install":
+    #!/usr/bin/bash
+    set -euo pipefail
+    case "{{ action }}" in
+        install) exec ujust _bluefin-lima ;;
+        remove)
+            if ! command -v limactl >/dev/null; then
+                echo "Lima is not installed."
+                exit 0
+            fi
+            if limactl ls -q 2>/dev/null | grep -qx ubuntu; then
+                echo "This deletes the Lima \"ubuntu\" virtual machine and everything inside it,"
+                echo "then removes Lima. Files shared from your home folder are kept."
+                if [[ ! -t 0 ]] || ! gum confirm "Delete the ubuntu virtual machine and remove Lima?"; then
+                    echo "Nothing removed."
+                    exit 0
+                fi
+                limactl autostart disable ubuntu 2>/dev/null || true
+                limactl stop -f ubuntu 2>/dev/null || true
+                limactl delete -f ubuntu
+            fi
+            brew uninstall --formula lima || true
+            sed -i '\|^Include ~/.lima/\*/ssh.config$|d' "${HOME}/.ssh/config" 2>/dev/null || true
+            echo "Lima removed."
+            ;;
+        *) echo "Usage: ujust install-lima [install|remove]" >&2; exit 1 ;;
+    esac
+
+# Install Kubernetes and cloud native tools (CNCF) with Homebrew; `remove` takes them away
+[group('Apps')]
+install-cncf-tools action="install":
+    #!/usr/bin/bash
+    set -euo pipefail
+    brewfile=/usr/share/ublue-os/homebrew/cncf.Brewfile
+    case "{{ action }}" in
+        install) exec ujust _bluefin-cncf-tools ;;
+        remove)
+            for formula in $(brew bundle list --file="${brewfile}" --formula); do
+                if brew list --formula "${formula##*/}" >/dev/null 2>&1; then
+                    brew uninstall --formula "${formula##*/}" || true
+                fi
+            done
+            echo "Done. A tool that another Homebrew package needs is kept."
+            ;;
+        *) echo "Usage: ujust install-cncf-tools [install|remove]" >&2; exit 1 ;;
+    esac
+
+# Install Goose, an AI assistant for the terminal, with read-only system diagnostics; `remove` takes it away
+[group('Apps')]
+install-ai-tools action="install":
+    #!/usr/bin/bash
+    set -euo pipefail
+    brewfile=/usr/share/ublue-os/homebrew/ai-tools.Brewfile
+    case "{{ action }}" in
+        install) exec ujust _bluefin-ai-tools ;;
+        remove)
+            for formula in $(brew bundle list --file="${brewfile}" --formula); do
+                if brew list --formula "${formula##*/}" >/dev/null 2>&1; then
+                    brew uninstall --formula "${formula##*/}" || true
+                fi
+            done
+            for cask in $(brew bundle list --file="${brewfile}" --cask); do
+                if brew list --cask "${cask##*/}" >/dev/null 2>&1; then
+                    brew uninstall --cask "${cask##*/}" || true
+                fi
+            done
+            # The configuration this command wrote, unless you changed it
+            config="${XDG_CONFIG_HOME:-${HOME}/.config}/goose/config.yaml"
+            if [[ -f "${config}" ]] && cmp -s "${config}" /usr/share/ublue-os/goose/config.yaml; then
+                rm -f "${config}"
+            fi
+            echo "Done."
+            ;;
+        *) echo "Usage: ujust install-ai-tools [install|remove]" >&2; exit 1 ;;
+    esac
+
+# Install the ASUS laptop tools (asusctl and ROG Control Center); `remove` takes them away
+[group('Apps')]
+install-asus action="install":
+    #!/usr/bin/bash
+    set -euo pipefail
+    case "{{ action }}" in
+        install) exec ujust _bluefin-asus ;;
+        remove)
+            systemctl --user disable --now asusd-user.service 2>/dev/null || true
+            sudo systemctl disable --now asusd.service asus-shutdown.service 2>/dev/null || true
+            for cask in rog-control-center-linux asusctl-linux; do
+                if brew list --cask "${cask}" >/dev/null 2>&1; then
+                    brew uninstall --cask "${cask}" || true
+                fi
+            done
+            echo "ASUS tools removed."
+            ;;
+        *) echo "Usage: ujust install-asus [install|remove]" >&2; exit 1 ;;
+    esac
+
+# Install JetBrains Toolbox, to install JetBrains IDEs; `remove` takes it away
+[group('Apps')]
+install-jetbrains-toolbox action="install":
+    #!/usr/bin/bash
+    set -euo pipefail
+    case "{{ action }}" in
+        install) exec ujust _bluefin-jetbrains-toolbox ;;
+        remove)
+            if brew list --cask jetbrains-toolbox-linux >/dev/null 2>&1; then
+                brew uninstall --cask jetbrains-toolbox-linux
+            fi
+            echo "JetBrains Toolbox removed. IDEs it installed stay in"
+            echo "~/.local/share/JetBrains: delete that folder to remove them too."
+            ;;
+        *) echo "Usage: ujust install-jetbrains-toolbox [install|remove]" >&2; exit 1 ;;
+    esac
+
+# Install OpenTabletDriver, for drawing tablets; `remove` takes it away
+[group('Apps')]
+install-opentabletdriver action="install":
+    #!/usr/bin/bash
+    set -euo pipefail
+    case "{{ action }}" in
+        install) exec ujust _bluefin-opentabletdriver ;;
+        remove)
+            systemctl --user disable --now opentabletdriver.service 2>/dev/null || true
+            rm -f "${HOME}/.config/systemd/user/opentabletdriver.service"
+            systemctl --user daemon-reload
+            sudo rm -f /etc/modprobe.d/blacklist-opentabletdriver.conf /etc/udev/rules.d/71-opentabletdriver.rules
+            flatpak uninstall --system --noninteractive net.opentabletdriver.OpenTabletDriver 2>/dev/null || true
+            echo "OpenTabletDriver removed. Restart to use the usual tablet drivers again."
+            ;;
+        *) echo "Usage: ujust install-opentabletdriver [install|remove]" >&2; exit 1 ;;
     esac
 
 # Turn the FlatPark app source on or off (off by default; or force one: on, off, status)
@@ -500,7 +727,7 @@ alias setup-vms := install-vms
 alias setup-lima := install-lima
 
 [private]
-alias install-system-flatpaks := install-default-apps
+alias install-system-flatpaks := reset-default-apps
 
 [private]
 alias cncf := install-cncf-tools

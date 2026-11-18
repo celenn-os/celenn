@@ -168,23 +168,30 @@ python3 -I /ctx/build_files/drop-just-recipes.py \
     "${STAGE}/usr/share/ublue-os/just/system.just" \
     bluespeed bluefin-apps bazaar-preview toggle-testing bluefin-cli devmode
 # Every listed ujust command reads verb-object, like cosmic-blue's own in
-# 60-custom.just: install- (adds apps or tools), toggle- (on/off), reset-,
-# check-, show-, switch-, report-... Bluefin's names that do not are renamed,
-# regrouped (Apps installs things, System looks after the computer) or hidden
-# when another command covers them; 60-custom.just keeps every old name as a
-# hidden alias. `toggle-devmode` turns nothing on or off: it is a menu that
-# installs developer tools. Fails if upstream renames a recipe.
+# 60-custom.just: install- (adds apps or tools, and `remove` takes them away),
+# toggle- (on/off), reset-, check-, show-, switch-, report-... Bluefin's names
+# that do not are renamed, regrouped (Apps installs things, System looks
+# after the computer) or hidden when another command covers them.
+# Bluefin's installers have no `remove`: they become hidden _bluefin-*
+# recipes, which 60-custom.just's install-* commands run to install, next to
+# their own removal. 60-custom.just keeps every old name as a hidden alias.
+# Fails if upstream renames a recipe.
 python3 -I /ctx/build_files/rename-just-recipes.py "${STAGE}"/usr/share/ublue-os/just/{apps,default,shared,system,update}.just -- \
-    "toggle-devmode=install-dev-tools@Apps|Install developer tools from a menu: Docker, Podman Desktop, VS Code, Lima..." \
-    "setup-vms=install-vms@Apps|Install virtual machines (virt-manager, with UEFI, TPM and USB passthrough)" \
-    "setup-lima=install-lima@Apps|Install Lima, a lightweight Ubuntu virtual machine for containers" \
-    "install-system-flatpaks=install-default-apps@Apps|Install the default apps again (those removed by mistake)" \
-    "cncf=install-cncf-tools@Apps|Install Kubernetes and cloud native tools (CNCF) with Homebrew" \
+    "toggle-devmode=_bluefin-dev-tools>install-dev-tools" \
+    "setup-vms=_bluefin-vms>install-vms" \
+    "setup-lima=_bluefin-lima>install-lima" \
+    "cncf=_bluefin-cncf-tools>install-cncf-tools" \
+    "install-ai-tools=_bluefin-ai-tools>install-ai-tools" \
+    "install-asus=_bluefin-asus>install-asus" \
+    "install-jetbrains-toolbox=_bluefin-jetbrains-toolbox>install-jetbrains-toolbox" \
+    "install-opentabletdriver=_bluefin-opentabletdriver>install-opentabletdriver" \
+    "install-system-flatpaks=reset-default-apps@Apps|Install the default apps again (those removed by mistake)" \
     "bios=reboot-to-bios@System|Restart into this computer's firmware settings (BIOS/UEFI)" \
     "bios-info=show-bios-info@System|Show the motherboard and firmware (BIOS/UEFI) version" \
     "logs-this-boot=show-logs@System|Show the system messages since this startup" \
     "logs-last-boot=show-previous-logs@System|Show the system messages of the previous startup" \
     "benchmark=run-benchmark@System|Run a one minute processor benchmark" \
+    "check-sb-key=check-secure-boot@System|Show whether Secure Boot is on and which keys are enrolled" \
     "powerwash=reset-system@System|Factory reset this computer: erases everything (experimental)" \
     "check-local-overrides@System|Show the system settings changed on this computer (in /etc)" \
     "check-idle-power-draw@System|Measure the power drawn while idle" \
@@ -192,10 +199,6 @@ python3 -I /ctx/build_files/rename-just-recipes.py "${STAGE}"/usr/share/ublue-os
     "update@System" \
     "toggle-updates@System|Turn automatic updates on or off" \
     "toggle-tpm2|Unlock the encrypted disk with the TPM2 chip instead of a password, or stop" \
-    "check-sb-key=check-secure-boot@System|Show whether Secure Boot is on and which keys are enrolled" \
-    "install-ai-tools|Install Goose, an AI assistant for the terminal, with read-only system diagnostics" \
-    "install-asus|Install the ASUS laptop tools (asusctl and ROG Control Center)" \
-    "install-jetbrains-toolbox|Install JetBrains Toolbox, to install JetBrains IDEs" \
     -jetbrains-toolbox -toggle-user-motd -device-info -toggle-vms
 
 # `ujust enroll-secure-boot-key` (projectbluefin/common) queues the akmods key
