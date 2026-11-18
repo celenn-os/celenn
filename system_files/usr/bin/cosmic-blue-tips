@@ -2,47 +2,47 @@
 # Print one random cosmic-blue tip, in Markdown, for the terminal welcome
 # banner (uwelcome, see /etc/uwelcome/config.toml). Replaces Bluefin's umotd,
 # whose tips are about Bluefin, GNOME and apps cosmic-blue does not ship.
-# English, or French when the messages locale is French.
+#
+# The tips are in /usr/share/cosmic-blue/tips, one file per language (en.txt,
+# fr.txt, pt_BR.txt for a regional variant...), one tip per line, with @DOCS@
+# for the documentation link. The file is picked from the messages locale,
+# like gettext does; English when there is none. To add a language, add its
+# file with the same tips in the same order.
 set -euo pipefail
 
-docs="https://cosmic-blue-os.github.io/cosmic-blue/docs/"
-locale="${LC_ALL:-${LC_MESSAGES:-${LANG:-}}}"
+dir="${COSMIC_BLUE_TIPS_DIR:-/usr/share/cosmic-blue/tips}"
+site="https://cosmic-blue-os.github.io/cosmic-blue/"
 
-if [[ "${locale}" == fr* ]]; then
-    docs="https://cosmic-blue-os.github.io/cosmic-blue/fr/docs/"
-    tips=(
-        "**Une mise à jour a cassé quelque chose ?** Revenez à la version précédente avec \`sudo bootc rollback\`, puis redémarrez."
-        "Les mises à jour s'installent en arrière-plan. Lancez \`ujust update\` pour mettre à jour tout de suite."
-        "Installez des applications depuis le **COSMIC Store** : Flathub et les applications COSMIC."
-        "Installez des outils en ligne de commande avec \`brew search\` et \`brew install\`."
-        "\`ujust\` liste tous les raccourcis, \`ujust --choose\` en choisit un dans un menu."
-        "**Vous développez ?** \`ujust install-dev-tools\` ajoute Docker, des IDE et des outils de virtualisation."
-        "Besoin d'un paquet d'une autre distribution ? \`distrobox create\` lance Ubuntu, Arch... dans un conteneur."
-        "**Tailscale est inclus** : connectez-vous avec \`sudo tailscale up\`."
-        "Vous avez perdu le style cosmic-blue ? \`ujust reset-cosmic-theme\` le restaure."
-        "\`ujust install-cli-tools\` ajoute des outils pratiques pour le terminal."
-        "Passez du thème sombre au thème clair avec \`ujust toggle-dark-mode\`."
-        "Le guide de cosmic-blue est en ligne : [documentation](${docs})"
-        "**Un bug ?** \`ujust report-bug\` ouvre un rapport de bug avec les informations du système déjà remplies."
-        "Désactivez ce message d'accueil avec \`uwelcome toggle\`."
-    )
-else
-    tips=(
-        "**Did an update break something?** Go back to the previous version with \`sudo bootc rollback\`, then reboot."
-        "Updates install in the background. Run \`ujust update\` to update right now."
-        "Install apps from the **COSMIC Store**: Flathub and COSMIC apps."
-        "Install command line tools with \`brew search\` and \`brew install\`."
-        "\`ujust\` lists all the shortcuts, \`ujust --choose\` picks one from a menu."
-        "**Are you a developer?** \`ujust install-dev-tools\` adds Docker, IDEs and virtualization tools."
-        "Need a package from another distribution? \`distrobox create\` runs Ubuntu, Arch... in a container."
-        "**Tailscale is included**: sign in with \`sudo tailscale up\`."
-        "Lost the cosmic-blue look? \`ujust reset-cosmic-theme\` brings it back."
-        "\`ujust install-cli-tools\` adds handy command line tools."
-        "Switch between the dark and light themes with \`ujust toggle-dark-mode\`."
-        "The cosmic-blue guide is online: [documentation](${docs})"
-        "**Found a bug?** \`ujust report-bug\` opens a bug report with the system details already filled in."
-        "Turn this welcome message off with \`uwelcome toggle\`."
-    )
-fi
+# The file of a locale name (de_CH.UTF-8): same language and region, else
+# same language, else another region of that language
+tips_file() {
+    local name="${1%%[.@]*}" lang candidate
+    lang="${name%%_*}"
+    for candidate in "${dir}/${name}.txt" "${dir}/${lang}.txt" "${dir}/${lang}"_*.txt; do
+        if [[ -f "${candidate}" ]]; then
+            printf '%s\n' "${candidate}"
+            return 0
+        fi
+    done
+    return 1
+}
 
-printf '%s\n' "${tips[RANDOM % ${#tips[@]}]}"
+file=""
+IFS=: read -r -a names <<< "${LANGUAGE:-}"
+names+=("${LC_ALL:-}" "${LC_MESSAGES:-}" "${LANG:-}")
+for name in "${names[@]}"; do
+    [[ -n "${name}" ]] || continue
+    if file="$(tips_file "${name}")"; then
+        break
+    fi
+    file=""
+    [[ "${name}" == en* || "${name}" == C* || "${name}" == POSIX ]] && break
+done
+[[ -n "${file}" ]] || file="${dir}/en.txt"
+
+# The site's documentation is in English and French
+docs="${site}docs/"
+[[ "$(basename "${file}")" == fr* ]] && docs="${site}fr/docs/"
+
+mapfile -t tips < <(grep -v '^[[:space:]]*$' "${file}")
+printf '%s\n' "${tips[RANDOM % ${#tips[@]}]//@DOCS@/${docs}}"

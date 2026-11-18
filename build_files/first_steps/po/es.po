@@ -1,0 +1,180 @@
+# Spanish translation of the cosmic-blue tours
+# (build_files/first_steps/src/main.rs).
+msgid ""
+msgstr ""
+"Language: es\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Back"
+msgstr "Atrás"
+
+msgid "Next"
+msgstr "Siguiente"
+
+msgid "Close"
+msgstr "Cerrar"
+
+msgid "Later"
+msgstr "Más tarde"
+
+msgid "Copy"
+msgstr "Copiar"
+
+msgid "Copied"
+msgstr "Copiado"
+
+msgid "Welcome to cosmic-blue"
+msgstr "Te damos la bienvenida a cosmic-blue"
+
+msgid "Accessibility"
+msgstr "Accesibilidad"
+
+msgid "Screen reader: Super + Alt + S. Zoom: Super + = and Super + -. More in the settings."
+msgstr "Lector de pantalla: Super + Alt + S. Zoom: Super + = y Super + -. Más opciones en la configuración."
+
+msgid "Settings"
+msgstr "Configuración"
+
+msgid "First steps"
+msgstr "Primeros pasos"
+
+msgid "Your system is installed and ready. Here are a few things worth knowing to get started."
+msgstr "Tu sistema está instalado y listo. Aquí tienes algunas cosas útiles para empezar."
+
+msgid "Install apps"
+msgstr "Instalar aplicaciones"
+
+msgid "Apps come from COSMIC Store, which offers Flathub and the COSMIC apps. They run apart from the system and update by themselves."
+msgstr "Las aplicaciones vienen de COSMIC Store, que ofrece Flathub y las aplicaciones de COSMIC. Funcionan aparte del sistema y se actualizan solas."
+
+msgid "Open COSMIC Store"
+msgstr "Abrir COSMIC Store"
+
+msgid "Command line tools, installed in your home folder with Homebrew"
+msgstr "Herramientas de línea de comandos, instaladas en tu carpeta personal con Homebrew"
+
+msgid "Packages from other distributions, in a container that shares your home folder"
+msgstr "Paquetes de otras distribuciones, en un contenedor que comparte tu carpeta personal"
+
+msgid "Updates and rollback"
+msgstr "Actualizaciones y vuelta atrás"
+
+msgid "The system, your apps and Homebrew packages update by themselves in the background. A system update applies at the next restart, without interrupting you."
+msgstr "El sistema, tus aplicaciones y los paquetes de Homebrew se actualizan solos en segundo plano. Una actualización del sistema se aplica en el siguiente reinicio, sin interrumpirte."
+
+msgid "Update everything now, without waiting"
+msgstr "Actualizar todo ahora, sin esperar"
+
+msgid "An update broke something? Go back to the previous version, then restart"
+msgstr "¿Una actualización rompió algo? Vuelve a la versión anterior y reinicia"
+
+msgid "Show the current and previous versions"
+msgstr "Mostrar la versión actual y la anterior"
+
+msgid "Handy commands"
+msgstr "Comandos útiles"
+
+msgid "ujust runs the shortcuts that come with the system: type ujust in a terminal to list them all. A few of them:"
+msgstr "ujust ejecuta los atajos que trae el sistema: escribe ujust en una terminal para verlos todos. Algunos de ellos:"
+
+msgid "Developer tools: Docker, VS Code, Podman Desktop…"
+msgstr "Herramientas de desarrollo: Docker, VS Code, Podman Desktop…"
+
+msgid "Command line tools: bat, eza, ripgrep, zoxide…"
+msgstr "Herramientas de línea de comandos: bat, eza, ripgrep, zoxide…"
+
+msgid "Switch between the dark and light themes"
+msgstr "Cambiar entre el tema oscuro y el claro"
+
+msgid "Bring the cosmic-blue look back: colors, icons, wallpaper"
+msgstr "Recuperar el estilo de cosmic-blue: colores, iconos, fondo de pantalla"
+
+msgid "Open a terminal"
+msgstr "Abrir una terminal"
+
+msgid "Tile your windows"
+msgstr "Organiza tus ventanas en mosaico"
+
+msgid "COSMIC can arrange your windows side by side, without overlap, as you open them. It is off by default: turn it on with the tiling button in the panel, or with the keyboard."
+msgstr "COSMIC puede colocar tus ventanas una al lado de otra, sin solaparse, a medida que las abres. Viene desactivado: actívalo con el botón de mosaico del panel o con el teclado."
+
+msgid "Turn tiling on or off"
+msgstr "Activar o desactivar el mosaico"
+
+msgid "Go to the window on the left, right, above or below"
+msgstr "Ir a la ventana de la izquierda, derecha, arriba o abajo"
+
+msgid "Move the window to the left, right, up or down"
+msgstr "Mover la ventana a la izquierda, derecha, arriba o abajo"
+
+msgid "Let a window float above the others"
+msgstr "Dejar una ventana flotando sobre las demás"
+
+msgid "COSMIC can be customized much further: Settings → Desktop."
+msgstr "COSMIC se puede personalizar mucho más: Configuración → Escritorio."
+
+msgid "Help and feedback"
+msgstr "Ayuda y comentarios"
+
+msgid "Everything else is in the cosmic-blue guide. You can open this tour again from the app library: look for First steps."
+msgstr "Todo lo demás está en la guía de cosmic-blue. Puedes volver a abrir este recorrido desde la biblioteca de aplicaciones: busca Primeros pasos."
+
+msgid "Documentation"
+msgstr "Documentación"
+
+msgid "Updates, software, commands and tips"
+msgstr "Actualizaciones, software, comandos y consejos"
+
+msgid "Report a problem"
+msgstr "Informar de un problema"
+
+msgid "Found a bug or something unclear? Tell us on GitHub"
+msgstr "¿Encontraste un error o algo poco claro? Cuéntanoslo en GitHub"
+
+msgid "Open"
+msgstr "Abrir"
+
+msgid "Get started"
+msgstr "Empezar"
+
+msgid "cosmic-blue is Fedora Atomic with the COSMIC desktop, made in the spirit of Bluefin: a desktop that stays out of your way and keeps itself up to date."
+msgstr "cosmic-blue es Fedora Atomic con el escritorio COSMIC, hecho con el espíritu de Bluefin: un escritorio que no se interpone y se mantiene al día solo."
+
+msgid "Try it live"
+msgstr "Pruébalo en vivo"
+
+msgid "cosmic-blue is running from the live media. Nothing is written to your disk, and your changes are lost when you shut down. You can start the installer at any time from the desktop or the dock."
+msgstr "cosmic-blue se está ejecutando desde el medio live. No se escribe nada en tu disco y tus cambios se pierden al apagar. Puedes iniciar el instalador en cualquier momento desde el escritorio o el dock."
+
+msgid "What you get"
+msgstr "Lo que obtienes"
+
+msgid "Automatic updates"
+msgstr "Actualizaciones automáticas"
+
+msgid "The whole system updates in the background and applies at the next restart. If something goes wrong, boot the previous version."
+msgstr "Todo el sistema se actualiza en segundo plano y se aplica en el siguiente reinicio. Si algo sale mal, arranca la versión anterior."
+
+msgid "Apps from Flathub and COSMIC"
+msgstr "Aplicaciones de Flathub y COSMIC"
+
+msgid "Install apps with COSMIC Store, from Flathub and the COSMIC repository. They run sandboxed and update on their own."
+msgstr "Instala aplicaciones con COSMIC Store, desde Flathub y el repositorio de COSMIC. Funcionan aisladas y se actualizan solas."
+
+msgid "Ready for the terminal"
+msgstr "Listo para la terminal"
+
+msgid "Homebrew for command line tools, distrobox for other distributions, and ujust for common tasks."
+msgstr "Homebrew para las herramientas de línea de comandos, distrobox para otras distribuciones y ujust para las tareas comunes."
+
+msgid "Ready to install?"
+msgstr "¿Todo listo para instalar?"
+
+msgid "The installer copies cosmic-blue to your disk. After that, it updates itself from the cosmic-blue image registry."
+msgstr "El instalador copia cosmic-blue en tu disco. Después, se actualiza solo desde el registro de imágenes de cosmic-blue."
+
+msgid "Install cosmic-blue"
+msgstr "Instalar cosmic-blue"
+
+msgid "Keep trying"
+msgstr "Seguir probando"

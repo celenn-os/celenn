@@ -11,8 +11,8 @@
 //   cosmic-blue-tour --check     Image build test: every text has its
 //                                translations (no window)
 //
-// Text is in English, with a French translation picked from the session
-// language (see TRANSLATIONS). The layout follows cosmic-initial-setup's
+// Text is in English, translated to the session language from the PO files
+// of po/ (see LANGUAGES). The layout follows cosmic-initial-setup's
 // App::view (src/main.rs of its epoch-<version> tag).
 
 use cosmic::app::{Core, Settings, Task};
@@ -41,161 +41,85 @@ const INSTALLERS: [&str; 2] = [
 const ACCESSIBILITY: &str =
     "Screen reader: Super + Alt + S. Zoom: Super + = and Super + -. More in the settings.";
 
-/// English text -> French text
-const FRENCH: &[(&str, &str)] = &[
-    // Shared
-    ("Back", "Précédent"),
-    ("Next", "Suivant"),
-    ("Close", "Fermer"),
-    ("Later", "Plus tard"),
-    ("Copy", "Copier"),
-    ("Copied", "Copié"),
-    ("Welcome to cosmic-blue", "Bienvenue dans cosmic-blue"),
-    ("Accessibility", "Accessibilité"),
-    (
-        "Screen reader: Super + Alt + S. Zoom: Super + = and Super + -. More in the settings.",
-        "Lecteur d’écran : Super + Alt + S. Zoom : Super + = et Super + -. Plus d’options dans les paramètres.",
-    ),
-    ("Settings", "Paramètres"),
-    // First steps
-    ("First steps", "Premiers pas"),
-    (
-        "Your system is installed and ready. Here are a few things worth knowing to get started.",
-        "Votre système est installé et prêt. Voici quelques points utiles pour bien démarrer.",
-    ),
-    ("Install apps", "Installer des applications"),
-    (
-        "Apps come from COSMIC Store, which offers Flathub and the COSMIC apps. They run apart from the system and update by themselves.",
-        "Les applications viennent de COSMIC Store, qui propose Flathub et les applications COSMIC. Elles tournent à part du système et se mettent à jour seules.",
-    ),
-    ("Open COSMIC Store", "Ouvrir COSMIC Store"),
-    (
-        "Command line tools, installed in your home folder with Homebrew",
-        "Outils en ligne de commande, installés dans votre dossier personnel avec Homebrew",
-    ),
-    (
-        "Packages from other distributions, in a container that shares your home folder",
-        "Paquets d’autres distributions, dans un conteneur qui partage votre dossier personnel",
-    ),
-    ("Updates and rollback", "Mises à jour et retour en arrière"),
-    (
-        "The system, your apps and Homebrew packages update by themselves in the background. A system update applies at the next restart, without interrupting you.",
-        "Le système, vos applications et les paquets Homebrew se mettent à jour seuls en arrière-plan. Une mise à jour du système s’applique au redémarrage suivant, sans vous interrompre.",
-    ),
-    (
-        "Update everything now, without waiting",
-        "Tout mettre à jour maintenant, sans attendre",
-    ),
-    (
-        "An update broke something? Go back to the previous version, then restart",
-        "Une mise à jour a cassé quelque chose ? Revenez à la version précédente, puis redémarrez",
-    ),
-    (
-        "Show the current and previous versions",
-        "Afficher la version actuelle et la précédente",
-    ),
-    ("Handy commands", "Commandes utiles"),
-    (
-        "ujust runs the shortcuts that come with the system: type ujust in a terminal to list them all. A few of them:",
-        "ujust lance les raccourcis fournis avec le système : tapez ujust dans un terminal pour tous les lister. En voici quelques-uns :",
-    ),
-    (
-        "Developer tools: Docker, VS Code, Podman Desktop…",
-        "Outils de développement : Docker, VS Code, Podman Desktop…",
-    ),
-    (
-        "Command line tools: bat, eza, ripgrep, zoxide…",
-        "Outils en ligne de commande : bat, eza, ripgrep, zoxide…",
-    ),
-    (
-        "Switch between the dark and light themes",
-        "Passer du thème sombre au thème clair",
-    ),
-    (
-        "Bring the cosmic-blue look back: colors, icons, wallpaper",
-        "Retrouver le style cosmic-blue : couleurs, icônes, fond d’écran",
-    ),
-    ("Open a terminal", "Ouvrir un terminal"),
-    ("Tile your windows", "Disposez vos fenêtres en mosaïque"),
-    (
-        "COSMIC can arrange your windows side by side, without overlap, as you open them. It is off by default: turn it on with the tiling button in the panel, or with the keyboard.",
-        "COSMIC peut placer vos fenêtres côte à côte, sans chevauchement, à mesure que vous les ouvrez. C’est désactivé par défaut : activez-le avec le bouton de mosaïque du panneau, ou au clavier.",
-    ),
-    ("Turn tiling on or off", "Activer ou désactiver la mosaïque"),
-    (
-        "Go to the window on the left, right, above or below",
-        "Aller à la fenêtre de gauche, de droite, du dessus ou du dessous",
-    ),
-    (
-        "Move the window to the left, right, up or down",
-        "Déplacer la fenêtre à gauche, à droite, en haut ou en bas",
-    ),
-    (
-        "Let a window float above the others",
-        "Laisser une fenêtre flotter au-dessus des autres",
-    ),
-    (
-        "COSMIC can be customized much further: Settings → Desktop.",
-        "COSMIC se personnalise bien plus encore : Paramètres → Bureau.",
-    ),
-    ("Help and feedback", "Aide et retours"),
-    (
-        "Everything else is in the cosmic-blue guide. You can open this tour again from the app library: look for First steps.",
-        "Tout le reste est dans le guide de cosmic-blue. Vous pouvez rouvrir cette visite depuis la bibliothèque d’applications : cherchez Premiers pas.",
-    ),
-    ("Documentation", "Documentation"),
-    (
-        "Updates, software, commands and tips",
-        "Mises à jour, logiciels, commandes et astuces",
-    ),
-    ("Report a problem", "Signaler un problème"),
-    (
-        "Found a bug or something unclear? Tell us on GitHub",
-        "Un bug ou quelque chose de pas clair ? Dites-le-nous sur GitHub",
-    ),
-    ("Open", "Ouvrir"),
-    ("Get started", "C’est parti"),
-    // Live welcome tour
-    (
-        "cosmic-blue is Fedora Atomic with the COSMIC desktop, made in the spirit of Bluefin: a desktop that stays out of your way and keeps itself up to date.",
-        "cosmic-blue, c’est Fedora Atomic avec le bureau COSMIC, dans l’esprit de Bluefin : un bureau qui se fait oublier et se tient à jour tout seul.",
-    ),
-    ("Try it live", "Essayez-le en live"),
-    (
-        "cosmic-blue is running from the live media. Nothing is written to your disk, and your changes are lost when you shut down. You can start the installer at any time from the desktop or the dock.",
-        "cosmic-blue fonctionne depuis le support live. Rien n’est écrit sur votre disque, et vos modifications sont perdues à l’extinction. Vous pouvez lancer l’installateur à tout moment depuis le bureau ou le dock.",
-    ),
-    ("What you get", "Ce qui vous attend"),
-    ("Automatic updates", "Mises à jour automatiques"),
-    (
-        "The whole system updates in the background and applies at the next restart. If something goes wrong, boot the previous version.",
-        "Le système entier se met à jour en arrière-plan et s’applique au redémarrage suivant. En cas de souci, démarrez la version précédente.",
-    ),
-    (
-        "Apps from Flathub and COSMIC",
-        "Applications de Flathub et COSMIC",
-    ),
-    (
-        "Install apps with COSMIC Store, from Flathub and the COSMIC repository. They run sandboxed and update on their own.",
-        "Installez vos applications avec COSMIC Store, depuis Flathub et le dépôt COSMIC. Elles tournent isolées et se mettent à jour seules.",
-    ),
-    ("Ready for the terminal", "Prêt pour le terminal"),
-    (
-        "Homebrew for command line tools, distrobox for other distributions, and ujust for common tasks.",
-        "Homebrew pour les outils en ligne de commande, distrobox pour les autres distributions, et ujust pour les tâches courantes.",
-    ),
-    ("Ready to install?", "Prêt à installer ?"),
-    (
-        "The installer copies cosmic-blue to your disk. After that, it updates itself from the cosmic-blue image registry.",
-        "L’installateur copie cosmic-blue sur votre disque. Ensuite, il se met à jour depuis le registre d’images de cosmic-blue.",
-    ),
-    ("Install cosmic-blue", "Installer cosmic-blue"),
-    ("Keep trying", "Continuer l’essai"),
+/// Translations, one gettext PO file per language in po/ (copies of
+/// po/cosmic-blue-tour.pot). To add a language, add its file here: pt_BR is
+/// a regional variant, also used for the other variants of its language when
+/// they have no file of their own.
+const LANGUAGES: &[(&str, &str)] = &[
+    ("de", include_str!("../po/de.po")),
+    ("es", include_str!("../po/es.po")),
+    ("fr", include_str!("../po/fr.po")),
+    ("it", include_str!("../po/it.po")),
+    ("pt_BR", include_str!("../po/pt_BR.po")),
 ];
+const TEMPLATE: &str = include_str!("../po/cosmic-blue-tour.pot");
 
-/// The session language, when it has a translation: "fr" or None
-fn language() -> Option<&'static str> {
-    static LANGUAGE: OnceLock<Option<&'static str>> = OnceLock::new();
+/// The translations of a PO file: (English text, translated text), without
+/// the header. Only what our files use: msgid and msgstr strings, on one or
+/// more lines, with \" \\ and \n escapes.
+fn parse_po(po: &str) -> Vec<(String, String)> {
+    fn unquote(line: &str) -> Option<String> {
+        let inner = line.trim().strip_prefix('"')?.strip_suffix('"')?;
+        let mut out = String::new();
+        let mut chars = inner.chars();
+        while let Some(c) = chars.next() {
+            if c == '\\' {
+                match chars.next() {
+                    Some('n') => out.push('\n'),
+                    Some(other) => out.push(other),
+                    None => {}
+                }
+            } else {
+                out.push(c);
+            }
+        }
+        Some(out)
+    }
+    let mut entries = Vec::new();
+    let (mut msgid, mut msgstr) = (None::<String>, None::<String>);
+    let mut flush = |msgid: &mut Option<String>, msgstr: &mut Option<String>| {
+        if let (Some(id), Some(text)) = (msgid.take(), msgstr.take()) {
+            if !id.is_empty() {
+                entries.push((id, text));
+            }
+        }
+    };
+    for line in po.lines().map(str::trim) {
+        if let Some(rest) = line.strip_prefix("msgid ") {
+            flush(&mut msgid, &mut msgstr);
+            msgid = unquote(rest);
+        } else if let Some(rest) = line.strip_prefix("msgstr ") {
+            msgstr = unquote(rest);
+        } else if line.starts_with('"') {
+            let target = if msgstr.is_some() { &mut msgstr } else { &mut msgid };
+            if let (Some(text), Some(more)) = (target.as_mut(), unquote(line)) {
+                text.push_str(&more);
+            }
+        }
+    }
+    flush(&mut msgid, &mut msgstr);
+    entries
+}
+
+/// The index in LANGUAGES of a locale name ("de_CH.UTF-8"): the same
+/// language and region, else the same language
+fn find_language(name: &str) -> Option<usize> {
+    let name = name.split(['.', '@']).next().unwrap_or_default();
+    let lang = name.split('_').next().unwrap_or_default();
+    LANGUAGES
+        .iter()
+        .position(|(code, _)| *code == name)
+        .or_else(|| LANGUAGES.iter().position(|(code, _)| *code == lang))
+        .or_else(|| {
+            LANGUAGES
+                .iter()
+                .position(|(code, _)| code.split('_').next() == Some(lang))
+        })
+}
+
+/// The session language, when it has a translation: its index in LANGUAGES
+fn language_index() -> Option<usize> {
+    static LANGUAGE: OnceLock<Option<usize>> = OnceLock::new();
     *LANGUAGE.get_or_init(|| {
         // Same order as gettext: LANGUAGE (a list), LC_ALL, LC_MESSAGES, LANG
         let mut names = Vec::new();
@@ -208,26 +132,35 @@ fn language() -> Option<&'static str> {
             }
         }
         for name in names.iter().filter(|name| !name.is_empty()) {
+            if let Some(index) = find_language(name) {
+                return Some(index);
+            }
             let lang = name.split(['_', '.', '@']).next().unwrap_or_default();
-            match lang {
-                "fr" => return Some("fr"),
-                "en" | "C" | "POSIX" => return None,
-                _ => {}
+            if matches!(lang, "en" | "C" | "POSIX") {
+                return None;
             }
         }
         None
     })
 }
 
-/// Translates an English text to the session language
+/// The session language code ("fr", "pt_BR"), when it has a translation
+fn language() -> Option<&'static str> {
+    language_index().map(|index| LANGUAGES[index].0)
+}
+
+/// Translates an English text to the session language (English when the
+/// text has no translation)
 fn tr(text: &'static str) -> &'static str {
-    match language() {
-        Some("fr") => FRENCH
-            .iter()
-            .find(|(english, _)| *english == text)
-            .map_or(text, |(_, french)| french),
-        _ => text,
-    }
+    static TRANSLATIONS: OnceLock<Vec<(String, String)>> = OnceLock::new();
+    let Some(index) = language_index() else {
+        return text;
+    };
+    TRANSLATIONS
+        .get_or_init(|| parse_po(LANGUAGES[index].1))
+        .iter()
+        .find(|(english, translated)| english == text && !translated.is_empty())
+        .map_or(text, |(_, translated)| translated.as_str())
 }
 
 #[derive(Clone, Debug)]
@@ -513,15 +446,41 @@ fn all_texts() -> Vec<&'static str> {
 
 fn check_translations() -> bool {
     let texts = all_texts();
-    let mut missing = 0;
+    let mut errors = 0;
+    let template: Vec<String> = parse_po(TEMPLATE).into_iter().map(|(id, _)| id).collect();
     for text in &texts {
-        if !FRENCH.iter().any(|(english, _)| english == text) {
-            eprintln!("No fr translation for: {text}");
-            missing += 1;
+        if !template.iter().any(|id| id == text) {
+            eprintln!("Not in po/cosmic-blue-tour.pot: {text}");
+            errors += 1;
         }
     }
-    println!("{} texts, {missing} missing translations", texts.len());
-    missing == 0
+    for id in &template {
+        if !texts.contains(&id.as_str()) {
+            eprintln!("No longer used, remove it from po/cosmic-blue-tour.pot: {id}");
+            errors += 1;
+        }
+    }
+    for (code, po) in LANGUAGES {
+        let entries = parse_po(po);
+        for text in &texts {
+            if !entries.iter().any(|(id, tr)| id == text && !tr.is_empty()) {
+                eprintln!("No {code} translation for: {text}");
+                errors += 1;
+            }
+        }
+        for (id, _) in &entries {
+            if !texts.contains(&id.as_str()) {
+                eprintln!("No longer used, remove it from po/{code}.po: {id}");
+                errors += 1;
+            }
+        }
+    }
+    println!(
+        "{} texts, {} languages, {errors} errors",
+        texts.len(),
+        LANGUAGES.len()
+    );
+    errors == 0
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

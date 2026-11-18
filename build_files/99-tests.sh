@@ -58,8 +58,20 @@ grep -qx 'commands = \["cosmic-blue-tips"\]' /etc/uwelcome/config.toml
 # The banner's guard is only set in interactive shells (not in the shell
 # that starts the desktop session, whose environment every terminal inherits)
 grep -qx 'case \$- in' /etc/profile.d/uwelcome.sh
-test -n "$(LANG=en_US.UTF-8 cosmic-blue-tips)"
-test -n "$(LANG=fr_FR.UTF-8 cosmic-blue-tips)"
+# Tips: every language has all the tips, and the session language picks them
+tips_dir=/usr/share/cosmic-blue/tips
+for tips in "${tips_dir}"/*.txt; do
+    [[ "$(grep -c . "${tips}")" == "$(grep -c . "${tips_dir}/en.txt")" ]] \
+        || { echo "${tips}: not the same number of tips as en.txt"; exit 1; }
+done
+for locale in en_US fr_FR de_DE es_ES it_IT pt_BR ja_JP; do
+    tip="$(env -u LANGUAGE -u LC_ALL -u LC_MESSAGES LANG="${locale}.UTF-8" cosmic-blue-tips)"
+    test -n "${tip}"
+    file="${tips_dir}/${locale}.txt"
+    [[ -f "${file}" ]] || file="${tips_dir}/${locale%%_*}.txt"
+    [[ -f "${file}" ]] || file="${tips_dir}/en.txt"
+    grep -qF -- "${tip%%(*}" "${file}" || { echo "cosmic-blue-tips: ${locale} tip not from ${file}"; exit 1; }
+done
 if grep -rlE 'projectbluefin\.io|bluefin-cli|ujust report([^-]|$)' /etc/uwelcome \
     || grep -rl 'projectbluefin\.io' /usr/share/ublue-os/just /usr/share/applications; then
     echo "Bluefin links or commands left in the welcome banner, ujust or launchers"; exit 1

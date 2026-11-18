@@ -18,8 +18,10 @@ third recommended source, off until the user adds it:
 `ujust toggle-flatpark` turns on or off the same remote.
 
 It also translates the texts that COSMIC Store writes in English in its code
-(each marked "TODO: translate" upstream), with English and French texts
-added to its Fluent files (other languages fall back to English):
+(each marked "TODO: translate" upstream), with English, French, German,
+Spanish, Italian and Brazilian Portuguese texts added to its Fluent files
+(other languages fall back to English; to add one, add an append() of
+i18n/<language>/cosmic_store.ftl with the same keys):
 
 3. The "System Upgrade" row of the Updates page (rpm-ostree backend), with
    the cosmic-blue updates icon (system-software-update) instead of a
@@ -383,5 +385,129 @@ operation-failed = { $kind ->
     [remove-repositories] Impossible de supprimer les dépôts { $name }
     [update-system] Impossible de mettre à jour le système
    *[update] Impossible de mettre à jour { $name } depuis { $source }
+}
+""")
+
+append("i18n/de/cosmic_store.ftl", """## cosmic-blue
+source-system = System
+system-upgrade = Systemupdate
+system-upgrade-summary = Auf Version { $version } aktualisieren
+system-upgrade-description = Eine neue Version des Systems ist verfügbar. Sie wird im Hintergrund installiert und beim nächsten Neustart aktiv.
+operation-pending = { $kind ->
+    [install] { $name } wird aus { $source } installiert ({ $percent } %)...
+    [uninstall] { $name } wird entfernt ({ $source }, { $percent } %)...
+    [add-repositories] Quellen { $name } werden hinzugefügt ({ $percent } %)...
+    [remove-repositories] Quellen { $name } werden entfernt ({ $percent } %)...
+    [update-system] Das System wird aktualisiert ({ $percent } %)...
+   *[update] { $name } wird aus { $source } aktualisiert ({ $percent } %)...
+}
+operation-completed = { $kind ->
+    [install] { $name } aus { $source } installiert
+    [uninstall] { $name } entfernt ({ $source })
+    [add-repositories] Quellen { $name } hinzugefügt
+    [remove-repositories] Quellen { $name } entfernt
+    [update-system] System aktualisiert: Die neue Version startet beim nächsten Neustart
+   *[update] { $name } aus { $source } aktualisiert
+}
+operation-failed = { $kind ->
+    [install] { $name } konnte nicht aus { $source } installiert werden
+    [uninstall] { $name } konnte nicht entfernt werden ({ $source })
+    [add-repositories] Quellen { $name } konnten nicht hinzugefügt werden
+    [remove-repositories] Quellen { $name } konnten nicht entfernt werden
+    [update-system] Das System konnte nicht aktualisiert werden
+   *[update] { $name } konnte nicht aus { $source } aktualisiert werden
+}
+""")
+
+append("i18n/es/cosmic_store.ftl", """## cosmic-blue
+source-system = Sistema
+system-upgrade = Actualización del sistema
+system-upgrade-summary = Actualizar a la versión { $version }
+system-upgrade-description = Hay una nueva versión del sistema. Se instala en segundo plano y se inicia en el próximo reinicio.
+operation-pending = { $kind ->
+    [install] Instalando { $name } desde { $source } ({ $percent } %)...
+    [uninstall] Desinstalando { $name } ({ $source }, { $percent } %)...
+    [add-repositories] Añadiendo los repositorios { $name } ({ $percent } %)...
+    [remove-repositories] Quitando los repositorios { $name } ({ $percent } %)...
+    [update-system] Actualizando el sistema ({ $percent } %)...
+   *[update] Actualizando { $name } desde { $source } ({ $percent } %)...
+}
+operation-completed = { $kind ->
+    [install] { $name } instalado desde { $source }
+    [uninstall] { $name } desinstalado ({ $source })
+    [add-repositories] Repositorios { $name } añadidos
+    [remove-repositories] Repositorios { $name } quitados
+    [update-system] Sistema actualizado: la nueva versión se inicia en el próximo reinicio
+   *[update] { $name } actualizado desde { $source }
+}
+operation-failed = { $kind ->
+    [install] No se pudo instalar { $name } desde { $source }
+    [uninstall] No se pudo desinstalar { $name } ({ $source })
+    [add-repositories] No se pudieron añadir los repositorios { $name }
+    [remove-repositories] No se pudieron quitar los repositorios { $name }
+    [update-system] No se pudo actualizar el sistema
+   *[update] No se pudo actualizar { $name } desde { $source }
+}
+""")
+
+append("i18n/it/cosmic_store.ftl", """## cosmic-blue
+source-system = Sistema
+system-upgrade = Aggiornamento del sistema
+system-upgrade-summary = Aggiorna alla versione { $version }
+system-upgrade-description = È disponibile una nuova versione del sistema. Si installa in background e si avvia al prossimo riavvio.
+operation-pending = { $kind ->
+    [install] Installazione di { $name } da { $source } ({ $percent }%)...
+    [uninstall] Disinstallazione di { $name } ({ $source }, { $percent }%)...
+    [add-repositories] Aggiunta dei repository { $name } ({ $percent }%)...
+    [remove-repositories] Rimozione dei repository { $name } ({ $percent }%)...
+    [update-system] Aggiornamento del sistema ({ $percent }%)...
+   *[update] Aggiornamento di { $name } da { $source } ({ $percent }%)...
+}
+operation-completed = { $kind ->
+    [install] { $name } installato da { $source }
+    [uninstall] { $name } disinstallato ({ $source })
+    [add-repositories] Repository { $name } aggiunti
+    [remove-repositories] Repository { $name } rimossi
+    [update-system] Sistema aggiornato: la nuova versione si avvia al prossimo riavvio
+   *[update] { $name } aggiornato da { $source }
+}
+operation-failed = { $kind ->
+    [install] Impossibile installare { $name } da { $source }
+    [uninstall] Impossibile disinstallare { $name } ({ $source })
+    [add-repositories] Impossibile aggiungere i repository { $name }
+    [remove-repositories] Impossibile rimuovere i repository { $name }
+    [update-system] Impossibile aggiornare il sistema
+   *[update] Impossibile aggiornare { $name } da { $source }
+}
+""")
+
+append("i18n/pt-BR/cosmic_store.ftl", """## cosmic-blue
+source-system = Sistema
+system-upgrade = Atualização do sistema
+system-upgrade-summary = Atualizar para a versão { $version }
+system-upgrade-description = Uma nova versão do sistema está disponível. Ela é instalada em segundo plano e começa a valer na próxima reinicialização.
+operation-pending = { $kind ->
+    [install] Instalando { $name } de { $source } ({ $percent }%)...
+    [uninstall] Desinstalando { $name } ({ $source }, { $percent }%)...
+    [add-repositories] Adicionando os repositórios { $name } ({ $percent }%)...
+    [remove-repositories] Removendo os repositórios { $name } ({ $percent }%)...
+    [update-system] Atualizando o sistema ({ $percent }%)...
+   *[update] Atualizando { $name } de { $source } ({ $percent }%)...
+}
+operation-completed = { $kind ->
+    [install] { $name } instalado de { $source }
+    [uninstall] { $name } desinstalado ({ $source })
+    [add-repositories] Repositórios { $name } adicionados
+    [remove-repositories] Repositórios { $name } removidos
+    [update-system] Sistema atualizado: a nova versão começa a valer na próxima reinicialização
+   *[update] { $name } atualizado de { $source }
+}
+operation-failed = { $kind ->
+    [install] Não foi possível instalar { $name } de { $source }
+    [uninstall] Não foi possível desinstalar { $name } ({ $source })
+    [add-repositories] Não foi possível adicionar os repositórios { $name }
+    [remove-repositories] Não foi possível remover os repositórios { $name }
+    [update-system] Não foi possível atualizar o sistema
+   *[update] Não foi possível atualizar { $name } de { $source }
 }
 """)

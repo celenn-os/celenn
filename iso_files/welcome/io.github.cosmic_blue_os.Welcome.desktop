@@ -2,8 +2,16 @@
 Type=Application
 Name=Welcome to cosmic-blue
 Name[fr]=Bienvenue dans cosmic-blue
+Name[de]=Willkommen bei cosmic-blue
+Name[es]=Te damos la bienvenida a cosmic-blue
+Name[it]=Ti diamo il benvenuto in cosmic-blue
+Name[pt_BR]=Boas-vindas ao cosmic-blue
 Comment=Discover cosmic-blue and install it
 Comment[fr]=Découvrir cosmic-blue et l'installer
+Comment[de]=cosmic-blue entdecken und installieren
+Comment[es]=Descubre cosmic-blue e instálalo
+Comment[it]=Scopri cosmic-blue e installalo
+Comment[pt_BR]=Conheça o cosmic-blue e instale-o
 Icon=cosmic-blue-welcome
 Exec=/usr/libexec/cosmic-blue-welcome
 Terminal=false
