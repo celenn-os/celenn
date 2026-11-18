@@ -8,7 +8,8 @@
 - apps: the COSMIC dock buttons (launcher, workspaces, applications) and
   the COSMIC Store and Settings in the Tela circle style, as are the
   Documentation launcher, the live ISO's welcome tour and installer, and
-  the installed system's first steps tour and the System Update launcher
+  the installed system's first steps tour, and the System Update launcher
+  (also in place of Tela's system-software-update, shown by the tour)
 - actions: the symbolic icons of the suspend and restart buttons in the
   panel's power menu (Tela has none for restart, and its suspend icon is
   hard to read). They follow the style of Tela's shutdown icon, which stays.
@@ -273,7 +274,7 @@ WELCOME = tela_app(
     '<circle cx="0" cy="-3" r="3.6" fill="#4f8dff"/></g>'
 )
 
-def circle_arrow(r, start, end, opacity=None, head=6.2):
+def circle_arrow(r, start, end, opacity=None, head=6.2, width=5):
     """A clockwise arc around the center, from angle start to end (degrees,
     counterclockwise from the right), ending in an arrowhead."""
     def at(angle, radius=r):
@@ -285,18 +286,14 @@ def circle_arrow(r, start, end, opacity=None, head=6.2):
     (bx1, by1), (bx2, by2) = at(end, r + head), at(end, r - head)
     alpha = f' opacity="{opacity}"' if opacity else ""
     return (f'<g{alpha}><path d="M{x0:.2f} {y0:.2f}A{r} {r} 0 0 1 {x1:.2f} {y1:.2f}" fill="none" '
-            'stroke="#fff" stroke-width="4.2" stroke-linecap="round"/>'
+            f'stroke="#fff" stroke-width="{width}" stroke-linecap="round"/>'
             f'<path d="M{tip[0]:.2f} {tip[1]:.2f}L{bx1:.2f} {by1:.2f}L{bx2:.2f} {by2:.2f}z" fill="#fff" '
             'stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></g>')
 
 
-# The System Update launcher: an arrow going down inside two circling arrows
-UPDATE = tela_app(
-    circle_arrow(15.5, 165, 40) + circle_arrow(15.5, 345, 220, ".45")
-    + '<rect x="29.8" y="22" width="4.4" height="13" rx="2.2" fill="#fff"/>'
-    '<path d="M25.2 31.2a1.9 1.9 0 0 1 2.7-2.7L32 32.6l4.1-4.1a1.9 1.9 0 0 1 2.7 2.7l-5.4 5.4a2 2 0 0 1-2.8 0z" '
-    'fill="#fff"/>'
-)
+# The System Update launcher and the tour's updates page: two circling arrows,
+# the lower one translucent
+UPDATE = tela_app(circle_arrow(13.5, 165, 40) + circle_arrow(13.5, 345, 220, ".45"))
 
 # Icon -> names (the desktop entries of the dock buttons and of the apps
 # they open). The first name gets the file, the others are links to it.
@@ -307,6 +304,8 @@ DOCK = {
     "launcher": (LAUNCHER, ["com.system76.CosmicPanelLauncherButton", "com.system76.CosmicLauncher"]),
     "store": (STORE, ["com.system76.CosmicStore"]),
     "settings": (SETTINGS, ["com.system76.CosmicSettings"]),
+    # Tela's update icon, which the first steps tour shows on its updates page
+    "update": (UPDATE, ["system-software-update"]),
 }
 
 # Session action symbolic icons, 16x16, in Tela's symbolic gray. They are
