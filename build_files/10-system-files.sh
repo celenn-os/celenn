@@ -200,6 +200,18 @@ python3 -I /ctx/build_files/rename-just-recipes.py "${STAGE}"/usr/share/ublue-os
     "toggle-updates@System|Turn automatic updates on or off" \
     "toggle-tpm2|Turn on or off disk unlocking with the TPM2 chip (no password)" \
     -jetbrains-toolbox -toggle-user-motd -device-info -toggle-vms
+# The menu's "Antigravity" entry (under IDE) installs Google's Antigravity
+# agent app (antigravity-linux), not the Antigravity IDE editor: install the
+# IDE (antigravity-ide-linux, same tap) instead. Fails if upstream changes it.
+python3 -I - "${STAGE}/usr/share/ublue-os/just/system.just" <<'PY'
+import pathlib, sys
+path = pathlib.Path(sys.argv[1])
+text = path.read_text()
+old = "brew install --cask ublue-os/tap/antigravity-linux"
+if text.count(old) != 1:
+    sys.exit(f"{path}: Antigravity install line not found")
+path.write_text(text.replace(old, "brew install --cask ublue-os/tap/antigravity-ide-linux"))
+PY
 
 # `ujust enroll-secure-boot-key` (projectbluefin/common) queues the akmods key
 # with Universal Blue's password: 60-custom.just has cosmic-blue's own, with

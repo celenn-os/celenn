@@ -240,6 +240,7 @@ done
 # renames Bluefin's that do not), and every install-<thing> has its
 # remove-<thing>; the earlier names and Bluefin's own installers still run,
 # unlisted
+grep -q 'ublue-os/tap/antigravity-ide-linux' /usr/share/ublue-os/just/system.just
 for recipe in $(tr ' ' '\n' <<<"${recipes}" | grep '^install-'); do
     tr ' ' '\n' <<<"${recipes}" | grep -qx -- "remove-${recipe#install-}" \
         || { echo "ujust ${recipe} has no remove-${recipe#install-}"; exit 1; }

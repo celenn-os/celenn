@@ -406,7 +406,7 @@ _dev-tools action:
         "Lima|ujust|lima"
         "VS Code|cask|visual-studio-code-linux"
         "VSCodium|cask|vscodium-linux"
-        "Antigravity|cask|antigravity-linux"
+        "Antigravity IDE|cask|antigravity-ide-linux"
         "Zed|cask|zed"
         "JetBrains Toolbox|ujust|jetbrains-toolbox"
         "Neovim|formula|neovim"
