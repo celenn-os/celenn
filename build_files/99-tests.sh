@@ -236,14 +236,19 @@ for recipe in contribute bluespeed bluefin-apps bazaar-preview toggle-testing ch
     if grep -qw -- "${recipe}" <<<"${recipes}"; then echo "ujust ${recipe} left in place"; exit 1; fi
 done
 if grep -q '^export LC_' /etc/zsh/zprofile; then exit 1; fi
-# Default applications: ours, naming installed COSMIC apps
+# Default applications: ours, and each one names an app the system has: a
+# launcher of the image, or a first-boot flatpak (whose launcher only exists
+# after the first boot)
 grep -q CosmicStore /etc/xdg/mimeapps.list
-# AppImages open in Gear Lever (a first-boot flatpak), not in noop
 grep -qx 'application/vnd.appimage=it.mijorus.gearlever.desktop' /etc/xdg/mimeapps.list
-grep -q '^\[Flatpak Preinstall it.mijorus.gearlever\]' /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall
-for app in com.system76.CosmicStore com.system76.CosmicPlayer; do
-    test -f "/usr/share/applications/${app}.desktop"
-done
+while IFS='=' read -r type apps; do
+    app="${apps%%;*}"
+    if [[ ! -f "/usr/share/applications/${app}" ]] \
+        && ! grep -qx "\[Flatpak Preinstall ${app%.desktop}\]" \
+            /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall; then
+        echo "mimeapps.list: ${type} opens in ${app}, which is not installed"; exit 1
+    fi
+done < <(sed -n '/^\[Default Applications\]/,/^\[/{/^[a-z].*=/p}' /etc/xdg/mimeapps.list)
 grep -q cosmic-blue /usr/share/applications/system-update.desktop
 grep -qx 'Icon=cosmic-blue-update' /usr/share/applications/system-update.desktop
 test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-update.svg
