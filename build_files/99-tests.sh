@@ -237,7 +237,10 @@ done
 if grep -q '^export LC_' /etc/zsh/zprofile; then exit 1; fi
 # Default applications: ours, naming installed COSMIC apps
 grep -q CosmicStore /etc/xdg/mimeapps.list
-for app in com.system76.CosmicStore com.system76.CosmicPlayer noop; do
+# AppImages open in Gear Lever (a first-boot flatpak), not in noop
+grep -qx 'application/vnd.appimage=it.mijorus.gearlever.desktop' /etc/xdg/mimeapps.list
+grep -q '^\[Flatpak Preinstall it.mijorus.gearlever\]' /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall
+for app in com.system76.CosmicStore com.system76.CosmicPlayer; do
     test -f "/usr/share/applications/${app}.desktop"
 done
 grep -q cosmic-blue /usr/share/applications/system-update.desktop
