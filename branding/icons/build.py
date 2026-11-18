@@ -257,7 +257,7 @@ DOCS = tela_app(
 
 # The live ISO installer: an arrow going down into a tray
 INSTALLER = tela_app(
-    '<path d="M17 36v6a4 4 0 0 0 4 4h22a4 4 0 0 0 4-4v-6" fill="none" stroke="#fff" stroke-opacity=".75" '
+    '<path d="M17 36v6a4 4 0 0 0 4 4h22a4 4 0 0 0 4-4v-6" fill="none" stroke="#fff" stroke-opacity=".45" '
     'stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>'
     '<rect x="29.5" y="15" width="5" height="17" rx="2.5" fill="#fff"/>'
     '<path d="M22.5 28.5a2.2 2.2 0 0 1 3.1-3.1L32 31.8l6.4-6.4a2.2 2.2 0 0 1 3.1 3.1l-8 8a2.1 2.1 0 0 1-3 0z" fill="#fff"/>')
@@ -271,7 +271,7 @@ def star(cx, cy, r, op=None):
             f'C{cx-k*.6} {cy+k} {cx-k} {cy+k*.6} {cx-r} {cy}C{cx-k} {cy-k*.6} {cx-k*.6} {cy-k} {cx} {cy-r}z" fill="#fff"{a}/>')
 
 
-WELCOME = tela_app(star(29, 34, 14) + star(42.5, 20.5, 6, ".75") + star(43, 42, 3.6, ".45"), "#2f6bff")
+WELCOME = tela_app(star(29, 34, 14) + star(42.5, 20.5, 6, ".45") + star(43, 42, 3.6, ".45"))
 
 # Icon -> names (the desktop entries of the dock buttons and of the apps
 # they open). The first name gets the file, the others are links to it.
