@@ -1,5 +1,8 @@
 # vim: set ft=make :
 # cosmic-blue commands, listed by `ujust` under "Desktop", "Apps" and "System".
+# Names are verb-object: install-<thing> and remove-<thing>, toggle-<thing>
+# (on/off), reset-, export-, switch-, report-, enroll-, and for Bluefin's
+# (build_files/10-system-files.sh) check-, show-, run-, reboot-, clean-.
 #
 # COSMIC reads each setting from ~/.config/cosmic first and falls back to the
 # image defaults in /usr/share/cosmic. Resetting a setting therefore means
@@ -8,7 +11,7 @@
 # The reset recipes ask first; `yes` as their argument skips the question
 # (e.g. `ujust reset-cosmic-theme yes` in a script).
 
-# Switch between the dark and light theme (or force one: dark, light)
+# Switch between the dark and light themes
 [group('Desktop')]
 toggle-dark-mode mode="toggle":
     #!/usr/bin/bash
@@ -42,7 +45,7 @@ toggle-dark-mode mode="toggle":
     write_setting is_dark "${is_dark}"
     if [[ "${is_dark}" == true ]]; then echo "Dark theme on."; else echo "Light theme on."; fi
 
-# Restore the cosmic-blue look: colors, dark mode, icons and wallpaper
+# Bring back the cosmic-blue look
 [group('Desktop')]
 reset-cosmic-theme confirm="ask":
     #!/usr/bin/bash
@@ -76,7 +79,7 @@ reset-cosmic-theme confirm="ask":
     rm -rf "${trash}"
     echo "Done. Log out and back in to see every change."
 
-# Reset all COSMIC settings to the cosmic-blue defaults (a backup is kept)
+# Reset all COSMIC settings (a backup is kept)
 [group('Desktop')]
 reset-cosmic-config confirm="ask":
     #!/usr/bin/bash
@@ -108,7 +111,7 @@ reset-cosmic-config confirm="ask":
     echo "Done. Log out and back in to finish the reset."
     echo "To undo it: rm -rf '${config}' && mv '${backup}' '${config}', then log out."
 
-# Save your COSMIC settings to one text file, to share them or propose them as defaults
+# Save your COSMIC settings to a text file
 [group('Desktop')]
 export-cosmic-config:
     #!/usr/bin/bash
@@ -183,9 +186,16 @@ export-cosmic-config:
     fi
     echo "It is plain text: read it before sharing it."
 
-# Install Microsoft's core fonts (Arial, Times New Roman, Verdana...) for your account
+# Install Microsoft fonts: Arial, Times New Roman...
 [group('Apps')]
-install-microsoft-fonts action="install":
+install-microsoft-fonts: (_microsoft-fonts "install")
+
+# Remove the Microsoft fonts
+[group('Apps')]
+remove-microsoft-fonts: (_microsoft-fonts "remove")
+
+[private]
+_microsoft-fonts action:
     #!/usr/bin/bash
     set -euo pipefail
     # The fonts are free to download and use but may not be redistributed, so
@@ -195,12 +205,16 @@ install-microsoft-fonts action="install":
     # which Flatpak apps also read.
     dest="${XDG_DATA_HOME:-${HOME}/.local/share}/fonts/microsoft-core-fonts"
     if [[ "{{ action }}" == remove ]]; then
+        if [[ ! -d "${dest}" ]]; then
+            echo "Microsoft core fonts are not installed."
+            exit 0
+        fi
         rm -rf "${dest}"
         fc-cache -f
         echo "Microsoft core fonts removed."
         exit 0
     elif [[ "{{ action }}" != install ]]; then
-        echo "Usage: ujust install-microsoft-fonts [install|remove]" >&2
+        echo "Usage: ujust install-microsoft-fonts or ujust remove-microsoft-fonts" >&2
         exit 1
     fi
     declare -A installers=(
@@ -237,11 +251,18 @@ install-microsoft-fonts action="install":
     install -m 0644 "${tmp}"/fonts/*.ttf "${dest}/"
     fc-cache -f "${dest}"
     echo "Installed $(find "${dest}" -name '*.ttf' | wc -l) font files in ${dest}."
-    echo "Restart open apps to see them. Remove them with: ujust install-microsoft-fonts remove"
+    echo "Restart open apps to see them. Remove them with: ujust remove-microsoft-fonts"
 
-# Install handy command line tools with Homebrew (bat, eza, fd, ripgrep, zoxide...)
+# Install command line tools: bat, eza, fd, ripgrep, zoxide...
 [group('Apps')]
-install-cli-tools action="install":
+install-cli-tools: (_cli-tools "install")
+
+# Remove the command line tools
+[group('Apps')]
+remove-cli-tools: (_cli-tools "remove")
+
+[private]
+_cli-tools action:
     #!/usr/bin/bash
     set -euo pipefail
     # The same tools as Bluefin's `ujust bluefin-cli` (its cli.Brewfile), plus
@@ -282,7 +303,7 @@ install-cli-tools action="install":
                 fi
             fi
             echo "Done. Open a new terminal to use them."
-            echo "Remove them with: ujust install-cli-tools remove"
+            echo "Remove them with: ujust remove-cli-tools"
             ;;
         remove)
             if bling_on; then
@@ -299,17 +320,366 @@ install-cli-tools action="install":
                 done
                 rm -f "${added}"
             else
-                echo "No tools were installed with ujust install-cli-tools on this account."
+                echo "No tools from ujust install-cli-tools are installed on this account."
             fi
             echo "Done. Open a new terminal."
             ;;
         *)
-            echo "Usage: ujust install-cli-tools [install|remove]" >&2
+            echo "Usage: ujust install-cli-tools or ujust remove-cli-tools" >&2
             exit 1
             ;;
     esac
 
-# Turn the FlatPark app source on or off (off by default; or force one: on, off, status)
+# Install Steam and Heroic
+[group('Apps')]
+install-gaming: (_gaming "install")
+
+# Remove Steam and Heroic (games are kept)
+[group('Apps')]
+remove-gaming: (_gaming "remove")
+
+[private]
+_gaming action:
+    #!/usr/bin/bash
+    set -euo pipefail
+    # Both are Flathub apps, installed system-wide like the first-boot apps.
+    # Flatpak adds the graphics driver parts they need (NVIDIA included) by
+    # itself. Removing them keeps the games and saves in ~/.var/app.
+    apps=(com.valvesoftware.Steam com.heroicgameslauncher.hgl)
+    case "{{ action }}" in
+        install)
+            echo "This installs from Flathub:"
+            echo "  Steam   - Valve's game store and launcher (Proton runs Windows games)"
+            echo "  Heroic  - games from Epic Games, GOG and Amazon Prime Gaming"
+            echo "The download is about 1.5 GB, games not included."
+            if [[ -t 0 ]] && ! gum confirm "Install them?"; then
+                echo "Nothing installed."
+                exit 0
+            fi
+            flatpak install --system --noninteractive flathub "${apps[@]}"
+            echo "Done: Steam and Heroic are in the app list."
+            echo "Remove them with: ujust remove-gaming"
+            ;;
+        remove)
+            readarray -t installed < <(flatpak list --system --app --columns=application | grep -xF -f <(printf '%s\n' "${apps[@]}") || true)
+            if [[ "${#installed[@]}" -eq 0 ]]; then
+                echo "Steam and Heroic are not installed."
+                exit 0
+            fi
+            flatpak uninstall --system --noninteractive "${installed[@]}"
+            echo "Removed. Your games and saves stay in ~/.var/app; delete"
+            echo "~/.var/app/com.valvesoftware.Steam or ~/.var/app/com.heroicgameslauncher.hgl to free the space."
+            ;;
+        *)
+            echo "Usage: ujust install-gaming or ujust remove-gaming" >&2
+            exit 1
+            ;;
+    esac
+
+# Bluefin's installers (projectbluefin/common), renamed _bluefin-* at build
+# time (build_files/10-system-files.sh): these commands run them to install,
+# and add the removal they lack (remove-*). Removing never deletes your own files
+# (projects, virtual machine disks are only removed after a question).
+
+# Install developer tools from a menu: Docker, VS Code...
+[group('Apps')]
+install-dev-tools: (_dev-tools "install")
+
+# Remove developer tools, picked from a menu
+[group('Apps')]
+remove-dev-tools: (_dev-tools "remove")
+
+[private]
+_dev-tools action:
+    #!/usr/bin/bash
+    set -euo pipefail
+    case "{{ action }}" in
+        install) exec ujust _bluefin-dev-tools ;;
+        remove) ;;
+        *) echo "Usage: ujust install-dev-tools or ujust remove-dev-tools" >&2; exit 1 ;;
+    esac
+    # What the menu installs: "Label|kind|names" (kind: formula, cask, flatpak, ujust)
+    tools=(
+        "devcontainer CLI|formula|devcontainer"
+        "Docker|formula|docker docker-compose lazydocker dive"
+        "Podman Desktop|flatpak|io.podman_desktop.PodmanDesktop"
+        "Lima|ujust|lima"
+        "VS Code|cask|visual-studio-code-linux"
+        "VSCodium|cask|vscodium-linux"
+        "Antigravity IDE|cask|antigravity-ide-linux"
+        "Zed|cask|zed"
+        "JetBrains Toolbox|ujust|jetbrains-toolbox"
+        "Neovim|formula|neovim"
+        "Helix|formula|helix"
+        "vim|formula|vim"
+        "micro|formula|micro"
+    )
+    present() { # kind names
+        case "$1" in
+            formula) brew list --formula "${2%% *}" >/dev/null 2>&1 ;;
+            cask) brew list --cask "$2" >/dev/null 2>&1 ;;
+            flatpak) flatpak info --system "$2" >/dev/null 2>&1 ;;
+            ujust)
+                case "$2" in
+                    lima) brew list --formula lima >/dev/null 2>&1 ;;
+                    jetbrains-toolbox) brew list --cask jetbrains-toolbox-linux >/dev/null 2>&1 ;;
+                esac
+                ;;
+        esac
+    }
+    installed=()
+    for tool in "${tools[@]}"; do
+        IFS='|' read -r label kind names <<<"${tool}"
+        if present "${kind}" "${names}"; then installed+=("${label}"); fi
+    done
+    if [[ "${#installed[@]}" -eq 0 ]]; then
+        echo "No tools from ujust install-dev-tools are installed."
+        exit 0
+    fi
+    chosen="$(gum choose --no-limit --header "Which tools do you want to remove? (space to select)" "${installed[@]}" || true)"
+    [[ -n "${chosen}" ]] || { echo "Nothing removed."; exit 0; }
+    for tool in "${tools[@]}"; do
+        IFS='|' read -r label kind names <<<"${tool}"
+        grep -qxF -- "${label}" <<<"${chosen}" || continue
+        echo "Removing ${label}..."
+        case "${kind}" in
+            formula) read -ra formulas <<<"${names}"; brew uninstall --formula "${formulas[@]}" || true ;;
+            cask) brew uninstall --cask "${names}" || true ;;
+            flatpak) flatpak uninstall --system --noninteractive "${names}" || true ;;
+            ujust) ujust "remove-${names}" ;;
+        esac
+    done
+    if [[ "${#installed[@]}" -eq "$(grep -c . <<<"${chosen}")" ]]; then
+        rm -f "${HOME}/.config/bluefin/devmode"
+    fi
+    echo "Done. Your projects and settings are kept."
+
+# Install virt-manager, to run virtual machines
+[group('Apps')]
+install-vms: (_vms "install")
+
+# Remove virt-manager (virtual machine disks are kept)
+[group('Apps')]
+remove-vms: (_vms "remove")
+
+[private]
+_vms action:
+    #!/usr/bin/bash
+    set -euo pipefail
+    case "{{ action }}" in
+        install) exec ujust _bluefin-vms ;;
+        remove)
+            if ! flatpak info --system org.virt_manager.virt-manager >/dev/null 2>&1; then
+                echo "Virtual machines (virt-manager) are not installed."
+                exit 0
+            fi
+            echo "This removes virt-manager. Your virtual machines' disks are kept"
+            echo "(in ~/.local/share/libvirt): installing it again finds them."
+            if [[ -t 0 ]] && ! gum confirm "Remove virt-manager?"; then echo "Nothing removed."; exit 0; fi
+            flatpak uninstall --system --noninteractive \
+                org.virt_manager.virt-manager org.virt_manager.virt_manager.Extension.Qemu || true
+            sed -i '/uri_default.*session/d' "${HOME}/.config/libvirt/libvirt.conf" 2>/dev/null || true
+            echo "virt-manager removed."
+            ;;
+        *) echo "Usage: ujust install-vms or ujust remove-vms" >&2; exit 1 ;;
+    esac
+
+# Install Lima, a light Ubuntu virtual machine
+[group('Apps')]
+install-lima: (_lima "install")
+
+# Remove Lima and its virtual machine
+[group('Apps')]
+remove-lima: (_lima "remove")
+
+[private]
+_lima action:
+    #!/usr/bin/bash
+    set -euo pipefail
+    case "{{ action }}" in
+        install) exec ujust _bluefin-lima ;;
+        remove)
+            if ! command -v limactl >/dev/null; then
+                echo "Lima is not installed."
+                exit 0
+            fi
+            if limactl ls -q 2>/dev/null | grep -qx ubuntu; then
+                echo "This deletes the Lima \"ubuntu\" virtual machine and everything inside it,"
+                echo "then removes Lima. Files shared from your home folder are kept."
+                if [[ ! -t 0 ]] || ! gum confirm "Delete the ubuntu virtual machine and remove Lima?"; then
+                    echo "Nothing removed."
+                    exit 0
+                fi
+                limactl autostart disable ubuntu 2>/dev/null || true
+                limactl stop -f ubuntu 2>/dev/null || true
+                limactl delete -f ubuntu
+            fi
+            brew uninstall --formula lima || true
+            sed -i '\|^Include ~/.lima/\*/ssh.config$|d' "${HOME}/.ssh/config" 2>/dev/null || true
+            echo "Lima removed."
+            ;;
+        *) echo "Usage: ujust install-lima or ujust remove-lima" >&2; exit 1 ;;
+    esac
+
+# Install Kubernetes and cloud native tools
+[group('Apps')]
+install-cncf-tools: (_cncf-tools "install")
+
+# Remove the cloud native tools
+[group('Apps')]
+remove-cncf-tools: (_cncf-tools "remove")
+
+[private]
+_cncf-tools action:
+    #!/usr/bin/bash
+    set -euo pipefail
+    brewfile=/usr/share/ublue-os/homebrew/cncf.Brewfile
+    case "{{ action }}" in
+        install) exec ujust _bluefin-cncf-tools ;;
+        remove)
+            removed=0
+            if command -v brew >/dev/null; then
+                for formula in $(brew bundle list --file="${brewfile}" --formula); do
+                    if brew list --formula "${formula##*/}" >/dev/null 2>&1; then
+                        brew uninstall --formula "${formula##*/}" || true
+                        removed=1
+                    fi
+                done
+            fi
+            if [[ "${removed}" -eq 0 ]]; then echo "No cloud native tools are installed."; exit 0; fi
+            echo "Done. A tool that another Homebrew package needs is kept."
+            ;;
+        *) echo "Usage: ujust install-cncf-tools or ujust remove-cncf-tools" >&2; exit 1 ;;
+    esac
+
+# Install Goose, an AI assistant for the terminal
+[group('Apps')]
+install-ai-tools: (_ai-tools "install")
+
+# Remove Goose
+[group('Apps')]
+remove-ai-tools: (_ai-tools "remove")
+
+[private]
+_ai-tools action:
+    #!/usr/bin/bash
+    set -euo pipefail
+    brewfile=/usr/share/ublue-os/homebrew/ai-tools.Brewfile
+    case "{{ action }}" in
+        install) exec ujust _bluefin-ai-tools ;;
+        remove)
+            if ! command -v goose >/dev/null && [[ ! -f "${XDG_CONFIG_HOME:-${HOME}/.config}/goose/config.yaml" ]]; then
+                echo "Goose is not installed."
+                exit 0
+            fi
+            for formula in $(brew bundle list --file="${brewfile}" --formula); do
+                if brew list --formula "${formula##*/}" >/dev/null 2>&1; then
+                    brew uninstall --formula "${formula##*/}" || true
+                fi
+            done
+            for cask in $(brew bundle list --file="${brewfile}" --cask); do
+                if brew list --cask "${cask##*/}" >/dev/null 2>&1; then
+                    brew uninstall --cask "${cask##*/}" || true
+                fi
+            done
+            # The configuration this command wrote, unless you changed it
+            config="${XDG_CONFIG_HOME:-${HOME}/.config}/goose/config.yaml"
+            if [[ -f "${config}" ]] && cmp -s "${config}" /usr/share/ublue-os/goose/config.yaml; then
+                rm -f "${config}"
+            fi
+            echo "Done."
+            ;;
+        *) echo "Usage: ujust install-ai-tools or ujust remove-ai-tools" >&2; exit 1 ;;
+    esac
+
+# Install the ASUS laptop tools (asusctl, ROG Control Center)
+[group('Apps')]
+install-asus: (_asus "install")
+
+# Remove the ASUS laptop tools
+[group('Apps')]
+remove-asus: (_asus "remove")
+
+[private]
+_asus action:
+    #!/usr/bin/bash
+    set -euo pipefail
+    case "{{ action }}" in
+        install) exec ujust _bluefin-asus ;;
+        remove)
+            if ! command -v brew >/dev/null || ! brew list --cask asusctl-linux >/dev/null 2>&1; then
+                echo "The ASUS laptop tools are not installed."
+                exit 0
+            fi
+            systemctl --user disable --now asusd-user.service 2>/dev/null || true
+            sudo systemctl disable --now asusd.service asus-shutdown.service 2>/dev/null || true
+            for cask in rog-control-center-linux asusctl-linux; do
+                if brew list --cask "${cask}" >/dev/null 2>&1; then
+                    brew uninstall --cask "${cask}" || true
+                fi
+            done
+            echo "ASUS tools removed."
+            ;;
+        *) echo "Usage: ujust install-asus or ujust remove-asus" >&2; exit 1 ;;
+    esac
+
+# Install JetBrains Toolbox, to get JetBrains IDEs
+[group('Apps')]
+install-jetbrains-toolbox: (_jetbrains-toolbox "install")
+
+# Remove JetBrains Toolbox
+[group('Apps')]
+remove-jetbrains-toolbox: (_jetbrains-toolbox "remove")
+
+[private]
+_jetbrains-toolbox action:
+    #!/usr/bin/bash
+    set -euo pipefail
+    case "{{ action }}" in
+        install) exec ujust _bluefin-jetbrains-toolbox ;;
+        remove)
+            if ! command -v brew >/dev/null || ! brew list --cask jetbrains-toolbox-linux >/dev/null 2>&1; then
+                echo "JetBrains Toolbox is not installed."
+                exit 0
+            fi
+            brew uninstall --cask jetbrains-toolbox-linux
+            echo "JetBrains Toolbox removed. IDEs it installed stay in"
+            echo "~/.local/share/JetBrains: delete that folder to remove them too."
+            ;;
+        *) echo "Usage: ujust install-jetbrains-toolbox or ujust remove-jetbrains-toolbox" >&2; exit 1 ;;
+    esac
+
+# Install OpenTabletDriver, for drawing tablets
+[group('Apps')]
+install-opentabletdriver: (_opentabletdriver "install")
+
+# Remove OpenTabletDriver
+[group('Apps')]
+remove-opentabletdriver: (_opentabletdriver "remove")
+
+[private]
+_opentabletdriver action:
+    #!/usr/bin/bash
+    set -euo pipefail
+    case "{{ action }}" in
+        install) exec ujust _bluefin-opentabletdriver ;;
+        remove)
+            if ! flatpak info --system net.opentabletdriver.OpenTabletDriver >/dev/null 2>&1 \
+                && [[ ! -e "${HOME}/.config/systemd/user/opentabletdriver.service" ]]; then
+                echo "OpenTabletDriver is not installed."
+                exit 0
+            fi
+            systemctl --user disable --now opentabletdriver.service 2>/dev/null || true
+            rm -f "${HOME}/.config/systemd/user/opentabletdriver.service"
+            systemctl --user daemon-reload
+            sudo rm -f /etc/modprobe.d/blacklist-opentabletdriver.conf /etc/udev/rules.d/71-opentabletdriver.rules
+            flatpak uninstall --system --noninteractive net.opentabletdriver.OpenTabletDriver 2>/dev/null || true
+            echo "OpenTabletDriver removed. Restart to use the usual tablet drivers again."
+            ;;
+        *) echo "Usage: ujust install-opentabletdriver or ujust remove-opentabletdriver" >&2; exit 1 ;;
+    esac
+
+# Turn the FlatPark app source on or off (off by default)
 [group('Apps')]
 toggle-flatpark mode="toggle":
     #!/usr/bin/bash
@@ -383,9 +753,111 @@ toggle-flatpark mode="toggle":
             ;;
     esac
 
-# Collect your system details and open a new bug report with them filled in
+# Switch between stable (weekly) and latest (daily) images
 [group('System')]
-bug-report mode="open":
+switch-channel channel="status":
+    #!/usr/bin/bash
+    set -euo pipefail
+    # The image the next boot starts (the first deployment), as rpm-ostree
+    # records it: "ostree-image-signed:docker://<image>" when signatures are
+    # checked, "ostree-unverified-registry:<image>" otherwise. Readable
+    # without root.
+    ref="$(rpm-ostree status --json | jq -r '.deployments[0]."container-image-reference" // empty')"
+    image="${ref#*docker://}"
+    image="${image#ostree-unverified-registry:}"
+    repo="${image%:*}"
+    tag="${image##*:}"
+    if [[ "${repo}" != ghcr.io/cosmic-blue-os/* || "${repo}" == "${image}" ]]; then
+        echo "This system does not follow a cosmic-blue image (${ref:-none}): nothing to switch." >&2
+        exit 1
+    fi
+    case "{{ channel }}" in
+        status)
+            case "${tag}" in
+                stable) echo "Channel: stable (updated once a week, after more tests)." ;;
+                latest) echo "Channel: latest (updated every day)." ;;
+                *) echo "Pinned to ${image}: no automatic updates to newer images." ;;
+            esac
+            echo "Switch with: ujust switch-channel stable  or  ujust switch-channel latest"
+            exit 0
+            ;;
+        stable|latest) ;;
+        *)
+            echo "Usage: ujust switch-channel [status|stable|latest]" >&2
+            exit 1
+            ;;
+    esac
+    target="${repo}:{{ channel }}"
+    if [[ "${tag}" == "{{ channel }}" ]]; then
+        echo "Already on the {{ channel }} channel (${target})."
+        exit 0
+    fi
+    if [[ "{{ channel }}" == stable ]]; then
+        echo "stable gets a new image once a week, after the update and install tests."
+        echo "It can be a few days older than the image you have now: that is fine,"
+        echo "your files and settings are kept."
+    else
+        echo "latest gets a new image every day, as soon as it passes the build tests."
+    fi
+    echo "The ${target} image is downloaded now, its signature is checked,"
+    echo "and it starts at the next reboot."
+    if [[ -t 0 ]] && ! gum confirm "Switch to ${target}?"; then
+        echo "Nothing changed."
+        exit 0
+    fi
+    sudo bootc switch --enforce-container-sigpolicy "${target}"
+    echo "Done. Reboot to start the {{ channel }} image."
+    if [[ "${tag}" == stable || "${tag}" == latest ]]; then
+        echo "To go back: ujust switch-channel ${tag}"
+    fi
+
+# Earlier names (cosmic-blue's and Bluefin's, renamed in build_files/10-system-files.sh),
+# still accepted but not listed
+[private]
+alias bug-report := report-bug
+
+[private]
+alias devmode := install-dev-tools
+
+[private]
+alias toggle-devmode := install-dev-tools
+
+[private]
+alias setup-vms := install-vms
+
+[private]
+alias setup-lima := install-lima
+
+[private]
+alias install-system-flatpaks := reset-default-apps
+
+[private]
+alias cncf := install-cncf-tools
+
+[private]
+alias bios := reboot-to-bios
+
+[private]
+alias bios-info := show-bios-info
+
+[private]
+alias logs-this-boot := show-logs
+
+[private]
+alias logs-last-boot := show-previous-logs
+
+[private]
+alias benchmark := run-benchmark
+
+[private]
+alias check-sb-key := check-secure-boot
+
+[private]
+alias powerwash := reset-system
+
+# Open a bug report with your system details filled in
+[group('System')]
+report-bug mode="open":
     #!/usr/bin/bash
     set -euo pipefail
     # The details (cosmic-blue-system-info) hold no personal data. They go
@@ -400,7 +872,7 @@ bug-report mode="open":
             exit 0
             ;;
         *)
-            echo "Usage: ujust bug-report [open|print]" >&2
+            echo "Usage: ujust report-bug [open|print]" >&2
             exit 1
             ;;
     esac
@@ -429,7 +901,7 @@ bug-report mode="open":
         echo "Report the bug later at ${form}"
     fi
 
-# NVIDIA image with Secure Boot: enroll the key that signs the driver (password "cosmicblue" at the next boot)
+# NVIDIA with Secure Boot: enroll the driver key (password "cosmicblue")
 [group('System')]
 enroll-secure-boot-key:
     #!/usr/bin/bash

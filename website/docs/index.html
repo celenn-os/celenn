@@ -65,6 +65,8 @@ sudo bootc status      # see the current and previous versions</code></pre>
       <h2>Installing software</h2>
       <h3>Apps: COSMIC Store</h3>
       <p>Graphical apps come as Flatpaks from the <strong>COSMIC Store</strong>, which shows Flathub and the COSMIC apps. They update with the system and do not touch it.</p>
+      <h3>AppImages: Gear Lever</h3>
+      <p>Open a downloaded AppImage: <strong>Gear Lever</strong> adds it to the app list and keeps it up to date.</p>
       <h3>Command line tools: Homebrew</h3>
       <p>Command line tools install in your home folder with Homebrew:</p>
       <div class="code">
@@ -82,39 +84,43 @@ distrobox enter arch</code></pre>
       <h3>Developer tools</h3>
       <p>Developer mode adds Docker, Podman Desktop, VS Code and other IDEs, Lima and more. Pick what you want from a menu:</p>
       <div class="code">
-        <pre><code>ujust devmode</code></pre>
+        <pre><code>ujust install-dev-tools</code></pre>
         <button type="button" class="copy" data-copy>Copy</button>
       </div>
     </section>
 
     <section id="ujust" class="block">
       <h2>ujust commands</h2>
-      <p><code>ujust</code> runs the shortcuts that come with the system. Run <code>ujust</code> alone to list them all, or <code>ujust --choose</code> to pick one from a menu. The most useful ones:</p>
+      <p><code>ujust</code> runs the shortcuts that come with the system. Type <code>ujust</code> to list them all, or <code>ujust --choose</code> to pick one from a menu. Each <code>install-…</code> command has a matching <code>remove-…</code>. The most useful:</p>
       <dl class="commands">
         <dt><code>ujust update</code></dt>
-        <dd>Update the system, Flatpak apps and Homebrew packages now.</dd>
+        <dd>Update the system, apps and Homebrew packages now.</dd>
         <dt><code>ujust toggle-updates</code></dt>
         <dd>Turn automatic updates on or off.</dd>
-        <dt><code>ujust devmode</code></dt>
-        <dd>Install developer tools.</dd>
+        <dt><code>ujust switch-channel</code></dt>
+        <dd>Switch between the <code>stable</code> images (weekly, the default) and <code>latest</code> (daily).</dd>
+        <dt><code>ujust install-dev-tools</code></dt>
+        <dd>Developer tools, picked from a menu: Docker, VS Code, Podman Desktop…</dd>
+        <dt><code>ujust install-cli-tools</code></dt>
+        <dd>Command line tools: bat, eza, fd, ripgrep, zoxide…</dd>
+        <dt><code>ujust install-microsoft-fonts</code></dt>
+        <dd>Microsoft fonts: Arial, Times New Roman, Verdana…</dd>
+        <dt><code>ujust install-gaming</code></dt>
+        <dd>Steam and Heroic (Epic Games, GOG, Amazon).</dd>
+        <dt><code>ujust toggle-flatpark</code></dt>
+        <dd>Turn FlatPark, an extra source of apps, on or off. Off by default: its apps are not reviewed like Flathub's.</dd>
         <dt><code>ujust toggle-dark-mode</code></dt>
         <dd>Switch between the dark and light themes.</dd>
         <dt><code>ujust reset-cosmic-theme</code></dt>
-        <dd>Restore the cosmic-blue look: colors, icons, wallpaper.</dd>
+        <dd>Bring back the cosmic-blue look.</dd>
         <dt><code>ujust reset-cosmic-config</code></dt>
-        <dd>Reset all COSMIC settings to the cosmic-blue defaults (a backup is kept).</dd>
-        <dt><code>ujust install-cli-tools</code></dt>
-        <dd>Install handy command line tools with Homebrew (bat, eza, fd, ripgrep, zoxide, yq...) and, if you want, shortcuts that use them in the terminal. Remove them with <code>ujust install-cli-tools remove</code>.</dd>
-        <dt><code>ujust install-microsoft-fonts</code></dt>
-        <dd>Download Microsoft's core fonts (Arial, Times New Roman, Verdana...) for your account, after accepting their license.</dd>
-        <dt><code>ujust toggle-flatpark</code></dt>
-        <dd>Turn FlatPark, an extra source of apps that are not on Flathub, on or off. It is off by default because its apps are not reviewed like Flathub's; when on, apps also on Flathub keep coming from Flathub. It can also be added or removed in COSMIC Store, under Software repositories.</dd>
+        <dd>Reset all COSMIC settings (a backup is kept).</dd>
         <dt><code>ujust toggle-tpm2</code></dt>
-        <dd>Unlock an encrypted disk with the TPM2 chip instead of a password.</dd>
+        <dd>Unlock the encrypted disk with the TPM2 chip, without a password.</dd>
         <dt><code>ujust enroll-secure-boot-key</code></dt>
-        <dd>NVIDIA image with Secure Boot: enroll the key that lets the driver load.</dd>
-        <dt><code>ujust bug-report</code></dt>
-        <dd>Open a bug report with your system details already filled in.</dd>
+        <dd>NVIDIA with Secure Boot: enroll the driver's key.</dd>
+        <dt><code>ujust report-bug</code></dt>
+        <dd>Open a bug report with your system details filled in.</dd>
       </dl>
     </section>
 
@@ -194,7 +200,7 @@ cosign verify-attestation --key cosign.pub --type spdxjson \
       <p>A question, or something unclear? Ask in <a href="https://github.com/cosmic-blue-os/cosmic-blue/discussions">Discussions</a>.</p>
       <p>Found a bug? Run this in a terminal on the computer with the problem: it collects the system details (no personal data) and opens a <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues/new/choose">bug report</a> with them filled in. Then say what you did and what happened.</p>
       <div class="code">
-        <pre><code>ujust bug-report</code></pre>
+        <pre><code>ujust report-bug</code></pre>
         <button type="button" class="copy" data-copy>Copy</button>
       </div>
     </section>

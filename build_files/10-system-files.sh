@@ -160,12 +160,58 @@ done
 # build hive), `bluespeed` (Bluefin's AI stack, `install-ai-tools` remains),
 # `bluefin-apps` (alias of install-system-flatpaks), `bazaar-preview`, and
 # `toggle-testing`, which switches to a "testing" tag that cosmic-blue does
-# not publish.
+# not publish. Also `bluefin-cli`, which `ujust install-cli-tools` replaces,
+# and `devmode`, an alias of `toggle-devmode`.
 python3 -I /ctx/build_files/drop-just-recipes.py \
     "${STAGE}/usr/share/ublue-os/just/shared.just" contribute
 python3 -I /ctx/build_files/drop-just-recipes.py \
     "${STAGE}/usr/share/ublue-os/just/system.just" \
-    bluespeed bluefin-apps bazaar-preview toggle-testing
+    bluespeed bluefin-apps bazaar-preview toggle-testing bluefin-cli devmode
+# Every listed ujust command reads verb-object, like cosmic-blue's own in
+# 60-custom.just: install- (adds apps or tools) and remove-,
+# toggle- (on/off), reset-, check-, show-, switch-, report-... Bluefin's names
+# that do not are renamed, regrouped (Apps installs things, System looks
+# after the computer) or hidden when another command covers them.
+# Bluefin's installers have no `remove`: they become hidden _bluefin-*
+# recipes, which 60-custom.just's install-* commands run, next to its own
+# remove-* commands. 60-custom.just keeps every old name as a hidden alias.
+# Fails if upstream renames a recipe.
+python3 -I /ctx/build_files/rename-just-recipes.py "${STAGE}"/usr/share/ublue-os/just/{apps,default,shared,system,update}.just -- \
+    "toggle-devmode=_bluefin-dev-tools>install-dev-tools" \
+    "setup-vms=_bluefin-vms>install-vms" \
+    "setup-lima=_bluefin-lima>install-lima" \
+    "cncf=_bluefin-cncf-tools>install-cncf-tools" \
+    "install-ai-tools=_bluefin-ai-tools>install-ai-tools" \
+    "install-asus=_bluefin-asus>install-asus" \
+    "install-jetbrains-toolbox=_bluefin-jetbrains-toolbox>install-jetbrains-toolbox" \
+    "install-opentabletdriver=_bluefin-opentabletdriver>install-opentabletdriver" \
+    "install-system-flatpaks=reset-default-apps@Apps|Reinstall the default apps" \
+    "bios=reboot-to-bios@System|Restart into the firmware settings (BIOS/UEFI)" \
+    "bios-info=show-bios-info@System|Show the motherboard and firmware version" \
+    "logs-this-boot=show-logs@System|Show the system messages since startup" \
+    "logs-last-boot=show-previous-logs@System|Show the system messages of the previous startup" \
+    "benchmark=run-benchmark@System|Run a one minute processor benchmark" \
+    "check-sb-key=check-secure-boot@System|Show the Secure Boot state and keys" \
+    "powerwash=reset-system@System|Factory reset: erases everything (experimental)" \
+    "check-local-overrides@System|List the system settings changed in /etc" \
+    "check-idle-power-draw@System|Measure the power used while idle" \
+    "clean-system@System|Free disk space (containers, Flatpak, Homebrew)" \
+    "update@System|Update the system, apps and Homebrew packages now" \
+    "toggle-updates@System|Turn automatic updates on or off" \
+    "toggle-tpm2|Turn on or off disk unlocking with the TPM2 chip (no password)" \
+    -jetbrains-toolbox -toggle-user-motd -device-info -toggle-vms
+# The menu's "Antigravity" entry (under IDE) installs Google's Antigravity
+# agent app (antigravity-linux), not the Antigravity IDE editor: install the
+# IDE (antigravity-ide-linux, same tap) instead. Fails if upstream changes it.
+python3 -I - "${STAGE}/usr/share/ublue-os/just/system.just" <<'PY'
+import pathlib, sys
+path = pathlib.Path(sys.argv[1])
+text = path.read_text()
+old = "brew install --cask ublue-os/tap/antigravity-linux"
+if text.count(old) != 1:
+    sys.exit(f"{path}: Antigravity install line not found")
+path.write_text(text.replace(old, "brew install --cask ublue-os/tap/antigravity-ide-linux"))
+PY
 
 # `ujust enroll-secure-boot-key` (projectbluefin/common) queues the akmods key
 # with Universal Blue's password: 60-custom.just has cosmic-blue's own, with

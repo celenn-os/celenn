@@ -65,6 +65,8 @@ sudo bootc status      # voir la version actuelle et la précédente</code></pre
       <h2>Installer des logiciels</h2>
       <h3>Applications&nbsp;: COSMIC Store</h3>
       <p>Les applications graphiques sont des Flatpak, installées depuis le <strong>COSMIC Store</strong>, qui affiche Flathub et les applications COSMIC. Elles se mettent à jour avec le système et n'y touchent pas.</p>
+      <h3>AppImages&nbsp;: Gear Lever</h3>
+      <p>Ouvrez une AppImage téléchargée&nbsp;: <strong>Gear Lever</strong> l'ajoute à la liste des applications et la tient à jour.</p>
       <h3>Outils en ligne de commande&nbsp;: Homebrew</h3>
       <p>Les outils en ligne de commande s'installent dans votre dossier personnel avec Homebrew&nbsp;:</p>
       <div class="code">
@@ -82,39 +84,43 @@ distrobox enter arch</code></pre>
       <h3>Outils de développement</h3>
       <p>Le mode développeur ajoute Docker, Podman Desktop, VS Code et d'autres IDE, Lima et plus encore. Choisissez ce que vous voulez dans un menu&nbsp;:</p>
       <div class="code">
-        <pre><code>ujust devmode</code></pre>
+        <pre><code>ujust install-dev-tools</code></pre>
         <button type="button" class="copy" data-copy>Copier</button>
       </div>
     </section>
 
     <section id="ujust" class="block">
       <h2>Commandes ujust</h2>
-      <p><code>ujust</code> lance les raccourcis fournis avec le système. Lancez <code>ujust</code> seul pour tous les lister, ou <code>ujust --choose</code> pour en choisir un dans un menu. Les plus utiles&nbsp;:</p>
+      <p><code>ujust</code> lance les raccourcis fournis avec le système. Tapez <code>ujust</code> pour tous les lister, ou <code>ujust --choose</code> pour en choisir un dans un menu. Chaque commande <code>install-…</code> a sa commande <code>remove-…</code>. Les plus utiles&nbsp;:</p>
       <dl class="commands">
         <dt><code>ujust update</code></dt>
-        <dd>Mettre à jour le système, les applications Flatpak et les paquets Homebrew tout de suite.</dd>
+        <dd>Mettre à jour le système, les applications et Homebrew tout de suite.</dd>
         <dt><code>ujust toggle-updates</code></dt>
         <dd>Activer ou couper les mises à jour automatiques.</dd>
-        <dt><code>ujust devmode</code></dt>
-        <dd>Installer des outils de développement.</dd>
+        <dt><code>ujust switch-channel</code></dt>
+        <dd>Passer des images <code>stable</code> (hebdomadaires, par défaut) aux images <code>latest</code> (quotidiennes), ou inversement.</dd>
+        <dt><code>ujust install-dev-tools</code></dt>
+        <dd>Outils de développement, au choix dans un menu&nbsp;: Docker, VS Code, Podman Desktop…</dd>
+        <dt><code>ujust install-cli-tools</code></dt>
+        <dd>Outils en ligne de commande&nbsp;: bat, eza, fd, ripgrep, zoxide…</dd>
+        <dt><code>ujust install-microsoft-fonts</code></dt>
+        <dd>Polices Microsoft&nbsp;: Arial, Times New Roman, Verdana…</dd>
+        <dt><code>ujust install-gaming</code></dt>
+        <dd>Steam et Heroic (Epic Games, GOG, Amazon).</dd>
+        <dt><code>ujust toggle-flatpark</code></dt>
+        <dd>Activer ou couper FlatPark, une source d'applications en plus. Coupée par défaut&nbsp;: ses applications ne sont pas vérifiées comme celles de Flathub.</dd>
         <dt><code>ujust toggle-dark-mode</code></dt>
         <dd>Passer du thème sombre au thème clair, et inversement.</dd>
         <dt><code>ujust reset-cosmic-theme</code></dt>
-        <dd>Restaurer le style cosmic-blue&nbsp;: couleurs, icônes, fond d'écran.</dd>
+        <dd>Retrouver le style cosmic-blue.</dd>
         <dt><code>ujust reset-cosmic-config</code></dt>
-        <dd>Remettre tous les réglages COSMIC par défaut de cosmic-blue (une sauvegarde est gardée).</dd>
-        <dt><code>ujust install-cli-tools</code></dt>
-        <dd>Installer des outils en ligne de commande pratiques avec Homebrew (bat, eza, fd, ripgrep, zoxide, yq…) et, si vous le souhaitez, des raccourcis qui les utilisent dans le terminal. Pour les retirer : <code>ujust install-cli-tools remove</code>.</dd>
-        <dt><code>ujust install-microsoft-fonts</code></dt>
-        <dd>Télécharger les polices de base de Microsoft (Arial, Times New Roman, Verdana…) pour votre compte, après avoir accepté leur licence.</dd>
-        <dt><code>ujust toggle-flatpark</code></dt>
-        <dd>Activer ou désactiver FlatPark, une source d'applications supplémentaire absentes de Flathub. Il est désactivé par défaut car ses applications ne sont pas vérifiées comme celles de Flathub&nbsp;; une fois activé, les applications aussi présentes sur Flathub viennent toujours de Flathub. On peut aussi l'ajouter ou le retirer dans COSMIC Store, sous Dépôts logiciels.</dd>
+        <dd>Remettre à zéro tous les réglages COSMIC (une sauvegarde est gardée).</dd>
         <dt><code>ujust toggle-tpm2</code></dt>
-        <dd>Déverrouiller un disque chiffré avec la puce TPM2 au lieu d'un mot de passe.</dd>
+        <dd>Déverrouiller le disque chiffré avec la puce TPM2, sans mot de passe.</dd>
         <dt><code>ujust enroll-secure-boot-key</code></dt>
-        <dd>Image NVIDIA avec Secure Boot&nbsp;: enregistrer la clé qui permet de charger le pilote.</dd>
-        <dt><code>ujust bug-report</code></dt>
-        <dd>Ouvrir un rapport de bug avec les informations du système déjà remplies.</dd>
+        <dd>NVIDIA avec Secure Boot&nbsp;: enregistrer la clé du pilote.</dd>
+        <dt><code>ujust report-bug</code></dt>
+        <dd>Ouvrir un rapport de bug avec les infos du système déjà remplies.</dd>
       </dl>
     </section>
 
@@ -194,7 +200,7 @@ cosign verify-attestation --key cosign.pub --type spdxjson \
       <p>Une question, ou quelque chose de pas clair&nbsp;? Posez-la dans les <a href="https://github.com/cosmic-blue-os/cosmic-blue/discussions">Discussions</a> (en anglais de préférence).</p>
       <p>Un bug&nbsp;? Lancez ceci dans un terminal sur l'ordinateur concerné&nbsp;: la commande rassemble les informations du système (aucune donnée personnelle) et ouvre un <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues/new/choose">rapport de bug</a> déjà rempli avec elles. Dites ensuite ce que vous avez fait et ce qui s'est passé.</p>
       <div class="code">
-        <pre><code>ujust bug-report</code></pre>
+        <pre><code>ujust report-bug</code></pre>
         <button type="button" class="copy" data-copy>Copier</button>
       </div>
     </section>

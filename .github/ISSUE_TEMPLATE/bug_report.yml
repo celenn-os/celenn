@@ -44,7 +44,7 @@ body:
     attributes:
       label: System details
       description: |
-        On the computer with the problem, open a terminal and run `ujust bug-report`: it fills this field in for you (it holds no personal data). If you cannot run it (live ISO, the system does not start), give the computer model and the graphics card.
+        On the computer with the problem, open a terminal and run `ujust report-bug`: it fills this field in for you (it holds no personal data). If you cannot run it (live ISO, the system does not start), give the computer model and the graphics card.
       render: text
     validations:
       required: true

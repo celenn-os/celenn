@@ -60,7 +60,7 @@ grep -qx 'commands = \["cosmic-blue-tips"\]' /etc/uwelcome/config.toml
 grep -qx 'case \$- in' /etc/profile.d/uwelcome.sh
 test -n "$(LANG=en_US.UTF-8 cosmic-blue-tips)"
 test -n "$(LANG=fr_FR.UTF-8 cosmic-blue-tips)"
-if grep -rlE 'projectbluefin\.io|bluefin-cli|ujust report' /etc/uwelcome \
+if grep -rlE 'projectbluefin\.io|bluefin-cli|ujust report([^-]|$)' /etc/uwelcome \
     || grep -rl 'projectbluefin\.io' /usr/share/ublue-os/just /usr/share/applications; then
     echo "Bluefin links or commands left in the welcome banner, ujust or launchers"; exit 1
 fi
@@ -199,11 +199,12 @@ done
 # cosmic-blue recipes (60-custom.just) parse and are listed by ujust
 recipes="$(just --justfile /usr/share/ublue-os/just/00-entry.just --summary)"
 for recipe in toggle-dark-mode reset-cosmic-theme reset-cosmic-config export-cosmic-config \
-              install-microsoft-fonts install-cli-tools bug-report enroll-secure-boot-key; do
+              install-microsoft-fonts install-cli-tools report-bug enroll-secure-boot-key \
+              switch-channel install-gaming; do
     grep -qw -- "${recipe}" <<<"${recipes}"
 done
 
-# `ujust bug-report`: the system details script runs anywhere (here without
+# `ujust report-bug`: the system details script runs anywhere (here without
 # deployments) and prints the image name
 test -x /usr/libexec/cosmic-blue-system-info
 /usr/libexec/cosmic-blue-system-info | grep "^Image: ${IMAGE_NAME} " >/dev/null
@@ -230,16 +231,50 @@ for path in /etc/bazaar \
     /usr/share/ublue-os/just/changelog.just /usr/share/ublue-os/homebrew/full-desktop.Brewfile; do
     test ! -e "${path}"
 done
-for recipe in contribute bluespeed bluefin-apps bazaar-preview toggle-testing changelogs; do
+for recipe in contribute bluespeed bluefin-apps bazaar-preview toggle-testing changelogs \
+              bluefin-cli; do
     # (`! cmd` never stops a set -e script: use if ... exit 1)
-    if grep -qw -- "${recipe}" <<<"${recipes}"; then echo "ujust ${recipe} left in place"; exit 1; fi
+    if tr ' ' '\n' <<<"${recipes}" | grep -qx -- "${recipe}"; then echo "ujust ${recipe} left in place"; exit 1; fi
+done
+# Every listed command reads verb-object (build_files/10-system-files.sh
+# renames Bluefin's that do not), and every install-<thing> has its
+# remove-<thing>; the earlier names and Bluefin's own installers still run,
+# unlisted
+grep -q 'ublue-os/tap/antigravity-ide-linux' /usr/share/ublue-os/just/system.just
+for recipe in $(tr ' ' '\n' <<<"${recipes}" | grep '^install-'); do
+    tr ' ' '\n' <<<"${recipes}" | grep -qx -- "remove-${recipe#install-}" \
+        || { echo "ujust ${recipe} has no remove-${recipe#install-}"; exit 1; }
+done
+odd="$(tr ' ' '\n' <<<"${recipes}" \
+    | grep -vE '^(install|remove|toggle|reset|export|switch|report|enroll|check|show|run|reboot|clean|update)(-|$)' || true)"
+if [[ -n "${odd}" ]]; then echo "ujust commands not named verb-object:" ${odd}; exit 1; fi
+for recipe in install-dev-tools install-vms install-lima reset-default-apps install-cncf-tools \
+              install-ai-tools install-asus install-jetbrains-toolbox install-opentabletdriver reboot-to-bios show-bios-info show-logs show-previous-logs run-benchmark \
+              check-secure-boot reset-system report-bug; do
+    tr ' ' '\n' <<<"${recipes}" | grep -qx -- "${recipe}"
+done
+for recipe in devmode toggle-devmode bug-report setup-vms setup-lima install-system-flatpaks cncf \
+              bios bios-info logs-this-boot logs-last-boot benchmark check-sb-key powerwash \
+              jetbrains-toolbox toggle-user-motd device-info toggle-vms _bluefin-dev-tools _bluefin-vms \
+              _bluefin-lima _bluefin-cncf-tools _bluefin-ai-tools _bluefin-asus _bluefin-jetbrains-toolbox \
+              _bluefin-opentabletdriver; do
+    if tr ' ' '\n' <<<"${recipes}" | grep -qx -- "${recipe}"; then echo "ujust ${recipe} still listed"; exit 1; fi
+    just --justfile /usr/share/ublue-os/just/00-entry.just --show "${recipe}" >/dev/null
 done
 if grep -q '^export LC_' /etc/zsh/zprofile; then exit 1; fi
-# Default applications: ours, naming installed COSMIC apps
+# Default applications: ours, and each one names an app the system has: a
+# launcher of the image, or a first-boot flatpak (whose launcher only exists
+# after the first boot)
 grep -q CosmicStore /etc/xdg/mimeapps.list
-for app in com.system76.CosmicStore com.system76.CosmicPlayer noop; do
-    test -f "/usr/share/applications/${app}.desktop"
-done
+grep -qx 'application/vnd.appimage=it.mijorus.gearlever.desktop' /etc/xdg/mimeapps.list
+while IFS='=' read -r type apps; do
+    app="${apps%%;*}"
+    if [[ ! -f "/usr/share/applications/${app}" ]] \
+        && ! grep -qx "\[Flatpak Preinstall ${app%.desktop}\]" \
+            /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall; then
+        echo "mimeapps.list: ${type} opens in ${app}, which is not installed"; exit 1
+    fi
+done < <(sed -n '/^\[Default Applications\]/,/^\[/{/^[a-z].*=/p}' /etc/xdg/mimeapps.list)
 grep -q cosmic-blue /usr/share/applications/system-update.desktop
 grep -qx 'Icon=cosmic-blue-update' /usr/share/applications/system-update.desktop
 test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-update.svg
@@ -255,7 +290,7 @@ for remote in flathub cosmic; do
     flatpak remotes --system --columns=name | grep -qx "${remote}"
 done
 test -f /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall
-# First-boot flatpaks and `ujust install-system-flatpaks` install the same apps
+# First-boot flatpaks and `ujust reset-default-apps` install the same apps
 diff <(sed -n 's/^\[Flatpak Preinstall \(.*\)\]$/\1/p' /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall | sort) \
      <(sed -n 's/^flatpak "\(.*\)"$/\1/p' /usr/share/ublue-os/homebrew/system-flatpaks.Brewfile | sort)
 # No flatpak that duplicates a COSMIC app or needs GNOME
@@ -323,7 +358,7 @@ for package in cosmic-session cosmic-comp; do
 done
 
 systemctl is-enabled cosmic-greeter.service
-# docker CLI works through the rootless Podman socket (ujust devmode installs docker)
+# docker CLI works through the rootless Podman socket (ujust install-dev-tools installs docker)
 systemctl --global is-enabled podman.socket
 test -x /usr/share/ublue-os/user-setup.hooks.d/30-docker-podman.sh
 test "$(systemctl get-default)" = graphical.target

@@ -1,10 +1,10 @@
 # cosmic-blue default applications (replaces Bluefin's list, which named Bazaar
-# and GNOME Showtime). Papers and Loupe are first-boot flatpaks.
+# and GNOME Showtime). Papers, Loupe and Gear Lever are first-boot flatpaks.
 [Default Applications]
 application/pdf=org.gnome.Papers.desktop
 application/vnd.flatpak.ref=com.system76.CosmicStore.desktop
 application/vnd.flatpak.repo=com.system76.CosmicStore.desktop
-application/vnd.appimage=noop.desktop
+application/vnd.appimage=it.mijorus.gearlever.desktop
 image/avif=org.gnome.Loupe.desktop
 image/bmp=org.gnome.Loupe.desktop
 image/gif=org.gnome.Loupe.desktop

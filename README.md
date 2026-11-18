@@ -72,7 +72,7 @@ sudo bootc rollback   # go back to the previous version on next boot
 ## Developer tools
 
 ```bash
-ujust devmode   # Docker, VS Code, Podman Desktop and other developer tools
+ujust install-dev-tools   # Docker, VS Code, Podman Desktop and other developer tools
 ```
 
 ## Image signature

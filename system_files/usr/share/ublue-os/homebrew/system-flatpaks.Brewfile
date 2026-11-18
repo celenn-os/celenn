@@ -1,4 +1,4 @@
-# cosmic-blue default flatpaks (ujust install-system-flatpaks)
+# cosmic-blue default flatpaks (ujust reset-default-apps)
 flatpak "com.github.tchx84.Flatseal"
 flatpak "com.ranfdev.DistroShelf"
 flatpak "io.missioncenter.MissionCenter"

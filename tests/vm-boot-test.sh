@@ -64,12 +64,21 @@ if [[ -n "${unexpected}" ]]; then
     errors=1
 fi
 
-# `ujust bug-report` lists the image and the booted deployment
-bug_report="$(vm "ujust bug-report print")" || bug_report=""
+# `ujust report-bug` lists the image and the booted deployment
+bug_report="$(vm "ujust report-bug print")" || bug_report=""
 echo "${bug_report}"
 grep -qE '^Image: cosmic-blue(-nvidia)? [0-9]' <<<"${bug_report}" \
     && grep -qE '^Booted: [0-9.]+ +.*ghcr\.io/cosmic-blue-os/cosmic-blue' <<<"${bug_report}" \
-    || { echo "::error::ujust bug-report does not show the image and the booted deployment"; errors=1; }
+    || { echo "::error::ujust report-bug does not show the image and the booted deployment"; errors=1; }
+grep -qE '^Free disk space: [0-9.,]+[KMGT]' <<<"${bug_report}" \
+    || { echo "::error::ujust report-bug does not show the free disk space"; errors=1; }
+
+# `ujust switch-channel` reads the channel this system follows (latest here,
+# as installed above); switching itself would download the published image
+channel="$(vm "ujust switch-channel status" 2>&1)" || channel=""
+echo "${channel}"
+[[ "${TARGET_IMGREF}" != *:latest ]] || grep -q '^Channel: latest' <<<"${channel}" \
+    || { echo "::error::ujust switch-channel status does not show the latest channel"; errors=1; }
 
 # FlatPark is off by default. `ujust toggle-flatpark` turns it on at the
 # lowest priority with its filter, and off again; the one-time cleanup for
