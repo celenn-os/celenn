@@ -308,7 +308,7 @@ fn pages(mode: Mode) -> Vec<Page> {
                 Body::Welcome,
             ),
             Page {
-                icon: Some("com.system76.CosmicStore"),
+                icon: Some("cosmic-blue-tour-store"),
                 button_before: Some(("Open COSMIC Store", Action::Launch(&["cosmic-store"]))),
                 ..Page::new(
                     "Install apps",
