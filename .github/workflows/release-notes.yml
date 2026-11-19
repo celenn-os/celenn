@@ -7,7 +7,7 @@
 # commit on the default branch.
 #
 # Called by promote-stable.yml each time `stable` moves. On a pull request
-# that changes it, it only previews the notes of `latest` against `stable`
+# that changes it, it only previews the notes of `testing` against `stable`
 # and the README block in the run summary, without publishing anything.
 # Run by hand, it only refreshes the README block from the current `stable`
 # (e.g. after rolling stable back), without a release.
@@ -73,9 +73,9 @@ jobs:
       - name: List packages and commits
         id: lists
         env:
-          # A pull request previews `latest` against the current `stable`
+          # A pull request previews `testing` against the current `stable`
           OLD: ${{ github.event_name == 'pull_request' && 'stable' || inputs.old }}
-          NEW: ${{ github.event_name == 'pull_request' && 'latest' || inputs.new || 'stable' }}
+          NEW: ${{ github.event_name == 'pull_request' && 'testing' || inputs.new || 'stable' }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
@@ -148,7 +148,7 @@ jobs:
           args=(--new "${out}/new.tsv")
           # The NVIDIA image moves to stable in the same run (by tag, not
           # by digest: it has its own digests)
-          nvidia_tag="${{ github.event_name == 'pull_request' && 'latest' || 'stable' }}"
+          nvidia_tag="${{ github.event_name == 'pull_request' && 'testing' || 'stable' }}"
           nvidia="$(nvidia_of "${nvidia_tag}")"
           echo "NVIDIA driver in ${image}-nvidia:${nvidia_tag}: ${nvidia:-not found}"
           [[ -n "${nvidia}" ]] && args+=(--nvidia "${nvidia}")
@@ -179,8 +179,8 @@ jobs:
           image="${IMAGE_REGISTRY,,}/${IMAGE_NAME,,}"
           out="${RUNNER_TEMP}/notes"
           if [[ "${GITHUB_EVENT_NAME}" == pull_request ]]; then
-            title="Preview: latest${VERSION:+ (${VERSION})} compared with stable"
-            ref="${image}:latest"
+            title="Preview: testing${VERSION:+ (${VERSION})} compared with stable"
+            ref="${image}:testing"
           else
             # stable-20261117 -> cosmic-blue 44.20261110 (stable 2026-11-17)
             date="${RELEASE_TAG#stable-}"

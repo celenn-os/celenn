@@ -23,9 +23,9 @@ permissions:
   contents: read
 
 env:
-  # The latest published image: most recipes and Brewfiles come from
+  # The testing image (the daily build): most recipes and Brewfiles come from
   # projectbluefin/common and ublue-os/brew, not from this repository
-  IMAGE: ghcr.io/cosmic-blue-os/cosmic-blue:latest
+  IMAGE: ghcr.io/cosmic-blue-os/cosmic-blue:testing
 
 jobs:
   check:
