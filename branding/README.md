@@ -34,14 +34,36 @@ Regenerate the SVGs with `python3 logo/build.py`.
 
 All 5120x2880, in `system_files/usr/share/backgrounds/cosmic-blue/`:
 
+- `cosmic-blue-arcs.jpg`: the official logo with the full name, its orbit
+  echoing outwards in fainter arcs (`wallpaper/shaders/echoes.frag`,
+  `wallpaper/logo_name.py`), the default COSMIC
+  wallpaper and the greeter background
+- `cosmic-blue-emblem.jpg`: a flat illustration, a tone-on-tone spiral and a
+  constellation drawing the "c" of the logo above the full name in the
+  logo's lettering (`wallpaper/shaders/constellation.frag`,
+  `wallpaper/name.py`), offered in Settings
+- `cosmic-blue-galaxy.jpg`: a tilted spiral galaxy, offered in Settings
+- `cosmic-blue-galactic-river.jpg`: a diagonal river of stars and gas, offered in
+  Settings
+- `cosmic-blue-gas-veils.jpg`: veils of blue gas around a star cluster, offered
+  in Settings
+- `cosmic-blue-line-orbits.jpg`: line art, bundles of orbit lines from two
+  corners, offered in Settings
 - `cosmic-blue-orbits.jpg`: a planetary system seen from above its plane (a
   bright star, shaded planets, a ringed giant, an asteroid belt) over the
-  Milky Way, the default COSMIC wallpaper
+  Milky Way, the previous default, offered in Settings
 - `cosmic-blue.jpg`: the logo as a scene, offered in Settings
 - `cosmic-blue-waves.jpg`: layered ribbons of light, offered in Settings
 - `cosmic-blue-milky-way.jpg`: the Milky Way above the Earth, a photo taken
   on the International Space Station (NASA, ISS064-E-55946, public domain),
   graded with the cosmic-blue palette, offered in Settings
+
+COSMIC Settings lists the wallpapers in the order of the folders on disk
+(alphabetical in the deployed image), so the file names put the current set
+first: the default (arcs), the emblem, then the others, and the older wallpapers
+(`milky-way`, `orbits`, `waves`, the logo scene) after them. The build moves
+COSMIC's own wallpapers to `/usr/share/backgrounds/cosmic-desktop` so that they
+come after ours (`build_files/20-cosmic.sh`).
 
 Keep the main elements inside the centre so they survive cropping to 16:10,
 4:3 and 21:9. `wallpaper/build.sh` renders them all (the NASA original is
@@ -51,6 +73,13 @@ accounts that picked a wallpaper in Settings point to its path.
 There are no light versions: the same wallpaper serves both themes. Later
 COSMIC releases read a wallpaper per theme (`com.system76.CosmicBackground.Dark`
 / `.Light`); both point to the default.
+
+The five shader wallpapers are GLSL fragment shaders in `wallpaper/shaders/`
+(`common.glsl` holds the palette, noise, stars and the film-like finish),
+rendered tile by tile with WebGL 2 in Playwright's headless Chromium by
+`wallpaper/shaders/render.js NAME OUT.png [WIDTH HEIGHT]`. They keep the
+top panel and the dock readable: no black edges, nothing dazzling behind
+them.
 
 `wallpaper/orbits.py` draws the planetary system with numpy over
 the sky of `wallpaper/sky.py`. The waves are drawn as SVG by

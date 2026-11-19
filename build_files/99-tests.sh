@@ -19,22 +19,23 @@ for face in "${faces}"/*.png; do
     test "$(od -An -tx1 -N8 "${face}" | tr -d ' ')" = 89504e470d0a1a0a
     test "$(od -An -tu1 -j16 -N8 "${face}" | tr -s ' ')" = " 0 0 2 0 0 0 2 0"
 done
-# cosmic-blue wallpapers: orbits is the COSMIC default, the logo scene, waves
-# and the Milky Way are extras. No light duplicates.
+# cosmic-blue wallpapers: arcs (the logo and name) is the COSMIC default, the others are
+# extras. No light duplicates.
 bg=/usr/share/backgrounds/cosmic-blue
-for name in orbits waves milky-way; do
+for name in arcs emblem galactic-river galaxy gas-veils line-orbits orbits waves milky-way; do
     test -s "${bg}/cosmic-blue-${name}.jpg"
 done
 test -s "${bg}/cosmic-blue.jpg"
 test ! -e "${bg}/cosmic-blue-light.jpg"
 test ! -e "${bg}/cosmic-blue-orbits-light.jpg"
-grep -q "Path(\"${bg}/cosmic-blue-orbits.jpg\")" \
+test ! -e "${bg}/cosmic-blue-constellation.jpg"
+grep -q "Path(\"${bg}/cosmic-blue-arcs.jpg\")" \
     /usr/share/cosmic/com.system76.CosmicBackground/v1/all
 # Per-theme defaults (used by COSMIC releases after 1.11): the same wallpaper
 # for both themes
-grep -q "Path(\"${bg}/cosmic-blue-orbits.jpg\")" \
+grep -q "Path(\"${bg}/cosmic-blue-arcs.jpg\")" \
     /usr/share/cosmic/com.system76.CosmicBackground.Dark/v1/all
-grep -q "Path(\"${bg}/cosmic-blue-orbits.jpg\")" \
+grep -q "Path(\"${bg}/cosmic-blue-arcs.jpg\")" \
     /usr/share/cosmic/com.system76.CosmicBackground.Light/v1/all
 test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-logo.svg
 # fastfetch: cosmic-blue logo and config instead of Bluefin's, a valid
@@ -173,6 +174,9 @@ grep -q 'io.missioncenter.MissionCenter' /usr/share/flatpak/preinstall.d/cosmic-
 rpm -q "f${FEDORA_MAJOR_VERSION}-backgrounds-base"
 # Each wallpaper is listed once in COSMIC Settings: no aliases, no copies
 test -z "$(find /usr/share/backgrounds -type l)"
+# cosmic-blue's wallpapers come first in COSMIC Settings (folder order)
+test "$(find /usr/share/backgrounds -mindepth 1 -maxdepth 1 -printf '%f\n' | LC_ALL=C sort | head -n1)" = cosmic-blue
+test ! -e /usr/share/backgrounds/cosmic
 test -z "$(find /usr/share/backgrounds -type f -exec sha256sum {} + | cut -d' ' -f1 | sort | uniq -d)"
 grep -q '^LOGO=cosmic-blue-logo$' /usr/lib/os-release
 # Links to the repository, also from cosmic-blue-nvidia

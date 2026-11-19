@@ -48,7 +48,7 @@ COPY --from=tour-build /out /
 # (see build_files/greeter/build.sh)
 FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS greeter-build
 COPY build_files/greeter /greeter
-COPY system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-orbits.jpg /greeter/background.jpg
+COPY system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-arcs.jpg /greeter/background.jpg
 ENV CARGO_CACHE_DIR=/cargo
 RUN /greeter/build.sh /greeter/background.jpg
 FROM scratch AS greeter
