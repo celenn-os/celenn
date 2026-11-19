@@ -1,7 +1,8 @@
 name: Lint
 # Static checks of pull requests, in about a minute: shellcheck on every shell
 # script (tests/lint.sh) and actionlint on the workflows, so a script mistake
-# shows before the image build and its boot test end.
+# shows before the image build and its boot test end. A change to the Renovate
+# config is also checked: a mistake there makes Renovate stop quietly.
 on:
   pull_request:
     branches:
@@ -13,6 +14,7 @@ on:
       - '.github/workflows/**'
       - '.github/actions/**'
       - '.github/actionlint.yaml'
+      - '.github/renovate.json5'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -45,3 +47,46 @@ jobs:
           SHELLCHECK_OPTS: --severity=warning
         with:
           args: -color
+
+  renovate:
+    name: Renovate config
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    env:
+      # Updated by Renovate (see .github/renovate.json5)
+      RENOVATE_VERSION: "44.234.1"
+    steps:
+      # Only when the pull request changes the config (the job is skipped
+      # quickly otherwise)
+      - name: Check whether the Renovate config changed
+        id: changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if gh pr diff "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --name-only | grep -qx '.github/renovate.json5'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Renovate config unchanged, nothing to check"
+          fi
+
+      - name: Checkout
+        if: steps.changed.outputs.changed == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        if: steps.changed.outputs.changed == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      # Without a file argument it finds .github/renovate.json5 and checks it
+      # as a repository config (with a path it would check a global config)
+      - name: renovate-config-validator
+        if: steps.changed.outputs.changed == 'true'
+        run: npx --yes --package "renovate@${RENOVATE_VERSION}" -- renovate-config-validator --strict
