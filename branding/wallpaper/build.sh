@@ -40,5 +40,9 @@ SHADER_DEFINES=$'#define CC vec2(0., .2)\n#define CR .085\n#define SPIRAL vec2(0
     node shaders/render.js constellation constellation.png
 python3 name.py constellation.png "${out}/cosmic-blue-emblem.jpg"
 rm -f constellation.png
+# The official logo and the full name, its orbit echoing outwards
+node shaders/render.js echoes echoes.png
+python3 logo_name.py echoes.png "${out}/cosmic-blue-echoes.jpg"
+rm -f echoes.png
 
 rm -f sky.png foreground.svg foreground.png concept.svg concept.png milky-way-orig.jpg
