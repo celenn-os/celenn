@@ -37,6 +37,9 @@ All 5120x2880, in `system_files/usr/share/backgrounds/cosmic-blue/`:
 - `cosmic-blue-constellation.jpg`: a flat illustration, a tone-on-tone
   spiral and a constellation drawing the "c" of the logo on a night-blue
   field, the default COSMIC wallpaper and the greeter background
+- `cosmic-blue-constellation-name.jpg`: the same, with the constellation above
+  the full name in the logo's lettering (`wallpaper/name.py`), offered in
+  Settings
 - `cosmic-blue-galaxy.jpg`: a tilted spiral galaxy, offered in Settings
 - `cosmic-blue-star-river.jpg`: a diagonal river of stars and gas, offered in
   Settings

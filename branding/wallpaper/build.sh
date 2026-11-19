@@ -32,5 +32,10 @@ for name in constellation galaxy star-river nebula orbit-lines; do
         "${name}.png" "${out}/cosmic-blue-${name}.jpg"
     rm -f "${name}.png"
 done
+# The constellation again, smaller, above the full name
+SHADER_DEFINES=$'#define CC vec2(0., .2)\n#define CR .085\n#define SPIRAL vec2(0., -.02)' \
+    node shaders/render.js constellation constellation.png
+python3 name.py constellation.png "${out}/cosmic-blue-constellation-name.jpg"
+rm -f constellation.png
 
 rm -f sky.png foreground.svg foreground.png concept.svg concept.png milky-way-orig.jpg

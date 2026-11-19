@@ -1,12 +1,13 @@
 // Render a GLSL fragment shader (common.glsl + NAME.frag) to a PNG with
 // headless Chromium (WebGL 2, software rendering), tile by tile.
 // Usage: node render.js NAME OUT.png [WIDTH HEIGHT]  (default 5120 2880)
+// SHADER_DEFINES='#define X 1' in the environment sets options of a shader.
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 const [name, out, w = '5120', h = '2880'] = process.argv.slice(2);
 const W = +w, H = +h;
-const src = fs.readFileSync(path.join(__dirname, 'common.glsl'), 'utf8') +
+const src = (process.env.SHADER_DEFINES || '') + '\n' + fs.readFileSync(path.join(__dirname, 'common.glsl'), 'utf8') +
   fs.readFileSync(path.join(__dirname, name + '.frag'), 'utf8');
 (async () => {
   const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });

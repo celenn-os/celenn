@@ -22,7 +22,7 @@ done
 # cosmic-blue wallpapers: constellation is the COSMIC default, the others are
 # extras. No light duplicates.
 bg=/usr/share/backgrounds/cosmic-blue
-for name in constellation galaxy star-river nebula orbit-lines orbits waves milky-way; do
+for name in constellation constellation-name galaxy star-river nebula orbit-lines orbits waves milky-way; do
     test -s "${bg}/cosmic-blue-${name}.jpg"
 done
 test -s "${bg}/cosmic-blue.jpg"
