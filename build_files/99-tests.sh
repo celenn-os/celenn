@@ -617,12 +617,23 @@ if [[ "${IMAGE_NAME}" == *-nvidia ]]; then
     grep -q 'nvidia-drm' /tmp/initramfs.txt
     grep -q 'nvidia-drm.modeset=1' /usr/lib/bootc/kargs.d/00-nvidia.toml
     grep -q 'modprobe.blacklist=nouveau' /usr/lib/bootc/kargs.d/00-nvidia.toml
+    systemctl is-enabled cosmic-blue-nvidia-flatpak-gl.service
     # The NVIDIA repositories used for the install are disabled again
     if dnf5 repolist --enabled | grep -i nvidia; then
         echo "NVIDIA repositories left enabled"; exit 1
     fi
 elif rpm -q kmod-nvidia; then
     echo "kmod-nvidia in a non-NVIDIA image"; exit 1
+fi
+
+# Only Fedora's repositories stay enabled (idea from Aurora): a third-party
+# repository left on would feed `dnf`/`rpm-ostree install` on installed
+# systems. fedora-multimedia (negativo17) is enabled by base-main itself for
+# the codecs, as in every Universal Blue image.
+allowed_repos='^(fedora|updates|updates-archive|fedora-multimedia)$'
+enabled_repos="$(dnf5 repolist --enabled | awk 'NR > 1 { print $1 }')"
+if unexpected="$(grep -vE "${allowed_repos}" <<<"${enabled_repos}")"; then
+    echo "Unexpected enabled repositories:"; echo "${unexpected}"; exit 1
 fi
 
 # No ESP automount on /boot, which made ostree drop staged updates
