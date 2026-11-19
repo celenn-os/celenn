@@ -421,11 +421,19 @@ jobs:
             ${VERSION}
 
       # Smaller delta updates for installed systems
-      - name: Rechunk with rpm-ostree
+      # dev (main pushes, and pull requests that run it): chunkah trial,
+      # see `just chunkah-rechunk`. testing: rpm-ostree.
+      - name: Rechunk
         id: rechunk
         if: needs.version.outputs.full == 'true'
         run: |
-          ${ROOT_ENV} just ostree-rechunk \
+          if [[ "${DEFAULT_TAG}" == dev ]]; then
+            recipe=chunkah-rechunk
+          else
+            recipe=ostree-rechunk
+          fi
+          echo "::notice::Rechunk: ${recipe}"
+          ${ROOT_ENV} just "${recipe}" \
             ${IMAGE_NAME} \
             ${DEFAULT_TAG}
 
