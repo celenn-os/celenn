@@ -73,7 +73,10 @@ if image not in binary:
     sys.exit("the cosmic-blue wallpaper is not embedded in cosmic-greeter")
 PY
 mkdir -p /out
-install -m 0755 "${bin}" /out/cosmic-greeter
+# Without debug data: Fedora's Rust build flags keep it (-Cdebuginfo=2), and
+# only its %install step, which is not run here, strips it (about 0.1 GB per
+# program in the image and the ISO)
+install -m 0755 -s "${bin}" /out/cosmic-greeter
 # The version the binary was built from, checked against the image's package
 rpm -qp --qf '%{VERSION}-%{RELEASE}\n' /srpm/cosmic-greeter-*.src.rpm > /out/version
 cat /out/version
