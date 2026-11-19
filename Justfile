@@ -260,53 +260,11 @@ helpers-keys:
         echo "${stage} $(sha256sum < "${inputs}" | cut -c1-32)"
     done
 
-# Split the image for smaller updates (Classical)!
-ostree-rechunk $target_image=image_name $tag=default_tag:
-    #!/usr/bin/env bash
-
-    set -xeuo pipefail
-
-    # Use the already-built local image to avoid pulling from a remote registry
-    RPM_OSTREE_CHUNKER_IMAGE="localhost/${target_image}:${tag}"
-
-    # The chunked image gets a new config without our labels; keep the OCI and
-    # Artifact Hub ones (not the ostree ones, which describe the old image), in
-    # particular org.opencontainers.image.version (without it `bootc install`
-    # writes a null version that bootupd fails to read on every boot).
-    LABEL_ARGS=()
-    while IFS= read -r label; do
-        LABEL_ARGS+=("--label" "${label}")
-    done < <(podman inspect "${RPM_OSTREE_CHUNKER_IMAGE}" \
-        | jq -r '.[0].Config.Labels // {} | to_entries[]
-                 | select(.key | test("^(org\\.opencontainers\\.image|io\\.artifacthub)\\."))
-                 | "\(.key)=\(.value)"')
-
-    GRAPHROOT="$(podman info --format '{{ '{{.Store.GraphRoot}}' }}')"
-
-    podman run --rm --pull=never --privileged \
-      --mount=type=image,src="${target_image}:${tag}",target=/rpm-ostree \
-      --mount=type=bind,src=${GRAPHROOT},target=/run/host-container-storage,rw \
-      --mount=type=tmpfs,target=/run/rpm-ostree-storage \
-      --entrypoint /usr/bin/rpm-ostree \
-      "${RPM_OSTREE_CHUNKER_IMAGE}" \
-      compose build-chunked-oci \
-      --max-layers 127 \
-      --format-version=2 \
-      --bootc \
-      --rootfs /rpm-ostree \
-      --output "containers-storage:[overlay@/run/host-container-storage+/run/rpm-ostree-storage]localhost/${target_image}:${tag}"
-
-    if (( ${#LABEL_ARGS[@]} > 0 )); then
-        LABEL_CTX="$(mktemp -d)"
-        echo "FROM localhost/${target_image}:${tag}" > "${LABEL_CTX}/Containerfile"
-        podman build --pull=never "${LABEL_ARGS[@]}" --tag "localhost/${target_image}:${tag}" "${LABEL_CTX}"
-        rm -rf "${LABEL_CTX}"
-    fi
-
-# Trial on the dev channel only (build.yml): rechunks with chunkah
+# Split the image into layers for smaller updates, with chunkah
 # (https://github.com/coreos/chunkah), rpm-ostree's successor that Aurora uses
-# for all its images, instead of `rpm-ostree compose build-chunked-oci`. Same
-# layer budget as ostree-rechunk, to compare update sizes. The image config
+# for all its images, instead of `rpm-ostree compose build-chunked-oci`: a
+# rebuild with the same content downloads about 360 MB instead of 600 MB or
+# more. 127 layers, as rpm-ostree gave. The image config
 # (labels included) is kept; the ostree labels go, as the result is a plain
 # image (--prune /sysroot/). Files without an RPM build time are clamped to
 # a fixed time (SOURCE_DATE_EPOCH=1, as Aurora's mtimes): otherwise chunkah
@@ -314,7 +272,8 @@ ostree-rechunk $target_image=image_name $tag=default_tag:
 # (556 MB to download for a rebuild with the same content). The image
 # creation time, which SOURCE_DATE_EPOCH also sets, is then set again to
 # the build time by a configuration-only rebuild (no new layer).
-# Pinned by digest, signature checked by `just verify-sources`.
+# Pinned by digest (Renovate, weekly), signature checked by
+# `just verify-sources`.
 chunkah_image := "quay.io/coreos/chunkah:latest@sha256:71e593421c5de7dcc7c8c5c50e98d3bac572055a76f399f61a491d123c20a523"
 
 chunkah-rechunk $target_image=image_name $tag=default_tag:
@@ -400,7 +359,7 @@ verify-sources:
         "${common}"
     echo "Signature OK: ${common}" >&2
 
-    # chunkah (dev channel rechunk trial): keyless, by its own CI
+    # chunkah (the rechunker): keyless, by its own CI
     retry cosign verify \
         --certificate-oidc-issuer https://token.actions.githubusercontent.com \
         --certificate-identity-regexp '^https://github\.com/coreos/chunkah/\.github/workflows/' \

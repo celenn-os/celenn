@@ -35,6 +35,13 @@
       "schedule": ["* 0-7 * * 1"]
     },
     {
+      // The rechunker, pinned by digest in the Justfile (`latest` tag)
+      "description": "chunkah, once a week",
+      "matchPackageNames": ["quay.io/coreos/chunkah"],
+      "groupName": "chunkah",
+      "schedule": ["* 0-7 * * 1"]
+    },
+    {
       "description": "GitHub Actions, once a week",
       "matchManagers": ["github-actions"],
       "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest"],
@@ -98,7 +105,8 @@
   // build_files/cursor_theme/bibata.sh, Starship at a pinned release in
   // build_files/30-packages.sh, titanoboa at a pinned commit in
   // .github/workflows/build-live-iso.yml, Renovate (config validator) at a
-  // pinned version in .github/workflows/lint.yml
+  // pinned version in .github/workflows/lint.yml, chunkah at a pinned digest
+  // in the Justfile
   "customManagers": [
     {
       "customType": "regex",
@@ -140,6 +148,14 @@
       "matchStrings": ["RENOVATE_VERSION: \"(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "renovate",
       "datasourceTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^Justfile$/"],
+      "matchStrings": [
+        "chunkah_image := \"(?<depName>quay\\.io/coreos/chunkah):(?<currentValue>[^@\"]+)@(?<currentDigest>sha256:[0-9a-f]{64})\""
+      ],
+      "datasourceTemplate": "docker"
     }
   ],
 

@@ -161,8 +161,8 @@ jobs:
 
       # The rechunk and the SBOM only change how the image is published, not
       # what it holds: pull requests skip them (about 11 minutes), unless they
-      # change these steps (Justfile, this workflow) or the base image whose
-      # rpm-ostree does the rechunk (Renovate). Main builds always run them,
+      # change these steps (Justfile, this workflow) or come from Renovate
+      # (base images, chunkah). Main builds always run them,
       # and boot-test the rechunked image before publishing it.
       - name: Pick the publishing steps to test
         id: full
@@ -420,20 +420,12 @@ jobs:
             ${DEFAULT_TAG} \
             ${VERSION}
 
-      # Smaller delta updates for installed systems
-      # dev (main pushes, and pull requests that run it): chunkah trial,
-      # see `just chunkah-rechunk`. testing: rpm-ostree.
+      # Smaller delta updates for installed systems (`just chunkah-rechunk`)
       - name: Rechunk
         id: rechunk
         if: needs.version.outputs.full == 'true'
         run: |
-          if [[ "${DEFAULT_TAG}" == dev ]]; then
-            recipe=chunkah-rechunk
-          else
-            recipe=ostree-rechunk
-          fi
-          echo "::notice::Rechunk: ${recipe}"
-          ${ROOT_ENV} just "${recipe}" \
+          ${ROOT_ENV} just chunkah-rechunk \
             ${IMAGE_NAME} \
             ${DEFAULT_TAG}
 
