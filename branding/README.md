@@ -37,15 +37,15 @@ All 5120x2880, in `system_files/usr/share/backgrounds/cosmic-blue/`:
 - `cosmic-blue-constellation.jpg`: a flat illustration, a tone-on-tone
   spiral and a constellation drawing the "c" of the logo on a night-blue
   field, the default COSMIC wallpaper and the greeter background
-- `cosmic-blue-constellation-name.jpg`: the same, with the constellation above
+- `cosmic-blue-emblem.jpg`: the same, with the constellation above
   the full name in the logo's lettering (`wallpaper/name.py`), offered in
   Settings
 - `cosmic-blue-galaxy.jpg`: a tilted spiral galaxy, offered in Settings
-- `cosmic-blue-star-river.jpg`: a diagonal river of stars and gas, offered in
+- `cosmic-blue-galactic-river.jpg`: a diagonal river of stars and gas, offered in
   Settings
-- `cosmic-blue-nebula.jpg`: veils of blue gas around a star cluster, offered
+- `cosmic-blue-gas-veils.jpg`: veils of blue gas around a star cluster, offered
   in Settings
-- `cosmic-blue-orbit-lines.jpg`: line art, bundles of orbit lines from two
+- `cosmic-blue-line-orbits.jpg`: line art, bundles of orbit lines from two
   corners, offered in Settings
 - `cosmic-blue-orbits.jpg`: a planetary system seen from above its plane (a
   bright star, shaded planets, a ringed giant, an asteroid belt) over the
@@ -55,6 +55,13 @@ All 5120x2880, in `system_files/usr/share/backgrounds/cosmic-blue/`:
 - `cosmic-blue-milky-way.jpg`: the Milky Way above the Earth, a photo taken
   on the International Space Station (NASA, ISS064-E-55946, public domain),
   graded with the cosmic-blue palette, offered in Settings
+
+COSMIC Settings lists the wallpapers in the order of the folders on disk
+(alphabetical in the deployed image), so the file names put the current set
+first: the default, the emblem, then the others, and the older wallpapers
+(`milky-way`, `orbits`, `waves`, the logo scene) after them. The build moves
+COSMIC's own wallpapers to `/usr/share/backgrounds/cosmic-desktop` so that they
+come after ours (`build_files/20-cosmic.sh`).
 
 Keep the main elements inside the centre so they survive cropping to 16:10,
 4:3 and 21:9. `wallpaper/build.sh` renders them all (the NASA original is

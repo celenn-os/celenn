@@ -98,6 +98,16 @@ while IFS= read -r -d '' file; do
 done < <(find /usr/share/backgrounds -type f -regextype egrep \
     -iregex '.*\.(png|jpe?g|jxl|webp|svg)' -print0 | sort -z)
 find /usr/share/backgrounds -mindepth 1 -type d -empty -delete
+# COSMIC Settings lists the wallpapers in folder order (alphabetical in the
+# deployed image): move COSMIC's own wallpapers after cosmic-blue's so that
+# ours come first ("cosmic" sorts before "cosmic-blue").
+if [[ -d /usr/share/backgrounds/cosmic ]]; then
+    mv /usr/share/backgrounds/cosmic /usr/share/backgrounds/cosmic-desktop
+    if grep -rlF /usr/share/backgrounds/cosmic/ /usr/share/cosmic /etc 2>/dev/null; then
+        echo "These files point to the moved COSMIC wallpapers" >&2
+        exit 1
+    fi
+fi
 echo "Wallpapers kept:"
 find /usr/share/backgrounds -printf '%y %p %l\n' | sort
 

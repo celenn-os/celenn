@@ -22,7 +22,7 @@ done
 # cosmic-blue wallpapers: constellation is the COSMIC default, the others are
 # extras. No light duplicates.
 bg=/usr/share/backgrounds/cosmic-blue
-for name in constellation constellation-name galaxy star-river nebula orbit-lines orbits waves milky-way; do
+for name in constellation emblem galactic-river galaxy gas-veils line-orbits orbits waves milky-way; do
     test -s "${bg}/cosmic-blue-${name}.jpg"
 done
 test -s "${bg}/cosmic-blue.jpg"
@@ -173,6 +173,9 @@ grep -q 'io.missioncenter.MissionCenter' /usr/share/flatpak/preinstall.d/cosmic-
 rpm -q "f${FEDORA_MAJOR_VERSION}-backgrounds-base"
 # Each wallpaper is listed once in COSMIC Settings: no aliases, no copies
 test -z "$(find /usr/share/backgrounds -type l)"
+# cosmic-blue's wallpapers come first in COSMIC Settings (folder order)
+test "$(find /usr/share/backgrounds -mindepth 1 -maxdepth 1 -printf '%f\n' | LC_ALL=C sort | head -n1)" = cosmic-blue
+test ! -e /usr/share/backgrounds/cosmic
 test -z "$(find /usr/share/backgrounds -type f -exec sha256sum {} + | cut -d' ' -f1 | sort | uniq -d)"
 grep -q '^LOGO=cosmic-blue-logo$' /usr/lib/os-release
 # Links to the repository, also from cosmic-blue-nvidia
