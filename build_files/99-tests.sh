@@ -471,7 +471,8 @@ done
 # which would add about 0.1 GB each to the image and the ISO
 for bin in /usr/bin/cosmic-greeter /usr/bin/cosmic-store /ctx/filemanager/bin/*; do
     sections="$(readelf -S --wide "${bin}")"
-    if grep -q ' \.debug_' <<<"${sections}"; then
+    # (.debug_gdb_scripts, Rust's debugger helpers, is loaded data and stays)
+    if grep -q ' \.debug_info ' <<<"${sections}"; then
         echo "${bin} is not stripped"; exit 1
     fi
 done
