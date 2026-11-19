@@ -663,6 +663,15 @@ systemctl is-enabled fstrim.timer
 systemctl cat fstrim.service | grep -q -- '--listed-in /proc/self/mountinfo '
 # - compressed RAM swap and the out-of-memory killer (Fedora defaults)
 rpm -q zram-generator-defaults systemd-oomd-defaults
+# - zram-aware swapping, a bounded write cache, more inotify instances: our
+#   values must be the last ones systemd-sysctl applies
+sysctl_config="$(/usr/lib/systemd/systemd-sysctl --cat-config)"
+for setting in vm.swappiness=180 vm.page-cluster=0 vm.dirty_bytes=268435456 \
+               vm.dirty_background_bytes=134217728 fs.inotify.max_user_instances=8192; do
+    key="${setting%%=*}"
+    last="$(sed -nE "s/^[[:space:]]*${key//./\\.}[[:space:]]*=[[:space:]]*//p" <<<"${sysctl_config}" | tail -n 1)"
+    [[ "${key}=${last}" == "${setting}" ]] || { echo "sysctl ${key} is '${last}', expected ${setting#*=}"; exit 1; }
+done
 # - CA certificates and crypto policies regenerated after each update
 #   (ublue-os/main), coredumps kept 5 days instead of 14
 systemctl is-enabled bootc-update-ca-trust.service bootc-update-crypto-policies.service

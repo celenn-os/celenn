@@ -282,7 +282,14 @@ vm_check_tuning() {
         problems+=("fstrim.service failed")
         vm 'journalctl -b -u fstrim.service --no-pager -n 20' || true
     fi
-    vm 'swapon --show; cat /proc/sys/vm/swappiness; oomctl | head -n 20' || true
+    # Kernel settings of /usr/lib/sysctl.d/60-cosmic-blue.conf, as applied
+    local setting
+    for setting in vm.swappiness=180 vm.page-cluster=0 vm.dirty_bytes=268435456 \
+                   vm.dirty_background_bytes=134217728 fs.inotify.max_user_instances=8192; do
+        vm "[ \"\$(sysctl -n ${setting%%=*})\" = ${setting#*=} ]" \
+            || problems+=("sysctl ${setting%%=*} is not ${setting#*=}")
+    done
+    vm 'swapon --show; oomctl | head -n 20' || true
 
     for problem in "${problems[@]}"; do
         echo "::error::${label}: ${problem}"
