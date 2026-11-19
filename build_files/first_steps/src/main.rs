@@ -38,8 +38,8 @@ const INSTALLERS: [&str; 2] = [
     "/usr/share/applications/anaconda.desktop",
 ];
 
-const ACCESSIBILITY: &str =
-    "Screen reader: Super + Alt + S. Zoom: Super + = and Super + -. More in the settings.";
+/// One shortcut per line (the Settings button next to it opens the rest)
+const ACCESSIBILITY: &str = "Screen reader: Super + Alt + S\nZoom: Super + = and Super + -";
 
 /// Translations, one gettext PO file per language in po/ (copies of
 /// po/cosmic-blue-tour.pot). To add a language, add its file here: pt_BR is
