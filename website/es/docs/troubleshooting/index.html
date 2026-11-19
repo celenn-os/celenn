@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solución de problemas · cosmic-blue</title>
+  <meta name="description" content="Resolver los problemas habituales de cosmic-blue: volver atrás tras una mala actualización, restablecer el escritorio, reparar aplicaciones e informar de un error.">
+  <meta name="theme-color" content="#060b1c">
+  <link rel="alternate" hreflang="de" href="https://cosmic-blue-os.github.io/cosmic-blue/de/docs/troubleshooting/">
+  <link rel="alternate" hreflang="en" href="https://cosmic-blue-os.github.io/cosmic-blue/docs/troubleshooting/">
+  <link rel="alternate" hreflang="es" href="https://cosmic-blue-os.github.io/cosmic-blue/es/docs/troubleshooting/">
+  <link rel="alternate" hreflang="fr" href="https://cosmic-blue-os.github.io/cosmic-blue/fr/docs/troubleshooting/">
+  <link rel="alternate" hreflang="it" href="https://cosmic-blue-os.github.io/cosmic-blue/it/docs/troubleshooting/">
+  <link rel="alternate" hreflang="pt-BR" href="https://cosmic-blue-os.github.io/cosmic-blue/pt-br/docs/troubleshooting/">
+  <link rel="alternate" hreflang="x-default" href="https://cosmic-blue-os.github.io/cosmic-blue/docs/troubleshooting/">
+  <link rel="icon" href="../../../img/cosmic-blue-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="page-head">
+    <nav class="top">
+      <a class="brand" href="../../"><img src="../../../img/cosmic-blue-logo.svg" alt="" width="28" height="28">cosmic-blue</a>
+      <span class="links">
+        <a class="text" href="../" aria-current="page">Docs</a>
+        <a class="text" href="../../screenshots/">Capturas</a>
+        <details class="lang">
+          <summary class="icon" title="Idioma" aria-label="Idioma: Español"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><ellipse cx="12" cy="12" rx="4" ry="9.5"/><path d="M2.5 12h19M4.2 7h15.6M4.2 17h15.6"/></svg><span aria-hidden="true">ES</span></summary>
+          <ul>
+            <li><a href="../../../de/docs/troubleshooting/" hreflang="de" lang="de">Deutsch</a></li>
+            <li><a href="../../../docs/troubleshooting/" hreflang="en" lang="en">English</a></li>
+            <li><a href="../../../es/docs/troubleshooting/" hreflang="es" lang="es" aria-current="page">Español</a></li>
+            <li><a href="../../../fr/docs/troubleshooting/" hreflang="fr" lang="fr">Français</a></li>
+            <li><a href="../../../it/docs/troubleshooting/" hreflang="it" lang="it">Italiano</a></li>
+            <li><a href="../../../pt-br/docs/troubleshooting/" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li>
+          </ul>
+        </details>
+        <a class="icon" href="https://github.com/cosmic-blue-os/cosmic-blue" title="GitHub" aria-label="GitHub"><svg viewBox="0 0 16 16" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+      </span>
+    </nav>
+  </header>
+
+  <main class="docs">
+    <section class="block">
+      <h1>Solución de problemas</h1>
+      <p>¿Algo ha salido mal? La mayoría de los problemas en cosmic-blue se pueden deshacer: la versión anterior del sistema sigue instalada, y tu configuración de COSMIC se puede devolver a los valores predeterminados. Los comandos se escriben en una terminal. Consulta también la <a href="../">documentación</a>.</p>
+      <nav class="toc" aria-label="Contenido">
+        <a href="#no-boot">El equipo no arranca</a>
+        <a href="#bad-update">Una actualización rompió algo</a>
+        <a href="#no-desktop">El escritorio no se inicia</a>
+        <a href="#settings">Aspecto y configuración</a>
+        <a href="#apps">Una aplicación no funciona</a>
+        <a href="#no-updates">Las actualizaciones no se instalan</a>
+        <a href="#nvidia">Controlador de NVIDIA</a>
+        <a href="#report">Informar de un problema</a>
+      </nav>
+    </section>
+
+    <section id="no-boot" class="block">
+      <h2>El equipo no arranca tras una actualización</h2>
+      <ol>
+        <li>Enciende el equipo y pulsa <kbd>Esc</kbd> varias veces (o mantén pulsada <kbd>Mayús</kbd>) hasta que aparezca el menú de arranque.</li>
+        <li>Elige la segunda entrada, marcada como <code>ostree:1</code>: es la versión que tenías antes de la actualización.</li>
+        <li>Una vez en el escritorio, conserva esa versión también para los próximos arranques:</li>
+      </ol>
+      <div class="code">
+        <pre><code>sudo bootc rollback</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+      <p>Después sigue la sección siguiente para que la versión rota no vuelva.</p>
+    </section>
+
+    <section id="bad-update" class="block">
+      <h2>Una actualización rompió algo</h2>
+      <p>Vuelve a la versión que tenías antes. Sigue instalada hasta la próxima actualización, así que funciona sin conexión:</p>
+      <div class="code">
+        <pre><code>sudo bootc rollback    # usar la versión anterior en el próximo arranque
+sudo systemctl reboot</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+      <p>Las actualizaciones automáticas volverían a instalar la versión rota. Ponlas en pausa, <a href="#report">informa del problema</a> y vuelve a activarlas cuando salga una corrección:</p>
+      <div class="code">
+        <pre><code>ujust toggle-updates disable   # pausar las actualizaciones automáticas
+ujust toggle-updates enable    # reactivarlas más tarde</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+      <h3>Volver más atrás</h3>
+      <p>Cada versión tiene su propio número, como <code>44.20261110</code>: <code>sudo bootc status</code> muestra la tuya, y la <a href="https://github.com/cosmic-blue-os/cosmic-blue/releases">página de versiones</a> lista las semanales. Puedes instalar una de ellas y volver más tarde a las actualizaciones normales. En la imagen de NVIDIA, escribe <code>cosmic-blue-nvidia</code> en lugar de <code>cosmic-blue</code>.</p>
+      <div class="code">
+        <pre><code>sudo bootc switch --enforce-container-sigpolicy ghcr.io/cosmic-blue-os/cosmic-blue:44.20261110   # quedarse en esta versión
+sudo bootc switch --enforce-container-sigpolicy ghcr.io/cosmic-blue-os/cosmic-blue:stable        # volver a las actualizaciones semanales</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+    </section>
+
+    <section id="no-desktop" class="block">
+      <h2>El escritorio no se inicia</h2>
+      <p>¿Pantalla negra, o de vuelta a la pantalla de inicio de sesión tras escribir la contraseña? Puede que la causa sea tu configuración de COSMIC.</p>
+      <ol>
+        <li>Pulsa <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F3</kbd> para abrir una consola de texto, e inicia sesión con tu nombre de usuario y contraseña.</li>
+        <li>Restablece la configuración de COSMIC (tus archivos y aplicaciones no se tocan) y reinicia:</li>
+      </ol>
+      <div class="code">
+        <pre><code>ujust reset-cosmic-config
+sudo systemctl reboot</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+      <p>Si empezó tras una actualización, <a href="#bad-update">vuelve a la versión anterior</a> desde la misma consola.</p>
+    </section>
+
+    <section id="settings" class="block">
+      <h2>Aspecto y configuración</h2>
+      <p>¿Has perdido el aspecto de cosmic-blue, o un panel, el dock o un atajo ya no se comporta bien? Restablece solo la apariencia, o toda la configuración de COSMIC. Cierra la sesión y vuelve a entrar después.</p>
+      <dl class="commands">
+        <dt><code>ujust reset-cosmic-theme</code></dt>
+        <dd>Recupera los colores, el tema oscuro, los iconos, las fuentes y el fondo de pantalla. El panel, el dock, el teclado y los atajos se conservan.</dd>
+        <dt><code>ujust reset-cosmic-config</code></dt>
+        <dd>Restablece toda la configuración de COSMIC, pero conserva la distribución del teclado y el formato de la hora. La configuración anterior se mueve a una carpeta <code>~/.config/cosmic.backup-</code>, y el comando indica cómo recuperarla.</dd>
+      </dl>
+    </section>
+
+    <section id="apps" class="block">
+      <h2>Una aplicación no funciona</h2>
+      <p>Las aplicaciones de COSMIC Store son Flatpak. Primero actualízalas y repara los archivos instalados:</p>
+      <div class="code">
+        <pre><code>flatpak update
+sudo flatpak repair</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+      <p>¿Sigue sin funcionar? Inicia la aplicación con una configuración nueva. Busca su ID y aparta sus datos (devuelve la carpeta a su sitio para deshacerlo):</p>
+      <div class="code">
+        <pre><code>flatpak list --app
+mv ~/.var/app/org.example.App ~/.var/app/org.example.App.old</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+      <p>¿Una aplicación de FlatPark falla? <code>ujust toggle-flatpark off</code> desinstala sus aplicaciones y desactiva FlatPark.</p>
+    </section>
+
+    <section id="no-updates" class="block">
+      <h2>Las actualizaciones no se instalan</h2>
+      <p>Lanza la actualización a mano para ver el error, y comprueba que las actualizaciones automáticas estén activadas:</p>
+      <div class="code">
+        <pre><code>ujust update
+ujust toggle-updates</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+      <p>¿Disco lleno? <code>ujust clean-system</code> elimina las imágenes de contenedor sin usar, los runtimes de Flatpak y los archivos de Homebrew, y pregunta antes de tocar los contenedores.</p>
+    </section>
+
+    <section id="nvidia" class="block">
+      <h2>Controlador de NVIDIA</h2>
+      <p>En la imagen de NVIDIA con Secure Boot activado, el controlador solo se carga cuando su clave está registrada. Ejecuta el comando de abajo y reinicia: una pantalla azul pide <strong>Enroll MOK</strong>, con la contraseña <code>cosmicblue</code> (escrita en distribución QWERTY).</p>
+      <div class="code">
+        <pre><code>ujust enroll-secure-boot-key</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+      <p>¿Instalaste la imagen estándar en un equipo con tarjeta NVIDIA? Cambia a la imagen de NVIDIA:</p>
+      <div class="code">
+        <pre><code>sudo bootc switch --enforce-container-sigpolicy ghcr.io/cosmic-blue-os/cosmic-blue-nvidia:stable</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+    </section>
+
+    <section id="report" class="block">
+      <h2>Informar de un problema</h2>
+      <p>Ejecuta el primer comando de abajo en el equipo con el problema: recopila los datos del sistema (ningún dato personal) y abre un <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues/new/choose">informe de error</a> con ellos ya rellenados. Cuenta qué hiciste y qué pasó. Si el problema apareció durante el arranque anterior, añade los errores que registró (segundo comando). Las preguntas van a <a href="https://github.com/cosmic-blue-os/cosmic-blue/discussions">Discussions</a>.</p>
+      <div class="code">
+        <pre><code>ujust report-bug
+sudo journalctl -b -1 -p err --no-pager</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>cosmic-blue está construido sobre <a href="https://universal-blue.org/">Universal Blue</a>, <a href="https://projectbluefin.io/">Bluefin</a>, <a href="https://fedoraproject.org/">Fedora</a> y <a href="https://system76.com/cosmic">COSMIC</a>. cosmic-blue es un proyecto independiente, no afiliado a estos proyectos ni respaldado por ellos.</p>
+    <p><a href="https://github.com/cosmic-blue-os/cosmic-blue">Código fuente</a> ·
+    <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues">Informar de un problema</a></p>
+  </footer>
+
+  <script src="../../../site.js"></script>
+</body>
+</html>

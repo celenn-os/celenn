@@ -26,8 +26,8 @@ Where things are:
   step; `build_files/99-tests.sh` checks the result.
 - `system_files/`: files copied as they are into the image.
 - `tests/`: the virtual machine tests run by CI.
-- `website/`: the website. Every text change goes in both the English page
-  and the French one under `website/fr/`.
+- `website/`: the website. Every text change goes in the English page and
+  in each translation (`website/de/`, `es/`, `fr/`, `it/`, `pt-br/`).
 - `branding/`: the logo, wallpapers and icons, and how to regenerate them.
 
 ## Translations
@@ -48,7 +48,14 @@ every language. To add a language:
   `iso_files/welcome/`.
 - COSMIC Store texts: add an `append()` for the language in
   `build_files/store/patch.py`.
+- Website: copy the English pages into `website/<language>/` (fixing the
+  relative paths, as in `website/fr/`), translate them, add the language to
+  `languages` in `website/build.sh`, and add it to the language menu and the
+  `hreflang` links of every page. Add its copy button labels to
+  `website/site.js`.
 
-The image build fails if a tour text or tip is missing in a language.
+The image build fails if a tour text or tip is missing in a language. The
+website build fails if a translated page lacks a section, a command, a
+screenshot or a language link of the English one.
 
 Proposing new COSMIC defaults: see [docs/cosmic-defaults.md](docs/cosmic-defaults.md).

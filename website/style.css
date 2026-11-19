@@ -95,7 +95,7 @@ kbd {
   gap: 8px;
 }
 
-/* Icon links in the top bar: language switch and GitHub */
+/* Icon links in the top bar: language menu and GitHub */
 .top .icon {
   display: inline-flex;
   align-items: center;
@@ -112,10 +112,49 @@ kbd {
 }
 
 .top .icon:hover,
-.top .icon:focus-visible {
+.top .icon:focus-visible,
+.lang[open] > .icon {
   opacity: 1;
   background: rgb(255 255 255 / .1);
 }
+
+/* Language menu: a native <details>, so it works without JavaScript */
+.lang { position: relative; }
+
+.lang > summary {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.lang > summary::-webkit-details-marker { display: none; }
+
+.lang ul {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 10;
+  min-width: 190px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgb(0 0 0 / .45);
+}
+
+.lang li a {
+  display: block;
+  padding: 9px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.lang li a:hover,
+.lang li a:focus-visible { background: rgb(255 255 255 / .08); }
+
+.lang li a[aria-current] { color: var(--accent-light); }
 
 .brand {
   display: inline-flex;

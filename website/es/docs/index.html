@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Documentación · cosmic-blue</title>
+  <meta name="description" content="Cómo usar cosmic-blue: actualizaciones y vuelta atrás, instalar programas, comandos ujust, el aspecto y cómo obtener ayuda.">
+  <meta name="theme-color" content="#060b1c">
+  <link rel="alternate" hreflang="de" href="https://cosmic-blue-os.github.io/cosmic-blue/de/docs/">
+  <link rel="alternate" hreflang="en" href="https://cosmic-blue-os.github.io/cosmic-blue/docs/">
+  <link rel="alternate" hreflang="es" href="https://cosmic-blue-os.github.io/cosmic-blue/es/docs/">
+  <link rel="alternate" hreflang="fr" href="https://cosmic-blue-os.github.io/cosmic-blue/fr/docs/">
+  <link rel="alternate" hreflang="it" href="https://cosmic-blue-os.github.io/cosmic-blue/it/docs/">
+  <link rel="alternate" hreflang="pt-BR" href="https://cosmic-blue-os.github.io/cosmic-blue/pt-br/docs/">
+  <link rel="alternate" hreflang="x-default" href="https://cosmic-blue-os.github.io/cosmic-blue/docs/">
+  <link rel="icon" href="../../img/cosmic-blue-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <header class="page-head">
+    <nav class="top">
+      <a class="brand" href="../"><img src="../../img/cosmic-blue-logo.svg" alt="" width="28" height="28">cosmic-blue</a>
+      <span class="links">
+        <a class="text" href="./" aria-current="page">Docs</a>
+        <a class="text" href="../screenshots/">Capturas</a>
+        <details class="lang">
+          <summary class="icon" title="Idioma" aria-label="Idioma: Español"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><ellipse cx="12" cy="12" rx="4" ry="9.5"/><path d="M2.5 12h19M4.2 7h15.6M4.2 17h15.6"/></svg><span aria-hidden="true">ES</span></summary>
+          <ul>
+            <li><a href="../../de/docs/" hreflang="de" lang="de">Deutsch</a></li>
+            <li><a href="../../docs/" hreflang="en" lang="en">English</a></li>
+            <li><a href="../../es/docs/" hreflang="es" lang="es" aria-current="page">Español</a></li>
+            <li><a href="../../fr/docs/" hreflang="fr" lang="fr">Français</a></li>
+            <li><a href="../../it/docs/" hreflang="it" lang="it">Italiano</a></li>
+            <li><a href="../../pt-br/docs/" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li>
+          </ul>
+        </details>
+        <a class="icon" href="https://github.com/cosmic-blue-os/cosmic-blue" title="GitHub" aria-label="GitHub"><svg viewBox="0 0 16 16" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+      </span>
+    </nav>
+  </header>
+
+  <main class="docs">
+    <section class="block">
+      <h1>Documentación</h1>
+      <p>Lo que necesitas saber para usar cosmic-blue en el día a día. cosmic-blue es una imagen atómica independiente construida sobre la base de Universal Blue: el sistema es de solo lectura y se actualiza como un todo, y tus aplicaciones y archivos viven aparte.</p>
+      <nav class="toc" aria-label="Contenido">
+        <a href="#updates">Actualizaciones y vuelta atrás</a>
+        <a href="#apps">Instalar programas</a>
+        <a href="#hardware">Impresoras, firmware, batería</a>
+        <a href="#ujust">Comandos ujust</a>
+        <a href="#look">El aspecto</a>
+        <a href="#terminal">Terminal</a>
+        <a href="#data">Tus datos</a>
+        <a href="#privacy">Privacidad</a>
+        <a href="#verify">Comprobar las descargas</a>
+        <a href="#help">Obtener ayuda</a>
+        <a href="troubleshooting/">Solución de problemas</a>
+      </nav>
+    </section>
+
+    <section id="updates" class="block">
+      <h2>Actualizaciones y vuelta atrás</h2>
+      <p>El sistema, las aplicaciones Flatpak, los paquetes de Homebrew y los AppImage añadidos con Gear Lever se actualizan solos en segundo plano. Una actualización del sistema se aplica en el siguiente arranque. Para actualizar ahora, o para desactivar las actualizaciones automáticas:</p>
+      <div class="code">
+        <pre><code>ujust update           # actualizar todo ahora
+ujust toggle-updates   # activar o desactivar las actualizaciones automáticas</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+      <p>Si una actualización rompe algo, vuelve a la versión anterior. Sigue instalada hasta la próxima actualización, así que funciona sin conexión:</p>
+      <div class="code">
+        <pre><code>sudo bootc rollback    # usar la versión anterior en el próximo arranque
+sudo systemctl reboot
+sudo bootc status      # ver la versión actual y la anterior</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+      <p>¿El equipo ya no arranca, o la versión rota vuelve una y otra vez? Consulta <a href="troubleshooting/">Solución de problemas</a>.</p>
+    </section>
+
+    <section id="apps" class="block">
+      <h2>Instalar programas</h2>
+      <h3>Aplicaciones: COSMIC Store</h3>
+      <p>Las aplicaciones gráficas llegan como Flatpak desde <strong>COSMIC Store</strong>, que muestra Flathub y las aplicaciones de COSMIC. Se actualizan con el sistema y no lo modifican.</p>
+      <h3>AppImage: Gear Lever</h3>
+      <p>Abre un AppImage descargado: <strong>Gear Lever</strong> lo añade a la lista de aplicaciones y lo mantiene al día.</p>
+      <h3>Herramientas de línea de comandos: Homebrew</h3>
+      <p>Las herramientas de línea de comandos se instalan en tu carpeta personal con Homebrew:</p>
+      <div class="code">
+        <pre><code>brew search ripgrep
+brew install ripgrep</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+      <h3>Paquetes de otras distribuciones: Distrobox</h3>
+      <p>¿Necesitas un paquete que solo existe para otra distribución? Distrobox lo ejecuta en un contenedor que comparte tu carpeta personal:</p>
+      <div class="code">
+        <pre><code>distrobox create --name arch --image archlinux:latest
+distrobox enter arch</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+      <h3>Herramientas de desarrollo</h3>
+      <p>El modo desarrollador añade Docker, Podman Desktop, VS Code y otros IDE, Lima y más. Elige lo que quieras en un menú:</p>
+      <div class="code">
+        <pre><code>ujust install-dev-tools</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+    </section>
+
+    <section id="hardware" class="block">
+      <h2>Impresoras, firmware, batería</h2>
+      <h3>Impresoras y escáneres</h3>
+      <p>La mayoría de las impresoras de red y USB funcionan al instante, sin controlador. Para añadir una a mano, abre <strong>Configuración de impresión</strong>: hay controladores instalados para HP, Epson, Brother, Canon y otras. <strong>Escáner de documentos</strong> escanea con escáneres de red y USB.</p>
+      <h3>Actualizaciones de firmware</h3>
+      <p>La aplicación <strong>Firmware</strong> actualiza el firmware del equipo y de sus dispositivos (BIOS/UEFI, SSD, dock…), cuando el fabricante lo publica en fwupd.org. O desde la terminal:</p>
+      <div class="code">
+        <pre><code>ujust update-firmware</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+      <h3>Batería del portátil</h3>
+      <p>Una batería que siempre está enchufada dura más si no está siempre llena. En los portátiles que lo permiten, esto detiene la carga al 80&nbsp;%:</p>
+      <div class="code">
+        <pre><code>ujust toggle-battery-limit</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+    </section>
+
+    <section id="ujust" class="block">
+      <h2>Comandos ujust</h2>
+      <p><code>ujust</code> ejecuta los atajos que trae el sistema. Escribe <code>ujust</code> para verlos todos, o <code>ujust --choose</code> para elegir uno en un menú. Cada comando <code>install-…</code> tiene su <code>remove-…</code>. Los más útiles:</p>
+      <dl class="commands">
+        <dt><code>ujust update</code></dt>
+        <dd>Actualizar ahora el sistema, las aplicaciones y los paquetes de Homebrew.</dd>
+        <dt><code>ujust toggle-updates</code></dt>
+        <dd>Activar o desactivar las actualizaciones automáticas.</dd>
+        <dt><code>ujust update-firmware</code></dt>
+        <dd>Instalar actualizaciones de firmware (BIOS/UEFI, SSD, dock…).</dd>
+        <dt><code>ujust switch-channel</code></dt>
+        <dd>Cambiar entre las imágenes <code>stable</code> (semanal, la predeterminada), <code>testing</code> (diaria) y <code>dev</code> (cada cambio fusionado).</dd>
+        <dt><code>ujust install-dev-tools</code></dt>
+        <dd>Herramientas de desarrollo, elegidas en un menú: Docker, VS Code, Podman Desktop…</dd>
+        <dt><code>ujust install-cli-tools</code></dt>
+        <dd>Herramientas de línea de comandos: bat, eza, fd, ripgrep, zoxide…</dd>
+        <dt><code>ujust install-microsoft-fonts</code></dt>
+        <dd>Fuentes de Microsoft: Arial, Times New Roman, Verdana…</dd>
+        <dt><code>ujust install-gaming</code></dt>
+        <dd>Steam y Heroic (Epic Games, GOG, Amazon).</dd>
+        <dt><code>ujust toggle-flatpark</code></dt>
+        <dd>Activar o desactivar FlatPark, una fuente extra de aplicaciones. Desactivado por defecto: sus aplicaciones no se revisan como las de Flathub.</dd>
+        <dt><code>ujust toggle-dark-mode</code></dt>
+        <dd>Cambiar entre el tema oscuro y el claro.</dd>
+        <dt><code>ujust reset-cosmic-theme</code></dt>
+        <dd>Recuperar el aspecto de cosmic-blue.</dd>
+        <dt><code>ujust reset-cosmic-config</code></dt>
+        <dd>Restablecer toda la configuración de COSMIC (se guarda una copia).</dd>
+        <dt><code>ujust toggle-battery-limit</code></dt>
+        <dd>Detener la carga del portátil al 80&nbsp;% para que la batería dure más.</dd>
+        <dt><code>ujust toggle-tpm2</code></dt>
+        <dd>Desbloquear el disco cifrado con el chip TPM2, sin contraseña.</dd>
+        <dt><code>ujust enroll-secure-boot-key</code></dt>
+        <dd>NVIDIA con Secure Boot: registrar la clave del controlador.</dd>
+        <dt><code>ujust report-bug</code></dt>
+        <dd>Abrir un informe de error con los datos de tu sistema ya rellenados.</dd>
+      </dl>
+    </section>
+
+    <section id="look" class="block">
+      <h2>El aspecto</h2>
+      <p>cosmic-blue trae un tema azul de COSMIC, paneles de vidrio esmerilado y fondos de pantalla, iconos y cursores propios. Cámbialo todo en <strong>Configuración</strong>. Si quieres recuperar el aspecto original:</p>
+      <div class="code">
+        <pre><code>ujust reset-cosmic-theme</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+    </section>
+
+    <section id="terminal" class="block">
+      <h2>Terminal</h2>
+      <p>Cada nueva terminal muestra un mensaje de bienvenida con un consejo. <code>fastfetch</code> muestra la información del sistema. Para desactivar el mensaje de bienvenida, o volver a activarlo:</p>
+      <div class="code">
+        <pre><code>uwelcome toggle</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+    </section>
+
+    <section id="data" class="block">
+      <h2>Tus datos</h2>
+      <p>Las actualizaciones solo sustituyen el sistema: tu carpeta personal, tus aplicaciones y su configuración se conservan, igual que tus cambios en <code>/etc</code>.</p>
+      <h3>Cifrado del disco</h3>
+      <p>El cifrado se elige en el instalador: en <em>Installation Destination</em>, marca <em>Encrypt my data</em> y elige una frase de contraseña. Hazlo en un portátil, que se puede perder o te pueden robar. No se puede activar más tarde sin reinstalar. Una vez instalado, el chip TPM2 puede desbloquear el disco al arrancar en lugar de la frase de contraseña:</p>
+      <div class="code">
+        <pre><code>ujust toggle-tpm2</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+      <h3>Copias de seguridad</h3>
+      <p>La aplicación <strong>Copias de seguridad</strong> (Déjà Dup) está instalada: guarda tu carpeta personal en un disco externo, una carpeta compartida en red o un almacenamiento en la nube, cifrada si quieres, y restaura archivos sueltos o todo. Para la terminal, también están instalados <code>restic</code>, <code>borg</code> y <code>rclone</code>.</p>
+      <h3>Si vienes de otro sistema</h3>
+      <p>Primero haz una copia de tus archivos (con Copias de seguridad, o copiándolos a un disco externo), instala cosmic-blue y luego cópialos de vuelta a tu carpeta personal. Vuelve a instalar tus aplicaciones desde COSMIC Store; las aplicaciones Flatpak guardan sus datos en <code>~/.var/app</code>, que puedes copiar desde otro sistema que usara los mismos Flatpak.</p>
+    </section>
+
+    <section id="privacy" class="block">
+      <h2>Privacidad</h2>
+      <p>cosmic-blue no recopila nada sobre ti. Lo que el sistema contacta por su cuenta:</p>
+      <ul>
+        <li>Actualizaciones, una vez al día: las imágenes de cosmic-blue en GitHub, Flathub y el repositorio de aplicaciones de COSMIC, y Homebrew si lo usas (con sus estadísticas de uso desactivadas).</li>
+        <li>El recuento semanal anónimo de Fedora (<code>rpm-ostree-countme</code>): una petición por semana a los servidores de Fedora, con la versión de Fedora y la antigüedad aproximada del sistema pero sin ningún identificador, para que Fedora sepa cuántos sistemas la usan.</li>
+        <li>Firefox: la telemetría, los estudios y el contenido patrocinado están desactivados.</li>
+        <li>Tailscale está instalado, para <code>sudo tailscale up</code>: su servicio se ejecuta pero no se une a ninguna red hasta que inicias sesión.</li>
+      </ul>
+      <p>Para detener el recuento de Fedora, o el servicio de Tailscale si no lo usas:</p>
+      <div class="code">
+        <pre><code>sudo systemctl mask --now rpm-ostree-countme.timer
+sudo systemctl disable --now tailscaled.service</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+      <p>El cortafuegos (firewalld) está activado; la aplicación <strong>Cortafuegos</strong> cambia su configuración. <strong>Flatseal</strong> muestra y cambia a qué puede acceder cada aplicación Flatpak (archivos, dispositivos, red).</p>
+    </section>
+
+    <section id="verify" class="block">
+      <h2>Comprobar las descargas</h2>
+      <p>La suma de comprobación de cada ISO live está firmada con la clave del proyecto, <a href="https://github.com/cosmic-blue-os/cosmic-blue/blob/main/cosign.pub">cosign.pub</a>. Descarga la ISO, su archivo <code>.sha256</code> y su firma <code>.sha256.sigstore.json</code> en la misma carpeta y compruébalos con <a href="https://github.com/sigstore/cosign">cosign</a> (para la ISO de NVIDIA, usa los nombres <code>cosmic-blue-nvidia-live-amd64</code>):</p>
+      <div class="code">
+        <pre><code>cosign verify-blob --key cosign.pub \
+  --bundle cosmic-blue-live-amd64.iso.sha256.sigstore.json \
+  cosmic-blue-live-amd64.iso.sha256
+sha256sum -c cosmic-blue-live-amd64.iso.sha256</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+      <p>Las imágenes del sistema también están firmadas, y los sistemas instalados rechazan las actualizaciones sin firmar. Cada imagen incluye además una lista firmada de sus paquetes (un SBOM SPDX):</p>
+      <div class="code">
+        <pre><code>cosign verify --key cosign.pub ghcr.io/cosmic-blue-os/cosmic-blue:stable
+cosign verify-attestation --key cosign.pub --type spdxjson \
+  --insecure-ignore-tlog=true ghcr.io/cosmic-blue-os/cosmic-blue:stable</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+    </section>
+
+    <section id="help" class="block">
+      <h2>Obtener ayuda</h2>
+      <p>¿Algo no funciona? La página de <a href="troubleshooting/">solución de problemas</a> cubre los problemas habituales.</p>
+      <p>¿Una pregunta, o algo que no queda claro? Pregunta en <a href="https://github.com/cosmic-blue-os/cosmic-blue/discussions">Discussions</a>.</p>
+      <p>¿Has encontrado un error? Ejecuta esto en una terminal del equipo con el problema: recopila los datos del sistema (ningún dato personal) y abre un <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues/new/choose">informe de error</a> con ellos ya rellenados. Después cuenta qué hiciste y qué pasó.</p>
+      <div class="code">
+        <pre><code>ujust report-bug</code></pre>
+        <button type="button" class="copy" data-copy>Copiar</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>cosmic-blue está construido sobre <a href="https://universal-blue.org/">Universal Blue</a>, <a href="https://projectbluefin.io/">Bluefin</a>, <a href="https://fedoraproject.org/">Fedora</a> y <a href="https://system76.com/cosmic">COSMIC</a>. cosmic-blue es un proyecto independiente, no afiliado a estos proyectos ni respaldado por ellos.</p>
+    <p><a href="troubleshooting/">Solución de problemas</a> ·
+    <a href="https://github.com/cosmic-blue-os/cosmic-blue">Código fuente</a> ·
+    <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues">Informar de un problema</a></p>
+  </footer>
+
+  <script src="../../site.js"></script>
+</body>
+</html>
