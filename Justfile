@@ -143,6 +143,10 @@ build $target_image=image_name $tag=default_tag $version="":
     # This actually builds the image!
     PODMAN_BUILD_ARGS=("${BUILD_ARGS[@]}" "${LABELS[@]}" --pull=newer --tag "${target_image}:${tag}" --file Containerfile)
     PODMAN_BUILD_ARGS+=(--build-context "helpers=${HELPERS_DIR}")
+    # The base image whose signature `just verify-sources` checked (CI)
+    if [[ -n "${BASE_IMAGE_REF:-}" ]]; then
+        PODMAN_BUILD_ARGS+=(--build-arg "BASE_IMAGE=${BASE_IMAGE_REF}")
+    fi
 
     podman build "${PODMAN_BUILD_ARGS[@]}" .
 
@@ -306,6 +310,53 @@ fedora-version:
     set -euo pipefail
 
     sed -n 's/^ARG BASE_TAG="\([0-9]*\)"$/\1/p' Containerfile | grep -x '[0-9][0-9]*'
+
+# Checks the signatures of the images the build starts from (idea from
+# Aurora and Bluefin), so that a registry or account compromise upstream
+# cannot slip into cosmic-blue: base-main and brew are signed with the
+# Universal Blue key (.github/keys/ublue-os.pub, ublue-os/main cosign.pub),
+# projectbluefin/common keyless by its own workflows. base-main is followed by
+# tag: its digest is resolved and verified here, and printed (stdout) for
+# `just build` (BASE_IMAGE_REF), so that the build uses that very image. The
+# NVIDIA modules (35-nvidia.sh) are verified by skopeo during the build
+# (policy.json requires the Universal Blue signature for ghcr.io/ublue-os).
+[group('Utility')]
+verify-sources:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    retry() {
+        local try
+        for try in 1 2 3; do
+            "$@" >/dev/null && return 0
+            echo "Attempt ${try} failed: $*" >&2
+            sleep 20
+        done
+        return 1
+    }
+    arg() {
+        sed -n "s/^ARG $1=\"\(.*\)\"$/\1/p" Containerfile | grep .
+    }
+    key=.github/keys/ublue-os.pub
+
+    base="$(arg BASE_IMAGE)"
+    digest="$(skopeo inspect --retry-times 3 --format '{{{{ .Digest }}' "docker://${base}")"
+    base_ref="${base}@${digest}"
+    retry cosign verify --key "${key}" "${base_ref}"
+    echo "Signature OK: ${base_ref}" >&2
+
+    brew="$(arg BREW_IMAGE)"
+    retry cosign verify --key "${key}" "${brew}"
+    echo "Signature OK: ${brew}" >&2
+
+    common="$(arg COMMON_IMAGE)"
+    retry cosign verify \
+        --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+        --certificate-identity-regexp '^https://github\.com/projectbluefin/(common|actions)/\.github/workflows/' \
+        "${common}"
+    echo "Signature OK: ${common}" >&2
+
+    echo "${base_ref}"
 
 # Version of the next published image, as in Bluefin: <Fedora>.<YYYYMMDD>
 # (UTC), then .1, .2... for the later builds of the same day. A version is

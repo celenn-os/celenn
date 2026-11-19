@@ -286,6 +286,24 @@ jobs:
           echo "IMAGE_REGISTRY=${IMAGE_REGISTRY,,}" >> ${GITHUB_ENV}
           echo "IMAGE_NAME=${IMAGE_NAME,,}" >> ${GITHUB_ENV}
 
+      # Cosign checks the signatures of the images the build starts from
+      # (below), and signs the published image: installed systems only accept
+      # updates signed with the key matching cosign.pub
+      # (/etc/containers/policy.json), so an unsigned image is an error.
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+        with:
+          # be careful when upgrading major versions
+          cosign-release: 'v3.1.4'
+
+      # base-main, brew and projectbluefin/common must carry their publishers'
+      # signatures; the build then uses the verified base-main digest
+      - name: Verify the source images
+        run: |
+          set -euo pipefail
+          base_ref="$(just verify-sources)"
+          echo "BASE_IMAGE_REF=${base_ref}" >> "${GITHUB_ENV}"
+
       # The image is built, rechunked, boot-tested and pushed in the root podman
       # storage, where `bootc install` (tests/vm-lib.sh) reads it: no copy from
       # the user storage (3 to 6 minutes, and a second copy on the disk).
@@ -397,7 +415,7 @@ jobs:
         env:
           HELPERS_DIR: ${{ runner.temp }}/helpers
         run: |
-          ${ROOT_ENV} HELPERS_DIR="${HELPERS_DIR}" just build \
+          ${ROOT_ENV} HELPERS_DIR="${HELPERS_DIR}" BASE_IMAGE_REF="${BASE_IMAGE_REF}" just build \
             ${IMAGE_NAME} \
             ${DEFAULT_TAG} \
             ${VERSION}
@@ -539,15 +557,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      # Installed systems only accept updates signed with the key matching
-      # cosign.pub (/etc/containers/policy.json), so an unsigned image is an error.
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        with:
-          # be careful when upgrading major versions
-          cosign-release: 'v3.1.4'
 
       # Signed before it is published: the image is first pushed under its
       # own tag only (testing: 44.YYYYMMDD[.N], dev: dev-<commit>; nothing

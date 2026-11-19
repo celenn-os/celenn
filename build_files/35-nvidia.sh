@@ -21,6 +21,11 @@ KVER="$(rpm -q --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' kernel-core | head -n1)"
 AKMODS_IMAGE="ghcr.io/ublue-os/akmods-nvidia-open:main-${FEDORA_MAJOR_VERSION}-${KVER}"
 
 command -v skopeo >/dev/null || dnf5 -y install skopeo
+# skopeo checks the Universal Blue signature of the modules image: the
+# policy (projectbluefin/common, 10-system-files.sh) requires it for
+# ghcr.io/ublue-os, with the signatures attached in the registry
+jq -e '.transports.docker."ghcr.io/ublue-os"[0].type == "sigstoreSigned"' /etc/containers/policy.json
+grep -rqs 'use-sigstore-attachments: true' /etc/containers/registries.d/ublue-os.yaml
 skopeo copy --retry-times 3 "docker://${AKMODS_IMAGE}" dir:/tmp/akmods-nvidia
 # The image holds a single layer with rpms/{kmods,nvidia,ublue-os}
 NVIDIA_TARGZ="$(jq -r '.layers[].digest' </tmp/akmods-nvidia/manifest.json | cut -d : -f 2)"
@@ -56,5 +61,8 @@ mkdir -p /usr/lib/bootc/kargs.d
 cat > /usr/lib/bootc/kargs.d/00-nvidia.toml <<'EOF'
 kargs = ["rd.driver.blacklist=nouveau", "modprobe.blacklist=nouveau", "nvidia-drm.modeset=1", "initcall_blacklist=simpledrm_platform_driver_init"]
 EOF
+
+# Flatpak NVIDIA GL extensions matching the driver, installed at boot
+systemctl enable cosmic-blue-nvidia-flatpak-gl.service
 
 rm -rf /tmp/akmods-nvidia /tmp/akmods-nvidia-layer
