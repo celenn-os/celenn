@@ -1,10 +1,11 @@
-// Background for the official logo with the full name: the logo's open
-// orbit echoes outwards in fainter and fainter arcs, a few small planets
-// ride on them, over the night-blue field of the constellation.
-// LOGO = centre of the logo's orbit, R = its radius (frame heights).
+// Background for the logo mark: the logo's open orbit echoes outwards in
+// fainter and fainter arcs, a few small planets ride on them, over the
+// night-blue field of the deep spiral.
+// LOGO = centre of the logo's orbit, R = its radius (frame heights); set
+// them with SHADER_DEFINES="$(python3 logo_mark.py --defines)".
 #ifndef LOGO
-#define LOGO vec2(-.4135, -.0205)
-#define R .072
+#define LOGO vec2(-.4135, -.0208)
+#define R .0720
 #endif
 void main() {
   vec2 frag = gl_FragCoord.xy, res = iResolution, p = (frag - .5 * res) / res.y;
