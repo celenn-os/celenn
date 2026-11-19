@@ -629,10 +629,16 @@ jobs:
           set -euo pipefail
           read -r _ others <<< "${ALIAS_TAGS}"
           for tag in ${others}; do
-            ${ROOT_ENV} podman push --digestfile=/tmp/digestfile "${IMAGE_NAME}:${tag}" "${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}"
+            # Tagged from the signed manifest in the registry, not pushed again
+            # from local storage: a second push can compress the layers again
+            # into other blobs (chunkah images do), giving an unsigned manifest
+            ${ROOT_ENV} skopeo copy --preserve-digests \
+              "docker://${IMAGE_REGISTRY}/${IMAGE_NAME}@${DIGEST}" \
+              "docker://${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}"
             # Same manifest as the signed one, or the tag would be unsigned
-            if [[ "$(< /tmp/digestfile)" != "${DIGEST}" ]]; then
-              echo "::error::${tag} was pushed as $(< /tmp/digestfile), not as the signed ${DIGEST}"
+            pushed="$(${ROOT_ENV} skopeo inspect --raw "docker://${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}" | sha256sum | cut -d' ' -f1)"
+            if [[ "sha256:${pushed}" != "${DIGEST}" ]]; then
+              echo "::error::${tag} points to sha256:${pushed}, not to the signed ${DIGEST}"
               exit 1
             fi
           done
