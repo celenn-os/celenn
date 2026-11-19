@@ -77,9 +77,12 @@ env:
 # recently, and that change would not be published (2026-11-17, #117). It
 # skips itself while a testing build started by hand runs or waits
 # (recent_build), and the version tag push refuses a version another build
-# already took.
+# already took. Builds started by hand have a group of their own for the
+# same reason: a testing build waiting behind a dev build cancelled the
+# pending dev build of #149 (2026-11-19), and a merge could cancel a pending
+# testing build the same way.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'schedule' && 'daily' || github.ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'schedule' && 'daily' || github.event_name == 'workflow_dispatch' && format('manual-{0}', github.ref) || github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:

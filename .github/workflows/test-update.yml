@@ -5,7 +5,7 @@
 # each promotion, from the current `stable` to the image it is about to
 # promote.
 #
-# Also runs on pull requests that change the test, from `stable` to `latest`.
+# Also runs on pull requests that change the test, from `stable` to `testing`.
 name: Test image updates
 
 on:
@@ -26,9 +26,9 @@ on:
         required: true
         default: stable
       to_tag:
-        description: "Tag updated to (e.g. latest or 20261113)"
+        description: "Tag updated to (e.g. testing, dev or 20261113)"
         required: true
-        default: latest
+        default: testing
 
 env:
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"  # do not edit
@@ -62,7 +62,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
   update_test:
-    name: Update ${{ matrix.image_suffix && format('{0} ', matrix.image_suffix) || '' }}${{ inputs.from_tag || 'stable' }} to ${{ inputs.to_tag || 'latest' }}
+    name: Update ${{ matrix.image_suffix && format('{0} ', matrix.image_suffix) || '' }}${{ inputs.from_tag || 'stable' }} to ${{ inputs.to_tag || 'testing' }}
     needs: images
     runs-on: ubuntu-26.04
     timeout-minutes: 120
@@ -75,7 +75,7 @@ jobs:
       # output of build.yml, keep in sync
       IMAGE_NAME: ${{ github.event.repository.name }}${{ matrix.image_suffix && format('-{0}', matrix.image_suffix) || '' }}
       FROM_TAG: ${{ inputs.from_tag || 'stable' }}
-      TO_TAG: ${{ inputs.to_tag || 'latest' }}
+      TO_TAG: ${{ inputs.to_tag || 'testing' }}
     permissions:
       contents: read
     steps:
