@@ -5,7 +5,7 @@ void main() {
   vec2 uv = frag / res, p = (frag - .5 * res) / res.y;
   vec2 c = vec2(.42, .03);
   float pk = pocketMask(p, c, vec2(.95, .30));
-  vec3 col = mix(spaceBase(p), mix(INK, ABYSS, .6), pk * .9);
+  vec3 col = mix(spaceBase(p), INK * .55, pk * .92);
   col += vec3(.9, .95, 1.) * stars(frag, .05, res.y / 48.) * pk * .7;
   float tilt = radians(-9.), f = .17;
   vec2 q0 = mat2(cos(tilt), sin(tilt), -sin(tilt), cos(tilt)) * (p - c);
@@ -18,9 +18,9 @@ void main() {
     vec2 q = q0 / vec2(a, a * f);
     float k = length(q);
     float dist = abs(k - 1.) * a * f;
-    float far = q0.y > 0. ? 1. : 0.;
+    float far = smoothstep(-.04, .04, q0.y);
     float wdt = mix(.6, 2.6, pow(h3, 3.)) * px * mix(1., 2.2, far);
-    if (dist > wdt * 6.) continue;
+    if (dist > wdt * 25.) continue;
     float ang = atan(q.y, q.x);
     float start = h2 * 6.2832, len = mix(.6, 2.8, h4);
     float t = mod(ang - start, 6.2832) / len;     // 0 at the tail, 1 at the head
@@ -28,7 +28,7 @@ void main() {
     float br = pow(t, 2.) * (.15 + 1.6 * pow(h3, 4.)) * mix(1., .45, far);
     float hc = hash12(vec2(fi, 5.5));
     vec3 tc = hc < .45 ? mix(BRAND, ICE, .5) : hc < .70 ? CYAN : hc < .78 ? ORCHID : hc < .81 ? WARM : SKY * .15;
-    acc += tc * br * exp(-pow(dist / wdt, 2.)) * 1.2 + tc * br * exp(-dist / (wdt * 5.)) * .08;
+    acc += tc * br * exp(-pow(dist / wdt, 2.)) * 1.2 + tc * br * exp(-dist / (wdt * 3.)) * .06;
   }
   col += acc;
   float rc = length(q0 / vec2(1., f));

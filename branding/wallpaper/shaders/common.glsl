@@ -57,4 +57,4 @@ float pocketMask(vec2 p, vec2 hero, vec2 hs) {
   d += (vec2(fbm2(p * .8, 3), fbm2(p * .8 + 5., 3)) - .5) * .35;
   return exp(-dot(d, d) * 1.6);
 }
-vec3 spaceBase(vec2 p) { return mix(mix(SKY, BRAND, .7), DEEP, .15 + .35 * fbm2(p * .6, 4)); }
+vec3 spaceBase(vec2 p) { return mix(mix(DEEP, BRAND, .2), mix(ABYSS, VIOLET, .12), .35 + .35 * fbm2(p * .6, 4)) * .55; }

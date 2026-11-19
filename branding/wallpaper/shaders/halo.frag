@@ -28,13 +28,13 @@ vec2 sphere(vec3 ro, vec3 rd, vec3 c, float r) {
 vec3 background(vec2 uv, vec2 p, vec2 frag) {
   vec2 hero = vec2(.85 / 4., .02 / 4.);   // planet centre on screen
   float pk = pocketMask(p, hero, vec2(.95, .36));
-  vec3 col = mix(spaceBase(p), mix(INK, ABYSS, .6), pk * .9);
+  vec3 col = mix(spaceBase(p), INK * .55, pk * .92);
   // nebulous light inside the pocket
   float n = fbm(vec3(p * 1.3 + vec2(0., .2), 1.3), 7), n2 = fbm(vec3(p * 3.2, 7.), 6);
   col += (DEEP * .35 + VIOLET * .14) * smoothstep(.42, .8, n) * pk;
   col += ICE * .08 * smoothstep(.55, .85, n2) * smoothstep(.45, .7, n) * pk;
   // warm-orchid key glow from the lower-left corner
-  col += (WARM * .20 + ORCHID * .12) * exp(-length((uv - vec2(0., 0.)) * vec2(1.4, 1.)) / .45);
+  col += (WARM * .06 + ORCHID * .06) * exp(-length((uv - vec2(0., 0.)) * vec2(1.4, 1.)) / .45);
   col += vec3(.9, .95, 1.) * stars(frag, .06, iResolution.y / 48.) * pk;
   return col;
 }
@@ -72,7 +72,7 @@ void main() {
     vec3 hp = ro + rd * tp, n = normalize(hp - C);
     float dl = dot(n, L), diff = max(dl, 0.);
     float c = fbm(vec3(n.y * 7., n.xz * 1.2), 5);
-    vec3 surf = mix(BRAND, ICE, .35 + .15 * c);
+    vec3 surf = mix(DEEP, SKY, .45 + .2 * c);
     vec3 day = surf * (diff * 1.3) + WARM * .10 * smoothstep(.18, .0, abs(dl - .06));
     vec3 night = ABYSS * .45 + DEEP * .12 * max(dot(n, normalize(vec3(.3, -1., .4))), 0.);
     vec3 pc = mix(night, day, smoothstep(-.08, .15, dl));

@@ -5,12 +5,12 @@ void main() {
   vec2 uv = frag / res, p = (frag - .5 * res) / res.y;
   float A = res.x / res.y;
   // sky: light at the top, deeper towards the middle, haze at the horizon
-  vec3 col = mix(spaceBase(p), mix(INK, ABYSS, .6), pocketMask(p, vec2(.1, .05), vec2(.95, .36)) * .9);
+  vec3 col = mix(spaceBase(p), INK * .55, pocketMask(p, vec2(.1, .05), vec2(.95, .36)) * .92);
   float hor = .27 - .55 * pow(uv.x - .35, 2.) - .03 * uv.x;
-  col = mix(col, mix(ICE, SKY, .4), exp(-max(uv.y - hor, 0.) / .07));
+  col = mix(col, mix(SKY, BRAND, .5), exp(-max(uv.y - hor, 0.) / .06) * .8);
   vec2 sun = vec2(1.04, .52);
   float ds = length((uv - sun) * vec2(A, 1.));
-  col += (WARM * .55 + ICE * .45) * exp(-ds / .22) * .55 + ICE * exp(-ds / .05) * .6;
+  col += (WARM * .5 + ICE * .5) * exp(-ds / .18) * .35 + ICE * exp(-ds / .04) * .5;
   col += vec3(.9, .95, 1.) * stars(frag, .03, res.y / 40.) * pocketMask(p, vec2(.1, .05), vec2(.95, .36)) * .6;
   // the ring band, from lower left to upper right
   // an arc of a large ellipse, from lower left to upper right
@@ -41,11 +41,11 @@ void main() {
     float c = fbm(vec3(cp * vec2(.25, 5.), 2.), 6) * .6 + fbm(vec3(cp * vec2(.8, 2.4), 2.), 7) * .4;
     float c2 = fbm(vec3(cp * vec2(2.5, 7.), 5.), 5);
     float shade = .78 + .65 * (c - .5) + .2 * (c2 - .5);
-    vec3 cl = mix(mix(BRAND, ORCHID, .3), ICE, .45) * shade * (.8 + .4 * c2);
+    vec3 cl = mix(mix(DEEP, VIOLET, .25), SKY, .35) * shade * (.8 + .4 * c2) * .75;
     cl = mix(cl, cl * mix(ICE, WARM, .3) * 1.3, smoothstep(.3, 1., uv.x));
     cl += ORCHID * .15 * smoothstep(.5, 0., uv.x);
     float haze = exp(-h / .035);
-    cl = mix(cl, mix(ICE, HAZE, .5), haze * .5);
+    cl = mix(cl, mix(SKY, ICE, .4), haze * .45);
     col = mix(col, cl, smoothstep(hor + .004, hor - .004, uv.y));
   }
   fragColor = finish(col, frag);
