@@ -3,7 +3,7 @@
 ## Supported versions
 
 Only the current images get security fixes: `ghcr.io/cosmic-blue-os/cosmic-blue`
-and `ghcr.io/cosmic-blue-os/cosmic-blue-nvidia`, tags `stable` and `latest`.
+and `ghcr.io/cosmic-blue-os/cosmic-blue-nvidia`, tags `stable`, `testing` (also `latest`) and `dev`.
 Older tags are not updated: `sudo bootc upgrade` (or the automatic updates)
 moves an installed system to the current image.
 

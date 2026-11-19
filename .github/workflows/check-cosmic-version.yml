@@ -276,7 +276,7 @@ jobs:
         run: |
           set -euo pipefail
           sha="$(git ls-remote origin "refs/heads/${BRANCH}" | cut -f1)"
-          gh workflow run build.yml --ref "${BRANCH}"
+          gh workflow run build.yml --ref "${BRANCH}" -f channel=dev
 
           run=""
           for _ in $(seq 60); do
@@ -310,8 +310,9 @@ jobs:
             --subject "${TITLE} (#${PR})" \
             --body "Fedora ${TARGET_TAG} ships COSMIC ${CURRENT}: move the theme tool to the libcosmic revision of this release. Image build from the branch passed: ${run_url}"
 
-          # The merge was made with the workflow token: start the build on main
-          gh workflow run build.yml --ref main
+          # The merge was made with the workflow token: start the build on
+          # main (dev, as a merge would)
+          gh workflow run build.yml --ref main -f channel=dev
 
       - name: Report a failure
         if: failure()

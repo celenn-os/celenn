@@ -2,9 +2,10 @@
 # Promotes an already published image to the `stable` tag.
 #
 # Every image on GHCR has passed the CI boot test (build.yml does not push or
-# sign an image that fails it). `latest` gets each daily build; `stable` moves
-# once a week to the daily build from 7 days earlier, so every `stable` image
-# has spent a week on `latest` first. If a regression shows up during that
+# sign an image that fails it). `testing` gets each daily build (`dev` each
+# merged change, never promoted); `stable` moves once a week to the daily
+# build from 7 days earlier, so every `stable` image has spent a week on
+# `testing` first. If a regression shows up during that
 # week, run this workflow by hand with a known good tag (e.g. 20261105) to
 # point `stable` back to it, or disable the workflow to freeze `stable`.
 # A date tag is the last build of that day; each build also has its own
@@ -33,7 +34,7 @@ on:
   workflow_dispatch:
     inputs:
       source_tag:
-        description: "Tag to promote (e.g. latest, 20261105 or 44.20261105.1). Empty: the daily build from 7 days ago."
+        description: "Tag to promote (e.g. testing, 20261105 or 44.20261105.1). Empty: the daily build from 7 days ago."
         required: false
         default: ""
       skip_update_test:

@@ -397,24 +397,27 @@ generate-build-tags $target_image=image_name $tag=default_tag $version="":
     #!/usr/bin/env bash
     set -eoux pipefail
 
-    # The date of the version (44.20261113.1 -> 20261113), so that both stay
-    # the same when a build runs past midnight
-    DATE=$(date -u +%Y%m%d)
-    BUILD_TAGS=()
-    if [[ -n "${version}" ]]; then
-        DATE="$(cut -d. -f2 <<< "${version}")"
-        BUILD_TAGS+=("${version}")
-    fi
-    if [[ -z "$(git status -s)" ]]; then
-        GIT_SHA=$(git rev-parse --short HEAD)
-        BUILD_TAGS+=("${tag}-${GIT_SHA}")
-        BUILD_TAGS+=("${tag}-${DATE}-${GIT_SHA}")
-        BUILD_TAGS+=("${DATE}-${GIT_SHA}")
-    fi
-
-    BUILD_TAGS+=("${DATE}")
-    BUILD_TAGS+=("${tag}")
-    BUILD_TAGS+=("${tag}-${DATE}")
+    # The first tag is the build's own (the CI pushes and signs it first):
+    # testing: its version (44.20261113.1), then the date (20261113, the last
+    # testing build of that day, promoted to stable a week later by
+    # promote-stable.yml), testing, and latest (the systems installed before
+    # the testing channel follow it). dev: dev-<commit>, then dev.
+    case "${tag}" in
+        testing)
+            [[ -n "${version}" ]] || { echo "testing needs a version" >&2; exit 1; }
+            # The date of the version (44.20261113.1 -> 20261113), so that
+            # both stay the same when a build runs past midnight
+            DATE="$(cut -d. -f2 <<< "${version}")"
+            BUILD_TAGS=("${version}" "${DATE}" testing latest)
+            ;;
+        dev)
+            BUILD_TAGS=("dev-$(git rev-parse --short HEAD)" dev)
+            ;;
+        *)
+            # Local builds
+            BUILD_TAGS=("${tag}")
+            ;;
+    esac
 
     echo "${BUILD_TAGS[@]}"
 
