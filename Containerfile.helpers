@@ -26,7 +26,8 @@ ENV CARGO_HOME=/cargo/home CARGO_TARGET_DIR=/cargo/target
 RUN cd /theme && cargo build --release --locked \
     && XDG_CONFIG_HOME=/out /cargo/target/release/cosmic-blue-theme \
     && XDG_CONFIG_HOME=/out/previous/stock /cargo/target/release/cosmic-blue-theme stock \
-    && XDG_CONFIG_HOME=/out/previous/frosted /cargo/target/release/cosmic-blue-theme frosted
+    && XDG_CONFIG_HOME=/out/previous/frosted /cargo/target/release/cosmic-blue-theme frosted \
+    && XDG_CONFIG_HOME=/out/previous/glass-0.8 /cargo/target/release/cosmic-blue-theme glass-0.8
 FROM scratch AS theme
 COPY --from=theme-build /out /
 
