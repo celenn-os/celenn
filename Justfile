@@ -303,6 +303,44 @@ ostree-rechunk $target_image=image_name $tag=default_tag:
         rm -rf "${LABEL_CTX}"
     fi
 
+# Trial on the dev channel only (build.yml): rechunks with chunkah
+# (https://github.com/coreos/chunkah), rpm-ostree's successor that Aurora uses
+# for all its images, instead of `rpm-ostree compose build-chunked-oci`. Same
+# layer budget as ostree-rechunk, to compare update sizes. The image config
+# (labels included) is kept; the ostree labels go, as the result is a plain
+# image (--prune /sysroot/). Files without an RPM build time get the commit
+# time (SOURCE_DATE_EPOCH), so that an unchanged file keeps the same layer.
+# Pinned by digest, signature checked by `just verify-sources`.
+chunkah_image := "quay.io/coreos/chunkah:latest@sha256:71e593421c5de7dcc7c8c5c50e98d3bac572055a76f399f61a491d123c20a523"
+
+chunkah-rechunk $target_image=image_name $tag=default_tag:
+    #!/usr/bin/env bash
+    set -xeuo pipefail
+
+    image="localhost/${target_image}:${tag}"
+    work="$(mktemp -d)"
+    trap 'rm -rf "${work}"' EXIT
+    podman inspect "${image}" > "${work}/config.json"
+    mkdir "${work}/out"
+
+    podman run --rm --pull=missing --security-opt=label=disable \
+      --mount=type=image,src="${image}",target=/chunkah \
+      -v "${work}/config.json:/chunkah-config.json:ro" \
+      -v "${work}/out:/run/out" \
+      -e SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)" \
+      "{{ chunkah_image }}" \
+      build \
+      --compressed \
+      --max-layers 127 \
+      --prune /sysroot/ \
+      --label ostree.commit- --label ostree.final-diffid- \
+      --config /chunkah-config.json \
+      --output oci:/run/out/chunked
+
+    chunked="$(podman pull -q "oci:${work}/out/chunked")"
+    podman tag "${chunked}" "${image}"
+    podman image inspect "${image}" --format '{{ '{{len .RootFS.Layers}}' }} layers'
+
 # Fedora release of the image (BASE_TAG in the Containerfile)
 [group('Utility')]
 fedora-version:
@@ -355,6 +393,13 @@ verify-sources:
         --certificate-identity-regexp '^https://github\.com/projectbluefin/(common|actions)/\.github/workflows/' \
         "${common}"
     echo "Signature OK: ${common}" >&2
+
+    # chunkah (dev channel rechunk trial): keyless, by its own CI
+    retry cosign verify \
+        --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+        --certificate-identity-regexp '^https://github\.com/coreos/chunkah/\.github/workflows/' \
+        "{{ chunkah_image }}"
+    echo "Signature OK: {{ chunkah_image }}" >&2
 
     echo "${base_ref}"
 
