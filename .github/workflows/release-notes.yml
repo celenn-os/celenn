@@ -11,7 +11,9 @@
 # that changes it, it only previews the notes of `testing` against `stable`
 # and the README block in the run summary, without publishing anything.
 # Run by hand, it only refreshes the README block from the current `stable`
-# (e.g. after rolling stable back), without a release.
+# (e.g. after rolling stable back), without a release. Run by hand with
+# `rewrite` set to an existing release tag, it only writes the notes of that
+# release again (current layout, compared with the stable release before it).
 name: Release notes
 
 on:
@@ -30,6 +32,11 @@ on:
         type: string
         required: true
   workflow_dispatch:
+    inputs:
+      rewrite:
+        description: "Existing release to write again (e.g. stable-20261117). Empty: only refresh the README."
+        type: string
+        default: ""
   pull_request:
     branches:
       - main
@@ -82,7 +89,8 @@ jobs:
           NEW: ${{ github.event_name == 'pull_request' && 'testing' || inputs.new || 'stable' }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_TAG: ${{ inputs.release_tag || inputs.rewrite }}
+          REWRITE: ${{ inputs.rewrite }}
         run: |
           set -euo pipefail
           image="${IMAGE_REGISTRY,,}/${IMAGE_NAME,,}"
@@ -140,6 +148,19 @@ jobs:
             echo "$(wc -l < "$2") packages in $1"
           }
 
+          # Previous stable release: the last one before this one (not this
+          # one if promoted again the same day; all of them for a preview)
+          previous="$(gh api "repos/${REPO}/releases?per_page=100" \
+                        --jq "[.[] | select(.draft | not) | .tag_name
+                               | select(startswith(\"stable-\") and . < \"${RELEASE_TAG:-stable-99999999}\")]
+                              | sort | last // \"\"")"
+          echo "Previous release: ${previous:-none}"
+          if [[ -n "${REWRITE}" ]]; then
+            # The dated stable tags of both images are kept (clean-images.yml)
+            NEW="${REWRITE}"
+            OLD="${previous}"
+          fi
+
           new_ref="$(ref_of "${NEW}")"
           packages_of "${new_ref}" "${out}/new.tsv"
           new_commit="$(commit_of "${new_ref}")"
@@ -153,16 +174,12 @@ jobs:
           args=(--new "${out}/new.tsv")
           # The NVIDIA image moves to stable in the same run (by tag, not
           # by digest: it has its own digests)
-          nvidia_tag="${{ github.event_name == 'pull_request' && 'testing' || 'stable' }}"
+          nvidia_tag="${{ github.event_name == 'pull_request' && 'testing' || inputs.rewrite || 'stable' }}"
           nvidia="$(nvidia_of "${nvidia_tag}")"
           echo "NVIDIA driver in ${image}-nvidia:${nvidia_tag}: ${nvidia:-not found}"
           [[ -n "${nvidia}" ]] && args+=(--nvidia "${nvidia}")
           args+=(--site "https://${REPO%%/*}.github.io/${REPO#*/}/")
-          # Previous stable release (not this one if promoted again the
-          # same day), and its NVIDIA driver from the NVIDIA image's tag
-          previous="$(gh api "repos/${REPO}/releases?per_page=5" \
-                        --jq "[.[] | select(.draft | not) | .tag_name
-                               | select(startswith(\"stable-\") and . != \"${RELEASE_TAG}\")][0] // \"\"")"
+          # NVIDIA driver of the previous release, from the NVIDIA image's tag
           if [[ -n "${previous}" ]]; then
             args+=(--previous-release "${previous}")
             nvidia_old="$(nvidia_of "${previous}")"
@@ -193,7 +210,7 @@ jobs:
 
       - name: Write the notes
         env:
-          RELEASE_TAG: ${{ github.event_name == 'pull_request' && 'preview' || inputs.release_tag || 'stable' }}
+          RELEASE_TAG: ${{ github.event_name == 'pull_request' && 'preview' || inputs.release_tag || inputs.rewrite || 'stable' }}
           VERSION: ${{ steps.lists.outputs.new_version }}
         run: |
           set -euo pipefail
@@ -229,19 +246,23 @@ jobs:
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Publish the release
-        # Not when run by hand (no release tag)
-        if: github.event_name != 'pull_request' && inputs.release_tag != ''
+        # Not when run by hand to refresh the README (no release tag)
+        if: github.event_name != 'pull_request' && (inputs.release_tag != '' || inputs.rewrite != '')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_TAG: ${{ inputs.release_tag || inputs.rewrite }}
+          REWRITE: ${{ inputs.rewrite }}
           TARGET: ${{ steps.lists.outputs.new_sha || github.sha }}
         run: |
           set -euo pipefail
           notes="${RUNNER_TEMP}/notes/notes.md"
           title="$(head -n 1 "${notes}" | sed 's/^# //')"
           tail -n +3 "${notes}" > "${RUNNER_TEMP}/body.md"
-          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+          if [[ -n "${REWRITE}" ]]; then
+            # Older release written again: its tag and "Latest" status stay
+            gh release edit "${RELEASE_TAG}" --title "${title}" --notes-file "${RUNNER_TEMP}/body.md"
+          elif gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
             # Promoted again the same day: replace the notes
             gh release edit "${RELEASE_TAG}" --title "${title}" --notes-file "${RUNNER_TEMP}/body.md" --latest
           else
@@ -253,7 +274,7 @@ jobs:
       # A commit with the default token starts no workflow (and build.yml
       # ignores README.md anyway). Retried if the branch moved meanwhile.
       - name: Update the README
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && inputs.rewrite == ''
         env:
           BRANCH: ${{ github.event.repository.default_branch }}
           RELEASE_TAG: ${{ inputs.release_tag }}
