@@ -308,8 +308,12 @@ ostree-rechunk $target_image=image_name $tag=default_tag:
 # for all its images, instead of `rpm-ostree compose build-chunked-oci`. Same
 # layer budget as ostree-rechunk, to compare update sizes. The image config
 # (labels included) is kept; the ostree labels go, as the result is a plain
-# image (--prune /sysroot/). Files without an RPM build time get the commit
-# time (SOURCE_DATE_EPOCH), so that an unchanged file keeps the same layer.
+# image (--prune /sysroot/). Files without an RPM build time are clamped to
+# a fixed time (SOURCE_DATE_EPOCH=1, as Aurora's mtimes): otherwise chunkah
+# clamps them to the build time, and every build changed their layers
+# (556 MB to download for a rebuild with the same content). The image
+# creation time, which SOURCE_DATE_EPOCH also sets, is then set again to
+# the build time by a configuration-only rebuild (no new layer).
 # Pinned by digest, signature checked by `just verify-sources`.
 chunkah_image := "quay.io/coreos/chunkah:latest@sha256:71e593421c5de7dcc7c8c5c50e98d3bac572055a76f399f61a491d123c20a523"
 
@@ -327,7 +331,7 @@ chunkah-rechunk $target_image=image_name $tag=default_tag:
       --mount=type=image,src="${image}",target=/chunkah \
       -v "${work}/config.json:/chunkah-config.json:ro" \
       -v "${work}/out:/run/out" \
-      -e SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)" \
+      -e SOURCE_DATE_EPOCH=1 \
       "{{ chunkah_image }}" \
       build \
       --compressed \
@@ -338,7 +342,9 @@ chunkah-rechunk $target_image=image_name $tag=default_tag:
       --output oci:/run/out/chunked
 
     chunked="$(podman pull -q "oci:${work}/out/chunked")"
-    podman tag "${chunked}" "${image}"
+    # The label is already there: it only makes podman commit a new config
+    printf 'FROM %s\nLABEL containers.bootc=1\n' "${chunked}" > "${work}/Containerfile"
+    podman build --pull=never --tag "${image}" "${work}"
     podman image inspect "${image}" --format '{{ '{{len .RootFS.Layers}}' }} layers'
 
 # Fedora release of the image (BASE_TAG in the Containerfile)
