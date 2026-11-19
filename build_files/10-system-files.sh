@@ -218,6 +218,21 @@ if text.count(old) != 1:
 path.write_text(text.replace(old, "brew install --cask ublue-os/tap/antigravity-ide-linux"))
 PY
 
+# `ujust install-cncf-tools` (projectbluefin/common cncf.Brewfile) installs
+# OpenLens, which is end-of-life on Flathub (its open source version was
+# retired): Headlamp, in the same list, is the Kubernetes UI it keeps.
+# Fails if upstream changes it (tests/check-app-sources.sh warns about
+# end-of-life apps every week).
+python3 -I - "${STAGE}/usr/share/ublue-os/homebrew/cncf.Brewfile" <<'PY'
+import pathlib, sys
+path = pathlib.Path(sys.argv[1])
+text = path.read_text()
+old = '# OpenLens - Kubernetes IDE\nflatpak "dev.k8slens.OpenLens"\n'
+if text.count(old) != 1 or 'flatpak "io.kinvolk.Headlamp"' not in text:
+    sys.exit(f"{path}: OpenLens or Headlamp lines not found")
+path.write_text(text.replace(old, "").replace("\n\n\n", "\n\n"))
+PY
+
 # `ujust enroll-secure-boot-key` (projectbluefin/common) queues the akmods key
 # with Universal Blue's password: 60-custom.just has cosmic-blue's own, with
 # the password "cosmicblue" that the ISO uses too.
