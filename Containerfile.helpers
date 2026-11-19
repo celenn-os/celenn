@@ -13,13 +13,19 @@
 # Fedora release: passed by `just build-helpers` from BASE_TAG in the Containerfile
 ARG BASE_TAG
 
+# The Rust stages (theme, tour) build in /cargo: `just build-helpers` mounts a
+# directory there when HELPERS_CARGO_CACHE is set, so that the CI can keep the
+# compiled dependencies from one build to the next (only our own code is then
+# compiled again). Without it, /cargo is an ordinary directory of the stage.
+
 # Default COSMIC themes with frosted glass (see build_files/theme/src/main.rs)
 FROM docker.io/library/rust:1 AS theme-build
 COPY build_files/theme /theme
+ENV CARGO_HOME=/cargo/home CARGO_TARGET_DIR=/cargo/target
 RUN cd /theme && cargo build --release --locked \
-    && XDG_CONFIG_HOME=/out /theme/target/release/cosmic-blue-theme \
-    && XDG_CONFIG_HOME=/out/previous/stock /theme/target/release/cosmic-blue-theme stock \
-    && XDG_CONFIG_HOME=/out/previous/frosted /theme/target/release/cosmic-blue-theme frosted
+    && XDG_CONFIG_HOME=/out /cargo/target/release/cosmic-blue-theme \
+    && XDG_CONFIG_HOME=/out/previous/stock /cargo/target/release/cosmic-blue-theme stock \
+    && XDG_CONFIG_HOME=/out/previous/frosted /cargo/target/release/cosmic-blue-theme frosted
 FROM scratch AS theme
 COPY --from=theme-build /out /
 
@@ -28,10 +34,11 @@ COPY --from=theme-build /out /
 # (see build_files/first_steps/src/main.rs)
 FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS tour-build
 COPY build_files/first_steps /tour
+ENV CARGO_HOME=/cargo/home CARGO_TARGET_DIR=/cargo/target
 RUN dnf5 -y install cargo rust gcc pkgconf-pkg-config libxkbcommon-devel wayland-devel \
     && cd /tour && cargo build --release --locked \
-    && /tour/target/release/cosmic-blue-tour --check \
-    && install -D -m 0755 /tour/target/release/cosmic-blue-tour /out/cosmic-blue-tour
+    && /cargo/target/release/cosmic-blue-tour --check \
+    && install -D -m 0755 /cargo/target/release/cosmic-blue-tour /out/cosmic-blue-tour
 FROM scratch AS tour
 COPY --from=tour-build /out /
 

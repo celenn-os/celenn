@@ -163,7 +163,15 @@ build-helpers $dest *stages:
     for stage in ${stages}; do
         rm -rf "${dest:?}/${stage}"
         mkdir -p "${dest}/${stage}"
-        podman build --pull=newer --build-arg "BASE_TAG=${base_tag}" \
+        # Rust stages: compiled dependencies kept in HELPERS_CARGO_CACHE/<stage>
+        # if set (see Containerfile.helpers)
+        volume=()
+        if [[ -n "${HELPERS_CARGO_CACHE:-}" ]] && grep -q "^ENV CARGO_HOME=/cargo/" \
+                <(awk -v build="AS ${stage}-build" 'index($0, build) { on = 1 } on && /^FROM / && !index($0, build) { exit } on' Containerfile.helpers); then
+            mkdir -p "${HELPERS_CARGO_CACHE}/${stage}"
+            volume=(--volume "$(realpath "${HELPERS_CARGO_CACHE}/${stage}"):/cargo")
+        fi
+        podman build --pull=newer --build-arg "BASE_TAG=${base_tag}" "${volume[@]}" \
             --file Containerfile.helpers --target "${stage}" \
             --output "type=local,dest=${dest}/${stage}" .
     done
