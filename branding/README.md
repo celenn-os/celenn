@@ -34,12 +34,13 @@ Regenerate the SVGs with `python3 logo/build.py`.
 
 All 5120x2880, in `system_files/usr/share/backgrounds/cosmic-blue/`:
 
+- `cosmic-blue-arcs.jpg`: the official logo with the full name, its orbit
+  echoing outwards in fainter arcs (`wallpaper/shaders/echoes.frag`,
+  `wallpaper/logo_name.py`), the default COSMIC
+  wallpaper and the greeter background
 - `cosmic-blue-constellation.jpg`: a flat illustration, a tone-on-tone
   spiral and a constellation drawing the "c" of the logo on a night-blue
-  field, the default COSMIC wallpaper and the greeter background
-- `cosmic-blue-echoes.jpg`: the official logo with the full name, its orbit
-  echoing outwards in fainter arcs (`wallpaper/shaders/echoes.frag`,
-  `wallpaper/logo_name.py`), offered in Settings
+  field, offered in Settings
 - `cosmic-blue-emblem.jpg`: the same, with the constellation above
   the full name in the logo's lettering (`wallpaper/name.py`), offered in
   Settings
@@ -61,7 +62,7 @@ All 5120x2880, in `system_files/usr/share/backgrounds/cosmic-blue/`:
 
 COSMIC Settings lists the wallpapers in the order of the folders on disk
 (alphabetical in the deployed image), so the file names put the current set
-first: the default, the logo with the name (echoes), the emblem, then the others, and the older wallpapers
+first: the default (arcs), the constellation, the emblem, then the others, and the older wallpapers
 (`milky-way`, `orbits`, `waves`, the logo scene) after them. The build moves
 COSMIC's own wallpapers to `/usr/share/backgrounds/cosmic-desktop` so that they
 come after ours (`build_files/20-cosmic.sh`).

@@ -19,22 +19,22 @@ for face in "${faces}"/*.png; do
     test "$(od -An -tx1 -N8 "${face}" | tr -d ' ')" = 89504e470d0a1a0a
     test "$(od -An -tu1 -j16 -N8 "${face}" | tr -s ' ')" = " 0 0 2 0 0 0 2 0"
 done
-# cosmic-blue wallpapers: constellation is the COSMIC default, the others are
+# cosmic-blue wallpapers: arcs (the logo and name) is the COSMIC default, the others are
 # extras. No light duplicates.
 bg=/usr/share/backgrounds/cosmic-blue
-for name in constellation echoes emblem galactic-river galaxy gas-veils line-orbits orbits waves milky-way; do
+for name in arcs constellation emblem galactic-river galaxy gas-veils line-orbits orbits waves milky-way; do
     test -s "${bg}/cosmic-blue-${name}.jpg"
 done
 test -s "${bg}/cosmic-blue.jpg"
 test ! -e "${bg}/cosmic-blue-light.jpg"
 test ! -e "${bg}/cosmic-blue-orbits-light.jpg"
-grep -q "Path(\"${bg}/cosmic-blue-constellation.jpg\")" \
+grep -q "Path(\"${bg}/cosmic-blue-arcs.jpg\")" \
     /usr/share/cosmic/com.system76.CosmicBackground/v1/all
 # Per-theme defaults (used by COSMIC releases after 1.11): the same wallpaper
 # for both themes
-grep -q "Path(\"${bg}/cosmic-blue-constellation.jpg\")" \
+grep -q "Path(\"${bg}/cosmic-blue-arcs.jpg\")" \
     /usr/share/cosmic/com.system76.CosmicBackground.Dark/v1/all
-grep -q "Path(\"${bg}/cosmic-blue-constellation.jpg\")" \
+grep -q "Path(\"${bg}/cosmic-blue-arcs.jpg\")" \
     /usr/share/cosmic/com.system76.CosmicBackground.Light/v1/all
 test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-logo.svg
 # fastfetch: cosmic-blue logo and config instead of Bluefin's, a valid

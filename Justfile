@@ -231,7 +231,7 @@ helpers-keys:
                     files build_files/first_steps
                     echo "week $(date -u +%G-W%V)" ;;
                 greeter)
-                    files build_files/greeter system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-constellation.jpg
+                    files build_files/greeter system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-arcs.jpg
                     package cosmic-greeter ;;
                 store)
                     files build_files/store

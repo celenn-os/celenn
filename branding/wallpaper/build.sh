@@ -24,7 +24,7 @@ curl -fsSL -o milky-way-orig.jpg \
     https://images-assets.nasa.gov/image/iss064e055946/iss064e055946~orig.jpg
 python3 milky_way.py milky-way-orig.jpg "${out}/cosmic-blue-milky-way.jpg"
 
-# Shader wallpapers (GLSL, rendered with headless Chromium): the default
+# Shader wallpapers (GLSL, rendered with headless Chromium): the
 # constellation, then a galaxy, a river of stars, a nebula and orbit lines
 # (shader name:file name; the file names set the order in COSMIC Settings)
 for pair in constellation:constellation galaxy:galaxy star-river:galactic-river \
@@ -40,9 +40,9 @@ SHADER_DEFINES=$'#define CC vec2(0., .2)\n#define CR .085\n#define SPIRAL vec2(0
     node shaders/render.js constellation constellation.png
 python3 name.py constellation.png "${out}/cosmic-blue-emblem.jpg"
 rm -f constellation.png
-# The official logo and the full name, its orbit echoing outwards
+# The default: the official logo and the full name, its orbit echoing outwards
 node shaders/render.js echoes echoes.png
-python3 logo_name.py echoes.png "${out}/cosmic-blue-echoes.jpg"
+python3 logo_name.py echoes.png "${out}/cosmic-blue-arcs.jpg"
 rm -f echoes.png
 
 rm -f sky.png foreground.svg foreground.png concept.svg concept.png milky-way-orig.jpg
