@@ -24,8 +24,8 @@ curl -fsSL -o milky-way-orig.jpg \
     https://images-assets.nasa.gov/image/iss064e055946/iss064e055946~orig.jpg
 python3 milky_way.py milky-way-orig.jpg "${out}/cosmic-blue-milky-way.jpg"
 
-# Shader wallpapers (GLSL, rendered with headless Chromium): the
-# constellation, then a galaxy, a river of stars, a nebula and orbit lines
+# Shader wallpapers (GLSL, rendered with headless Chromium): a galaxy,
+# a river of stars, a nebula and orbit lines
 # (shader name:file name; the file names set the order in COSMIC Settings)
 for pair in galaxy:galaxy star-river:galactic-river \
         nebula:gas-veils orbit-lines:line-orbits; do
