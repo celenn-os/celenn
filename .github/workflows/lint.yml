@@ -42,7 +42,7 @@ jobs:
       # The image comes with its own shellcheck, which also checks the run:
       # scripts of the workflows
       - name: actionlint
-        uses: docker://rhysd/actionlint:1.7.12
+        uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
         env:
           SHELLCHECK_OPTS: --severity=warning
         with:

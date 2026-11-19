@@ -7,6 +7,14 @@ description: >-
   NVIDIA modules are built for). Everything else gets both images. The main
   build tests both anyway and never publishes an image that fails.
   Needs GH_TOKEN with pull-requests: read.
+inputs:
+  renovate:
+    description: >-
+      Images for Renovate pull requests: "both" (default), or "standard" where
+      their updates cannot differ between the two images (e.g. the live ISO
+      builder)
+    required: false
+    default: both
 outputs:
   suffixes:
     description: JSON list of image suffixes
@@ -20,6 +28,7 @@ runs:
       env:
         PR: ${{ github.event.pull_request.number }}
         HEAD_REF: ${{ github.head_ref }}
+        RENOVATE: ${{ inputs.renovate }}
       run: |
         set -euo pipefail
         both='["","nvidia"]'
@@ -32,6 +41,9 @@ runs:
             suffixes='[""]'
             echo "::notice::The pull request does not touch NVIDIA: cosmic-blue-nvidia is tested by the main build only"
           fi
+        elif [[ "${GITHUB_EVENT_NAME}" == "pull_request" && "${RENOVATE}" == standard ]]; then
+          suffixes='[""]'
+          echo "::notice::Renovate update: cosmic-blue only, cosmic-blue-nvidia is built the same way"
         fi
         echo "Images: ${suffixes}"
         echo "suffixes=${suffixes}" >> "${GITHUB_OUTPUT}"

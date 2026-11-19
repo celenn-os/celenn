@@ -13,8 +13,8 @@ name: Check Fedora and COSMIC versions
 #      move to a new Fedora release is merged by hand unless FEDORA_AUTOMERGE
 #      is true: the build only boot-tests the image, not the live ISO install.
 # If the build fails, the pull request stays open with a link to the failed
-# run, and this workflow fails too (GitHub sends an email); later daily runs
-# leave it alone until it is fixed by hand.
+# run, and this workflow fails too, which opens a "CI failure" issue; later
+# daily runs leave both alone until it is fixed by hand.
 on:
   schedule:
     - cron: '11 5 * * *'  # every day at 05:11 UTC, before the image build (06:17)
@@ -53,6 +53,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
       - name: Query Fedora
         id: fedora
@@ -133,6 +135,9 @@ jobs:
       TARGET_TAG: ${{ needs.check.outputs.target_tag }}
       PINNED: ${{ needs.check.outputs.pinned }}
       CURRENT: ${{ needs.check.outputs.current }}
+    # "true" when an earlier update is still waiting for a manual fix
+    outputs:
+      waiting: ${{ steps.branch.outputs.waiting }}
 
     steps:
       - name: Checkout
@@ -165,6 +170,7 @@ jobs:
               echo "run=true" >> "${GITHUB_OUTPUT}"
             else
               echo "${branch} already exists, waiting for a manual fix or merge"
+              echo "waiting=true" >> "${GITHUB_OUTPUT}"
             fi
             exit 0
           fi
@@ -330,3 +336,29 @@ jobs:
           if [ -n "${PR}" ]; then
             gh pr comment "${PR}" --body "${msg}"
           fi
+
+  # A failed scheduled or manual run opens an issue, closed by the next run
+  # that passes. A run that only finds an earlier update still waiting for a
+  # manual fix leaves the issue open.
+  report:
+    name: Report the result
+    needs: [check, update]
+    if: always() && github.event_name != 'pull_request'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: .github/actions
+          persist-credentials: false
+
+      - name: Report the result
+        uses: ./.github/actions/failure-issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          result: ${{ contains(needs.*.result, 'failure') && 'failure' || (needs.update.outputs.waiting == 'true' && 'none' || (needs.check.result == 'success' && 'success' || 'none')) }}

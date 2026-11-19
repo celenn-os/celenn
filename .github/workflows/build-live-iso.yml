@@ -28,12 +28,17 @@ env:
   TITANOBOA_REPO: "https://github.com/ublue-os/titanoboa"
   TITANOBOA_REF: "840217d97bd0bc9a52466508c54d8dda5c5ba2fd"
 
+# Pull requests: a new push cancels the running build. Main: runs queue up,
+# so a second run (a promotion while one runs, a manual run) never cuts an
+# upload to R2 short, which could leave a new ISO with the old checksum.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # Pull requests that do not touch NVIDIA only build and test the cosmic-blue ISO
+  # Pull requests that do not touch NVIDIA only build and test the cosmic-blue
+  # ISO. Renovate pull requests too: here they only move titanoboa or the
+  # actions, which build both ISOs the same way.
   images:
     name: Pick the images
     runs-on: ubuntu-26.04
@@ -47,11 +52,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          persist-credentials: false
           sparse-checkout: .github/actions
 
       - name: Pick the images
         id: images
         uses: ./.github/actions/pr-images
+        with:
+          renovate: standard
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -95,6 +103,8 @@ jobs:
       - name: Checkout
         if: steps.image.outputs.published == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
       - name: Setup Just
         if: steps.image.outputs.published == 'true'
@@ -235,6 +245,8 @@ jobs:
       - name: Checkout
         if: steps.image.outputs.published == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
       - name: Prepare the install test
         if: steps.image.outputs.published == 'true'
@@ -371,6 +383,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          persist-credentials: false
           sparse-checkout: .github/actions
 
       - name: Report the result
