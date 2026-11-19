@@ -287,6 +287,9 @@ for recipe in devmode toggle-devmode bug-report setup-vms setup-lima install-sys
     just --justfile /usr/share/ublue-os/just/00-entry.just --show "${recipe}" >/dev/null
 done
 if grep -q '^export LC_' /etc/zsh/zprofile; then exit 1; fi
+# Kubernetes tools: Headlamp, not OpenLens (end-of-life on Flathub)
+grep -q '^flatpak "io.kinvolk.Headlamp"' /usr/share/ublue-os/homebrew/cncf.Brewfile
+if grep -q OpenLens /usr/share/ublue-os/homebrew/cncf.Brewfile; then exit 1; fi
 # Default applications: ours, and each one names an app the system has: a
 # launcher of the image, or a first-boot flatpak (whose launcher only exists
 # after the first boot)
