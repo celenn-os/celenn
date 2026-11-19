@@ -38,10 +38,8 @@ All 5120x2880, in `system_files/usr/share/backgrounds/cosmic-blue/`:
   echoing outwards in fainter arcs, and the name small in the bottom right
   corner (`wallpaper/shaders/echoes.frag`, `wallpaper/logo_mark.py`), the
   default COSMIC wallpaper and the greeter background
-- `cosmic-blue-emblem.jpg`: a flat illustration, a tone-on-tone spiral and a
-  constellation drawing the "c" of the logo above the full name in the
-  logo's lettering (`wallpaper/shaders/constellation.frag`,
-  `wallpaper/name.py`), offered in Settings
+- `cosmic-blue-deep-spiral.jpg`: a flat illustration, a calm night-blue field
+  with a large tone-on-tone spiral and small round stars, offered in Settings
 - `cosmic-blue-galaxy.jpg`: a tilted spiral galaxy, offered in Settings
 - `cosmic-blue-galactic-river.jpg`: a diagonal river of stars and gas, offered in
   Settings
@@ -60,7 +58,7 @@ All 5120x2880, in `system_files/usr/share/backgrounds/cosmic-blue/`:
 
 COSMIC Settings lists the wallpapers in the order of the folders on disk
 (alphabetical in the deployed image), so the file names put the current set
-first: the default (arcs), the emblem, then the others, and the older wallpapers
+first: the default (arcs), the deep spiral, then the others, and the older wallpapers
 (`milky-way`, `orbits`, `waves`, the logo scene) after them. The build moves
 COSMIC's own wallpapers to `/usr/share/backgrounds/cosmic-desktop` so that they
 come after ours (`build_files/20-cosmic.sh`).

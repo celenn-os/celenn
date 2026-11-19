@@ -1,6 +1,6 @@
 // Background for the logo mark: the logo's open orbit echoes outwards in
 // fainter and fainter arcs, a few small planets ride on them, over the
-// night-blue field of the constellation.
+// night-blue field of the deep spiral.
 // LOGO = centre of the logo's orbit, R = its radius (frame heights); set
 // them with SHADER_DEFINES="$(python3 logo_mark.py --defines)".
 #ifndef LOGO
