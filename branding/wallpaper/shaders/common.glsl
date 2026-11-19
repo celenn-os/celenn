@@ -73,3 +73,4 @@ vec3 skyBase(vec2 p) {
   vec3 c = mix(mix(DEEP, ABYSS, .45), mix(ABYSS, VIOLET, .28), smoothstep(-.6, .6, p.y + (n - .5) * .5));
   return c * (.30 + .25 * n);
 }
+float sdSeg(vec2 p, vec2 a, vec2 b) { vec2 pa = p - a, ba = b - a; return length(pa - ba * clamp(dot(pa, ba) / dot(ba, ba), 0., 1.)); }
