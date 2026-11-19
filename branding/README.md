@@ -34,10 +34,10 @@ Regenerate the SVGs with `python3 logo/build.py`.
 
 All 5120x2880, in `system_files/usr/share/backgrounds/cosmic-blue/`:
 
-- `cosmic-blue-arcs.jpg`: the official logo with the full name, its orbit
-  echoing outwards in fainter arcs (`wallpaper/shaders/echoes.frag`,
-  `wallpaper/logo_name.py`), the default COSMIC
-  wallpaper and the greeter background
+- `cosmic-blue-arcs.jpg`: the logo mark, large and left of centre, its orbit
+  echoing outwards in fainter arcs, and the name small in the bottom right
+  corner (`wallpaper/shaders/echoes.frag`, `wallpaper/logo_mark.py`), the
+  default COSMIC wallpaper and the greeter background
 - `cosmic-blue-emblem.jpg`: a flat illustration, a tone-on-tone spiral and a
   constellation drawing the "c" of the logo above the full name in the
   logo's lettering (`wallpaper/shaders/constellation.frag`,
