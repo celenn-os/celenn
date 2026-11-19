@@ -54,23 +54,46 @@ if [[ -n "${shots_dir}" && -f "${shots_dir}/info.env" ]]; then
 fi
 [[ -n "${shots}" ]] && shots+=" shots-info" || shots="no-shots"
 
-# One page per language: index.html (English, default) and fr/index.html,
-# and the same for the documentation (docs/, docs/troubleshooting/) and the
-# screenshots.
-for page in index.html fr/index.html docs/index.html fr/docs/index.html \
-            docs/troubleshooting/index.html fr/docs/troubleshooting/index.html \
-            screenshots/index.html fr/screenshots/index.html; do
+# The same pages in every language: English at the root (the default), the
+# others in their own folder (fr/, de/...).
+languages=(en de es fr it pt-br)
+pages=(index.html docs/index.html docs/troubleshooting/index.html screenshots/index.html)
+all_pages=()
+for lang in "${languages[@]}"; do
+  for page in "${pages[@]}"; do
+    [[ "${lang}" == en ]] && all_pages+=("${page}") || all_pages+=("${lang}/${page}")
+  done
+done
+
+# Keep the translations in step with the English pages: same sections, same
+# commands, same screenshots, and a link to every language in the menu.
+sync_errors=0
+outline() {
+  grep -oE 'id="[^"]+"|<pre>|<!-- /?(shot(:[a-z0-9-]+)?|shots-info|no-shots|checksum|/checksum) -->|data-(nvidia|main)-only|data-iso-size="[a-z]+"|hreflang="[A-Za-z-]+"' "$1"
+}
+for page in "${pages[@]}"; do
+  for lang in "${languages[@]:1}"; do
+    if ! diff <(outline "${root}/website/${page}") <(outline "${root}/website/${lang}/${page}") > /dev/null; then
+      echo "::error file=website/${lang}/${page}::not in step with website/${page} (sections, commands, screenshots or language links differ)"
+      sync_errors=1
+    fi
+  done
+done
+(( sync_errors == 0 )) || exit 1
+
+for page in "${all_pages[@]}"; do
   mkdir -p "$(dirname "${out}/${page}")"
   if [[ -n "${ISO_BASE_URL:-}" ]]; then
     sed -e "s|@ISO_NVIDIA_URL@|${ISO_BASE_URL%/}/${iso_nvidia_name}|g" \
         -e "s|@ISO_URL@|${ISO_BASE_URL%/}/${iso_name}|g" \
       "${root}/website/${page}" > "${out}/${page}"
     # The size of the ISOs online, in GB with one decimal (a decimal comma
-    # in French); the size written in the page stays if it cannot be read
+    # in every language but English); the size written in the page stays if
+    # it cannot be read
     for kind in main nvidia; do
       size="${iso_sizes[${kind}]:-}"
       [[ -n "${size}" ]] || continue
-      [[ "${page}" == fr/* ]] && size="${size/./,}"
+      [[ "${page}" == */* && "${page}" != docs/* && "${page}" != screenshots/* ]] && size="${size/./,}"
       sed -i "s|<span data-iso-size=\"${kind}\">[^<]*</span>|<span data-iso-size=\"${kind}\">${size}</span>|" "${out}/${page}"
     done
   else

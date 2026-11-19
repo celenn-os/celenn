@@ -29,7 +29,11 @@ for (const input of document.querySelectorAll('input[name="gpu"]')) {
 // Copy buttons: labels follow the page language.
 const labels = {
   en: { copy: "Copy", copied: "Copied", failed: "Select and copy" },
+  de: { copy: "Kopieren", copied: "Kopiert", failed: "Markieren und kopieren" },
+  es: { copy: "Copiar", copied: "Copiado", failed: "Selecciona y copia" },
   fr: { copy: "Copier", copied: "Copié", failed: "Sélectionnez et copiez" },
+  it: { copy: "Copia", copied: "Copiato", failed: "Seleziona e copia" },
+  "pt-BR": { copy: "Copiar", copied: "Copiado", failed: "Selecione e copie" },
 }[document.documentElement.lang] ?? { copy: "Copy", copied: "Copied", failed: "Select and copy" };
 
 for (const button of document.querySelectorAll("[data-copy]")) {
@@ -54,4 +58,18 @@ for (const time of document.querySelectorAll("time[datetime]")) {
       day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
     });
   }
+}
+
+// Language menu: close it on a click elsewhere or with Escape.
+const langMenu = document.querySelector("details.lang");
+if (langMenu) {
+  document.addEventListener("click", (event) => {
+    if (langMenu.open && !langMenu.contains(event.target)) langMenu.open = false;
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && langMenu.open) {
+      langMenu.open = false;
+      langMenu.querySelector("summary").focus();
+    }
+  });
 }
