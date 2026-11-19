@@ -27,7 +27,7 @@ python3 milky_way.py milky-way-orig.jpg "${out}/cosmic-blue-milky-way.jpg"
 # Shader wallpapers (GLSL, rendered with headless Chromium): the
 # constellation, then a galaxy, a river of stars, a nebula and orbit lines
 # (shader name:file name; the file names set the order in COSMIC Settings)
-for pair in constellation:constellation galaxy:galaxy star-river:galactic-river \
+for pair in galaxy:galaxy star-river:galactic-river \
         nebula:gas-veils orbit-lines:line-orbits; do
     name="${pair%%:*}"
     node shaders/render.js "${name}" "${name}.png"
@@ -35,7 +35,7 @@ for pair in constellation:constellation galaxy:galaxy star-river:galactic-river 
         "${name}.png" "${out}/cosmic-blue-${pair#*:}.jpg"
     rm -f "${name}.png"
 done
-# The constellation again, smaller, above the full name
+# The emblem: a constellation drawing the "c" above the full name
 SHADER_DEFINES=$'#define CC vec2(0., .2)\n#define CR .085\n#define SPIRAL vec2(0., -.02)' \
     node shaders/render.js constellation constellation.png
 python3 name.py constellation.png "${out}/cosmic-blue-emblem.jpg"

@@ -22,12 +22,13 @@ done
 # cosmic-blue wallpapers: arcs (the logo and name) is the COSMIC default, the others are
 # extras. No light duplicates.
 bg=/usr/share/backgrounds/cosmic-blue
-for name in arcs constellation emblem galactic-river galaxy gas-veils line-orbits orbits waves milky-way; do
+for name in arcs emblem galactic-river galaxy gas-veils line-orbits orbits waves milky-way; do
     test -s "${bg}/cosmic-blue-${name}.jpg"
 done
 test -s "${bg}/cosmic-blue.jpg"
 test ! -e "${bg}/cosmic-blue-light.jpg"
 test ! -e "${bg}/cosmic-blue-orbits-light.jpg"
+test ! -e "${bg}/cosmic-blue-constellation.jpg"
 grep -q "Path(\"${bg}/cosmic-blue-arcs.jpg\")" \
     /usr/share/cosmic/com.system76.CosmicBackground/v1/all
 # Per-theme defaults (used by COSMIC releases after 1.11): the same wallpaper
