@@ -87,3 +87,27 @@ jobs:
             gh api -X DELETE "${api}/${id}" >/dev/null
           done <<< "${remove}"
           echo "Deleted ${count} versions" >> "${GITHUB_STEP_SUMMARY}"
+
+  # A failed run opens an issue, closed by the next run that passes
+  report:
+    name: Report the result
+    needs: clean
+    if: always()
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: .github/actions
+          persist-credentials: false
+
+      - name: Report the result
+        uses: ./.github/actions/failure-issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          result: ${{ needs.clean.result }}
