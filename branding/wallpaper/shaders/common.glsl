@@ -49,16 +49,6 @@ vec4 finish(vec3 col, vec2 frag) {
   return vec4(col, 1.);
 }
 
-// Light, softly varied background with a dark, warped pocket of deep space
-// behind the subject: the edges under the panel and the dock stay light
-// without drawing a horizontal band. hs = half-size of the pocket.
-float pocketMask(vec2 p, vec2 hero, vec2 hs) {
-  vec2 d = (p - hero) / hs;
-  d += (vec2(fbm2(p * .8, 3), fbm2(p * .8 + 5., 3)) - .5) * .35;
-  return exp(-dot(d, d) * 1.6);
-}
-vec3 spaceBase(vec2 p) { return mix(mix(DEEP, BRAND, .2), mix(ABYSS, VIOLET, .12), .35 + .35 * fbm2(p * .6, 4)) * .55; }
-
 // Ridged fbm: thin bright filaments, for gas and energy wisps.
 float ridged(vec3 p, int oct) {
   float a = .5, s = 0.;

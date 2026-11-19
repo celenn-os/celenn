@@ -2,7 +2,7 @@
 // small round stars and a constellation drawing the orbit "c" of the logo.
 void main() {
   vec2 frag = gl_FragCoord.xy, res = iResolution, p = (frag - .5 * res) / res.y;
-  float px = 1. / res.y;
+  float px = 1. / 720.;   // line widths as in a 720p frame, whatever the size
   vec3 col = mix(hex(0x14234a), hex(0x1a2f63), smoothstep(-.6, .6, p.y + p.x * .3));
   // tone-on-tone spiral
   vec2 d = rot(radians(-15.)) * (p - vec2(-.1, 0.)); d.y /= .7;

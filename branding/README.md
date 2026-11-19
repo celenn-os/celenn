@@ -34,9 +34,19 @@ Regenerate the SVGs with `python3 logo/build.py`.
 
 All 5120x2880, in `system_files/usr/share/backgrounds/cosmic-blue/`:
 
+- `cosmic-blue-constellation.jpg`: a flat illustration, a tone-on-tone
+  spiral and a constellation drawing the "c" of the logo on a night-blue
+  field, the default COSMIC wallpaper and the greeter background
+- `cosmic-blue-galaxy.jpg`: a tilted spiral galaxy, offered in Settings
+- `cosmic-blue-star-river.jpg`: a diagonal river of stars and gas, offered in
+  Settings
+- `cosmic-blue-nebula.jpg`: veils of blue gas around a star cluster, offered
+  in Settings
+- `cosmic-blue-orbit-lines.jpg`: line art, bundles of orbit lines from two
+  corners, offered in Settings
 - `cosmic-blue-orbits.jpg`: a planetary system seen from above its plane (a
   bright star, shaded planets, a ringed giant, an asteroid belt) over the
-  Milky Way, the default COSMIC wallpaper
+  Milky Way, the previous default, offered in Settings
 - `cosmic-blue.jpg`: the logo as a scene, offered in Settings
 - `cosmic-blue-waves.jpg`: layered ribbons of light, offered in Settings
 - `cosmic-blue-milky-way.jpg`: the Milky Way above the Earth, a photo taken
@@ -51,6 +61,13 @@ accounts that picked a wallpaper in Settings point to its path.
 There are no light versions: the same wallpaper serves both themes. Later
 COSMIC releases read a wallpaper per theme (`com.system76.CosmicBackground.Dark`
 / `.Light`); both point to the default.
+
+The five shader wallpapers are GLSL fragment shaders in `wallpaper/shaders/`
+(`common.glsl` holds the palette, noise, stars and the film-like finish),
+rendered tile by tile with WebGL 2 in Playwright's headless Chromium by
+`wallpaper/shaders/render.js NAME OUT.png [WIDTH HEIGHT]`. They keep the
+top panel and the dock readable: no black edges, nothing dazzling behind
+them.
 
 `wallpaper/orbits.py` draws the planetary system with numpy over
 the sky of `wallpaper/sky.py`. The waves are drawn as SVG by

@@ -11,7 +11,7 @@ float bundle(vec2 p, vec2 c, float r0, float gap, float px, out float t) {
 }
 void main() {
   vec2 frag = gl_FragCoord.xy, res = iResolution, p = (frag - .5 * res) / res.y;
-  float px = 1. / res.y, ar = res.x / res.y;
+  float px = 1. / 720., ar = res.x / res.y;   // line widths as in a 720p frame
   vec3 col = mix(hex(0x162043), hex(0x1d2b58), smoothstep(-.7, .7, p.y - p.x * .4));
   col += BRAND * .05 * exp(-dot(p, p) / .25);
   float t;
