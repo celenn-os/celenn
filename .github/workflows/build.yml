@@ -303,7 +303,9 @@ jobs:
           stage: theme
           key: ${{ steps.helpers.outputs.theme }}
           dir: ${{ runner.temp }}/helpers
+          cargo: 'true'
           cargo-lock: build_files/theme/Cargo.lock
+          cargo-weekly: 'true'
 
       - name: Helper stage tour
         uses: ./.github/actions/helper-stage
@@ -311,7 +313,9 @@ jobs:
           stage: tour
           key: ${{ steps.helpers.outputs.tour }}
           dir: ${{ runner.temp }}/helpers
+          cargo: 'true'
           cargo-lock: build_files/first_steps/Cargo.lock
+          cargo-weekly: 'true'
 
       - name: Helper stage greeter
         uses: ./.github/actions/helper-stage
@@ -319,6 +323,7 @@ jobs:
           stage: greeter
           key: ${{ steps.helpers.outputs.greeter }}
           dir: ${{ runner.temp }}/helpers
+          cargo: 'true'
 
       - name: Helper stage store
         uses: ./.github/actions/helper-stage
@@ -326,6 +331,7 @@ jobs:
           stage: store
           key: ${{ steps.helpers.outputs.store }}
           dir: ${{ runner.temp }}/helpers
+          cargo: 'true'
 
       - name: Helper stage filemanager
         uses: ./.github/actions/helper-stage
@@ -333,6 +339,7 @@ jobs:
           stage: filemanager
           key: ${{ steps.helpers.outputs.filemanager }}
           dir: ${{ runner.temp }}/helpers
+          cargo: 'true'
 
       - name: Helper stage plymouth
         uses: ./.github/actions/helper-stage
