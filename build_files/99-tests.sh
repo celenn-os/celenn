@@ -467,6 +467,16 @@ for bin in /ctx/filemanager/bin/*; do
     cmp "${bin}" "/usr/bin/$(basename "${bin}")"
 done
 
+# The rebuilt programs carry no debug data (stripped in their helper stage),
+# which would add about 0.1 GB each to the image and the ISO
+for bin in /usr/bin/cosmic-greeter /usr/bin/cosmic-store /ctx/filemanager/bin/*; do
+    sections="$(readelf -S --wide "${bin}")"
+    # (.debug_gdb_scripts, Rust's debugger helpers, is loaded data and stays)
+    if grep -q ' \.debug_info ' <<<"${sections}"; then
+        echo "${bin} is not stripped"; exit 1
+    fi
+done
+
 # Frosted glass on by default, in the theme apps read and in the builder
 for theme in Dark Light; do
     grep -qx true "/usr/share/cosmic/com.system76.CosmicTheme.${theme}/v2/frosted_windows"

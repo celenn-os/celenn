@@ -45,12 +45,15 @@ touch /tmp/build-start
 # Build only (no new %prep, which would undo the patch)
 rpmbuild --define "_topdir ${TOPDIR}" -bc --short-circuit "${SPEC}"
 
-# The file manager, and the applet (desktop icons) that shares its code
+# The file manager, and the applet (desktop icons) that shares its code.
+# Without debug data: Fedora's Rust build flags keep it (-Cdebuginfo=2), and
+# only its %install step, which is not run here, strips it (about 0.1 GB per
+# program in the image and the ISO)
 mkdir -p /out/bin
 for name in cosmic-files cosmic-files-applet; do
     bin="$(find "${src}/target/" -type f -newer /tmp/build-start -name "${name}" -perm -u+x | head -n1)"
     if [ -n "${bin}" ]; then
-        install -m 0755 "${bin}" "/out/bin/${name}"
+        install -m 0755 -s "${bin}" "/out/bin/${name}"
     fi
 done
 test -x /out/bin/cosmic-files
