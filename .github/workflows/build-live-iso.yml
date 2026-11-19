@@ -20,8 +20,8 @@ on:
 
 env:
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"  # do not edit
-  # Installed systems follow this tag. PR test builds use latest.
-  DEFAULT_TAG: ${{ github.event_name == 'pull_request' && 'latest' || 'stable' }}
+  # Installed systems follow this tag. PR test builds use testing.
+  DEFAULT_TAG: ${{ github.event_name == 'pull_request' && 'testing' || 'stable' }}
   # The tool that builds the live ISO, at a pinned commit (it has no
   # releases), moved to the latest main commit by Renovate once a week; the
   # update pull request builds and install-tests the ISO.

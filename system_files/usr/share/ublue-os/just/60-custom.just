@@ -753,7 +753,7 @@ toggle-flatpark mode="toggle":
             ;;
     esac
 
-# Switch between stable (weekly) and latest (daily) images
+# Switch between the stable (weekly), testing (daily) and dev images
 [group('System')]
 switch-channel channel="status":
     #!/usr/bin/bash
@@ -771,34 +771,47 @@ switch-channel channel="status":
         echo "This system does not follow a cosmic-blue image (${ref:-none}): nothing to switch." >&2
         exit 1
     fi
-    case "{{ channel }}" in
+    channel="{{ channel }}"
+    case "${channel}" in
         status)
             case "${tag}" in
                 stable) echo "Channel: stable (updated once a week, after more tests)." ;;
-                latest) echo "Channel: latest (updated every day)." ;;
+                testing) echo "Channel: testing (updated every day)." ;;
+                latest) echo "Channel: testing (updated every day), under its old name latest." ;;
+                dev) echo "Channel: dev (every change, as soon as it is merged and tested; for testers)." ;;
                 *) echo "Pinned to ${image}: no automatic updates to newer images." ;;
             esac
-            echo "Switch with: ujust switch-channel stable  or  ujust switch-channel latest"
+            echo "Switch with: ujust switch-channel stable, testing or dev"
             exit 0
             ;;
-        stable|latest) ;;
+        # The old name of testing
+        latest) channel=testing ;;
+        stable|testing|dev) ;;
         *)
-            echo "Usage: ujust switch-channel [status|stable|latest]" >&2
+            echo "Usage: ujust switch-channel [status|stable|testing|dev]" >&2
             exit 1
             ;;
     esac
-    target="${repo}:{{ channel }}"
-    if [[ "${tag}" == "{{ channel }}" ]]; then
-        echo "Already on the {{ channel }} channel (${target})."
+    target="${repo}:${channel}"
+    if [[ "${tag}" == "${channel}" ]]; then
+        echo "Already on the ${channel} channel (${target})."
         exit 0
     fi
-    if [[ "{{ channel }}" == stable ]]; then
-        echo "stable gets a new image once a week, after the update and install tests."
-        echo "It can be a few days older than the image you have now: that is fine,"
-        echo "your files and settings are kept."
-    else
-        echo "latest gets a new image every day, as soon as it passes the build tests."
-    fi
+    case "${channel}" in
+        stable)
+            echo "stable gets a new image once a week, after the update and install tests."
+            echo "It can be a few days older than the image you have now: that is fine,"
+            echo "your files and settings are kept."
+            ;;
+        testing)
+            echo "testing gets a new image every day, as soon as it passes the build tests."
+            ;;
+        dev)
+            echo "dev gets every change as soon as it is merged and passes the build tests,"
+            echo "several times a day: for testing what is coming. Something can break;"
+            echo "the previous image stays one reboot away (sudo bootc rollback)."
+            ;;
+    esac
     echo "The ${target} image is downloaded now, its signature is checked,"
     echo "and it starts at the next reboot."
     if [[ -t 0 ]] && ! gum confirm "Switch to ${target}?"; then
@@ -806,10 +819,11 @@ switch-channel channel="status":
         exit 0
     fi
     sudo bootc switch --enforce-container-sigpolicy "${target}"
-    echo "Done. Reboot to start the {{ channel }} image."
-    if [[ "${tag}" == stable || "${tag}" == latest ]]; then
-        echo "To go back: ujust switch-channel ${tag}"
-    fi
+    echo "Done. Reboot to start the ${channel} image."
+    case "${tag}" in
+        stable|testing|dev) echo "To go back: ujust switch-channel ${tag}" ;;
+        latest) echo "To go back: ujust switch-channel testing" ;;
+    esac
 
 # Install firmware updates (BIOS/UEFI, SSD, dock...)
 [group('System')]

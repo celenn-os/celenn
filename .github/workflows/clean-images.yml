@@ -2,8 +2,8 @@
 # Old image versions on GHCR: every build publishes a new version of each
 # image, and nothing removed them. This lists (and, run by hand with
 # "delete", removes) the versions older than KEEP_DAYS, except:
-#   - any version tagged stable, stable-YYYYMMDD or latest (the weekly stable
-#     images stay available for rollback, whatever their age),
+#   - any version tagged stable, stable-YYYYMMDD, testing, latest or dev (the
+#     weekly stable images stay available for rollback, whatever their age),
 #   - the cosign signatures and SBOM attestations of the versions kept.
 # The signature and attestation of a removed version go with it. Untagged
 # versions are left alone (they could be parts of a multi-platform image).
@@ -56,11 +56,11 @@ jobs:
             | jq -s . > "${versions}"
           cutoff="$(date -u -d "-${KEEP_DAYS} days" +%FT%TZ)"
           # Image versions (not signatures or attestations) to remove: old
-          # and not tagged stable* or latest
+          # and not tagged stable*, testing, latest or dev
           old="$(jq -r --arg cutoff "${cutoff}" '
             .[] | select(.created_at < $cutoff and (.tags | length) > 0)
                 | select(any(.tags[]; test("^sha256-.*\\.(sig|att)$")) | not)
-                | select(any(.tags[]; test("^(stable.*|latest)$")) | not)
+                | select(any(.tags[]; test("^(stable.*|testing|latest|dev)$")) | not)
                 | .name' "${versions}")"
           # Their signatures and attestations are tagged sha256-<digest>.sig/.att
           remove="$(jq -r --arg old "${old}" '
@@ -75,7 +75,7 @@ jobs:
           {
             echo "### ${IMAGE}"
             echo
-            echo "${total} versions, ${count} older than ${KEEP_DAYS} days and not stable or latest."
+            echo "${total} versions, ${count} older than ${KEEP_DAYS} days and not on a channel (stable, testing, dev)."
             if [[ "${DELETE}" != true && "${count}" -gt 0 ]]; then
               echo "Nothing deleted: run this workflow by hand with \"delete\" to remove them."
             fi

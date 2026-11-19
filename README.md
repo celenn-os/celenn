@@ -43,9 +43,9 @@ sudo systemctl reboot
 After the reboot, cosmic-blue turns on the signature check of its updates by
 itself (`bootc switch --enforce-container-sigpolicy`).
 
-`stable` moves once a week to a build that has spent a week on `latest`.
-`latest` gets every daily build; use it instead of `stable` to get changes
-sooner.
+`stable` moves once a week to a build that has spent a week on `testing`.
+`testing` gets every daily build, and `dev` every merged change: switch with
+`ujust switch-channel testing` (or `dev`) to get changes sooner.
 
 **NVIDIA graphics cards** (GTX 16xx, RTX 20xx and newer): use the
 `cosmic-blue-nvidia` image, which ships NVIDIA's driver. For a new install,

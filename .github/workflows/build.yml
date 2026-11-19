@@ -1,13 +1,20 @@
 ---
 name: Build container image
+# Channels (tags installed systems follow), as in Fedora CoreOS:
+#   - dev: every change merged to main (tags dev and dev-<commit>, no version
+#     number: the image shows e.g. 44.20261119-dev.abc1234),
+#   - testing: one build a day with Fedora's package updates (tags testing,
+#     latest for the systems installed before testing existed, the version
+#     44.YYYYMMDD and the date YYYYMMDD),
+#   - stable: a testing build a week old (promote-stable.yml).
 # Triggers, without duplicate builds:
 #   - pull requests: build and boot-test, nothing is published,
-#   - pushes to main (merged pull requests, Renovate base image updates): build
-#     and publish,
-#   - every day: build and publish to pick up Fedora package updates, unless
-#     main was already built in the last hours (e.g. after the morning
-#     Renovate base image update),
-#   - by hand (workflow_dispatch), also used by check-cosmic-version.yml.
+#   - pushes to main (merged pull requests, Renovate base image updates):
+#     build and publish to dev,
+#   - every day: build and publish to testing, unless testing was already
+#     built by hand in the last hours,
+#   - by hand (workflow_dispatch): testing by default, or dev
+#     (check-cosmic-version.yml, after its merge).
 # Changes that do not end up in the image (website, docs, other workflows,
 # Renovate config) do not start a build.
 on:
@@ -60,10 +67,16 @@ on:
       - '.github/actionlint.yaml'
       - 'tests/lint.sh'
   workflow_dispatch:
+    inputs:
+      channel:
+        description: "Channel to publish to (from main)"
+        type: choice
+        options: [testing, dev]
+        default: testing
 
 env:
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"  # do not edit
-  # The daily build is skipped if main was built within this many hours
+  # The daily build is skipped if testing was built within this many hours
   RECENT_BUILD_HOURS: 8
 
 # Pull requests: a new push cancels the running build. Main: builds queue up
@@ -72,8 +85,9 @@ env:
 # per group, so a daily run (often hours late) would otherwise replace the
 # pending build of a just merged change, then skip itself as main was built
 # recently, and that change would not be published (2026-11-17, #117). It
-# skips itself while another build of main runs or waits (recent_build),
-# and the version tag push refuses a version another build already took.
+# skips itself while a testing build started by hand runs or waits
+# (recent_build), and the version tag push refuses a version another build
+# already took.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'schedule' && 'daily' || github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -97,26 +111,30 @@ jobs:
         run: |
           set -euo pipefail
           since="$(date -u -d "-${RECENT_BUILD_HOURS} hours" +%FT%TZ)"
-          # Successful, running or queued builds of main, other than this run
-          recent="$(gh run list --workflow build.yml --branch main --limit 30 \
+          # Successful, running or queued testing builds of main (daily or
+          # by hand; dev builds come from pushes), other than this run. A dev
+          # build started by hand is counted too: rare, and harmless.
+          recent="$(gh run list --workflow build.yml --branch main --limit 50 \
             --json databaseId,status,conclusion,createdAt,event,url \
-            --jq "map(select(.databaseId != ${GITHUB_RUN_ID} and .event != \"pull_request\"
+            --jq "map(select(.databaseId != ${GITHUB_RUN_ID}
+                  and (.event == \"schedule\" or .event == \"workflow_dispatch\")
                   and .createdAt >= \"${since}\"
                   and (.status != \"completed\" or .conclusion == \"success\")))
                   | .[0].url // empty")"
           if [ -n "${recent}" ]; then
-            echo "main was built in the last ${RECENT_BUILD_HOURS} hours, skipping: ${recent}"
+            echo "testing was built in the last ${RECENT_BUILD_HOURS} hours, skipping: ${recent}"
             echo "skip=true" >> "${GITHUB_OUTPUT}"
           else
             echo "skip=false" >> "${GITHUB_OUTPUT}"
           fi
 
-  # One version for all the images of this build, as in Bluefin:
-  # <Fedora>.<YYYYMMDD>, then .1, .2... if an image of the day is already on
-  # GHCR (`just version`). Builds of main triggered by pushes queue up, but
-  # the daily build has a concurrency group of its own (see above): a merge
-  # while it runs can pick the same version. The later push then stops, and
-  # the report job starts a new build of main, which picks the next version.
+  # The channel, and one version for all the images of this build. testing,
+  # as in Bluefin: <Fedora>.<YYYYMMDD>, then .1, .2... if an image of the day
+  # is already on GHCR (`just version`), which only happens when testing is
+  # built again by hand. The daily build has a concurrency group of its own
+  # (see above): a testing build started by hand while it runs can pick the
+  # same version. The later push then stops, and the report job starts a new
+  # testing build, which picks the next version.
   version:
     name: Pick the version
     needs: recent_build
@@ -132,6 +150,7 @@ jobs:
       pull-requests: read  # pr-images
     outputs:
       version: ${{ steps.version.outputs.version }}
+      channel: ${{ steps.version.outputs.channel }}
       suffixes: ${{ steps.images.outputs.suffixes }}
       full: ${{ steps.full.outputs.full }}
     steps:
@@ -172,14 +191,28 @@ jobs:
       - name: Install just
         uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 #v4.0.0
 
+      # testing: the next free version of the day (`just version`). dev and
+      # pull requests: the date and commit, never published as a version tag.
       - name: Pick the version
         id: version
+        env:
+          INPUT_CHANNEL: ${{ inputs.channel }}
         run: |
           set -euo pipefail
-          image="$(just image_name)"
-          # Same images as the build_push matrix
-          version="$(just version "${image}" "${image}-nvidia")"
-          echo "Version: ${version}"
+          case "${GITHUB_EVENT_NAME}" in
+            schedule) channel=testing ;;
+            workflow_dispatch) channel="${INPUT_CHANNEL:-testing}" ;;
+            *) channel=dev ;;
+          esac
+          if [[ "${channel}" == testing ]]; then
+            image="$(just image_name)"
+            # Same images as the build_push matrix
+            version="$(just version "${image}" "${image}-nvidia")"
+          else
+            version="$(just fedora-version).$(date -u +%Y%m%d)-dev.$(git rev-parse --short HEAD)"
+          fi
+          echo "Channel: ${channel}, version: ${version}"
+          echo "channel=${channel}" >> "${GITHUB_OUTPUT}"
           echo "version=${version}" >> "${GITHUB_OUTPUT}"
 
   build_push:
@@ -244,12 +277,13 @@ jobs:
 
           echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_ENV
 
+      # The local tag of the build: its channel (testing or dev)
       - name: Default Tag
         id: gen-default-tag
+        env:
+          CHANNEL: ${{ needs.version.outputs.channel }}
         run: |
-          DEFAULT_TAG=$(just generate-default-tag)
-
-          echo "DEFAULT_TAG=${DEFAULT_TAG}" >> $GITHUB_ENV
+          echo "DEFAULT_TAG=${CHANNEL}" >> $GITHUB_ENV
 
       - name: Prepare environment
         run: |
@@ -440,7 +474,7 @@ jobs:
       - name: Boot test
         timeout-minutes: 40
         env:
-          TARGET_IMGREF: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          TARGET_IMGREF: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
           # The virtual machine has no NVIDIA GPU for these to work with
           EXTRA_IGNORED_UNITS: ${{ matrix.image_suffix == 'nvidia' && 'nvidia-persistenced|nvidia-cdi-refresh' || '' }}
         run: |
@@ -521,9 +555,10 @@ jobs:
           cosign-release: 'v3.1.4'
 
       # Signed before it is published: the image is first pushed under its
-      # version tag only (44.YYYYMMDD[.N], which nothing follows), signed by
-      # digest, and only then pushed under the tags installed systems follow
-      # (latest, ...). No unsigned latest, even for a moment.
+      # own tag only (testing: 44.YYYYMMDD[.N], dev: dev-<commit>; nothing
+      # follows them), signed by digest, and only then pushed under the tags
+      # installed systems follow (testing, latest, dev). No unsigned channel
+      # tag, even for a moment.
       - name: Push the version tag
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         id: push-image
@@ -536,11 +571,16 @@ jobs:
           # The login above is for cosign; root podman has its own credentials
           ${ROOT_ENV} podman login ghcr.io --username "${REGISTRY_USER}" --password-stdin <<< "${REGISTRY_PASSWORD}"
           read -r first _ <<< "${ALIAS_TAGS}"
-          [[ "${first}" == "${VERSION}" ]] || { echo "::error::The first build tag (${first}) is not the version (${VERSION})"; exit 1; }
-          # Two builds of main that ran at the same time (the daily build and
-          # a merge) could pick the same version: the second one stops here
-          # instead of replacing the first one's image under that version.
-          if skopeo inspect --raw "docker://${IMAGE_REGISTRY}/${IMAGE_NAME}:${first}" >/dev/null 2>&1; then
+          if [[ "${DEFAULT_TAG}" == testing ]]; then
+            [[ "${first}" == "${VERSION}" ]] || { echo "::error::The first build tag (${first}) is not the version (${VERSION})"; exit 1; }
+          else
+            [[ "${first}" == dev-* ]] || { echo "::error::The first build tag (${first}) is not dev-<commit>"; exit 1; }
+          fi
+          # Two testing builds that ran at the same time (the daily build and
+          # one started by hand) could pick the same version: the second one
+          # stops here instead of replacing the first one's image under that
+          # version. (A dev build of the same commit again replaces it.)
+          if [[ "${DEFAULT_TAG}" == testing ]] && skopeo inspect --raw "docker://${IMAGE_REGISTRY}/${IMAGE_NAME}:${first}" >/dev/null 2>&1; then
             echo "::error::${IMAGE_NAME}:${first} is already published by another build: a new build of main starts (report job)"
             echo "version_taken=true" >> "${GITHUB_OUTPUT}"
             exit 1
@@ -629,8 +669,8 @@ jobs:
           GH_REPO: ${{ github.repository }}
           BRANCH: ${{ github.event.repository.default_branch }}
         run: |
-          echo "::notice::This build's version was taken by another build: starting a new build of ${BRANCH}"
-          gh workflow run build.yml --ref "${BRANCH}"
+          echo "::notice::This build's version was taken by another build: starting a new testing build of ${BRANCH}"
+          gh workflow run build.yml --ref "${BRANCH}" -f channel=testing
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
