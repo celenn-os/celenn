@@ -71,6 +71,33 @@ msgstr "Ein Update hat etwas kaputt gemacht? Zur vorherigen Version zurückkehre
 msgid "Show the current and previous versions"
 msgstr "Aktuelle und vorherige Version anzeigen"
 
+msgid "Protect your files"
+msgstr "Dateien schützen"
+
+msgid "Rollback brings the system back, not your files. Déjà Dup keeps a copy of your home folder on another disk."
+msgstr "Das Zurücksetzen stellt das System wieder her, nicht Ihre Dateien. Déjà Dup bewahrt eine Kopie Ihres persönlichen Ordners auf einem anderen Datenträger auf."
+
+msgid "Use a USB drive"
+msgstr "Einen USB-Datenträger verwenden"
+
+msgid "The simplest choice: a backup on the same disk would be lost with it. A network share or a cloud storage works too."
+msgstr "Am einfachsten: Eine Sicherung auf demselben Datenträger ginge mit ihm verloren. Eine Netzwerkfreigabe oder ein Cloud-Speicher eignet sich ebenfalls."
+
+msgid "Turn on automatic backups"
+msgstr "Automatische Sicherungen einschalten"
+
+msgid "Backups then run by themselves in the background, and only save what changed since the last one."
+msgstr "Sicherungen laufen dann von selbst im Hintergrund und speichern nur, was sich seit der letzten geändert hat."
+
+msgid "Restore when you need it"
+msgstr "Bei Bedarf wiederherstellen"
+
+msgid "Get back a single file, a folder or your whole home folder, even on a new computer."
+msgstr "Holen Sie eine einzelne Datei, einen Ordner oder Ihren ganzen persönlichen Ordner zurück, auch auf einem neuen Computer."
+
+msgid "Open Déjà Dup"
+msgstr "Déjà Dup öffnen"
+
 msgid "Handy commands"
 msgstr "Nützliche Befehle"
 

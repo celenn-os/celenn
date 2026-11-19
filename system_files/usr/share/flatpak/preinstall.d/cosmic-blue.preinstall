@@ -36,10 +36,6 @@ IsRuntime=false
 Branch=stable
 IsRuntime=false
 
-[Flatpak Preinstall org.gnome.DejaDup]
-Branch=stable
-IsRuntime=false
-
 [Flatpak Preinstall org.gnome.Firmware]
 Branch=stable
 IsRuntime=false

@@ -404,6 +404,11 @@ desktop_tour() {
     if [[ "${first_steps}" == true ]]; then
         first_steps_shots || true
     fi
+    # Backups (Déjà Dup): its package starts the monitor that runs the
+    # automatic backups at login (a Flatpak could not, see 30-packages.sh)
+    wait_for 30 "pgrep -u ${DEMO_USER} -f deja-dup-monitor" \
+        || desktop_problem "the Déjà Dup backup monitor did not start at login"
+
     screenshot "${SHOTS}/03-desktop"
 
     # App Library (Super+A): the application icons
@@ -473,7 +478,7 @@ vm_check_crashes() {
 
 # cosmic-blue's first steps tour, which opens at the first login of a new
 # account: one screenshot per page (Alt+Right turns the page), then closed.
-FIRST_STEPS_PAGES=6
+FIRST_STEPS_PAGES=7
 
 first_steps_shots() {
     local page
