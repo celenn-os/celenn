@@ -838,7 +838,11 @@ impl<T: Tour> App<T> {
                     settings::item_row(vec![
                         two_lines(text::monotext(*command).into(), tr(description)),
                         widget::tooltip(
+                            // Named for screen readers, which otherwise only
+                            // say "button" for an icon
                             widget::button::icon(widget::icon::from_name("edit-copy-symbolic"))
+                                .name(tr("Copy"))
+                                .description(*command)
                                 .on_press(Message::Copy(command)),
                             text::body(tr("Copy")),
                             widget::tooltip::Position::Left,
