@@ -1,7 +1,7 @@
 // Gravity well: a grid of light bent by a planet's mass, the way spacetime
 // is drawn in physics, with the planet glowing at the bottom of the well.
 float height(vec2 xz) {
-  float r = length(xz - vec2(.8, -6.));
+  float r = length(xz - vec2(1.9, -8.));
   return -1.25 / sqrt(r * r + .35) + .02 * sin(xz.x * .5);
 }
 void main() {
@@ -32,7 +32,7 @@ void main() {
     col = mix(col, surf + lc * line * .9, fog);
   }
   // the planet at the bottom of the well
-  vec3 pc = vec3(.8, -1.45, -6.);
+  vec3 pc = vec3(1.9, -1.30, -8.);
   vec3 oc = ro - pc; float b = dot(oc, rd), h = b * b - dot(oc, oc) + .55 * .55;
   if (h > 0.) {
     float tp = -b - sqrt(h);

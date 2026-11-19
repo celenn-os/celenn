@@ -14,7 +14,7 @@ float Pr(int i) { return i == 0 ? .30 : i == 1 ? .22 : i == 2 ? .55 : i == 3 ? .
 vec3 Pcol(int i) { return i == 0 ? SKY : i == 1 ? ORCHID : i == 2 ? BRAND : i == 3 ? ICE : i == 4 ? CYAN * .8 : WARM; }
 float ringSd(vec3 p) {  // ring around planet 2
   vec3 q = p - Pc(2);
-  float c = cos(radians(80.)), s = sin(radians(70.)); q.yz = mat2(c, s, -s, c) * q.yz;
+  float c = cos(radians(14.)), s = sin(radians(70.)); q.yz = mat2(c, s, -s, c) * q.yz;
   float c2 = cos(radians(-12.)), s2 = sin(radians(-12.)); q.xy = mat2(c2, s2, -s2, c2) * q.xy;
   vec2 t = vec2(length(q.xz) - .95, q.y);
   return length(max(abs(t) - vec2(.22, .006), 0.)) - .01;
