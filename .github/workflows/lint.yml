@@ -59,18 +59,19 @@ jobs:
       # Updated by Renovate (see .github/renovate.json5)
       RENOVATE_VERSION: "44.234.1"
     steps:
-      # Only when the pull request changes the config (the job is skipped
-      # quickly otherwise)
+      # Only when the pull request changes the config, or this workflow (a new
+      # Node.js or Renovate version for the validator itself); the job is
+      # skipped quickly otherwise
       - name: Check whether the Renovate config changed
         id: changed
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          if gh pr diff "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --name-only | grep -qx '.github/renovate.json5'; then
+          if gh pr diff "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --name-only | grep -qxE '\.github/(renovate\.json5|workflows/lint\.yml)'; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Renovate config unchanged, nothing to check"
+            echo "Renovate config and validator unchanged, nothing to check"
           fi
 
       - name: Checkout
