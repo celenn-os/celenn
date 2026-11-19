@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The bright cosmic-blue wallpapers, drawn with numpy (5120x2880).
 Usage: bright.py NAME OUT.jpg [SCALE]
-NAME: dawn, aurora, nebula, eclipse, dunes, layers. SCALE (default 1) renders
+NAME: dawn, aurora, layers, crescent, halo, orbits-light, haze. SCALE (default 1) renders
 a smaller preview, e.g. 0.5. Output is deterministic (fixed seeds).
 Needs numpy, pillow and scipy.
 """
@@ -113,8 +113,8 @@ def dawn():
     along = (ang - sang) * R / W                   # distance along the limb from the sun
     # sky: light near the horizon, deep blue at the top
     sky = ramp(np.clip(alt, 0, None) / .69, [(0, "#bfe3ff"), (.08, "#7fb6ff"), (.30, "#3f78f0"),
-                                               (.65, "#2148bf"), (1, "#16308a")])
-    sky = screen(sky, stars(rng, 2600, bright=.8, mask=np.clip(alt * 4 - 1.6, 0, 1))[..., None])
+                                               (.65, "#3566dc"), (1, "#2f5fd6")])
+    sky = screen(sky, stars(rng, 2600, bright=.8, mask=np.clip(alt * 4 - 1.6, 0, 1) * .5)[..., None])
     sun = np.hypot((x - sunx) / W, (y - (cy - R)) / H * 1.4)
     sky = screen(sky, (np.exp(-(sun / .32) ** 2) * .55)[..., None] * hexc("#d6ecff"))
     # thin airglow layers above the limb
@@ -151,7 +151,7 @@ def dawn():
 def aurora():
     """A soft mesh of luminous blues with a faint orbit line, very bright."""
     rng = np.random.default_rng(5)
-    img = ramp(v * .6 + u * .4, [(0, "#9ec5ff"), (.5, "#4f8dff"), (1, "#1d47c4")])
+    img = ramp(v * .6 + u * .4, [(0, "#9ec5ff"), (.5, "#4f8dff"), (1, "#3164dc")])
     blobs = [(.18, .22, .30, "#c9e2ff", .85), (.78, .30, .28, "#7fe0ff", .55), (.62, .78, .34, "#2f5ee0", .7),
              (.30, .82, .25, "#7b8cff", .55), (.92, .88, .22, "#1d3fb0", .6), (.50, .45, .22, "#a8d0ff", .45)]
     for bx, by, br, c, a in blobs:
@@ -175,128 +175,12 @@ def aurora():
     return img
 
 
-def nebula():
-    """A bright, wide nebula of blues and cyans with dark dust and stars."""
-    rng = np.random.default_rng(21)
-    wx = (fbm(1400, 5, rng) - .5) * 700 * K
-    wy = (fbm(1400, 5, rng) - .5) * 700 * K
-    # a sweeping arc of gas across the screen
-    cx, cy, R = .30 * W, 1.55 * H, 1.25 * H
-    d = (np.hypot(x + wx - cx, y + wy - cy) - R) / H
-    band = np.exp(-(d / .22) ** 2)
-    det = fbm(700, 8, rng, .55)
-    gas = band * np.clip((det - .25) * 2.0, 0, 1) ** 1.2
-    puff = fbm(320, 7, rng, .55)
-    gas2 = band * np.clip((puff - .5) * 4, 0, 1) ** 1.5
-    dust = blur((1 - np.abs(2 * fbm(520, 6, rng, .5) - 1)) ** 4, 14) * np.exp(-((d + .05) / .10) ** 2)
-    base = ramp(v, [(0, "#1d3f9e"), (.5, "#2551c2"), (1, "#1a3a96")])
-    base = mix(base, hexc("#3f6fe0"), np.exp(-((u - .62) ** 2 / .12 + (v - .45) ** 2 / .08)) * .7)
-    img = screen(base, stars(rng, 5000, bright=.9)[..., None])
-    img = screen(img, (gas * .85)[..., None] * hexc("#6fb3ff"))
-    img = screen(img, (gas2 * .7)[..., None] * hexc("#bfefff"))
-    img = screen(img, (blur(gas, 60) * .5)[..., None] * hexc("#7a86ff"))
-    img = img * (1 - .38 * np.clip(dust * 1.3, 0, 1))[..., None]
-    # two bright young stars in the gas
-    for sx, sy, s in [(.63, .34, 1.0), (.41, .52, .6)]:
-        rs = np.hypot(x - sx * W, y - sy * H)
-        ang = np.arctan2(y - sy * H, x - sx * W)
-        core = np.exp(-(rs / (18 * K)) ** 2) * 1.5 + np.exp(-(rs / (160 * K)) ** 2) * .35
-        spikes = np.abs(np.cos(2 * ang)) ** 600 * np.exp(-rs / (160 * K)) * .5
-        img = screen(img, ((core + spikes) * s)[..., None] * hexc("#f2f9ff"))
-    return img
-
-
-def eclipse():
-    """A planet passing in front of its star: a ring of light (the shape of
-    the logo's orbit) on a luminous blue sky."""
-    rng = np.random.default_rng(9)
-    cx, cy, R = .56 * W, .46 * H, .20 * H
-    rr = np.hypot(x - cx, y - cy) / R
-    ang = np.arctan2(y - cy, x - cx)
-    img = ramp(np.clip(np.hypot((u - .56) * 1.4, v - .47) / .95, 0, 1),
-               [(0, "#5d9bff"), (.3, "#3b72ea"), (.7, "#2450c4"), (1, "#1a3a9a")])
-    img = screen(img, stars(rng, 2200, bright=.6, mask=np.clip(rr / 3 - .3, 0, 1))[..., None])
-    # corona: streamers, brighter towards the lower right (the "diamond")
-    streamer = fbm(260, 5, rng)
-    rays = np.interp((ang + np.pi) / (2 * np.pi) * 255, np.arange(256), np.random.default_rng(4).random(256))
-    rays = gaussian_filter(rays, 0)
-    cor = np.exp(-np.clip(rr - 1, 0, None) / (.35 + .25 * rays)) * (rr > 1)
-    cor *= .75 + .5 * streamer
-    img = screen(img, (cor * .9)[..., None] * hexc("#cfe6ff"))
-    img = screen(img, (np.exp(-np.clip(rr - 1, 0, None) / 1.6) * .35 * (rr > .99))[..., None] * hexc("#8cc0ff"))
-    ring = np.exp(-((rr - 1) * R / (5 * K)) ** 2) * 1.2
-    img = screen(img, ring[..., None] * hexc("#f2f9ff"))
-    da = math.radians(38)
-    dmd = np.hypot(x - (cx + R * math.cos(da)), y - (cy + R * math.sin(da)))
-    diamond = np.exp(-(dmd / (22 * K)) ** 2) * 1.6 + np.exp(-(dmd / (200 * K)) ** 2) * .55
-    dang = np.arctan2(y - (cy + R * math.sin(da)), x - (cx + R * math.cos(da)))
-    diamond += np.abs(np.cos(2 * (dang - .2))) ** 900 * np.exp(-dmd / (220 * K)) * .5
-    # the dark planet, with a faint earthshine
-    p = sphere(cx, cy, R, L=(-.6, -.5, .2))
-    disc = hexc("#0c1f5c") * (.75 + .5 * np.clip(p[5], 0, 1))[..., None]
-    img = mix(img, disc, p[3])
-    img = screen(img, diamond[..., None] * hexc("#ffffff"))
-    return img
-
-
-def dunes():
-    """Blue dunes of an icy world under a ringed planet, in layers that fade
-    into a bright haze."""
-    rng = np.random.default_rng(13)
-    sky = ramp(v / .68, [(0, "#2b55cf"), (.5, "#5a92ff"), (.85, "#a9d0ff"), (1, "#d6eaff")])
-    sky = screen(sky, stars(rng, 1500, bright=.6, mask=np.clip(1 - v * 3.5, 0, 1))[..., None])
-    # ringed planet high in the sky, lit from the left
-    pcx, pcy, pr = .69 * W, .27 * H, .11 * H
-    t = math.radians(-14)
-    dx, dy = (x - pcx) / pr, (y - pcy) / pr
-    ux = dx * math.cos(t) + dy * math.sin(t)
-    uy = -dx * math.sin(t) + dy * math.cos(t)
-    d = np.hypot(dx, dy)
-    nz = np.sqrt(np.clip(1 - d * d, 0, 1))
-    inside = np.clip((1 - d) * pr / 1.5, 0, 1)
-    Lv = np.array([-.8, -.25, .55]); Lv /= np.linalg.norm(Lv)
-    lam = np.clip(dx * Lv[0] + dy * Lv[1] + nz * Lv[2], 0, 1)
-    bands = .88 + .12 * np.interp(uy * 20 + 20, np.arange(41), np.random.default_rng(6).random(41))
-    disc = mix(hexc("#1b3a9c"), hexc("#e3f0ff"), lam ** .9) * bands[..., None]
-    rim = np.exp(-((d - 1) * pr / (4 * K)) ** 2) * (d > .97) * .5
-    ry = uy / .2
-    rd = np.hypot(ux, ry)
-    rtex = .55 + .45 * np.interp(rd, np.linspace(1.45, 2.35, 48), np.random.default_rng(8).random(48))
-    ring = np.clip((rd - 1.45) * 60, 0, 1) * np.clip((2.35 - rd) * 60, 0, 1) * rtex
-    gap = 1 - .8 * np.exp(-((rd - 1.95) / .025) ** 2)
-    ring *= gap
-    front = (ry > 0) | (inside == 0)
-    img = mix(sky, hexc("#eef6ff"), ring * (~front) * .7)
-    img = mix(img, disc, inside)
-    img = screen(img, rim[..., None] * hexc("#bfe0ff"))
-    img = mix(img, hexc("#eef6ff"), ring * front * .8)
-    # dune layers, back to front: each a ridge, the lit face to the left
-    layers = [(.60, .025, "#b9d8ff", "#8ab8ff", .30), (.68, .040, "#9cc7ff", "#5a8ff0", .18),
-              (.77, .055, "#7fb0ff", "#3a6ad8", .08), (.88, .065, "#6aa1ff", "#2350c0", 0)]
-    for i, (base, amp, clit, cdark, haze) in enumerate(layers):
-        ph = np.random.default_rng(40 + i).uniform(0, 2 * np.pi, 3)
-        xs = u[0]
-        ridge = base + amp * (np.sin(xs * (3 + i) + ph[0]) * .6 + np.sin(xs * (7 + 2 * i) + ph[1]) * .3
-                              + np.sin(xs * (13 + i) + ph[2]) * .1)
-        below = v - ridge[None, :]
-        mask = np.clip(below * H / 1.2, 0, 1)
-        slope = np.gradient(ridge)[None, :] * W
-        lit = np.clip(.5 - slope * 2.5, 0, 1)
-        dd = np.clip(below / .10, 0, 1)
-        col = mix(hexc(clit), hexc(cdark), .25 + dd * .45 + (1 - lit) * .3)
-        crest = np.exp(-(below * H / (5 * K)) ** 2) * (.25 + .6 * lit)
-        col = screen(col, crest[..., None] * hexc("#ffffff"))
-        col = mix(col, hexc("#d6eaff"), haze)
-        img = mix(img, col, mask)
-    return img
-
-
 def layers():
     """Translucent sheets of light folded over each other, from a pale sky
     at the top to deep blue at the bottom."""
     img = ramp(v, [(0, "#d4e8ff"), (1, "#7fb0ff")])
     sheets = [("#b4d4ff", "#8fbaff"), ("#8fbaff", "#6a9cff"), ("#7fa0ff", "#5a7df0"), ("#5d93ff", "#3f74ef"),
-              ("#4a7ff2", "#2f5fd8"), ("#3567df", "#244dc4"), ("#2752c9", "#1a3ca6"), ("#1f45b8", "#152f8a")]
+              ("#4a7ff2", "#2f5fd8"), ("#3567df", "#244dc4"), ("#3a6ae0", "#3060d6"), ("#4677ec", "#3a6be0")]
     n = len(sheets)
     for i, (c0, c1) in enumerate(sheets):
         ph = np.random.default_rng(70 + i).uniform(0, 2 * np.pi, 3)
@@ -318,5 +202,109 @@ def layers():
     return img
 
 
-img = {"dawn": dawn, "aurora": aurora, "nebula": nebula, "eclipse": eclipse, "dunes": dunes, "layers": layers}[name]()
+def crescent():
+    """The lit edge of a huge planet in the lower left, under a luminous
+    blue sky: few elements, lots of space."""
+    rng = np.random.default_rng(31)
+    t = np.clip(np.hypot((u - .95) * 1.2, v - .0) / 1.35, 0, 1)
+    img = ramp(t, [(0, "#8fc0ff"), (.35, "#5d95ff"), (.7, "#3f74ea"), (1, "#3366dd")])
+    haze = blur(fbm(900, 5, rng), 40)
+    img = screen(img, (np.clip(haze - .45, 0, 1) * .5 * np.clip(1 - t * 1.3, 0, 1))[..., None] * hexc("#d6e9ff"))
+    img = screen(img, stars(rng, 900, bright=.55, mask=np.clip(t * 2 - .3, 0, 1))[..., None])
+    cx, cy, R = .16 * W, 1.30 * H, .95 * H
+    p = sphere(cx, cy, R, L=(.75, -.55, .05))
+    lam = np.clip(p[5], 0, 1)
+    body = mix(hexc("#2a55c4"), hexc("#5d95ff"), lam ** 1.6)
+    body = mix(body, hexc("#cfe6ff"), lam ** 6)
+    img = mix(img, body, p[3])
+    lit = np.clip((p[0] * .75 - p[1] * .55) / .9, 0, 1)
+    out = np.clip(p[4] - 1, 0, None) * R / H
+    glow = np.exp(-out / .012) * (p[4] > 1) * lit * .9 + np.exp(-out / .07) * (p[4] > 1) * lit * .35
+    rim = np.exp(-(((p[4] - 1) * R) / (3 * K)) ** 2) * lit
+    img = screen(img, (glow + rim)[..., None] * hexc("#bfe2ff"))
+    # a small moon
+    m = sphere(.74 * W, .30 * H, .035 * H, L=(-.6, .5, .4))
+    img = mix(img, mix(hexc("#2a56c8"), hexc("#eaf4ff"), np.clip(m[5], 0, 1) ** .8), m[3])
+    return img
+
+
+def halo():
+    """A ringed planet close up on the right, its rings sweeping across
+    the screen."""
+    rng = np.random.default_rng(33)
+    img = ramp(np.clip(np.hypot(u - .75, (v - .45) * .8) / .95, 0, 1),
+               [(0, "#7fb0ff"), (.4, "#4f8dff"), (1, "#3a6fe6")])
+    img = screen(img, stars(rng, 1100, bright=.55)[..., None])
+    cx, cy, R = .80 * W, .52 * H, .30 * H
+    t = math.radians(-13)
+    dx, dy = (x - cx) / R, (y - cy) / R
+    ux = dx * math.cos(t) + dy * math.sin(t)
+    uy = (-dx * math.sin(t) + dy * math.cos(t)) / .16
+    rd = np.hypot(ux, uy)
+    prof = np.random.default_rng(34).random(160)
+    prof = gaussian_filter(prof, 1.2)
+    tex = np.interp(rd, np.linspace(1.35, 3.1, 160), prof)
+    ring = np.clip((rd - 1.35) * 25, 0, 1) * np.clip((3.1 - rd) * 25, 0, 1) * (.35 + .9 * tex)
+    ring *= 1 - .85 * np.exp(-((rd - 2.25) / .035) ** 2)       # a dark gap
+    ring *= np.clip(1.15 - np.abs(rd - 2.2) * .25, 0, 1)
+    p = sphere(cx, cy, R, L=(-.7, -.45, .55))
+    lam = np.clip(p[5], 0, 1)
+    lat = (-dx * math.sin(t) + dy * math.cos(t))
+    bands = .96 + .04 * np.sin(lat * 9 + np.sin(lat * 4) * 1.5)
+    body = mix(hexc("#14307f"), hexc("#a9d0ff"), lam ** 1.1) * bands[..., None]
+    body = screen(body, (np.exp(-((p[4] - 1) * R / (6 * K)) ** 2) * .5 * (lam + .2))[..., None] * hexc("#cfe6ff"))
+    behind = (uy < 0)
+    img = screen(img, (ring * behind * .75)[..., None] * hexc("#e6f2ff"))
+    img = mix(img, body, p[3])
+    img = screen(img, (ring * (~behind) * .9)[..., None] * hexc("#eef6ff"))
+    img = screen(img, (blur(ring, 30) * .25)[..., None] * hexc("#8cc0ff"))
+    return img
+
+
+def orbits_light():
+    """Thin luminous orbits around an unseen star, with soft glows; calm and
+    abstract."""
+    rng = np.random.default_rng(35)
+    img = ramp(u * .45 + v * .55, [(0, "#7fb0ff"), (.5, "#4f86f5"), (1, "#3f72e6")])
+    img = screen(img, stars(rng, 600, bright=.45)[..., None])
+    cx, cy = .30 * W, .35 * H
+    t = math.radians(-20)
+    for i, (a, dot, ang) in enumerate([(.22, 18, 40), (.36, 26, 200), (.52, 14, 300), (.72, 34, 120), (.95, 22, 250)]):
+        ex = ((x - cx) * math.cos(t) + (y - cy) * math.sin(t)) / (a * W)
+        ey = (-(x - cx) * math.sin(t) + (y - cy) * math.cos(t)) / (a * W * .45)
+        e = np.abs(np.hypot(ex, ey) - 1) * a * W * .45
+        line = np.exp(-(e / (2.2 * K)) ** 2) * .55 + np.exp(-(e / (30 * K)) ** 2) * .10
+        img = screen(img, line[..., None] * hexc("#e8f3ff"))
+        th = math.radians(ang)
+        px = cx + a * W * math.cos(th) * math.cos(t) - a * W * .45 * math.sin(th) * math.sin(t)
+        py = cy + a * W * math.cos(th) * math.sin(t) + a * W * .45 * math.sin(th) * math.cos(t)
+        r = np.hypot(x - px, y - py) / (dot * K)
+        img = screen(img, (np.clip(1.6 - r, 0, 1) + np.exp(-r / 2.5) * .5)[..., None] * hexc("#f4f9ff"))
+    rs = np.hypot(x - cx, y - cy) / W
+    img = screen(img, (np.exp(-(rs / .05) ** 2) * .9 + np.exp(-(rs / .25) ** 2) * .35)[..., None] * hexc("#eaf4ff"))
+    # soft out-of-focus lights
+    for bx, by, br, a in [(.82, .25, .10, .10), (.70, .78, .14, .08), (.92, .62, .06, .12), (.12, .85, .08, .07)]:
+        d = np.hypot(u - bx, (v - by) * H / W) / (br * .56)
+        img = screen(img, (np.clip((1 - d) * 30, 0, 1) * a)[..., None] * hexc("#cfe4ff"))
+    return img
+
+
+def haze():
+    """A calm, out-of-focus nebula: soft clouds of light in blues and a few
+    stars."""
+    rng = np.random.default_rng(37)
+    img = ramp(v, [(0, "#4a82f5"), (.5, "#3567e0"), (1, "#4378ee")])
+    n1 = blur(fbm(1500, 4, rng), 60)
+    n2 = blur(fbm(800, 4, rng), 40)
+    band = np.exp(-((v - .55 + (u - .5) * .55) / .30) ** 2)
+    c = np.clip((n1 * .7 + n2 * .5 - .52) * 4, 0, 1) * band
+    img = screen(img, (c * .9)[..., None] * hexc("#6fb3ff"))
+    img = screen(img, (np.clip(c - .45, 0, 1) * 1.6)[..., None] * hexc("#e2f3ff"))
+    img = screen(img, (blur(c, 80) * .35)[..., None] * hexc("#8a9bff"))
+    img = screen(img, stars(rng, 1600, bright=.7)[..., None])
+    return img
+
+
+img = {"dawn": dawn, "aurora": aurora, "layers": layers, "crescent": crescent, "halo": halo,
+       "orbits-light": orbits_light, "haze": haze}[name]()
 save(img)
