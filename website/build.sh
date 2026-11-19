@@ -113,10 +113,14 @@ cp "${root}/website/style.css" "${root}/website/site.js" "${out}/"
 cp "${root}/branding/logo/cosmic-blue-logo.svg" \
    "${root}/branding/logo/cosmic-blue-logo-horizontal-dark.svg" "${out}/img/"
 
+# Header image: WebP (about a quarter of the JPEG size), JPEG kept for old
+# browsers and for link previews (og:image)
 wallpaper="${root}/system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue.jpg"
 for width in 1280 2560; do
   convert "${wallpaper}" -resize "${width}x" -strip -interlace Plane \
     -sampling-factor 4:2:0 -quality 82 "${out}/img/wallpaper-${width}.jpg"
+  convert "${wallpaper}" -resize "${width}x" -strip -quality 80 \
+    -define webp:method=6 "${out}/img/wallpaper-${width}.webp"
 done
 
 # Stop GitHub Pages from running Jekyll on the files

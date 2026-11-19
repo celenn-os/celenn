@@ -7,6 +7,8 @@ wordmark is Montserrat Light, stored as outlines in `logo/glyphs.json` so the
 SVGs need no font.
 
 - `logo/cosmic-blue-logo.svg`: the mark (installed as the `cosmic-blue-logo` icon)
+- `logo/cosmic-blue-readme-banner.svg`: the README header, the logo and the
+  name in white on the night sky of the tour (`tour/build.py`)
 - `logo/cosmic-blue-logo.png`: the mark, 512 px (Artifact Hub)
 - `logo/cosmic-blue-logo-horizontal-dark.svg` / `-light.svg`: mark + wordmark,
   for dark and light backgrounds
@@ -167,7 +169,10 @@ one, is a link to `planet.png`.
 - `avatars/export.js`: renders the PNGs with Playwright's Chromium
 
 Regenerate them with `python3 avatars/make.py` then
-`node avatars/export.js ../system_files/usr/share/pixmaps/faces`.
+`node avatars/export.js ../system_files/usr/share/pixmaps/faces`, and
+compress them losslessly with
+`oxipng -o 4 --strip safe ../system_files/usr/share/pixmaps/faces/*.png`
+(the same pixels in under a third of the size).
 
 ## Licenses
 
