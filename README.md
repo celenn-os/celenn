@@ -14,7 +14,7 @@ effect on the next reboot, and can be rolled back.
 ## Versions
 
 <!-- versions:start (written by release-notes.yml on each stable release) -->
-In the current `stable` image (cosmic-blue 44.20261119.1):
+In the current `stable` image (cosmic-blue 44.20261119.6):
 
 ![Fedora 44](https://img.shields.io/badge/Fedora-44-4f8dff)
 ![Kernel 7.3.4](https://img.shields.io/badge/Kernel-7.3.4-4f8dff)
