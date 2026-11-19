@@ -47,10 +47,22 @@ test "$(printf '%s\n' "${fallback}" | grep -c .)" = 1
 test -f "${src}/${fallback}"
 install -m 0644 "${WALLPAPER}" "${src}/${fallback}"
 
+# Compiled crates kept from the previous build in CARGO_CACHE_DIR
+# (Containerfile.helpers). The package's own sources are touched, so they
+# always compile again even when the unpacked files carry older dates.
+if [ -n "${CARGO_CACHE_DIR:-}" ]; then
+    mkdir -p "${CARGO_CACHE_DIR}/target"
+    rm -rf "${src}/target"
+    ln -s "${CARGO_CACHE_DIR}/target" "${src}/target"
+    find "${src}" \( -path '*/vendor' -o -path "${src}/target" \) -prune -o -type f -exec touch {} +
+fi
+
+# Binaries older than this build (kept in CARGO_CACHE_DIR) are not used
+touch /tmp/build-start
 # Build only (no new %prep, which would undo the replacement)
 rpmbuild --define "_topdir ${TOPDIR}" -bc --short-circuit "${SPEC}"
 
-bin="$(find "${src}/target" -type f -name cosmic-greeter -perm -u+x | head -n1)"
+bin="$(find "${src}/target/" -type f -newer /tmp/build-start -name cosmic-greeter -perm -u+x | head -n1)"
 test -n "${bin}"
 # The wallpaper really is inside the binary
 python3 - "${bin}" "${WALLPAPER}" <<'PY'
