@@ -58,3 +58,18 @@ float pocketMask(vec2 p, vec2 hero, vec2 hs) {
   return exp(-dot(d, d) * 1.6);
 }
 vec3 spaceBase(vec2 p) { return mix(mix(DEEP, BRAND, .2), mix(ABYSS, VIOLET, .12), .35 + .35 * fbm2(p * .6, 4)) * .55; }
+
+// Ridged fbm: thin bright filaments, for gas and energy wisps.
+float ridged(vec3 p, int oct) {
+  float a = .5, s = 0.;
+  for (int i = 0; i < 8; i++) { if (i >= oct) break; float n = 1. - abs(2. * vnoise(p) - 1.); s += a * n * n; p = p * 2.07 + vec3(3.1, 1.7, 5.3); a *= .5; }
+  return s;
+}
+mat2 rot(float a) { return mat2(cos(a), sin(a), -sin(a), cos(a)); }
+// Deep blue sky that never goes black: violet at the top, blue below,
+// slow clouds of colour.
+vec3 skyBase(vec2 p) {
+  float n = fbm2(p * .9 + 3., 4);
+  vec3 c = mix(mix(DEEP, ABYSS, .45), mix(ABYSS, VIOLET, .28), smoothstep(-.6, .6, p.y + (n - .5) * .5));
+  return c * (.30 + .25 * n);
+}
