@@ -166,7 +166,7 @@ build-helpers $dest *stages:
         # Rust stages: compiled dependencies kept in HELPERS_CARGO_CACHE/<stage>
         # if set (see Containerfile.helpers)
         volume=()
-        if [[ -n "${HELPERS_CARGO_CACHE:-}" ]] && grep -q "^ENV CARGO_HOME=/cargo/" \
+        if [[ -n "${HELPERS_CARGO_CACHE:-}" ]] && grep -qE "^ENV CARGO_(HOME|CACHE_DIR)=/cargo" \
                 <(awk -v build="AS ${stage}-build" 'index($0, build) { on = 1 } on && /^FROM / && !index($0, build) { exit } on' Containerfile.helpers); then
             mkdir -p "${HELPERS_CARGO_CACHE}/${stage}"
             volume=(--volume "$(realpath "${HELPERS_CARGO_CACHE}/${stage}"):/cargo")

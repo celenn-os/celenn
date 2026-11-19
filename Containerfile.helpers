@@ -13,9 +13,10 @@
 # Fedora release: passed by `just build-helpers` from BASE_TAG in the Containerfile
 ARG BASE_TAG
 
-# The Rust stages (theme, tour) build in /cargo: `just build-helpers` mounts a
-# directory there when HELPERS_CARGO_CACHE is set, so that the CI can keep the
-# compiled dependencies from one build to the next (only our own code is then
+# The Rust stages (theme, tour, and the COSMIC programs rebuilt from Fedora's
+# source packages) build in /cargo: `just build-helpers` mounts a directory
+# there when HELPERS_CARGO_CACHE is set, so that the CI can keep the compiled
+# dependencies from one build to the next (only the program itself is then
 # compiled again). Without it, /cargo is an ordinary directory of the stage.
 
 # Default COSMIC themes with frosted glass (see build_files/theme/src/main.rs)
@@ -48,6 +49,7 @@ COPY --from=tour-build /out /
 FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS greeter-build
 COPY build_files/greeter /greeter
 COPY system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-constellation.jpg /greeter/background.jpg
+ENV CARGO_CACHE_DIR=/cargo
 RUN /greeter/build.sh /greeter/background.jpg
 FROM scratch AS greeter
 COPY --from=greeter-build /out /
@@ -56,6 +58,7 @@ COPY --from=greeter-build /out /
 # recommended source, off by default (see build_files/store/patch.py)
 FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS store-build
 COPY build_files/store /store
+ENV CARGO_CACHE_DIR=/cargo
 RUN /store/build.sh
 FROM scratch AS store
 COPY --from=store-build /out /
@@ -64,6 +67,7 @@ COPY --from=store-build /out /
 # get their own icons under /var/home (see build_files/filemanager/patch.py)
 FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS filemanager-build
 COPY build_files/filemanager /filemanager
+ENV CARGO_CACHE_DIR=/cargo
 RUN /filemanager/build.sh
 FROM scratch AS filemanager
 COPY --from=filemanager-build /out /
