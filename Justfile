@@ -256,42 +256,6 @@ helpers-keys:
         echo "${stage} $(sha256sum < "${inputs}" | cut -c1-32)"
     done
 
-# Split the image for smaller updates (New)!
-rechunk $target_image=image_name $tag=default_tag:
-    #!/usr/bin/env bash
-
-    set -xeuo pipefail
-
-    # TODO: pin chunkah image to hash once mature enough
-    # You may run into space issues on github runners as we are making a
-    # complete copy of the image, which likely has no shared layers, unless your
-    # base image is also using chunkah
-    CHUNKAH_CONFIG_FILE="$(mktemp)"
-
-    # You may omit the current directory here if you are confident that you
-    # won't run out of space on /tmp for your image
-    CHUNKAH_OUTPUT_DIR="$(mktemp -d ./"${target_image}"_chunkah_XXXXXX)"
-
-    trap 'rm -f "${CHUNKAH_CONFIG_FILE}"; rm -rf "${CHUNKAH_OUTPUT_DIR}"' EXIT
-    podman inspect "${target_image}:${tag}" > "${CHUNKAH_CONFIG_FILE}"
-
-    podman run --rm \
-      --mount=type=image,src="${target_image}:${tag}",target=/chunkah \
-      -v "${CHUNKAH_CONFIG_FILE}:/chunkah-config.json:ro,Z" \
-      -v "${CHUNKAH_OUTPUT_DIR}:/run/out:Z" \
-      quay.io/coreos/chunkah:latest \
-      build \
-      --verbose \
-      --compressed \
-      --max-layers 128 \
-      --prune /sysroot/ \
-      --label ostree.commit- --label ostree.final-diffid- \
-      --config /chunkah-config.json \
-      --output oci:/run/out/chunked
-
-    CHUNKED_IMAGE="$(podman pull "oci:${CHUNKAH_OUTPUT_DIR}/chunked")"
-    podman tag "${CHUNKED_IMAGE}" "${target_image}:${tag}"
-
 # Split the image for smaller updates (Classical)!
 ostree-rechunk $target_image=image_name $tag=default_tag:
     #!/usr/bin/env bash
@@ -502,7 +466,7 @@ _rootful_load_image $target_image=image_name $tag=default_tag:
 # Parameters:
 #   target_image: The name of the image to build (ex. localhost/fedora)
 #   tag: The tag of the image to build (ex. latest)
-#   type: The type of image to build (ex. qcow2, raw, iso)
+#   type: The type of image to build (qcow2 or raw)
 #   config: The configuration file to use for the build (default: disk_config/disk.toml)
 
 # Example: just _rebuild-bib localhost/fedora latest qcow2 disk_config/disk.toml
@@ -539,35 +503,27 @@ _build-bib $target_image $tag $type $config: (_rootful_load_image target_image t
 # Parameters:
 #   target_image: The name of the image to build (ex. localhost/fedora)
 #   tag: The tag of the image to build (ex. latest)
-#   type: The type of image to build (ex. qcow2, raw, iso)
-#   config: The configuration file to use for the build (deafult: disk_config/disk.toml)
+#   type: The type of image to build (qcow2 or raw)
+#   config: The configuration file to use for the build (default: disk_config/disk.toml)
 
 # Example: just _rebuild-bib localhost/fedora latest qcow2 disk_config/disk.toml
 _rebuild-bib $target_image $tag $type $config: (build target_image tag) && (_build-bib target_image tag type config)
 
 # Build a QCOW2 virtual machine image
-[group('Build Virtal Machine Image')]
+[group('Build Virtual Machine Image')]
 build-qcow2 $target_image=("localhost/" + image_name) $tag=default_tag: && (_build-bib target_image tag "qcow2" "disk_config/disk.toml")
 
 # Build a RAW virtual machine image
-[group('Build Virtal Machine Image')]
+[group('Build Virtual Machine Image')]
 build-raw $target_image=("localhost/" + image_name) $tag=default_tag: && (_build-bib target_image tag "raw" "disk_config/disk.toml")
 
-# Build an ISO virtual machine image
-[group('Build Virtal Machine Image')]
-build-iso $target_image=("localhost/" + image_name) $tag=default_tag: && (_build-bib target_image tag "iso" "disk_config/iso.toml")
-
 # Rebuild a QCOW2 virtual machine image
-[group('Build Virtal Machine Image')]
+[group('Build Virtual Machine Image')]
 rebuild-qcow2 $target_image=("localhost/" + image_name) $tag=default_tag: && (_rebuild-bib target_image tag "qcow2" "disk_config/disk.toml")
 
 # Rebuild a RAW virtual machine image
-[group('Build Virtal Machine Image')]
+[group('Build Virtual Machine Image')]
 rebuild-raw $target_image=("localhost/" + image_name) $tag=default_tag: && (_rebuild-bib target_image tag "raw" "disk_config/disk.toml")
-
-# Rebuild an ISO virtual machine image
-[group('Build Virtal Machine Image')]
-rebuild-iso $target_image=("localhost/" + image_name) $tag=default_tag: && (_rebuild-bib target_image tag "iso" "disk_config/iso.toml")
 
 # Run a virtual machine with the specified image type and configuration
 _run-vm $target_image $tag $type $config:
@@ -576,9 +532,6 @@ _run-vm $target_image $tag $type $config:
 
     # Determine the image file based on the type
     image_file="output/${type}/disk.${type}"
-    if [[ $type == iso ]]; then
-        image_file="output/bootiso/install.iso"
-    fi
 
     # Build the image if it does not exist
     if [[ ! -f "${image_file}" ]]; then
@@ -612,19 +565,15 @@ _run-vm $target_image $tag $type $config:
     podman run "${run_args[@]}"
 
 # Run a virtual machine from a QCOW2 image
-[group('Run Virtal Machine')]
+[group('Run Virtual Machine')]
 run-vm-qcow2 $target_image=("localhost/" + image_name) $tag=default_tag: && (_run-vm target_image tag "qcow2" "disk_config/disk.toml")
 
 # Run a virtual machine from a RAW image
-[group('Run Virtal Machine')]
+[group('Run Virtual Machine')]
 run-vm-raw $target_image=("localhost/" + image_name) $tag=default_tag: && (_run-vm target_image tag "raw" "disk_config/disk.toml")
 
-# Run a virtual machine from an ISO
-[group('Run Virtal Machine')]
-run-vm-iso $target_image=("localhost/" + image_name) $tag=default_tag: && (_run-vm target_image tag "iso" "disk_config/iso.toml")
-
 # Run a virtual machine using systemd-vmspawn
-[group('Run Virtal Machine')]
+[group('Run Virtual Machine')]
 spawn-vm rebuild="0" type="qcow2" ram="6G":
     #!/usr/bin/env bash
 

@@ -55,7 +55,7 @@ GNOME_ONLY+=(
     usr/share/pixmaps/system-logo-white.png
 )
 # Bluefin's profile pictures (photos): cosmic-blue ships its own avatars
-# (system_files/usr/share/pixmaps/faces, made by build_files/avatars).
+# (system_files/usr/share/pixmaps/faces, made by branding/avatars).
 GNOME_ONLY+=(
     usr/share/pixmaps/faces
 )
@@ -164,8 +164,8 @@ done
 # Bluefin-only ujust recipes: `contribute` (runs a worker for Bluefin's
 # build hive), `bluespeed` (Bluefin's AI stack, `install-ai-tools` remains),
 # `bluefin-apps` (alias of install-system-flatpaks), `bazaar-preview`, and
-# `toggle-testing`, which switches to a "testing" tag that cosmic-blue does
-# not publish. Also `bluefin-cli`, which `ujust install-cli-tools` replaces,
+# `toggle-testing`, Bluefin's way to its testing tag, which `ujust
+# switch-channel testing` replaces (with stable and dev). Also `bluefin-cli`, which `ujust install-cli-tools` replaces,
 # and `devmode`, an alias of `toggle-devmode`.
 python3 -I /ctx/build_files/drop-just-recipes.py \
     "${STAGE}/usr/share/ublue-os/just/shared.just" contribute
