@@ -74,7 +74,7 @@ There are no light versions: the same wallpaper serves both themes. Later
 COSMIC releases read a wallpaper per theme (`com.system76.CosmicBackground.Dark`
 / `.Light`); both point to the default.
 
-The five shader wallpapers are GLSL fragment shaders in `wallpaper/shaders/`
+The six shader wallpapers are GLSL fragment shaders in `wallpaper/shaders/`
 (`common.glsl` holds the palette, noise, stars and the film-like finish),
 rendered tile by tile with WebGL 2 in Playwright's headless Chromium by
 `wallpaper/shaders/render.js NAME OUT.png [WIDTH HEIGHT]`. They keep the
@@ -153,16 +153,35 @@ The files are named like Tela's, and the theme also takes every name that
 Tela links to them (`build_files/icon_theme/compose.py`). Regenerate them with
 `python3 icons/build.py` after a change.
 
+## Avatars
+
+The profile pictures offered in COSMIC Settings, 512x512 PNGs in
+`system_files/usr/share/pixmaps/faces/`: a white drawing on a colored
+gradient with a few faint stars, in the style of the dock icons, one hue per
+avatar. `pop-robot.png`, the picture COSMIC Settings gives accounts without
+one, is a link to `planet.png`.
+
+- `avatars/make.py`: draws the SVGs into `avatars/svg/`
+- `avatars/bbox.js` measures each drawing; `avatars/offsets.json` holds the
+  shifts that center it
+- `avatars/earth-ortho.py`: the land of the Earth avatar
+  (`avatars/earth-land.txt`), from Natural Earth
+- `avatars/export.js`: renders the PNGs with Playwright's Chromium
+
+Regenerate them with `python3 avatars/make.py` then
+`node avatars/export.js ../system_files/usr/share/pixmaps/faces`.
+
 ## Licenses
 
 The project's own artwork (logo, wallpapers except the photo, icons drawn by
-`icons/build.py`, the prompt font, the Plymouth images) is under the
+`icons/build.py`, the avatars, the prompt font, the Plymouth images) is under the
 repository's Apache-2.0 license. Third-party parts shipped in the image:
 
 | Part | Source | License |
 |------|--------|---------|
 | Wordmark letters (outlines in `logo/glyphs.json`) | Montserrat Light | SIL Open Font License 1.1 |
 | Milky Way photo (`cosmic-blue-milky-way.jpg`) | NASA, ISS064-E-55946 | Public domain |
+| Land outlines of the Earth avatar (`avatars/earth-land.txt`) | [Natural Earth](https://www.naturalearthdata.com), 1:110m land | Public domain |
 | Icon theme base | [Tela circle](https://github.com/vinceliuice/Tela-circle-icon-theme), recolored | No license file in the upstream repository (the author's other themes are GPL-3.0) |
 | Cursor theme | [Bibata](https://github.com/ful1e5/Bibata_Cursor), recolored | GPL-3.0 (its LICENSE ships with the theme) |
 | Boot spinner frames | Fedora's Plymouth spinner theme, tinted | GPL-2.0-or-later |
