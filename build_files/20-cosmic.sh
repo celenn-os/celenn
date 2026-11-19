@@ -17,6 +17,10 @@ dnf5 -y install \
     cosmic-store \
     cosmic-term
 
+# The screen reader that COSMIC starts with Super + Alt + S (shown on the
+# first page of our tour): named here so the image never ships without it
+dnf5 -y install orca
+
 # The COSMIC version cosmic-blue is tested against (also checked by
 # `just helpers-keys` before the helper stages): a new version comes through
 # the pull request of check-cosmic-version.yml, which moves cosmic-version.

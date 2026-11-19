@@ -680,7 +680,8 @@ grep -q '^d /var/lib/systemd/coredump .* 5d$' /usr/lib/tmpfiles.d/coredump.conf
 #   smart cards) next to TPM2 (projectbluefin/common dracut config)
 [[ "$(/usr/lib/dracut/skipcpio "/usr/lib/modules/${KVER}/initramfs.img" | head -c 4 | od -An -tx1 | tr -d ' \n')" == 28b52ffd ]]
 grep -q 'libcryptsetup-token-systemd-fido2.so' /tmp/initramfs.txt
-# - speech for the screen reader
+# - the screen reader and its speech
+rpm -q orca
 systemctl --global is-enabled speech-dispatcher.socket
 
 # Homebrew sends no usage statistics
