@@ -167,7 +167,10 @@ one, is a link to `planet.png`.
 - `avatars/export.js`: renders the PNGs with Playwright's Chromium
 
 Regenerate them with `python3 avatars/make.py` then
-`node avatars/export.js ../system_files/usr/share/pixmaps/faces`.
+`node avatars/export.js ../system_files/usr/share/pixmaps/faces`, and
+compress them losslessly with
+`oxipng -o 4 --strip safe ../system_files/usr/share/pixmaps/faces/*.png`
+(the same pixels in under a third of the size).
 
 ## Licenses
 
