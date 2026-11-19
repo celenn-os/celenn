@@ -29,8 +29,8 @@ msgstr "Boas-vindas ao cosmic-blue"
 msgid "Accessibility"
 msgstr "Acessibilidade"
 
-msgid "Screen reader: Super + Alt + S. Zoom: Super + = and Super + -. More in the settings."
-msgstr "Leitor de tela: Super + Alt + S. Zoom: Super + = e Super + -. Mais opções nas configurações."
+msgid "Screen reader: Super + Alt + S\nZoom: Super + = and Super + -"
+msgstr "Leitor de tela: Super + Alt + S\nZoom: Super + = e Super + -"
 
 msgid "Settings"
 msgstr "Configurações"

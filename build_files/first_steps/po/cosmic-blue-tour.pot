@@ -30,7 +30,7 @@ msgstr ""
 msgid "Accessibility"
 msgstr ""
 
-msgid "Screen reader: Super + Alt + S. Zoom: Super + = and Super + -. More in the settings."
+msgid "Screen reader: Super + Alt + S\nZoom: Super + = and Super + -"
 msgstr ""
 
 msgid "Settings"
