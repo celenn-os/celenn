@@ -1,7 +1,8 @@
 ---
 # Publishes the release notes of a stable image as a GitHub Release: the
-# package changes since the previous stable image (COSMIC first) and the
-# cosmic-blue commits between the two builds. No file is attached (the live
+# cosmic-blue commits between the two builds (sorted by what they change),
+# the main packages and every package change since the previous stable
+# image, and how to get it. No file is attached (the live
 # ISO is too big for a release). It then updates the "Versions" block of
 # README.md (Fedora, kernel, COSMIC, Mesa, NVIDIA driver of `stable`) with a
 # commit on the default branch.
@@ -81,6 +82,7 @@ jobs:
           NEW: ${{ github.event_name == 'pull_request' && 'testing' || inputs.new || 'stable' }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
           set -euo pipefail
           image="${IMAGE_REGISTRY,,}/${IMAGE_NAME,,}"
@@ -133,7 +135,7 @@ jobs:
           packages_of() {
             podman pull -q "$1" >/dev/null
             podman run --rm --pull=never --entrypoint rpm "$1" \
-              -qa --qf '%{NAME}\t%{EVR}\n' | sort > "$2"
+              -qa --qf '%{NAME}\t%{EVR}\t%{SOURCERPM}\n' | sort > "$2"
             podman rmi -f "$1" >/dev/null
             echo "$(wc -l < "$2") packages in $1"
           }
@@ -155,6 +157,17 @@ jobs:
           nvidia="$(nvidia_of "${nvidia_tag}")"
           echo "NVIDIA driver in ${image}-nvidia:${nvidia_tag}: ${nvidia:-not found}"
           [[ -n "${nvidia}" ]] && args+=(--nvidia "${nvidia}")
+          args+=(--site "https://${REPO%%/*}.github.io/${REPO#*/}/")
+          # Previous stable release (not this one if promoted again the
+          # same day), and its NVIDIA driver from the NVIDIA image's tag
+          previous="$(gh api "repos/${REPO}/releases?per_page=5" \
+                        --jq "[.[] | select(.draft | not) | .tag_name
+                               | select(startswith(\"stable-\") and . != \"${RELEASE_TAG}\")][0] // \"\"")"
+          if [[ -n "${previous}" ]]; then
+            args+=(--previous-release "${previous}")
+            nvidia_old="$(nvidia_of "${previous}")"
+            if [[ -n "${nvidia_old}" ]]; then args+=(--nvidia-old "${nvidia_old}"); fi
+          fi
           if [[ -n "${OLD}" ]]; then
             old_ref="$(ref_of "${OLD}")"
             packages_of "${old_ref}" "${out}/old.tsv"
@@ -163,9 +176,14 @@ jobs:
             if [[ -n "${old_commit}" && -n "${new_commit}" ]]; then
               : > "${out}/commits.tsv"
               if [[ "${old_commit}" != "${new_commit}" ]]; then
+                # SHA, author, subject and changed files of each commit,
+                # to sort them in the notes (image, website, build)
                 gh api "repos/${REPO}/compare/${old_commit}...${new_commit}" \
-                  --jq '.commits | reverse | .[] | [.sha, (.commit.message | split("\n")[0])] | @tsv' \
-                  > "${out}/commits.tsv"
+                  --jq '.commits | reverse | .[] | [.sha, (.author.login // ""), (.commit.message | split("\n")[0])] | @tsv' \
+                  | while IFS=$'\t' read -r sha author subject; do
+                      files="$(gh api "repos/${REPO}/commits/${sha}" --jq '[.files[].filename] | join(" ")')"
+                      printf '%s\t%s\t%s\t%s\n' "${sha}" "${author}" "${subject}" "${files}"
+                    done > "${out}/commits.tsv"
               fi
               args+=(--commits "${out}/commits.tsv"
                      --compare-url "https://github.com/${REPO}/compare/${old_commit}...${new_commit}")
