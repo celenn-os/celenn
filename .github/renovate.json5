@@ -64,6 +64,16 @@
       "enabled": false
     },
     {
+      // Renovate's own config validator in .github/workflows/lint.yml: new
+      // releases come several times a day, so once a week with the actions
+      "description": "Renovate (config validator in the Lint workflow), once a week",
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["renovate"],
+      "groupName": "GitHub Actions",
+      "schedule": ["* 0-7 * * 1"],
+      "minimumReleaseAge": "3 days"
+    },
+    {
       "description": "Tela circle icons (no releases: latest master commit), once a week",
       "matchDepNames": ["https://github.com/vinceliuice/Tela-circle-icon-theme.git"],
       "groupName": "Tela circle icons",
@@ -87,7 +97,8 @@
   // build_files/icon_theme/tela.sh, the Bibata cursors at a pinned tag in
   // build_files/cursor_theme/bibata.sh, Starship at a pinned release in
   // build_files/30-packages.sh, titanoboa at a pinned commit in
-  // .github/workflows/build-live-iso.yml
+  // .github/workflows/build-live-iso.yml, Renovate (config validator) at a
+  // pinned version in .github/workflows/lint.yml
   "customManagers": [
     {
       "customType": "regex",
@@ -122,6 +133,13 @@
       ],
       "datasourceTemplate": "git-refs",
       "currentValueTemplate": "main"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/lint\\.yml$/"],
+      "matchStrings": ["RENOVATE_VERSION: \"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "renovate",
+      "datasourceTemplate": "npm"
     }
   ],
 
