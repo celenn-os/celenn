@@ -36,7 +36,17 @@ const labels = {
   "pt-BR": { copy: "Copiar", copied: "Copiado", failed: "Selecione e copie" },
 }[document.documentElement.lang] ?? { copy: "Copy", copied: "Copied", failed: "Select and copy" };
 
-for (const button of document.querySelectorAll("[data-copy]")) {
+// Screen readers do not always read a button whose label changes, so the
+// result is also said in a hidden status region.
+const copyButtons = document.querySelectorAll("[data-copy]");
+let copyStatus;
+if (copyButtons.length) {
+  copyStatus = document.createElement("span");
+  copyStatus.className = "visually-hidden";
+  copyStatus.setAttribute("role", "status");
+  document.body.append(copyStatus);
+}
+for (const button of copyButtons) {
   button.addEventListener("click", async () => {
     const text = button.previousElementSibling.innerText;
     try {
@@ -45,7 +55,11 @@ for (const button of document.querySelectorAll("[data-copy]")) {
     } catch {
       button.textContent = labels.failed;
     }
-    setTimeout(() => { button.textContent = labels.copy; }, 2000);
+    copyStatus.textContent = button.textContent;
+    setTimeout(() => {
+      button.textContent = labels.copy;
+      copyStatus.textContent = "";
+    }, 2000);
   });
 }
 
