@@ -16,8 +16,9 @@ from PIL import Image
 from scipy.ndimage import gaussian_filter
 
 W, H = 5120, 2880
-MARK = (2160, 1380)
-SCALE = 9.0
+# where the mark sat in the horizontal logo, centred 60 px below the middle
+SCALE = 2900 / 559.7
+MARK = (W / 2 - 559.7 * SCALE / 2 + 50 * SCALE, H / 2 + 60)
 
 
 def defines():
@@ -34,7 +35,7 @@ def main():
     defs = logo[logo.index("<defs>"):logo.index("</defs>") + 7]
     icon = logo[logo.index('<g transform="translate(50 50)">') + 32:logo.index('</g><g transform="translate(118')]
     text = logo[logo.index('<g transform="translate(118'):logo.rindex("</svg>")]
-    parts = [f'<g transform="translate({MARK[0]} {MARK[1]}) scale({SCALE})">{icon}</g>']
+    parts = [f'<g transform="translate({MARK[0]:.1f} {MARK[1]:.1f}) scale({SCALE:.4f})">{icon}</g>']
     if text_mode != "none":
         width = 760 if text_mode == "corner" else 1150
         k = width / (559.7 - 118)
@@ -51,8 +52,8 @@ def main():
         fg = np.asarray(Image.open(f"{tmp}/mark.png").convert("RGBA")).astype(np.float32) / 255
     bg = np.asarray(Image.open(bg_path).convert("RGB")).astype(np.float32) / 255
     a = fg[..., 3:4]
-    glow = gaussian_filter(a[..., 0], 90)[..., None]
-    img = bg + glow * np.array([79, 141, 255], np.float32) / 255 * .5
+    glow = gaussian_filter(a[..., 0], 70)[..., None]
+    img = bg + glow * np.array([79, 141, 255], np.float32) / 255 * .45
     img = img * (1 - a) + fg[..., :3] * a
     img = np.clip(img, 0, 1) * 255
     img += np.random.default_rng(1).normal(0, .8, img.shape[:2])[..., None]

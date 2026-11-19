@@ -4,8 +4,8 @@
 // LOGO = centre of the logo's orbit, R = its radius (frame heights); set
 // them with SHADER_DEFINES="$(python3 logo_mark.py --defines)".
 #ifndef LOGO
-#define LOGO vec2(-.1389, .0208)
-#define R .125
+#define LOGO vec2(-.4135, -.0208)
+#define R .0720
 #endif
 void main() {
   vec2 frag = gl_FragCoord.xy, res = iResolution, p = (frag - .5 * res) / res.y;
