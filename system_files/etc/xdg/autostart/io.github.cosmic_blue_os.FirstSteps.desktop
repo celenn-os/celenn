@@ -2,8 +2,16 @@
 Type=Application
 Name=First steps
 Name[fr]=Premiers pas
+Name[de]=Erste Schritte
+Name[es]=Primeros pasos
+Name[it]=Primi passi
+Name[pt_BR]=Primeiros passos
 Comment=Opens the cosmic-blue first steps tour at the first login of a new account
 Comment[fr]=Ouvre la visite Premiers pas de cosmic-blue à la première connexion d'un nouveau compte
+Comment[de]=Öffnet die Tour Erste Schritte von cosmic-blue bei der ersten Anmeldung eines neuen Kontos
+Comment[es]=Abre el recorrido Primeros pasos de cosmic-blue en el primer inicio de sesión de una cuenta nueva
+Comment[it]=Apre la presentazione Primi passi di cosmic-blue al primo accesso di un nuovo account
+Comment[pt_BR]=Abre o tour Primeiros passos do cosmic-blue no primeiro login de uma conta nova
 Icon=cosmic-blue-welcome
 Exec=/usr/libexec/cosmic-blue-first-steps-autostart
 Terminal=false

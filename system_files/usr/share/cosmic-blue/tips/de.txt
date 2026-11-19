@@ -1,0 +1,14 @@
+**Ein Update hat etwas kaputt gemacht?** Mit `sudo bootc rollback` zur vorherigen Version zurückkehren, dann neu starten.
+Updates werden im Hintergrund installiert. Mit `ujust update` sofort aktualisieren.
+Apps aus dem **COSMIC Store** installieren: Flathub und COSMIC-Apps.
+Kommandozeilen-Tools mit `brew search` und `brew install` installieren.
+`ujust` listet alle Kurzbefehle auf, `ujust --choose` wählt einen aus einem Menü.
+**Entwickeln Sie Software?** `ujust install-dev-tools` fügt Docker, IDEs und Virtualisierungswerkzeuge hinzu.
+Ein Paket aus einer anderen Distribution nötig? `distrobox create` startet Ubuntu, Arch... in einem Container.
+**Tailscale ist dabei**: Mit `sudo tailscale up` anmelden.
+Der cosmic-blue-Look ist weg? `ujust reset-cosmic-theme` holt ihn zurück.
+`ujust install-cli-tools` fügt praktische Kommandozeilen-Tools hinzu.
+Mit `ujust toggle-dark-mode` zwischen dunklem und hellem Design wechseln.
+Das cosmic-blue-Handbuch ist online: [Dokumentation](@DOCS@) (Englisch)
+**Einen Fehler gefunden?** `ujust report-bug` öffnet einen Fehlerbericht, in dem die Systemdaten schon ausgefüllt sind.
+Diese Begrüßung mit `uwelcome toggle` ausschalten.

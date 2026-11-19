@@ -37,7 +37,10 @@ bin="$(find "${src}/target" -type f -name cosmic-store -perm -u+x | head -n1)"
 test -n "${bin}"
 # The patch is in the binary (FlatPark, translations)
 grep -q /usr/share/cosmic-blue/flatpak/flatpark.flatpakrepo "${bin}"
-grep -q "Mise à jour du système" "${bin}"
+for text in "Mise à jour du système" "Auf Version" "Actualización del sistema" \
+    "Aggiornamento del sistema" "Atualização do sistema"; do
+    grep -q "${text}" "${bin}"
+done
 mkdir -p /out
 install -m 0755 "${bin}" /out/cosmic-store
 # The version the binary was built from, checked against the image's package

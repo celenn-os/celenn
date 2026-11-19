@@ -1,0 +1,181 @@
+# Texts of the cosmic-blue tours (build_files/first_steps/src/main.rs).
+# To add a language: copy this file to po/<language>.po (pt_BR for a
+# regional variant), fill in every msgstr and list the file in LANGUAGES
+# (src/main.rs). The image build fails when a text has no translation.
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Back"
+msgstr ""
+
+msgid "Next"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Later"
+msgstr ""
+
+msgid "Copy"
+msgstr ""
+
+msgid "Copied"
+msgstr ""
+
+msgid "Welcome to cosmic-blue"
+msgstr ""
+
+msgid "Accessibility"
+msgstr ""
+
+msgid "Screen reader: Super + Alt + S. Zoom: Super + = and Super + -. More in the settings."
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "First steps"
+msgstr ""
+
+msgid "Your system is installed and ready. Here are a few things worth knowing to get started."
+msgstr ""
+
+msgid "Install apps"
+msgstr ""
+
+msgid "Apps come from COSMIC Store, which offers Flathub and the COSMIC apps. They run apart from the system and update by themselves."
+msgstr ""
+
+msgid "Open COSMIC Store"
+msgstr ""
+
+msgid "Command line tools, installed in your home folder with Homebrew"
+msgstr ""
+
+msgid "Packages from other distributions, in a container that shares your home folder"
+msgstr ""
+
+msgid "Updates and rollback"
+msgstr ""
+
+msgid "The system, your apps and Homebrew packages update by themselves in the background. A system update applies at the next restart, without interrupting you."
+msgstr ""
+
+msgid "Update everything now, without waiting"
+msgstr ""
+
+msgid "An update broke something? Go back to the previous version, then restart"
+msgstr ""
+
+msgid "Show the current and previous versions"
+msgstr ""
+
+msgid "Handy commands"
+msgstr ""
+
+msgid "ujust runs the shortcuts that come with the system: type ujust in a terminal to list them all. A few of them:"
+msgstr ""
+
+msgid "Developer tools: Docker, VS Code, Podman Desktop…"
+msgstr ""
+
+msgid "Command line tools: bat, eza, ripgrep, zoxide…"
+msgstr ""
+
+msgid "Switch between the dark and light themes"
+msgstr ""
+
+msgid "Bring the cosmic-blue look back: colors, icons, wallpaper"
+msgstr ""
+
+msgid "Open a terminal"
+msgstr ""
+
+msgid "Tile your windows"
+msgstr ""
+
+msgid "COSMIC can arrange your windows side by side, without overlap, as you open them. It is off by default: turn it on with the tiling button in the panel, or with the keyboard."
+msgstr ""
+
+msgid "Turn tiling on or off"
+msgstr ""
+
+msgid "Go to the window on the left, right, above or below"
+msgstr ""
+
+msgid "Move the window to the left, right, up or down"
+msgstr ""
+
+msgid "Let a window float above the others"
+msgstr ""
+
+msgid "COSMIC can be customized much further: Settings → Desktop."
+msgstr ""
+
+msgid "Help and feedback"
+msgstr ""
+
+msgid "Everything else is in the cosmic-blue guide. You can open this tour again from the app library: look for First steps."
+msgstr ""
+
+msgid "Documentation"
+msgstr ""
+
+msgid "Updates, software, commands and tips"
+msgstr ""
+
+msgid "Report a problem"
+msgstr ""
+
+msgid "Found a bug or something unclear? Tell us on GitHub"
+msgstr ""
+
+msgid "Open"
+msgstr ""
+
+msgid "Get started"
+msgstr ""
+
+msgid "cosmic-blue is Fedora Atomic with the COSMIC desktop, made in the spirit of Bluefin: a desktop that stays out of your way and keeps itself up to date."
+msgstr ""
+
+msgid "Try it live"
+msgstr ""
+
+msgid "cosmic-blue is running from the live media. Nothing is written to your disk, and your changes are lost when you shut down. You can start the installer at any time from the desktop or the dock."
+msgstr ""
+
+msgid "What you get"
+msgstr ""
+
+msgid "Automatic updates"
+msgstr ""
+
+msgid "The whole system updates in the background and applies at the next restart. If something goes wrong, boot the previous version."
+msgstr ""
+
+msgid "Apps from Flathub and COSMIC"
+msgstr ""
+
+msgid "Install apps with COSMIC Store, from Flathub and the COSMIC repository. They run sandboxed and update on their own."
+msgstr ""
+
+msgid "Ready for the terminal"
+msgstr ""
+
+msgid "Homebrew for command line tools, distrobox for other distributions, and ujust for common tasks."
+msgstr ""
+
+msgid "Ready to install?"
+msgstr ""
+
+msgid "The installer copies cosmic-blue to your disk. After that, it updates itself from the cosmic-blue image registry."
+msgstr ""
+
+msgid "Install cosmic-blue"
+msgstr ""
+
+msgid "Keep trying"
+msgstr ""
