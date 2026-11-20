@@ -41,6 +41,18 @@ done
 
 ### Anaconda
 
+# Anaconda mounts the target system at /mnt/sysroot and runs the live
+# session's systemd-tmpfiles with --root=/mnt/sysroot. In the image /mnt is a
+# symlink to var/mnt, so the root resolves to /var/mnt/sysroot while the
+# paths stay under /mnt/sysroot: since Fedora 45, systemd-tmpfiles refuses to
+# label them and fails (exit code 73), and the install stops at its end.
+# A real directory in the live session only (the installed system keeps the
+# symlink).
+if [[ -L /mnt ]]; then
+    rm /mnt
+    mkdir -m 0755 /mnt
+fi
+
 # Firefox: a browser in the live session (the installed system uses the flatpak).
 # spice-vdagent: clipboard sharing when the live ISO runs in a VM (GNOME Boxes...).
 dnf install -y \

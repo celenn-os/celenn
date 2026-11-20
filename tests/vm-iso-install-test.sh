@@ -101,8 +101,8 @@ clearpart --all --initlabel --disklabel=gpt
 # The profile's layout (btrfs with /, /home and /var)
 autopart
 user --name=${DEMO_USER} --password=${DEMO_PASSWORD} --plaintext --groups=wheel --gecos=cosmic-blue
-# Only for the test: SSH for the checks, boot messages on the serial log
-sshkey --username=root "${pubkey}"
+# Only for the test: SSH for the checks (the key reaches root through a
+# systemd credential at boot, see step 3), boot messages on the serial log
 services --enabled=sshd
 bootloader --append="console=tty0 console=ttyS0,115200"
 # A text-mode install would make the system boot to a text console; the
@@ -164,6 +164,15 @@ while vm_running; do
         collect_live_logs
         fail "The installer stopped without powering off (unit ${state}): the install failed, see anaconda-live in the artifacts"
     fi
+    # An installer error: show its traceback before Anaconda powers the
+    # machine off and the live session's logs are lost
+    if vm 'ls /tmp/anaconda-tb-* >/dev/null 2>&1 || grep -q "running handleException" /tmp/anaconda.log' 2>/dev/null; then
+        sleep 20  # let Anaconda finish writing the traceback
+        screenshot install-error
+        collect_live_logs
+        vm 'for f in /tmp/anaconda-tb-*; do [ -f "$f" ] && { echo "== $f"; head -n 120 "$f"; }; done' || true
+        fail "The installer hit an error, see the traceback above and anaconda-live in the artifacts"
+    fi
     progress="$(vm 'tail -n 1 /tmp/anaconda.log' 2>/dev/null | cut -c 1-200 || true)"
     if [[ -n "${progress}" && "${progress}" != "${last_progress}" ]]; then
         echo "[$(( (SECONDS - started) / 60 )) min] ${progress}"
@@ -183,7 +192,12 @@ log "Install finished in $(( (SECONDS - started) / 60 )) minutes"
 
 # 3. Boot the installed system as the firmware chooses (the boot entry made by
 # the installer), with Secure Boot still on and the ISO still in the drive
-VM_EXTRA_ARGS=()
+# The SSH key reaches root through the same systemd credential as in the live
+# session and the boot test (systemd-tmpfiles writes /root/.ssh with its
+# SELinux labels). Since Fedora 45 the installed system did not accept the
+# key the kickstart's sshkey command wrote (no SSH within 10 minutes, login
+# prompt on the serial console), and people never install with that command.
+VM_EXTRA_ARGS=(-smbios "type=11,value=io.systemd.credential:ssh.authorized_keys.root=${pubkey}")
 export VM_MEMORY=4096 VM_CPUS=2 VM_SERIAL=serial.log
 vm_start
 vm_wait_ssh no-ssh-installed
