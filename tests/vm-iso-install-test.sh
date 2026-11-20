@@ -164,6 +164,15 @@ while vm_running; do
         collect_live_logs
         fail "The installer stopped without powering off (unit ${state}): the install failed, see anaconda-live in the artifacts"
     fi
+    # An installer error: show its traceback before Anaconda powers the
+    # machine off and the live session's logs are lost
+    if vm 'ls /tmp/anaconda-tb-* >/dev/null 2>&1 || grep -q "running handleException" /tmp/anaconda.log' 2>/dev/null; then
+        sleep 20  # let Anaconda finish writing the traceback
+        screenshot install-error
+        collect_live_logs
+        vm 'for f in /tmp/anaconda-tb-*; do [ -f "$f" ] && { echo "== $f"; head -n 120 "$f"; }; done' || true
+        fail "The installer hit an error, see the traceback above and anaconda-live in the artifacts"
+    fi
     progress="$(vm 'tail -n 1 /tmp/anaconda.log' 2>/dev/null | cut -c 1-200 || true)"
     if [[ -n "${progress}" && "${progress}" != "${last_progress}" ]]; then
         echo "[$(( (SECONDS - started) / 60 )) min] ${progress}"
