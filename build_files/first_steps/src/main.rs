@@ -281,6 +281,30 @@ fn pages(mode: Mode) -> Vec<Page> {
                 )
             },
             Page {
+                icon: Some("org.gnome.DejaDup"),
+                button_after: Some(("Open Déjà Dup", Action::Launch(&["deja-dup"]))),
+                ..Page::new(
+                    "Protect your files",
+                    Some(
+                        "Rollback brings the system back, not your files. Déjà Dup keeps a copy of your home folder on another disk.",
+                    ),
+                    Body::Features(vec![
+                        (
+                            "Use a USB drive",
+                            "The simplest choice: a backup on the same disk would be lost with it. A network share or a cloud storage works too.",
+                        ),
+                        (
+                            "Turn on automatic backups",
+                            "Backups then run by themselves in the background, and only save what changed since the last one.",
+                        ),
+                        (
+                            "Restore when you need it",
+                            "Get back a single file, a folder or your whole home folder, even on a new computer.",
+                        ),
+                    ]),
+                )
+            },
+            Page {
                 icon: Some("org.gnome.Terminal"),
                 button_after: Some(("Open a terminal", Action::Launch(&["cosmic-term"]))),
                 ..Page::new(

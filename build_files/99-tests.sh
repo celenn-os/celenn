@@ -430,6 +430,15 @@ test -f /usr/share/cosmic-blue/tour-welcome.svg
 test -f /usr/share/cosmic-blue/tour-banner.svg
 rpm -q spice-vdagent
 
+# Backups (Déjà Dup, build_files/30-packages.sh): the package starts its
+# monitor at login in every desktop, which runs the automatic backups
+rpm -q deja-dup
+monitor_desktop=/etc/xdg/autostart/org.gnome.DejaDup.Monitor.desktop
+grep -q '^Exec=.*deja-dup-monitor' "${monitor_desktop}"
+if grep -qE '^(OnlyShowIn|NotShowIn|Hidden)=' "${monitor_desktop}"; then
+    echo "${monitor_desktop} is limited to some desktops" >&2; exit 1
+fi
+
 # First steps tour: opened once for new accounts, at the first login;
 # it runs and every text has its French translation
 test -f /etc/skel/.config/cosmic-blue/first-steps-pending
@@ -441,7 +450,7 @@ test -f /usr/share/applications/io.github.cosmic_blue_os.FirstSteps.desktop
 test -f /usr/share/icons/hicolor/scalable/apps/cosmic-blue-welcome.svg
 # Color icons of the tour pages (build_files/first_steps/src/main.rs), found
 # as app icons of the cosmic-blue icon theme (its layer, Tela) or hicolor
-for icon in system-software-update org.gnome.Terminal \
+for icon in system-software-update org.gnome.DejaDup org.gnome.Terminal \
     cs-tiling help-browser preferences-desktop-accessibility cosmic-blue-welcome; do
     [[ -n "$(find /usr/share/icons/cosmic-blue /usr/share/icons/Tela-circle-4f8dff \
         /usr/share/icons/hicolor -path "*/apps/${icon}.svg" -print -quit)" ]] \

@@ -105,6 +105,13 @@ EVERYDAY_PACKAGES=(
     gnome-epub-thumbnailer
     # Extracts the Microsoft core fonts for `ujust install-microsoft-fonts`
     cabextract
+    # Backups (Déjà Dup) as a package, not the Flatpak: its automatic backups
+    # need its monitor running in the session. The package starts it at login
+    # (/etc/xdg/autostart); the Flatpak asks the Background portal for that,
+    # and COSMIC has none yet (pop-os/xdg-desktop-portal-cosmic#49), so they
+    # never ran. Going back to the Flatpak once COSMIC has it means moving the
+    # settings too (dconf /org/gnome/deja-dup/ -> the Flatpak's keyfile).
+    deja-dup
 )
 dnf5 -y install "${EVERYDAY_PACKAGES[@]}"
 
