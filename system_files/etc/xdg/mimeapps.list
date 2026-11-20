@@ -1,10 +1,21 @@
 # cosmic-blue default applications (replaces Bluefin's list, which named Bazaar
 # and GNOME Showtime). Papers, Loupe and Gear Lever are first-boot flatpaks.
+# Windows programs and other distributions' packages open a dialog that
+# explains how to get the program (/usr/libexec/cosmic-blue-tour --open).
 [Default Applications]
 application/pdf=org.gnome.Papers.desktop
 application/vnd.flatpak.ref=com.system76.CosmicStore.desktop
 application/vnd.flatpak.repo=com.system76.CosmicStore.desktop
 application/vnd.appimage=it.mijorus.gearlever.desktop
+application/vnd.debian.binary-package=io.github.cosmic_blue_os.OpenPackage.desktop
+application/vnd.microsoft.portable-executable=io.github.cosmic_blue_os.OpenPackage.desktop
+application/x-deb=io.github.cosmic_blue_os.OpenPackage.desktop
+application/x-debian-package=io.github.cosmic_blue_os.OpenPackage.desktop
+application/x-ms-dos-executable=io.github.cosmic_blue_os.OpenPackage.desktop
+application/x-msdos-program=io.github.cosmic_blue_os.OpenPackage.desktop
+application/x-msdownload=io.github.cosmic_blue_os.OpenPackage.desktop
+application/x-msi=io.github.cosmic_blue_os.OpenPackage.desktop
+application/x-rpm=io.github.cosmic_blue_os.OpenPackage.desktop
 image/avif=org.gnome.Loupe.desktop
 image/bmp=org.gnome.Loupe.desktop
 image/gif=org.gnome.Loupe.desktop

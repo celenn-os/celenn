@@ -450,12 +450,29 @@ grep -qx 'Exec=/usr/libexec/cosmic-blue-first-steps-autostart' \
 test -f /usr/share/applications/io.github.cosmic_blue_os.FirstSteps.desktop
 test -f /usr/share/icons/hicolor/scalable/apps/cosmic-blue-welcome.svg
 # Color icons of the tour pages (build_files/first_steps/src/main.rs), found
-# as app icons of the cosmic-blue icon theme (its layer, Tela) or hicolor
-for icon in system-software-update org.gnome.DejaDup org.gnome.Terminal \
-    cs-tiling help-browser preferences-desktop-accessibility cosmic-blue-welcome; do
+# in the cosmic-blue icon theme (its layer, Tela) or hicolor
+for icon in cosmic-blue-welcome cosmic-blue-tour-store computer input-keyboard folder idea \
+    org.gnome.Terminal org.gnome.DejaDup preferences-desktop-accessibility \
+    preferences-desktop-keyboard-shortcuts; do
     [[ -n "$(find /usr/share/icons/cosmic-blue /usr/share/icons/Tela-circle-4f8dff \
-        /usr/share/icons/hicolor -path "*/apps/${icon}.svg" -print -quit)" ]] \
+        /usr/share/icons/hicolor -name "${icon}.svg" -print -quit)" ]] \
         || { echo "Tour icon ${icon} not found" >&2; exit 1; }
+done
+# Wallpaper choice: each wallpaper has its small thumbnail (branding/tour/thumbnails.py)
+for wallpaper in /usr/share/backgrounds/cosmic-blue/*.jpg; do
+    test -s "/usr/share/cosmic-blue/wallpapers/${wallpaper##*/}" \
+        || { echo "No tour thumbnail for ${wallpaper##*/}" >&2; exit 1; }
+done
+# Keyboard shortcuts sheet, and the dialog that explains Windows and other
+# distributions' packages, opened by default for them
+grep -qx 'Exec=/usr/libexec/cosmic-blue-tour --shortcuts' \
+    /usr/share/applications/io.github.cosmic_blue_os.Shortcuts.desktop
+grep -qx 'Exec=/usr/libexec/cosmic-blue-tour --open %f' \
+    /usr/share/applications/io.github.cosmic_blue_os.OpenPackage.desktop
+for type in application/x-ms-dos-executable application/x-msi application/vnd.debian.binary-package \
+    application/x-rpm; do
+    grep -qx "${type}=io.github.cosmic_blue_os.OpenPackage.desktop" /etc/xdg/mimeapps.list \
+        || { echo "${type} does not open the package dialog" >&2; exit 1; }
 done
 # (libcosmic binary: its libraries resolve, and the check needs no display)
 if ldd /usr/libexec/cosmic-blue-tour | grep 'not found'; then
@@ -489,6 +506,9 @@ done
 # Wrong arguments are refused before anything runs
 if /usr/libexec/cosmic-blue-updates-helper channel dev 2>/dev/null; then
     echo "cosmic-blue-updates-helper accepted the dev channel"; exit 1
+fi
+if /usr/libexec/cosmic-blue-updates-helper edition amd 2>/dev/null; then
+    echo "cosmic-blue-updates-helper accepted an unknown edition"; exit 1
 fi
 
 # Login and lock screens: our rebuild, with the cosmic-blue wallpaper as the

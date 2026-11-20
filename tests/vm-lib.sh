@@ -420,10 +420,12 @@ desktop_tour() {
 
     # Files (folder icons), Settings (accent, theme), COSMIC Store (our
     # rebuild, which no other step starts: a crash fails vm_check_crashes),
-    # Updates (cosmic-blue's own app; images before it skip it)
+    # Updates and Keyboard shortcuts (cosmic-blue's own apps; images before
+    # them skip them)
     local entry name cmd
     for entry in "05-files|cosmic-files" "06-settings|cosmic-settings appearance" "06-store|cosmic-store" \
-        "06-updates|/usr/libexec/cosmic-blue-updates"; do
+        "06-updates|/usr/libexec/cosmic-blue-updates" \
+        "06-shortcuts|/usr/libexec/cosmic-blue-tour --shortcuts"; do
         name="${entry%%|*}"
         cmd="${entry#*|}"
         if [[ "${cmd}" == /* ]] && ! vm "test -x ${cmd%% *}"; then
@@ -501,7 +503,8 @@ vm_check_crashes() {
 
 # cosmic-blue's first steps tour, which opens at the first login of a new
 # account: one screenshot per page (Alt+Right turns the page), then closed.
-FIRST_STEPS_PAGES=7
+# Nobody picks where they come from, so the pages are those of the general path.
+FIRST_STEPS_PAGES=8
 
 first_steps_shots() {
     local page
