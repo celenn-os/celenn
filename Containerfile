@@ -12,8 +12,8 @@
 # Renovate moves them once a week in a pull request that must build and pass
 # the boot test (see .github/renovate.json5).
 # BASE_TAG is the Fedora release of Containerfile.helpers (`just fedora-version`).
-ARG BASE_TAG="44"
-ARG BASE_IMAGE="ghcr.io/ublue-os/base-main:44"
+ARG BASE_TAG="45"
+ARG BASE_IMAGE="ghcr.io/ublue-os/base-main:45"
 ARG COMMON_IMAGE="ghcr.io/projectbluefin/common:latest@sha256:c2799fd6253575b9efb22bf798af335e822d8ad22f798f09c75fcdffcb37c3a8"
 ARG BREW_IMAGE="ghcr.io/ublue-os/brew:latest@sha256:9e0492dbc471258657564c94dae18b58dd96ddb998a06f2b15e8209efb48042b"
 

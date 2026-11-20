@@ -4,7 +4,8 @@ description: >-
   "" is cosmic-blue, "nvidia" is cosmic-blue-nvidia. Pull requests only test
   the NVIDIA image when their diff mentions NVIDIA (file names or content) or
   when they come from Renovate (base image updates can change the kernel the
-  NVIDIA modules are built for). Everything else gets both images. The main
+  NVIDIA modules are built for) or move to another Fedora release (BASE_TAG).
+  Everything else gets both images. The main
   build tests both anyway and never publishes an image that fails.
   Needs GH_TOKEN with pull-requests: read.
 inputs:
@@ -35,9 +36,12 @@ runs:
         suffixes="${both}"
         if [[ "${GITHUB_EVENT_NAME}" == "pull_request" && "${HEAD_REF}" != renovate/* ]]; then
           diff="${RUNNER_TEMP}/pr.diff"
-          # A diff too large for the API: test both images
+          # A diff too large for the API: test both images. A new Fedora
+          # release (BASE_TAG) also moves the NVIDIA modules (akmods-nvidia-open
+          # main-<fedora>-<kernel>): test both images too.
           if gh pr diff "${PR}" --repo "${GITHUB_REPOSITORY}" > "${diff}" \
-             && ! grep -qi nvidia "${diff}"; then
+             && ! grep -qi nvidia "${diff}" \
+             && ! grep -q '^+ARG BASE_TAG=' "${diff}"; then
             suffixes='[""]'
             echo "::notice::The pull request does not touch NVIDIA: cosmic-blue-nvidia is tested by the main build only"
           fi
