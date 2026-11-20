@@ -10,4 +10,5 @@ under the GPL-3.0 (see LICENSE):
 
 `../bibata.py` recolors them with the cosmic-blue colors and builds the cursor
 theme. Keeping them here means the build no longer depends on an upstream that
-publishes no new versions.
+publishes no new versions. Renovate still watches it and opens a pull request
+on a new release: copy the new sources here as described in `../bibata.sh`.
