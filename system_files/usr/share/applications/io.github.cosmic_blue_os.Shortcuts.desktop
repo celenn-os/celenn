@@ -1,0 +1,25 @@
+[Desktop Entry]
+Type=Application
+Name=Keyboard shortcuts
+Name[fr]=Raccourcis clavier
+Name[de]=Tastenkürzel
+Name[es]=Atajos de teclado
+Name[it]=Scorciatoie da tastiera
+Name[pt_BR]=Atalhos de teclado
+Comment=The keyboard shortcuts of the desktop, on one page
+Comment[fr]=Les raccourcis clavier du bureau, sur une seule page
+Comment[de]=Die Tastenkürzel des Desktops auf einer Seite
+Comment[es]=Los atajos de teclado del escritorio, en una sola página
+Comment[it]=Le scorciatoie da tastiera del desktop, in una sola pagina
+Comment[pt_BR]=Os atalhos de teclado da área de trabalho, em uma só página
+Keywords=Keyboard;Shortcuts;Keys;Help;
+Keywords[fr]=Clavier;Raccourcis;Touches;Aide;
+Keywords[de]=Tastatur;Tastenkürzel;Tasten;Hilfe;
+Keywords[es]=Teclado;Atajos;Teclas;Ayuda;
+Keywords[it]=Tastiera;Scorciatoie;Tasti;Aiuto;
+Keywords[pt_BR]=Teclado;Atalhos;Teclas;Ajuda;
+Icon=preferences-desktop-keyboard-shortcuts
+Exec=/usr/libexec/cosmic-blue-tour --shortcuts
+Terminal=false
+StartupNotify=true
+Categories=System;

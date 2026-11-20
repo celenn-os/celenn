@@ -38,15 +38,6 @@ msgstr "Configurações"
 msgid "First steps"
 msgstr "Primeiros passos"
 
-msgid "Your system is installed and ready. Here are a few things worth knowing to get started."
-msgstr "Seu sistema está instalado e pronto. Aqui vão algumas dicas para começar."
-
-msgid "Install apps"
-msgstr "Instalar aplicativos"
-
-msgid "Apps come from COSMIC Store, which offers Flathub and the COSMIC apps. They run apart from the system and update by themselves."
-msgstr "Os aplicativos vêm da COSMIC Store, que oferece o Flathub e os aplicativos do COSMIC. Eles rodam separados do sistema e se atualizam sozinhos."
-
 msgid "Open COSMIC Store"
 msgstr "Abrir a COSMIC Store"
 
@@ -56,74 +47,17 @@ msgstr "Ferramentas de linha de comando, instaladas na sua pasta pessoal com o H
 msgid "Packages from other distributions, in a container that shares your home folder"
 msgstr "Pacotes de outras distribuições, em um contêiner que compartilha sua pasta pessoal"
 
-msgid "Updates and rollback"
-msgstr "Atualizações e reversão"
-
-msgid "The system, your apps and Homebrew packages update by themselves in the background. A system update applies at the next restart, without interrupting you."
-msgstr "O sistema, seus aplicativos e os pacotes do Homebrew se atualizam sozinhos em segundo plano. Uma atualização do sistema é aplicada na próxima reinicialização, sem interromper você."
-
 msgid "Update everything now, without waiting"
 msgstr "Atualizar tudo agora, sem esperar"
 
 msgid "An update broke something? Go back to the previous version, then restart"
 msgstr "Uma atualização quebrou algo? Volte para a versão anterior e reinicie"
 
-msgid "Show the current and previous versions"
-msgstr "Mostrar a versão atual e a anterior"
-
 msgid "Protect your files"
 msgstr "Proteja seus arquivos"
 
-msgid "Rollback brings the system back, not your files. Déjà Dup keeps a copy of your home folder on another disk."
-msgstr "A reversão recupera o sistema, não seus arquivos. O Déjà Dup guarda uma cópia da sua pasta pessoal em outro disco."
-
-msgid "Use a USB drive"
-msgstr "Use um disco USB"
-
-msgid "The simplest choice: a backup on the same disk would be lost with it. A network share or a cloud storage works too."
-msgstr "A escolha mais simples: um backup no mesmo disco se perderia junto com ele. Um compartilhamento de rede ou um armazenamento na nuvem também serve."
-
-msgid "Turn on automatic backups"
-msgstr "Ative os backups automáticos"
-
-msgid "Backups then run by themselves in the background, and only save what changed since the last one."
-msgstr "Eles passam a rodar sozinhos em segundo plano, e só salvam o que mudou desde o último."
-
-msgid "Restore when you need it"
-msgstr "Restaure quando precisar"
-
-msgid "Get back a single file, a folder or your whole home folder, even on a new computer."
-msgstr "Recupere um único arquivo, uma pasta ou toda a sua pasta pessoal, mesmo em um computador novo."
-
-msgid "Open Déjà Dup"
-msgstr "Abrir o Déjà Dup"
-
-msgid "Handy commands"
-msgstr "Comandos úteis"
-
-msgid "ujust runs the shortcuts that come with the system: type ujust in a terminal to list them all. A few of them:"
-msgstr "O ujust executa os atalhos que vêm com o sistema: digite ujust em um terminal para ver todos. Alguns deles:"
-
-msgid "Developer tools: Docker, VS Code, Podman Desktop…"
-msgstr "Ferramentas de desenvolvimento: Docker, VS Code, Podman Desktop…"
-
-msgid "Command line tools: bat, eza, ripgrep, zoxide…"
-msgstr "Ferramentas de linha de comando: bat, eza, ripgrep, zoxide…"
-
-msgid "Switch between the dark and light themes"
-msgstr "Alternar entre o tema escuro e o claro"
-
-msgid "Bring the cosmic-blue look back: colors, icons, wallpaper"
-msgstr "Trazer de volta o visual do cosmic-blue: cores, ícones, papel de parede"
-
-msgid "Open a terminal"
-msgstr "Abrir um terminal"
-
 msgid "Tile your windows"
 msgstr "Organize suas janelas lado a lado"
-
-msgid "COSMIC can arrange your windows side by side, without overlap, as you open them. It is off by default: turn it on with the tiling button in the panel, or with the keyboard."
-msgstr "O COSMIC pode organizar suas janelas lado a lado, sem sobreposição, conforme você as abre. Vem desativado: ative com o botão de lado a lado no painel ou pelo teclado."
 
 msgid "Turn tiling on or off"
 msgstr "Ativar ou desativar o lado a lado"
@@ -136,15 +70,6 @@ msgstr "Mover a janela para a esquerda, a direita, para cima ou para baixo"
 
 msgid "Let a window float above the others"
 msgstr "Deixar uma janela flutuando sobre as outras"
-
-msgid "COSMIC can be customized much further: Settings → Desktop."
-msgstr "O COSMIC pode ser personalizado muito mais: Configurações → Área de trabalho."
-
-msgid "Help and feedback"
-msgstr "Ajuda e feedback"
-
-msgid "Everything else is in the cosmic-blue guide. You can open this tour again from the app library: look for First steps."
-msgstr "Todo o resto está no guia do cosmic-blue. Você pode abrir este tour de novo pela biblioteca de aplicativos: procure Primeiros passos."
 
 msgid "Documentation"
 msgstr "Documentação"
@@ -205,3 +130,468 @@ msgstr "Instalar o cosmic-blue"
 
 msgid "Keep trying"
 msgstr "Continuar testando"
+
+msgid "Installing your apps: {} of {}"
+msgstr "Instalando seus aplicativos: {} de {}"
+
+msgid "They show up in the app library as they arrive."
+msgstr "Eles aparecem na biblioteca de aplicativos à medida que chegam."
+
+msgid "Theme"
+msgstr "Tema"
+
+msgid "Dark"
+msgstr "Escuro"
+
+msgid "Light"
+msgstr "Claro"
+
+msgid "Wallpaper"
+msgstr "Papel de parede"
+
+msgid "Your picture"
+msgstr "Sua imagem"
+
+msgid "Dock always visible"
+msgstr "Dock sempre visível"
+
+msgid "This did not work."
+msgstr "Isso não funcionou."
+
+msgid "Installed"
+msgstr "Instalado"
+
+msgid "Development"
+msgstr "Desenvolvimento"
+
+msgid "Docker, VS Code, Podman Desktop… picked from a menu, in a terminal"
+msgstr "Docker, VS Code, Podman Desktop… escolhidos em um menu, em um terminal"
+
+msgid "Choose…"
+msgstr "Escolher…"
+
+msgid "Install the selection"
+msgstr "Instalar a seleção"
+
+msgid "Installing: {} of {}"
+msgstr "Instalando: {} de {}"
+
+msgid "Some apps did not install. Are you online? They are also in COSMIC Store."
+msgstr "Alguns aplicativos não foram instalados. Você está conectado? Eles também estão na COSMIC Store."
+
+msgid "Press Enter to close this window."
+msgstr "Pressione Enter para fechar esta janela."
+
+msgid "Checking your computer…"
+msgstr "Verificando seu computador…"
+
+msgid "Connected to the internet"
+msgstr "Conectado à internet"
+
+msgid "No internet connection"
+msgstr "Sem conexão com a internet"
+
+msgid "Apps and updates need it."
+msgstr "Os aplicativos e as atualizações precisam dela."
+
+msgid "Network settings"
+msgstr "Configurações de rede"
+
+msgid "NVIDIA graphics card"
+msgstr "Placa de vídeo NVIDIA"
+
+msgid "Its driver is installed: this is the NVIDIA edition of cosmic-blue."
+msgstr "O driver dela está instalado: esta é a edição NVIDIA do cosmic-blue."
+
+msgid "The NVIDIA edition of cosmic-blue has its driver: about 4 GB to download, then it starts at the next restart."
+msgstr "A edição NVIDIA do cosmic-blue tem o driver dela: cerca de 4 GB para baixar, e ela inicia na próxima reinicialização."
+
+msgid "Switch"
+msgstr "Trocar"
+
+msgid "Downloading the NVIDIA edition… This can take a while."
+msgstr "Baixando a edição NVIDIA… Isso pode levar um tempo."
+
+msgid "The NVIDIA edition starts at the next restart."
+msgstr "A edição NVIDIA inicia na próxima reinicialização."
+
+msgid "At the restart, a blue screen asks to enroll a key: choose Enroll MOK, Continue, Yes, then type the password cosmicblue (the keyboard is QWERTY there)."
+msgstr "Na reinicialização, uma tela azul pede para registrar uma chave: escolha Enroll MOK, Continue, Yes e digite a senha cosmicblue (lá o teclado é QWERTY)."
+
+msgid "Firmware updates are available"
+msgstr "Há atualizações de firmware disponíveis"
+
+msgid "Firmware is up to date"
+msgstr "O firmware está atualizado"
+
+msgid "Open Firmware"
+msgstr "Abrir Firmware"
+
+msgid "Take care of the battery"
+msgstr "Cuidar da bateria"
+
+msgid "Stop charging at 80 % when the laptop stays plugged in: the battery lasts longer."
+msgstr "Parar de carregar em 80 % quando o notebook fica na tomada: a bateria dura mais."
+
+msgid "Screen scale"
+msgstr "Escala da tela"
+
+msgid "Text and windows too small or too big? Change the scale of the screen."
+msgstr "Texto e janelas pequenos ou grandes demais? Mude a escala da tela."
+
+msgid "Display settings"
+msgstr "Configurações de tela"
+
+msgid "Try"
+msgstr "Experimentar"
+
+msgid "Turn on"
+msgstr "Ativar"
+
+msgid "Turn off"
+msgstr "Desativar"
+
+msgid "Your look is set"
+msgstr "Sua aparência está pronta"
+
+msgid "Your apps are installed"
+msgstr "Seus aplicativos estão instalados"
+
+msgid "Plug in a USB drive and turn on automatic backups: Déjà Dup keeps a copy of your home folder."
+msgstr "Conecte um pendrive e ative os backups automáticos: o Déjà Dup guarda uma cópia da sua pasta pessoal."
+
+msgid "Set up backups"
+msgstr "Configurar backups"
+
+msgid "This tour and the Keyboard shortcuts app stay in the app library."
+msgstr "Este tour e o aplicativo Atalhos de teclado continuam na biblioteca de aplicativos."
+
+msgid "“{}” does not install here"
+msgstr "“{}” não se instala aqui"
+
+msgid "This is a Windows program. On cosmic-blue, apps come from COSMIC Store: most well-known apps are there, or a good alternative."
+msgstr "Este é um programa do Windows. No cosmic-blue, os aplicativos vêm da COSMIC Store: a maioria dos aplicativos conhecidos está lá, ou uma boa alternativa."
+
+msgid "This is a package for Debian and Ubuntu. On cosmic-blue, apps come from COSMIC Store: most well-known apps are there, or a good alternative."
+msgstr "Este é um pacote para Debian e Ubuntu. No cosmic-blue, os aplicativos vêm da COSMIC Store: a maioria dos aplicativos conhecidos está lá, ou uma boa alternativa."
+
+msgid "This is a package for Fedora. cosmic-blue's system is a read-only image: apps come from COSMIC Store instead. Most well-known apps are there, or a good alternative."
+msgstr "Este é um pacote para o Fedora. O sistema do cosmic-blue é uma imagem somente leitura: os aplicativos vêm da COSMIC Store. A maioria dos aplicativos conhecidos está lá, ou uma boa alternativa."
+
+msgid "Search for “{}” in COSMIC Store"
+msgstr "Buscar “{}” na COSMIC Store"
+
+msgid "A Windows program with no equivalent? Bottles, in COSMIC Store, runs some of them."
+msgstr "Um programa do Windows sem equivalente? O Bottles, na COSMIC Store, executa alguns deles."
+
+msgid "Open with Bottles"
+msgstr "Abrir com o Bottles"
+
+msgid "For advanced users: distrobox installs it in a container of another distribution."
+msgstr "Para usuários avançados: o distrobox o instala em um contêiner de outra distribuição."
+
+msgid "Keyboard shortcuts"
+msgstr "Atalhos de teclado"
+
+msgid "Super is the key with the Windows logo on most keyboards."
+msgstr "Super é a tecla com o logotipo do Windows na maioria dos teclados."
+
+msgid "Change them in Settings"
+msgstr "Alterá-los nas Configurações"
+
+msgid "Your bearings from Windows"
+msgstr "Suas referências do Windows"
+
+msgid "Your bearings from the Mac"
+msgstr "Suas referências do Mac"
+
+msgid "The short version, with the commands"
+msgstr "A versão curta, com os comandos"
+
+msgid "Office"
+msgstr "Escritório"
+
+msgid "LibreOffice: documents, spreadsheets and presentations, Word and Excel files included"
+msgstr "LibreOffice: documentos, planilhas e apresentações, incluindo arquivos do Word e do Excel"
+
+msgid "Games"
+msgstr "Jogos"
+
+msgid "Steam, and Heroic Games Launcher for Epic Games and GOG"
+msgstr "Steam, e Heroic Games Launcher para Epic Games e GOG"
+
+msgid "Creative work"
+msgstr "Criação"
+
+msgid "GIMP for photos, Inkscape for drawings, Krita for painting, Kdenlive for videos"
+msgstr "GIMP para fotos, Inkscape para desenhos, Krita para pintura, Kdenlive para vídeos"
+
+msgid "Open the launcher"
+msgstr "Abrir o lançador"
+
+msgid "Press Super, type the name of an app, then Enter. Super is the key with the Windows logo on most keyboards."
+msgstr "Pressione Super, digite o nome de um aplicativo e depois Enter. Super é a tecla com o logotipo do Windows na maioria dos teclados."
+
+msgid "See all your apps"
+msgstr "Ver todos os seus aplicativos"
+
+msgid "Super + A"
+msgstr "Super + A"
+
+msgid "See your workspaces"
+msgstr "Ver seus espaços de trabalho"
+
+msgid "Super + W: one desktop per activity. Super + Ctrl + arrows goes from one to the next."
+msgstr "Super + W: uma área de trabalho por atividade. Super + Ctrl + setas passa de uma para outra."
+
+msgid "Windows side by side, without overlap. Super + Y turns it on or off."
+msgstr "Janelas lado a lado, sem sobreposição. Super + Y ativa ou desativa."
+
+msgid "Take a screenshot"
+msgstr "Fazer uma captura de tela"
+
+msgid "Super + Shift + S, or the Print Screen key"
+msgstr "Super + Shift + S, ou a tecla Print Screen"
+
+msgid "Desktop"
+msgstr "Área de trabalho"
+
+msgid "See your windows and workspaces"
+msgstr "Ver suas janelas e espaços de trabalho"
+
+msgid "Lock the screen"
+msgstr "Bloquear a tela"
+
+msgid "Windows"
+msgstr "Janelas"
+
+msgid "Go from one window to the next"
+msgstr "Passar de uma janela para outra"
+
+msgid "Close the window"
+msgstr "Fechar a janela"
+
+msgid "Maximize the window"
+msgstr "Maximizar a janela"
+
+msgid "Workspaces"
+msgstr "Espaços de trabalho"
+
+msgid "Go to the next or previous workspace"
+msgstr "Ir para o espaço de trabalho seguinte ou anterior"
+
+msgid "Go to a workspace"
+msgstr "Ir para um espaço de trabalho"
+
+msgid "Move the window to a workspace"
+msgstr "Mover a janela para um espaço de trabalho"
+
+msgid "Apps"
+msgstr "Aplicativos"
+
+msgid "Terminal"
+msgstr "Terminal"
+
+msgid "Files"
+msgstr "Arquivos"
+
+msgid "System monitor"
+msgstr "Monitor do sistema"
+
+msgid "Turn the screen reader on or off"
+msgstr "Ativar ou desativar o leitor de tela"
+
+msgid "Zoom in and out"
+msgstr "Aumentar e diminuir o zoom"
+
+msgid "Your system is installed and ready. Where do you come from? The tour adapts to you."
+msgstr "Seu sistema está instalado e pronto. De onde você vem? O tour se adapta a você."
+
+msgid "Make it yours"
+msgstr "Do seu jeito"
+
+msgid "What do you use your computer for?"
+msgstr "Para que você usa o computador?"
+
+msgid "Pick what concerns you: nothing installs without a click, and everything can be removed later."
+msgstr "Marque o que interessa a você: nada é instalado sem um clique, e tudo pode ser removido depois."
+
+msgid "Thousands of other apps are in COSMIC Store."
+msgstr "Milhares de outros aplicativos estão na COSMIC Store."
+
+msgid "Your computer"
+msgstr "Seu computador"
+
+msgid "Checked for you: only what concerns this computer shows up."
+msgstr "Verificado para você: só aparece o que diz respeito a este computador."
+
+msgid "Try it, it is safe"
+msgstr "Experimente, é seguro"
+
+msgid "Each button does the real thing."
+msgstr "Cada botão faz a ação de verdade."
+
+msgid "The Keyboard shortcuts app lists them all."
+msgstr "O aplicativo Atalhos de teclado lista todos eles."
+
+msgid "Bring your things"
+msgstr "Traga suas coisas"
+
+msgid "Your files, bookmarks and email from before."
+msgstr "Seus arquivos, favoritos e e-mails de antes."
+
+msgid "Files from an old disk"
+msgstr "Arquivos de um disco antigo"
+
+msgid "Plug it in: it shows up in Files, on the left. A Windows partition of this computer too."
+msgstr "Conecte-o: ele aparece em Arquivos, à esquerda. Uma partição do Windows deste computador também."
+
+msgid "Open Files"
+msgstr "Abrir Arquivos"
+
+msgid "Photos from a phone"
+msgstr "Fotos de um celular"
+
+msgid "Plug it in with its cable and allow file transfer on the phone: it shows up in Files."
+msgstr "Conecte-o com o cabo e permita a transferência de arquivos no celular: ele aparece em Arquivos."
+
+msgid "Bookmarks and passwords"
+msgstr "Favoritos e senhas"
+
+msgid "Export them from your old browser (an HTML file for bookmarks, a CSV file for passwords), then import them in Firefox."
+msgstr "Exporte-os do seu navegador antigo (um arquivo HTML para os favoritos, um arquivo CSV para as senhas) e depois importe-os no Firefox."
+
+msgid "Open Firefox"
+msgstr "Abrir o Firefox"
+
+msgid "Email"
+msgstr "E-mail"
+
+msgid "Thunderbird sets up your account with just your address and password."
+msgstr "O Thunderbird configura sua conta só com seu endereço e sua senha."
+
+msgid "Open Thunderbird"
+msgstr "Abrir o Thunderbird"
+
+msgid "Good to know"
+msgstr "Bom saber"
+
+msgid "Three things that work differently here."
+msgstr "Três coisas que funcionam de outro jeito aqui."
+
+msgid "Updates apply at the next restart"
+msgstr "As atualizações são aplicadas na próxima reinicialização"
+
+msgid "The system updates itself in the background, without interrupting you. Something wrong after an update? Go back to the previous version in one click."
+msgstr "O sistema se atualiza sozinho em segundo plano, sem interromper você. Algo deu errado depois de uma atualização? Volte para a versão anterior com um clique."
+
+msgid "Updates"
+msgstr "Atualizações"
+
+msgid "An app cannot see a folder or a USB drive?"
+msgstr "Um aplicativo não vê uma pasta ou um pendrive?"
+
+msgid "Apps run apart from the system and only see what they need. Flatseal gives them access to more."
+msgstr "Os aplicativos rodam separados do sistema e só veem o que precisam. O Flatseal dá acesso a mais coisas."
+
+msgid "Open Flatseal"
+msgstr "Abrir o Flatseal"
+
+msgid "A downloaded .exe, .deb or .rpm file?"
+msgstr "Um arquivo .exe, .deb ou .rpm baixado?"
+
+msgid "They do not install on cosmic-blue: look for the app in COSMIC Store, where it updates by itself."
+msgstr "Eles não se instalam no cosmic-blue: procure o aplicativo na COSMIC Store, onde ele se atualiza sozinho."
+
+msgid "You are ready"
+msgstr "Você está pronto"
+
+msgid "One more thing worth doing: backups."
+msgstr "Mais uma coisa que vale a pena: os backups."
+
+msgid "What changes, and what stays the same."
+msgstr "O que muda e o que continua igual."
+
+msgid "Windows key → the Super key"
+msgstr "Tecla Windows → a tecla Super"
+
+msgid "It opens the launcher, like the Start menu: type the name of an app"
+msgstr "Ela abre o lançador, como o menu Iniciar: digite o nome de um aplicativo"
+
+msgid "Microsoft Store → COSMIC Store"
+msgstr "Microsoft Store → COSMIC Store"
+
+msgid "Apps install and update from there"
+msgstr "Os aplicativos são instalados e atualizados por lá"
+
+msgid "File Explorer → Files"
+msgstr "Explorador de Arquivos → Arquivos"
+
+msgid "Super + E opens it, as on Windows"
+msgstr "Super + E o abre, como no Windows"
+
+msgid "Settings and Control Panel → Settings"
+msgstr "Configurações e Painel de Controle → Configurações"
+
+msgid "Everything in one place"
+msgstr "Tudo em um só lugar"
+
+msgid "Office → LibreOffice"
+msgstr "Office → LibreOffice"
+
+msgid "It opens and saves Word, Excel and PowerPoint files"
+msgstr "Ele abre e salva arquivos do Word, Excel e PowerPoint"
+
+msgid "Same as on Windows"
+msgstr "Igual ao Windows"
+
+msgid "Alt + Tab, Ctrl + C and Ctrl + V, Super + Shift + S for a screenshot, Ctrl + Shift + Esc for the task manager"
+msgstr "Alt + Tab, Ctrl + C e Ctrl + V, Super + Shift + S para uma captura de tela, Ctrl + Shift + Esc para o gerenciador de tarefas"
+
+msgid "Command key → Ctrl, most of the time"
+msgstr "Tecla Command → Ctrl, na maioria das vezes"
+
+msgid "Copy, paste, save: Ctrl + C, Ctrl + V, Ctrl + S"
+msgstr "Copiar, colar, salvar: Ctrl + C, Ctrl + V, Ctrl + S"
+
+msgid "Spotlight → the Super key"
+msgstr "Spotlight → a tecla Super"
+
+msgid "Super opens the launcher: type the name of an app"
+msgstr "Super abre o lançador: digite o nome de um aplicativo"
+
+msgid "App Store → COSMIC Store"
+msgstr "App Store → COSMIC Store"
+
+msgid "Finder → Files"
+msgstr "Finder → Arquivos"
+
+msgid "Super + E opens it"
+msgstr "Super + E o abre"
+
+msgid "Mission Control → Super + W"
+msgstr "Mission Control → Super + W"
+
+msgid "Your windows and workspaces at a glance"
+msgstr "Suas janelas e espaços de trabalho num relance"
+
+msgid "System Settings → Settings"
+msgstr "Ajustes do Sistema → Configurações"
+
+msgid "Everything in one place, Settings → Desktop for the look"
+msgstr "Tudo em um só lugar, Configurações → Área de trabalho para a aparência"
+
+msgid "cosmic-blue in a nutshell"
+msgstr "cosmic-blue em poucas palavras"
+
+msgid "Fedora Atomic with COSMIC: the system is a signed, read-only image that updates as a whole. Apps and tools go on top of it."
+msgstr "Fedora Atomic com COSMIC: o sistema é uma imagem assinada, somente leitura, que se atualiza por inteiro. Aplicativos e ferramentas ficam por cima."
+
+msgid "Tiling: Super + Y. The Keyboard shortcuts app lists them all."
+msgstr "Mosaico: Super + Y. O aplicativo Atalhos de teclado lista todos eles."
+
+msgid "The system's recipes: developer tools, command line tools, update channel… Type ujust to list them."
+msgstr "As receitas do sistema: ferramentas de desenvolvimento, de linha de comando, canal de atualizações… Digite ujust para listá-las."
+
+msgid "Follow the stable (weekly), testing (daily) or dev image"
+msgstr "Seguir a imagem stable (semanal), testing (diária) ou dev"

@@ -39,15 +39,6 @@ msgstr ""
 msgid "First steps"
 msgstr ""
 
-msgid "Your system is installed and ready. Here are a few things worth knowing to get started."
-msgstr ""
-
-msgid "Install apps"
-msgstr ""
-
-msgid "Apps come from COSMIC Store, which offers Flathub and the COSMIC apps. They run apart from the system and update by themselves."
-msgstr ""
-
 msgid "Open COSMIC Store"
 msgstr ""
 
@@ -57,73 +48,16 @@ msgstr ""
 msgid "Packages from other distributions, in a container that shares your home folder"
 msgstr ""
 
-msgid "Updates and rollback"
-msgstr ""
-
-msgid "The system, your apps and Homebrew packages update by themselves in the background. A system update applies at the next restart, without interrupting you."
-msgstr ""
-
 msgid "Update everything now, without waiting"
 msgstr ""
 
 msgid "An update broke something? Go back to the previous version, then restart"
 msgstr ""
 
-msgid "Show the current and previous versions"
-msgstr ""
-
 msgid "Protect your files"
 msgstr ""
 
-msgid "Rollback brings the system back, not your files. Déjà Dup keeps a copy of your home folder on another disk."
-msgstr ""
-
-msgid "Use a USB drive"
-msgstr ""
-
-msgid "The simplest choice: a backup on the same disk would be lost with it. A network share or a cloud storage works too."
-msgstr ""
-
-msgid "Turn on automatic backups"
-msgstr ""
-
-msgid "Backups then run by themselves in the background, and only save what changed since the last one."
-msgstr ""
-
-msgid "Restore when you need it"
-msgstr ""
-
-msgid "Get back a single file, a folder or your whole home folder, even on a new computer."
-msgstr ""
-
-msgid "Open Déjà Dup"
-msgstr ""
-
-msgid "Handy commands"
-msgstr ""
-
-msgid "ujust runs the shortcuts that come with the system: type ujust in a terminal to list them all. A few of them:"
-msgstr ""
-
-msgid "Developer tools: Docker, VS Code, Podman Desktop…"
-msgstr ""
-
-msgid "Command line tools: bat, eza, ripgrep, zoxide…"
-msgstr ""
-
-msgid "Switch between the dark and light themes"
-msgstr ""
-
-msgid "Bring the cosmic-blue look back: colors, icons, wallpaper"
-msgstr ""
-
-msgid "Open a terminal"
-msgstr ""
-
 msgid "Tile your windows"
-msgstr ""
-
-msgid "COSMIC can arrange your windows side by side, without overlap, as you open them. It is off by default: turn it on with the tiling button in the panel, or with the keyboard."
 msgstr ""
 
 msgid "Turn tiling on or off"
@@ -136,15 +70,6 @@ msgid "Move the window to the left, right, up or down"
 msgstr ""
 
 msgid "Let a window float above the others"
-msgstr ""
-
-msgid "COSMIC can be customized much further: Settings → Desktop."
-msgstr ""
-
-msgid "Help and feedback"
-msgstr ""
-
-msgid "Everything else is in the cosmic-blue guide. You can open this tour again from the app library: look for First steps."
 msgstr ""
 
 msgid "Documentation"
@@ -205,4 +130,469 @@ msgid "Install cosmic-blue"
 msgstr ""
 
 msgid "Keep trying"
+msgstr ""
+
+msgid "Installing your apps: {} of {}"
+msgstr ""
+
+msgid "They show up in the app library as they arrive."
+msgstr ""
+
+msgid "Theme"
+msgstr ""
+
+msgid "Dark"
+msgstr ""
+
+msgid "Light"
+msgstr ""
+
+msgid "Wallpaper"
+msgstr ""
+
+msgid "Your picture"
+msgstr ""
+
+msgid "Dock always visible"
+msgstr ""
+
+msgid "This did not work."
+msgstr ""
+
+msgid "Installed"
+msgstr ""
+
+msgid "Development"
+msgstr ""
+
+msgid "Docker, VS Code, Podman Desktop… picked from a menu, in a terminal"
+msgstr ""
+
+msgid "Choose…"
+msgstr ""
+
+msgid "Install the selection"
+msgstr ""
+
+msgid "Installing: {} of {}"
+msgstr ""
+
+msgid "Some apps did not install. Are you online? They are also in COSMIC Store."
+msgstr ""
+
+msgid "Press Enter to close this window."
+msgstr ""
+
+msgid "Checking your computer…"
+msgstr ""
+
+msgid "Connected to the internet"
+msgstr ""
+
+msgid "No internet connection"
+msgstr ""
+
+msgid "Apps and updates need it."
+msgstr ""
+
+msgid "Network settings"
+msgstr ""
+
+msgid "NVIDIA graphics card"
+msgstr ""
+
+msgid "Its driver is installed: this is the NVIDIA edition of cosmic-blue."
+msgstr ""
+
+msgid "The NVIDIA edition of cosmic-blue has its driver: about 4 GB to download, then it starts at the next restart."
+msgstr ""
+
+msgid "Switch"
+msgstr ""
+
+msgid "Downloading the NVIDIA edition… This can take a while."
+msgstr ""
+
+msgid "The NVIDIA edition starts at the next restart."
+msgstr ""
+
+msgid "At the restart, a blue screen asks to enroll a key: choose Enroll MOK, Continue, Yes, then type the password cosmicblue (the keyboard is QWERTY there)."
+msgstr ""
+
+msgid "Firmware updates are available"
+msgstr ""
+
+msgid "Firmware is up to date"
+msgstr ""
+
+msgid "Open Firmware"
+msgstr ""
+
+msgid "Take care of the battery"
+msgstr ""
+
+msgid "Stop charging at 80 % when the laptop stays plugged in: the battery lasts longer."
+msgstr ""
+
+msgid "Screen scale"
+msgstr ""
+
+msgid "Text and windows too small or too big? Change the scale of the screen."
+msgstr ""
+
+msgid "Display settings"
+msgstr ""
+
+msgid "Try"
+msgstr ""
+
+msgid "Turn on"
+msgstr ""
+
+msgid "Turn off"
+msgstr ""
+
+msgid "Your look is set"
+msgstr ""
+
+msgid "Your apps are installed"
+msgstr ""
+
+msgid "Plug in a USB drive and turn on automatic backups: Déjà Dup keeps a copy of your home folder."
+msgstr ""
+
+msgid "Set up backups"
+msgstr ""
+
+msgid "This tour and the Keyboard shortcuts app stay in the app library."
+msgstr ""
+
+msgid "“{}” does not install here"
+msgstr ""
+
+msgid "This is a Windows program. On cosmic-blue, apps come from COSMIC Store: most well-known apps are there, or a good alternative."
+msgstr ""
+
+msgid "This is a package for Debian and Ubuntu. On cosmic-blue, apps come from COSMIC Store: most well-known apps are there, or a good alternative."
+msgstr ""
+
+msgid "This is a package for Fedora. cosmic-blue's system is a read-only image: apps come from COSMIC Store instead. Most well-known apps are there, or a good alternative."
+msgstr ""
+
+msgid "Search for “{}” in COSMIC Store"
+msgstr ""
+
+msgid "A Windows program with no equivalent? Bottles, in COSMIC Store, runs some of them."
+msgstr ""
+
+msgid "Open with Bottles"
+msgstr ""
+
+msgid "For advanced users: distrobox installs it in a container of another distribution."
+msgstr ""
+
+msgid "Keyboard shortcuts"
+msgstr ""
+
+msgid "Super is the key with the Windows logo on most keyboards."
+msgstr ""
+
+msgid "Change them in Settings"
+msgstr ""
+
+msgid "Your bearings from Windows"
+msgstr ""
+
+msgid "Your bearings from the Mac"
+msgstr ""
+
+msgid "The short version, with the commands"
+msgstr ""
+
+msgid "Office"
+msgstr ""
+
+msgid "LibreOffice: documents, spreadsheets and presentations, Word and Excel files included"
+msgstr ""
+
+msgid "Games"
+msgstr ""
+
+msgid "Steam, and Heroic Games Launcher for Epic Games and GOG"
+msgstr ""
+
+msgid "Creative work"
+msgstr ""
+
+msgid "GIMP for photos, Inkscape for drawings, Krita for painting, Kdenlive for videos"
+msgstr ""
+
+msgid "Open the launcher"
+msgstr ""
+
+msgid "Press Super, type the name of an app, then Enter. Super is the key with the Windows logo on most keyboards."
+msgstr ""
+
+msgid "See all your apps"
+msgstr ""
+
+msgid "Super + A"
+msgstr ""
+
+msgid "See your workspaces"
+msgstr ""
+
+msgid "Super + W: one desktop per activity. Super + Ctrl + arrows goes from one to the next."
+msgstr ""
+
+msgid "Windows side by side, without overlap. Super + Y turns it on or off."
+msgstr ""
+
+msgid "Take a screenshot"
+msgstr ""
+
+msgid "Super + Shift + S, or the Print Screen key"
+msgstr ""
+
+msgid "Desktop"
+msgstr ""
+
+msgid "See your windows and workspaces"
+msgstr ""
+
+msgid "Lock the screen"
+msgstr ""
+
+msgid "Windows"
+msgstr ""
+
+msgid "Go from one window to the next"
+msgstr ""
+
+msgid "Close the window"
+msgstr ""
+
+msgid "Maximize the window"
+msgstr ""
+
+msgid "Workspaces"
+msgstr ""
+
+msgid "Go to the next or previous workspace"
+msgstr ""
+
+msgid "Go to a workspace"
+msgstr ""
+
+msgid "Move the window to a workspace"
+msgstr ""
+
+msgid "Apps"
+msgstr ""
+
+msgid "Terminal"
+msgstr ""
+
+msgid "Files"
+msgstr ""
+
+msgid "System monitor"
+msgstr ""
+
+msgid "Turn the screen reader on or off"
+msgstr ""
+
+msgid "Zoom in and out"
+msgstr ""
+
+msgid "Your system is installed and ready. Where do you come from? The tour adapts to you."
+msgstr ""
+
+msgid "Make it yours"
+msgstr ""
+
+msgid "What do you use your computer for?"
+msgstr ""
+
+msgid "Pick what concerns you: nothing installs without a click, and everything can be removed later."
+msgstr ""
+
+msgid "Thousands of other apps are in COSMIC Store."
+msgstr ""
+
+msgid "Your computer"
+msgstr ""
+
+msgid "Checked for you: only what concerns this computer shows up."
+msgstr ""
+
+msgid "Try it, it is safe"
+msgstr ""
+
+msgid "Each button does the real thing."
+msgstr ""
+
+msgid "The Keyboard shortcuts app lists them all."
+msgstr ""
+
+msgid "Bring your things"
+msgstr ""
+
+msgid "Your files, bookmarks and email from before."
+msgstr ""
+
+msgid "Files from an old disk"
+msgstr ""
+
+msgid "Plug it in: it shows up in Files, on the left. A Windows partition of this computer too."
+msgstr ""
+
+msgid "Open Files"
+msgstr ""
+
+msgid "Photos from a phone"
+msgstr ""
+
+msgid "Plug it in with its cable and allow file transfer on the phone: it shows up in Files."
+msgstr ""
+
+msgid "Bookmarks and passwords"
+msgstr ""
+
+msgid "Export them from your old browser (an HTML file for bookmarks, a CSV file for passwords), then import them in Firefox."
+msgstr ""
+
+msgid "Open Firefox"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "Thunderbird sets up your account with just your address and password."
+msgstr ""
+
+msgid "Open Thunderbird"
+msgstr ""
+
+msgid "Good to know"
+msgstr ""
+
+msgid "Three things that work differently here."
+msgstr ""
+
+msgid "Updates apply at the next restart"
+msgstr ""
+
+msgid "The system updates itself in the background, without interrupting you. Something wrong after an update? Go back to the previous version in one click."
+msgstr ""
+
+msgid "Updates"
+msgstr ""
+
+msgid "An app cannot see a folder or a USB drive?"
+msgstr ""
+
+msgid "Apps run apart from the system and only see what they need. Flatseal gives them access to more."
+msgstr ""
+
+msgid "Open Flatseal"
+msgstr ""
+
+msgid "A downloaded .exe, .deb or .rpm file?"
+msgstr ""
+
+msgid "They do not install on cosmic-blue: look for the app in COSMIC Store, where it updates by itself."
+msgstr ""
+
+msgid "You are ready"
+msgstr ""
+
+msgid "One more thing worth doing: backups."
+msgstr ""
+
+msgid "What changes, and what stays the same."
+msgstr ""
+
+msgid "Windows key → the Super key"
+msgstr ""
+
+msgid "It opens the launcher, like the Start menu: type the name of an app"
+msgstr ""
+
+msgid "Microsoft Store → COSMIC Store"
+msgstr ""
+
+msgid "Apps install and update from there"
+msgstr ""
+
+msgid "File Explorer → Files"
+msgstr ""
+
+msgid "Super + E opens it, as on Windows"
+msgstr ""
+
+msgid "Settings and Control Panel → Settings"
+msgstr ""
+
+msgid "Everything in one place"
+msgstr ""
+
+msgid "Office → LibreOffice"
+msgstr ""
+
+msgid "It opens and saves Word, Excel and PowerPoint files"
+msgstr ""
+
+msgid "Same as on Windows"
+msgstr ""
+
+msgid "Alt + Tab, Ctrl + C and Ctrl + V, Super + Shift + S for a screenshot, Ctrl + Shift + Esc for the task manager"
+msgstr ""
+
+msgid "Command key → Ctrl, most of the time"
+msgstr ""
+
+msgid "Copy, paste, save: Ctrl + C, Ctrl + V, Ctrl + S"
+msgstr ""
+
+msgid "Spotlight → the Super key"
+msgstr ""
+
+msgid "Super opens the launcher: type the name of an app"
+msgstr ""
+
+msgid "App Store → COSMIC Store"
+msgstr ""
+
+msgid "Finder → Files"
+msgstr ""
+
+msgid "Super + E opens it"
+msgstr ""
+
+msgid "Mission Control → Super + W"
+msgstr ""
+
+msgid "Your windows and workspaces at a glance"
+msgstr ""
+
+msgid "System Settings → Settings"
+msgstr ""
+
+msgid "Everything in one place, Settings → Desktop for the look"
+msgstr ""
+
+msgid "cosmic-blue in a nutshell"
+msgstr ""
+
+msgid "Fedora Atomic with COSMIC: the system is a signed, read-only image that updates as a whole. Apps and tools go on top of it."
+msgstr ""
+
+msgid "Tiling: Super + Y. The Keyboard shortcuts app lists them all."
+msgstr ""
+
+msgid "The system's recipes: developer tools, command line tools, update channel… Type ujust to list them."
+msgstr ""
+
+msgid "Follow the stable (weekly), testing (daily) or dev image"
 msgstr ""

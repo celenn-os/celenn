@@ -70,6 +70,11 @@ Keep the main elements inside the centre so they survive cropping to 16:10,
 downloaded); the output is deterministic (fixed seeds). Keep the file names:
 accounts that picked a wallpaper in Settings point to its path.
 
+The first steps tour shows the wallpapers as small thumbnails (224x126 JPEGs
+in `system_files/usr/share/cosmic-blue/wallpapers/`, same file names): run
+`python3 branding/tour/thumbnails.py` from the repository root after adding, removing or changing a wallpaper
+(the image build checks that each wallpaper has its thumbnail).
+
 There are no light versions: the same wallpaper serves both themes. Later
 COSMIC releases read a wallpaper per theme (`com.system76.CosmicBackground.Dark`
 / `.Light`); both point to the default.
