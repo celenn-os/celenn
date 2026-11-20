@@ -875,6 +875,8 @@ name = "cosmic-blue-tour"
 version = "0.1.0"
 dependencies = [
  "libcosmic",
+ "serde_json",
+ "tokio",
 ]
 
 [[package]]

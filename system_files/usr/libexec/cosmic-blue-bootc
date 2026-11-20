@@ -1,0 +1,47 @@
+#!/usr/bin/bash
+# bootc as uupd runs it (UUPD_BOOTC_BINARY, set in uupd.service.d and
+# uupd-manual.service.d): the same, except that the automatic updates do not
+# install again a version left behind with "Go back" in the Updates app.
+#
+# When the Updates app goes back to the previous version, its helper
+# (cosmic-blue-updates-helper) writes the digest and version of the version
+# left behind to /var/lib/cosmic-blue/update-hold. While the registry still
+# serves that same image, `upgrade` reports no update; once a newer image is
+# out, the note is removed and updates go on as usual. Every other command
+# goes straight to bootc.
+set -euo pipefail
+
+BOOTC=/usr/bin/bootc
+HOLD=/var/lib/cosmic-blue/update-hold
+
+if [[ "${1:-}" != upgrade || ! -s "${HOLD}" ]]; then
+    exec "${BOOTC}" "$@"
+fi
+
+read -r held version < "${HOLD}" || true
+booted="$("${BOOTC}" status --json | jq -r '.status.booted.image.imageDigest // empty')" || booted=""
+if [[ -z "${held:-}" || "${booted}" == "${held}" ]]; then
+    # Running the version that was set aside after all: nothing to hold
+    rm -f "${HOLD}"
+    exec "${BOOTC}" "$@"
+fi
+
+# What the registry serves now (only its manifest is downloaded)
+if ! check="$("${BOOTC}" upgrade --check 2>&1)"; then
+    # Offline or registry error: let bootc report it
+    exec "${BOOTC}" "$@"
+fi
+available="$(sed -n 's/^  Digest: //p' <<<"${check}" | head -n 1)"
+if [[ "${available}" == "${held}" ]]; then
+    image="$(sed -n 's/^Update available for: //p' <<<"${check}" | head -n 1)"
+    # The words uupd looks for when it checks for an update
+    echo "No changes in: ${image} (version ${version:-?} was set aside after going back to the previous one)"
+    exit 0
+fi
+# A newer image (or none at all): the version set aside is behind us
+[[ -z "${available}" ]] || rm -f "${HOLD}"
+if [[ " $* " == *" --check "* ]]; then
+    echo "${check}"
+    exit 0
+fi
+exec "${BOOTC}" "$@"

@@ -72,6 +72,12 @@ touch /etc/skel/.config/cosmic-initial-setup-done
 mkdir -p /etc/skel/.config/cosmic-blue
 touch /etc/skel/.config/cosmic-blue/first-steps-pending
 
+# The Updates app (/usr/libexec/cosmic-blue-updates, built with the tour)
+# replaces the "System Update" launcher of Bluefin's shared files, which ran
+# `ujust update` in a terminal: its "Check now" runs the same update
+# (uupd-manual.service), and `ujust update` stays for the terminal.
+rm -f /usr/share/applications/system-update.desktop
+
 systemctl set-default graphical.target
 
 # Fedora's default wallpaper for this release (day/night), offered in COSMIC

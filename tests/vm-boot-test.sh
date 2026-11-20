@@ -109,6 +109,53 @@ case "${expected}" in
             || { echo "::error::ujust switch-channel status does not show the ${expected} channel"; errors=1; } ;;
 esac
 
+# Updates app: what it shows (read from rpm-ostree, as in the user's session)
+# on a new install: this version, the channel, no previous version yet
+updates="$(vm "/usr/libexec/cosmic-blue-updates --status" 2>&1)" || updates=""
+echo "${updates}"
+grep -qE '^current: [0-9]' <<<"${updates}" \
+    && grep -qx 'previous: none' <<<"${updates}" \
+    || { echo "::error::cosmic-blue-updates --status does not show the version"; errors=1; }
+case "${expected}" in
+    stable|testing|dev)
+        grep -qx "channel: ${expected}" <<<"${updates}" \
+            || { echo "::error::cosmic-blue-updates --status does not show the ${expected} channel"; errors=1; } ;;
+esac
+# The older stable versions it offers (stable-YYYYMMDD tags of the registry)
+older="$(vm "/usr/libexec/cosmic-blue-updates --older" 2>&1)" || older=""
+echo "Older stable versions: ${older//$'\n'/ }"
+grep -qE '^stable-[0-9]{8}$' <<<"${older}" \
+    || echo "::warning::cosmic-blue-updates --older lists no older stable version (${older})"
+# Its root helper only does what it is meant to: no rollback without a
+# previous version, no dev channel (ujust only), no tag other than stable-YYYYMMDD
+vm "/usr/libexec/cosmic-blue-updates-helper rollback" 2>/dev/null \
+    && { echo "::error::cosmic-blue-updates-helper rolled back without a previous version"; errors=1; }
+vm "/usr/libexec/cosmic-blue-updates-helper channel dev" 2>/dev/null \
+    && { echo "::error::cosmic-blue-updates-helper accepted the dev channel"; errors=1; }
+vm "/usr/libexec/cosmic-blue-updates-helper pin testing" 2>/dev/null \
+    && { echo "::error::cosmic-blue-updates-helper pinned something else than a stable-YYYYMMDD tag"; errors=1; }
+# A version left behind with "Go back" is not installed again by uupd
+# (through cosmic-blue-bootc), until a newer one is out. The published
+# image of TARGET_IMGREF is an update for this test build: set it aside as
+# the Updates app's helper would, then pretend another version was.
+hold=/var/lib/cosmic-blue/update-hold
+upgrade_check="$(vm "bootc upgrade --check" 2>&1)" || upgrade_check=""
+available="$(sed -n 's/^  Digest: //p' <<<"${upgrade_check}" | head -n 1)"
+if [[ -n "${available}" ]]; then
+    vm "mkdir -p ${hold%/*} && echo '${available} 44.test' > ${hold}"
+    held_check="$(vm "/usr/libexec/cosmic-blue-bootc upgrade --check" 2>&1)" || held_check=""
+    echo "${held_check}"
+    grep -q '^No changes in: ' <<<"${held_check}" && vm "test -s ${hold}" \
+        || { echo "::error::cosmic-blue-bootc offers the version set aside again"; errors=1; }
+    vm "echo 'sha256:0000000000000000000000000000000000000000000000000000000000000000 44.old' > ${hold}"
+    new_check="$(vm "/usr/libexec/cosmic-blue-bootc upgrade --check" 2>&1)" || new_check=""
+    grep -q '^Update available for: ' <<<"${new_check}" && vm "test ! -e ${hold}" \
+        || { echo "::error::cosmic-blue-bootc does not offer a newer version after one was set aside"; errors=1; }
+    vm "rm -f ${hold}"
+else
+    echo "::warning::No update offered for ${TARGET_IMGREF} (${upgrade_check}): the update hold was not tested"
+fi
+
 # FlatPark is off by default. `ujust toggle-flatpark` turns it on at the
 # lowest priority with its filter, and off again; the one-time cleanup for
 # systems where older images turned it on removes it when no app uses it.

@@ -419,11 +419,16 @@ desktop_tour() {
     sleep 3
 
     # Files (folder icons), Settings (accent, theme), COSMIC Store (our
-    # rebuild, which no other step starts: a crash fails vm_check_crashes)
+    # rebuild, which no other step starts: a crash fails vm_check_crashes),
+    # Updates (cosmic-blue's own app; images before it skip it)
     local entry name cmd
-    for entry in "05-files|cosmic-files" "06-settings|cosmic-settings appearance" "06-store|cosmic-store"; do
+    for entry in "05-files|cosmic-files" "06-settings|cosmic-settings appearance" "06-store|cosmic-store" \
+        "06-updates|/usr/libexec/cosmic-blue-updates"; do
         name="${entry%%|*}"
         cmd="${entry#*|}"
+        if [[ "${cmd}" == /* ]] && ! vm "test -x ${cmd%% *}"; then
+            continue
+        fi
         if ! vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
                 setsid -f ${cmd} >/dev/null 2>&1 </dev/null"; then
             warn "could not start ${cmd}"
@@ -434,6 +439,24 @@ desktop_tour() {
         vm "pkill -u ${DEMO_USER} -f '^(/usr/bin/)?${cmd%% *}'" || true
         sleep 3
     done
+
+    # Updates once more with the light theme: its symbols and accent must
+    # read on both (COSMIC apps follow the setting as it changes)
+    local mode_dir="~${DEMO_USER}/.config/cosmic/com.system76.CosmicTheme.Mode/v1"
+    if vm "test -x /usr/libexec/cosmic-blue-updates" \
+        && vm "runuser -u ${DEMO_USER} -- sh -c 'mkdir -p ${mode_dir} && printf false > ${mode_dir}/is_dark'"; then
+        sleep 5
+        if vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
+                setsid -f /usr/libexec/cosmic-blue-updates >/dev/null 2>&1 </dev/null"; then
+            sleep 12
+            screenshot "${SHOTS}/06-updates-light"
+            vm "pkill -u ${DEMO_USER} -f '^/usr/libexec/cosmic-blue-updates'" || true
+            sleep 3
+        fi
+        vm "runuser -u ${DEMO_USER} -- sh -c 'printf true > ${mode_dir}/is_dark'" \
+            || warn "could not switch back to the dark theme"
+        sleep 5
+    fi
 
     # Firefox, a first-boot flatpak in the dock, with the cosmic-blue
     # policies it reads from its systemconfig extension (mounted at
