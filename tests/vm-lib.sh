@@ -419,11 +419,16 @@ desktop_tour() {
     sleep 3
 
     # Files (folder icons), Settings (accent, theme), COSMIC Store (our
-    # rebuild, which no other step starts: a crash fails vm_check_crashes)
+    # rebuild, which no other step starts: a crash fails vm_check_crashes),
+    # Updates (cosmic-blue's own app; images before it skip it)
     local entry name cmd
-    for entry in "05-files|cosmic-files" "06-settings|cosmic-settings appearance" "06-store|cosmic-store"; do
+    for entry in "05-files|cosmic-files" "06-settings|cosmic-settings appearance" "06-store|cosmic-store" \
+        "06-updates|/usr/libexec/cosmic-blue-updates"; do
         name="${entry%%|*}"
         cmd="${entry#*|}"
+        if [[ "${cmd}" == /* ]] && ! vm "test -x ${cmd%% *}"; then
+            continue
+        fi
         if ! vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
                 setsid -f ${cmd} >/dev/null 2>&1 </dev/null"; then
             warn "could not start ${cmd}"

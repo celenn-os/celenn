@@ -33,14 +33,17 @@ COPY --from=theme-build /out /
 
 # cosmic-blue's tours: "First steps" on installed systems and the live ISO's
 # welcome tour, built with libcosmic like COSMIC's first-run assistant
-# (see build_files/first_steps/src/main.rs)
+# (see build_files/first_steps/src/main.rs), and the Updates app, which looks
+# the same (src/updates.rs)
 FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS tour-build
 COPY build_files/first_steps /tour
 ENV CARGO_HOME=/cargo/home CARGO_TARGET_DIR=/cargo/target
 RUN dnf5 -y install cargo rust gcc pkgconf-pkg-config libxkbcommon-devel wayland-devel \
     && cd /tour && cargo build --release --locked \
     && /cargo/target/release/cosmic-blue-tour --check \
-    && install -D -m 0755 /cargo/target/release/cosmic-blue-tour /out/cosmic-blue-tour
+    && /cargo/target/release/cosmic-blue-updates --check \
+    && install -D -m 0755 /cargo/target/release/cosmic-blue-tour /out/cosmic-blue-tour \
+    && install -D -m 0755 /cargo/target/release/cosmic-blue-updates /out/cosmic-blue-updates
 FROM scratch AS tour
 COPY --from=tour-build /out /
 

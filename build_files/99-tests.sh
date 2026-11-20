@@ -310,8 +310,7 @@ while IFS='=' read -r type apps; do
         echo "mimeapps.list: ${type} opens in ${app}, which is not installed"; exit 1
     fi
 done < <(sed -n '/^\[Default Applications\]/,/^\[/{/^[a-z].*=/p}' /etc/xdg/mimeapps.list)
-grep -q cosmic-blue /usr/share/applications/system-update.desktop
-grep -qx 'Icon=cosmic-blue-update' /usr/share/applications/system-update.desktop
+test ! -e /usr/share/applications/system-update.desktop
 test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-update.svg
 test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-tour-store.svg
 test ! -e /usr/share/icons/hicolor/scalable/places/ublue-update.svg
@@ -463,6 +462,34 @@ if ldd /usr/libexec/cosmic-blue-tour | grep 'not found'; then
     echo "cosmic-blue-tour: missing libraries"; exit 1
 fi
 /usr/libexec/cosmic-blue-tour --check
+
+# Updates app: its launcher, its translations, the root helper it runs with
+# pkexec (polkit action, limited to that program), and uupd going through the
+# bootc wrapper that keeps a version left behind from coming back
+grep -qx 'Exec=/usr/libexec/cosmic-blue-updates' \
+    /usr/share/applications/io.github.cosmic_blue_os.Updates.desktop
+grep -qx 'Icon=cosmic-blue-update' /usr/share/applications/io.github.cosmic_blue_os.Updates.desktop
+if ldd /usr/libexec/cosmic-blue-updates | grep 'not found'; then
+    echo "cosmic-blue-updates: missing libraries"; exit 1
+fi
+/usr/libexec/cosmic-blue-updates --check
+test -x /usr/libexec/cosmic-blue-updates-helper
+test -x /usr/libexec/cosmic-blue-bootc
+grep -q '<annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/cosmic-blue-updates-helper</annotate>' \
+    /usr/share/polkit-1/actions/io.github.cosmic_blue_os.updates.policy
+command -v pkexec >/dev/null
+# "Check now" starts uupd-manual.service, which uupd's polkit rule lets any
+# user start without a password
+test -f /usr/lib/systemd/system/uupd-manual.service
+grep -q 'uupd-manual.service' /usr/share/polkit-1/rules.d/uupd.rules
+for unit in uupd.service uupd-manual.service; do
+    systemctl cat "${unit}" | grep -qx 'Environment=UUPD_BOOTC_BINARY=/usr/libexec/cosmic-blue-bootc' \
+        || { echo "${unit} does not run bootc through cosmic-blue-bootc"; exit 1; }
+done
+# Wrong arguments are refused before anything runs
+if /usr/libexec/cosmic-blue-updates-helper channel dev 2>/dev/null; then
+    echo "cosmic-blue-updates-helper accepted the dev channel"; exit 1
+fi
 
 # Login and lock screens: our rebuild, with the cosmic-blue wallpaper as the
 # background shown before a user has a saved one

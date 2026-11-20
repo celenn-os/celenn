@@ -23,7 +23,9 @@ use cosmic::widget::{self, settings, text, toaster::Toasts};
 use cosmic::{Application, ApplicationExt, Apply, Element, cosmic_theme, executor, theme};
 use std::path::Path;
 use std::process::Command;
-use std::sync::OnceLock;
+
+mod i18n;
+use i18n::{language, tr};
 
 const SITE: &str = "https://cosmic-blue-os.github.io/cosmic-blue/";
 const ISSUES: &str = "https://github.com/cosmic-blue-os/cosmic-blue/issues";
@@ -45,123 +47,18 @@ const ACCESSIBILITY: &str = "Screen reader: Super + Alt + S\nZoom: Super + = and
 /// po/cosmic-blue-tour.pot). To add a language, add its file here: pt_BR is
 /// a regional variant, also used for the other variants of its language when
 /// they have no file of their own.
-const LANGUAGES: &[(&str, &str)] = &[
+pub(crate) const LANGUAGES: &[(&str, &str)] = &[
     ("de", include_str!("../po/de.po")),
     ("es", include_str!("../po/es.po")),
     ("fr", include_str!("../po/fr.po")),
     ("it", include_str!("../po/it.po")),
     ("pt_BR", include_str!("../po/pt_BR.po")),
 ];
-const TEMPLATE: &str = include_str!("../po/cosmic-blue-tour.pot");
+pub(crate) const TEMPLATE: &str = include_str!("../po/cosmic-blue-tour.pot");
 
-/// The translations of a PO file: (English text, translated text), without
-/// the header. Only what our files use: msgid and msgstr strings, on one or
-/// more lines, with \" \\ and \n escapes.
-fn parse_po(po: &str) -> Vec<(String, String)> {
-    fn unquote(line: &str) -> Option<String> {
-        let inner = line.trim().strip_prefix('"')?.strip_suffix('"')?;
-        let mut out = String::new();
-        let mut chars = inner.chars();
-        while let Some(c) = chars.next() {
-            if c == '\\' {
-                match chars.next() {
-                    Some('n') => out.push('\n'),
-                    Some(other) => out.push(other),
-                    None => {}
-                }
-            } else {
-                out.push(c);
-            }
-        }
-        Some(out)
-    }
-    let mut entries = Vec::new();
-    let (mut msgid, mut msgstr) = (None::<String>, None::<String>);
-    let mut flush = |msgid: &mut Option<String>, msgstr: &mut Option<String>| {
-        if let (Some(id), Some(text)) = (msgid.take(), msgstr.take()) {
-            if !id.is_empty() {
-                entries.push((id, text));
-            }
-        }
-    };
-    for line in po.lines().map(str::trim) {
-        if let Some(rest) = line.strip_prefix("msgid ") {
-            flush(&mut msgid, &mut msgstr);
-            msgid = unquote(rest);
-        } else if let Some(rest) = line.strip_prefix("msgstr ") {
-            msgstr = unquote(rest);
-        } else if line.starts_with('"') {
-            let target = if msgstr.is_some() { &mut msgstr } else { &mut msgid };
-            if let (Some(text), Some(more)) = (target.as_mut(), unquote(line)) {
-                text.push_str(&more);
-            }
-        }
-    }
-    flush(&mut msgid, &mut msgstr);
-    entries
-}
-
-/// The index in LANGUAGES of a locale name ("de_CH.UTF-8"): the same
-/// language and region, else the same language
-fn find_language(name: &str) -> Option<usize> {
-    let name = name.split(['.', '@']).next().unwrap_or_default();
-    let lang = name.split('_').next().unwrap_or_default();
-    LANGUAGES
-        .iter()
-        .position(|(code, _)| *code == name)
-        .or_else(|| LANGUAGES.iter().position(|(code, _)| *code == lang))
-        .or_else(|| {
-            LANGUAGES
-                .iter()
-                .position(|(code, _)| code.split('_').next() == Some(lang))
-        })
-}
-
-/// The session language, when it has a translation: its index in LANGUAGES
-fn language_index() -> Option<usize> {
-    static LANGUAGE: OnceLock<Option<usize>> = OnceLock::new();
-    *LANGUAGE.get_or_init(|| {
-        // Same order as gettext: LANGUAGE (a list), LC_ALL, LC_MESSAGES, LANG
-        let mut names = Vec::new();
-        if let Ok(list) = std::env::var("LANGUAGE") {
-            names.extend(list.split(':').map(str::to_owned));
-        }
-        for var in ["LC_ALL", "LC_MESSAGES", "LANG"] {
-            if let Ok(value) = std::env::var(var) {
-                names.push(value);
-            }
-        }
-        for name in names.iter().filter(|name| !name.is_empty()) {
-            if let Some(index) = find_language(name) {
-                return Some(index);
-            }
-            let lang = name.split(['_', '.', '@']).next().unwrap_or_default();
-            if matches!(lang, "en" | "C" | "POSIX") {
-                return None;
-            }
-        }
-        None
-    })
-}
-
-/// The session language code ("fr", "pt_BR"), when it has a translation
-fn language() -> Option<&'static str> {
-    language_index().map(|index| LANGUAGES[index].0)
-}
-
-/// Translates an English text to the session language (English when the
-/// text has no translation)
-fn tr(text: &'static str) -> &'static str {
-    static TRANSLATIONS: OnceLock<Vec<(String, String)>> = OnceLock::new();
-    let Some(index) = language_index() else {
-        return text;
-    };
-    TRANSLATIONS
-        .get_or_init(|| parse_po(LANGUAGES[index].1))
-        .iter()
-        .find(|(english, translated)| english == text && !translated.is_empty())
-        .map_or(text, |(_, translated)| translated.as_str())
-}
+/// Where the PO files are, for the messages of the translation check
+pub(crate) const PO_DIR: &str = "po";
+pub(crate) const TEMPLATE_NAME: &str = "cosmic-blue-tour.pot";
 
 #[derive(Clone, Debug)]
 enum Action {
@@ -469,42 +366,7 @@ fn all_texts() -> Vec<&'static str> {
 }
 
 fn check_translations() -> bool {
-    let texts = all_texts();
-    let mut errors = 0;
-    let template: Vec<String> = parse_po(TEMPLATE).into_iter().map(|(id, _)| id).collect();
-    for text in &texts {
-        if !template.iter().any(|id| id == text) {
-            eprintln!("Not in po/cosmic-blue-tour.pot: {text}");
-            errors += 1;
-        }
-    }
-    for id in &template {
-        if !texts.contains(&id.as_str()) {
-            eprintln!("No longer used, remove it from po/cosmic-blue-tour.pot: {id}");
-            errors += 1;
-        }
-    }
-    for (code, po) in LANGUAGES {
-        let entries = parse_po(po);
-        for text in &texts {
-            if !entries.iter().any(|(id, tr)| id == text && !tr.is_empty()) {
-                eprintln!("No {code} translation for: {text}");
-                errors += 1;
-            }
-        }
-        for (id, _) in &entries {
-            if !texts.contains(&id.as_str()) {
-                eprintln!("No longer used, remove it from po/{code}.po: {id}");
-                errors += 1;
-            }
-        }
-    }
-    println!(
-        "{} texts, {} languages, {errors} errors",
-        texts.len(),
-        LANGUAGES.len()
-    );
-    errors == 0
+    i18n::check(&all_texts())
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

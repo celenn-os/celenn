@@ -1,0 +1,62 @@
+#!/usr/bin/bash
+# The changes the Updates app (/usr/libexec/cosmic-blue-updates) makes to the
+# system, run as root through pkexec after an administrator password (polkit
+# action io.github.cosmic_blue_os.updates.manage). Only these two:
+#
+#   rollback          start the previous version at the next restart
+#                     (bootc rollback), and set aside the version left behind
+#                     so that the automatic updates do not install it again
+#                     (see /usr/libexec/cosmic-blue-bootc)
+#   channel <name>    follow the stable (weekly) or testing (daily) image of
+#                     the same cosmic-blue image, signature checked; the new
+#                     image starts at the next restart
+#
+# dev and pinned versions stay with `ujust switch-channel` and bootc.
+set -euo pipefail
+
+VENDOR="ghcr.io/cosmic-blue-os/"
+HOLD=/var/lib/cosmic-blue/update-hold
+
+usage() {
+    echo "Usage: ${0##*/} rollback | channel stable|testing" >&2
+    exit 2
+}
+
+case "${1:-} ${2:-} $#" in
+    "rollback  1" | "channel stable 2" | "channel testing 2") ;;
+    *) usage ;;
+esac
+status="$(bootc status --json)"
+
+case "$1" in
+    rollback)
+        if [[ "$(jq -r '.status.rollbackQueued // false' <<<"${status}")" == true ]]; then
+            echo "The previous version already starts at the next restart."
+            exit 0
+        fi
+        if [[ "$(jq -r '.status.rollback // empty | .image.imageDigest // empty' <<<"${status}")" == "" ]]; then
+            echo "There is no previous version to go back to." >&2
+            exit 1
+        fi
+        digest="$(jq -r '.status.booted.image.imageDigest // empty' <<<"${status}")"
+        version="$(jq -r '.status.booted.image.version // "unknown"' <<<"${status}")"
+        bootc rollback
+        if [[ -n "${digest}" ]]; then
+            mkdir -p "${HOLD%/*}"
+            printf '%s %s\n' "${digest}" "${version}" > "${HOLD}"
+            echo "Version ${version} is set aside: updates start again with the next one."
+        fi
+        ;;
+    channel)
+        channel="$2"
+        image="$(jq -r '.spec.image.image // empty' <<<"${status}")"
+        repo="${image%:*}"
+        if [[ "${image}" != "${VENDOR}"* || "${repo}" == "${image}" || "${image}" == *@* ]]; then
+            echo "This system does not follow a cosmic-blue image (${image:-none})." >&2
+            exit 1
+        fi
+        bootc switch --enforce-container-sigpolicy "${repo}:${channel}"
+        # A new channel, new versions: nothing set aside any more
+        rm -f "${HOLD}"
+        ;;
+esac

@@ -29,6 +29,7 @@ CAPTIONS = {
     "files": "Files",
     "settings": "Settings: Appearance",
     "store": "COSMIC Store",
+    "updates": "Updates",
     "web-browser": "Firefox",
     "terminal": "Terminal: welcome message and system information",
     "terminal-zoom": "Terminal, full size",

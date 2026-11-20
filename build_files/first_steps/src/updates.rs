@@ -1,0 +1,691 @@
+// cosmic-blue Updates: the system version in one window, without jargon.
+//
+//   - the current version, a "Check now" button (uupd-manual.service, the
+//     same update as the daily timer: system, flatpaks, Homebrew), and the
+//     version waiting for the next restart, if any;
+//   - the previous version, with a button that goes back to it (bootc
+//     rollback), then offers to restart;
+//   - one switch, "Get new features early": off follows the stable channel
+//     (one tested image a week, the default), on follows testing (every
+//     day). dev stays a ujust command for testers.
+//
+// Changing the version needs root: the app runs
+// /usr/libexec/cosmic-blue-updates-helper through pkexec, which asks for an
+// administrator password (polkit action io.github.cosmic_blue_os.updates.manage)
+// and only accepts those two changes. After going back, that helper records
+// the version left behind (/var/lib/cosmic-blue/update-hold), so that the
+// automatic updates do not install it again (/usr/libexec/cosmic-blue-bootc);
+// they start again with the next version.
+// No notifications: the system updates by itself, this is for when people
+// want to look or act.
+//
+//   cosmic-blue-updates            the window
+//   cosmic-blue-updates --status   what the window would show, as text (tests)
+//   cosmic-blue-updates --check    image build test: every text has its
+//                                  translations (no window)
+//
+// The look is the tours' (main.rs): same banner, title, rows and buttons.
+// Text is in English, translated from the PO files of po/updates/.
+
+use cosmic::app::{Core, Settings, Task};
+use cosmic::iced::core::text::Wrapping;
+use cosmic::iced::{Alignment, Length, Limits};
+use cosmic::widget::{self, settings, text, toaster::Toasts};
+use cosmic::{Application, ApplicationExt, Apply, Element, cosmic_theme, executor, theme};
+use std::path::Path;
+
+mod i18n;
+use i18n::tr;
+
+pub(crate) const LANGUAGES: &[(&str, &str)] = &[
+    ("de", include_str!("../po/updates/de.po")),
+    ("es", include_str!("../po/updates/es.po")),
+    ("fr", include_str!("../po/updates/fr.po")),
+    ("it", include_str!("../po/updates/it.po")),
+    ("pt_BR", include_str!("../po/updates/pt_BR.po")),
+];
+pub(crate) const TEMPLATE: &str = include_str!("../po/updates/cosmic-blue-updates.pot");
+pub(crate) const PO_DIR: &str = "po/updates";
+pub(crate) const TEMPLATE_NAME: &str = "cosmic-blue-updates.pot";
+
+const HELPER: &str = "/usr/libexec/cosmic-blue-updates-helper";
+/// The version left behind by the last rollback: "<digest> <version>"
+const HOLD: &str = "/var/lib/cosmic-blue/update-hold";
+const RELEASES: &str = "https://github.com/cosmic-blue-os/cosmic-blue/releases";
+const VENDOR: &str = "ghcr.io/cosmic-blue-os/";
+/// Banner of the tours (branding/tour/build.py), behind the app icon
+const BANNER: &str = "/usr/share/cosmic-blue/tour-banner.svg";
+const ICON: &str = "cosmic-blue-update";
+
+/// Every text, for the translation check
+const TEXTS: &[&str] = &[
+    "Updates",
+    "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you.",
+    "Current version: {}",
+    "Weekly updates, tested before they come out",
+    "Daily updates, sooner but less tested",
+    "dev channel: every change, for testers",
+    "This system stays on this version: it does not update by itself.",
+    "Check now",
+    "Checking…",
+    "You are up to date.",
+    "The check did not work. Are you online?",
+    "Ready for the next restart: {}",
+    "Downloaded and checked. It starts when you restart the computer.",
+    "Restart",
+    "Previous version: {}",
+    "Something wrong since the last update? Go back to this version. Your files and settings stay as they are.",
+    "Go back to it",
+    "Back to {} at the next restart",
+    "Your files and settings stay as they are. The version you leave will not be installed again: updates start again with the next one.",
+    "Version {} is set aside",
+    "You went back from it, so it will not be installed again. Updates start again with the next version.",
+    "Get new features early",
+    "Off (recommended): one tested update a week.\nOn: an update every day, sooner but less tested.",
+    "You follow the dev channel, chosen in a terminal. Turn this off to go back to one tested update a week.",
+    "Downloading the new version… This can take a few minutes.",
+    "Something went wrong, nothing was changed.",
+    "The system version could not be read: is this computer installed with cosmic-blue?",
+    "Apps from COSMIC Store update by themselves too.",
+    "What's new",
+];
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    if args.iter().any(|arg| arg == "--check") {
+        std::process::exit(if i18n::check(TEXTS) { 0 } else { 1 });
+    }
+    if args.iter().any(|arg| arg == "--status") {
+        let status = read_status()?;
+        println!("{}", status.summary());
+        return Ok(());
+    }
+    let settings = Settings::default()
+        .size(cosmic::iced::Size::new(760.0, 700.0))
+        .size_limits(Limits::NONE.min_width(520.0).min_height(480.0));
+    cosmic::app::run::<App>(settings, ())?;
+    Ok(())
+}
+
+/// One deployment (a version of the system on the disk), as rpm-ostree
+/// lists them
+#[derive(Clone, Debug, Default, PartialEq)]
+struct Deployment {
+    version: String,
+    /// "ostree-image-signed:docker://ghcr.io/cosmic-blue-os/cosmic-blue:stable"
+    reference: String,
+    booted: bool,
+    staged: bool,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Channel {
+    Stable,
+    Testing,
+    Dev,
+    /// A date or version tag: no automatic updates
+    Pinned,
+}
+
+impl Deployment {
+    /// The image name with its tag
+    fn image(&self) -> &str {
+        let image = self
+            .reference
+            .rsplit_once("docker://")
+            .map_or(self.reference.as_str(), |(_, image)| image);
+        image
+            .strip_prefix("ostree-unverified-registry:")
+            .unwrap_or(image)
+    }
+
+    fn channel(&self) -> Option<Channel> {
+        let image = self.image();
+        if !image.starts_with(VENDOR) || image.contains('@') {
+            return None;
+        }
+        let (_, tag) = image.rsplit_once(':')?;
+        Some(match tag {
+            "stable" => Channel::Stable,
+            "testing" | "latest" => Channel::Testing,
+            "dev" => Channel::Dev,
+            _ => Channel::Pinned,
+        })
+    }
+}
+
+#[derive(Clone, Debug, Default)]
+struct Status {
+    booted: Deployment,
+    /// Downloaded update, which starts at the next restart
+    staged: Option<Deployment>,
+    /// The other version on the disk, one rollback away
+    previous: Option<Deployment>,
+    /// True when the previous version starts at the next restart (after a
+    /// rollback)
+    rollback_queued: bool,
+    /// Version left behind by the last rollback
+    held: Option<String>,
+}
+
+impl Status {
+    /// The channel the next restart follows (switching channel stages the
+    /// image of the new one)
+    fn channel(&self) -> Option<Channel> {
+        self.staged.as_ref().unwrap_or(&self.booted).channel()
+    }
+
+    fn summary(&self) -> String {
+        let version = |d: Option<&Deployment>| d.map_or("none".to_owned(), |d| d.version.clone());
+        format!(
+            "current: {}\nchannel: {}\nstaged: {}\nprevious: {}\nrollback-queued: {}\nheld: {}",
+            self.booted.version,
+            match self.channel() {
+                Some(Channel::Stable) => "stable",
+                Some(Channel::Testing) => "testing",
+                Some(Channel::Dev) => "dev",
+                Some(Channel::Pinned) => "pinned",
+                None => "unknown",
+            },
+            version(self.staged.as_ref()),
+            version(self.previous.as_ref()),
+            if self.rollback_queued { "yes" } else { "no" },
+            self.held.as_deref().unwrap_or("none"),
+        )
+    }
+}
+
+/// The deployments from `rpm-ostree status --json` (readable without root),
+/// or from the file named by COSMIC_BLUE_UPDATES_STATUS_JSON (previews)
+fn read_status() -> Result<Status, String> {
+    let json = match std::env::var_os("COSMIC_BLUE_UPDATES_STATUS_JSON") {
+        Some(path) => std::fs::read_to_string(path).map_err(|error| error.to_string())?,
+        None => {
+            let output = std::process::Command::new("rpm-ostree")
+                .args(["status", "--json"])
+                .output()
+                .map_err(|error| format!("rpm-ostree: {error}"))?;
+            if !output.status.success() {
+                return Err(String::from_utf8_lossy(&output.stderr).trim().to_owned());
+            }
+            String::from_utf8_lossy(&output.stdout).into_owned()
+        }
+    };
+    let value: serde_json::Value =
+        serde_json::from_str(&json).map_err(|error| error.to_string())?;
+    let deployments: Vec<Deployment> = value["deployments"]
+        .as_array()
+        .ok_or("rpm-ostree lists no deployments")?
+        .iter()
+        .map(|d| Deployment {
+            version: d["version"].as_str().unwrap_or("?").to_owned(),
+            reference: d["container-image-reference"]
+                .as_str()
+                .unwrap_or_default()
+                .to_owned(),
+            booted: d["booted"].as_bool().unwrap_or(false),
+            staged: d["staged"].as_bool().unwrap_or(false),
+        })
+        .collect();
+    let booted = deployments
+        .iter()
+        .find(|d| d.booted)
+        .cloned()
+        .ok_or("no booted deployment")?;
+    // The first deployment is the one the next restart starts
+    let rollback_queued = deployments.first().is_some_and(|d| !d.booted && !d.staged);
+    let held = std::fs::read_to_string(HOLD)
+        .ok()
+        .and_then(|hold| hold.split_whitespace().nth(1).map(str::to_owned));
+    Ok(Status {
+        staged: deployments.iter().find(|d| d.staged).cloned(),
+        previous: deployments.iter().find(|d| !d.booted && !d.staged).cloned(),
+        booted,
+        rollback_queued,
+        held,
+    })
+}
+
+/// What runs in the background, shown instead of the buttons it concerns
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Busy {
+    Checking,
+    Switching,
+    RollingBack,
+}
+
+#[derive(Clone, Debug)]
+enum Message {
+    Status(Result<Status, String>),
+    CheckNow,
+    Rollback,
+    Early(bool),
+    /// End of a background command: what it was, and whether it worked
+    /// (None: the password prompt was cancelled)
+    Done(Busy, Option<bool>),
+    Restart,
+    OpenReleases,
+    CloseToast(widget::ToastId),
+}
+
+struct App {
+    core: Core,
+    status: Option<Result<Status, String>>,
+    busy: Option<Busy>,
+    toasts: Toasts<Message>,
+    banner: Option<widget::svg::Handle>,
+}
+
+/// Runs a command in the background: Some(true) when it worked, None when
+/// pkexec says the password prompt was dismissed (126) or the password was
+/// wrong three times (127)
+async fn run(program: &'static str, args: Vec<&'static str>) -> Option<bool> {
+    match tokio::process::Command::new(program)
+        .args(&args)
+        .status()
+        .await
+    {
+        Ok(status) if status.success() => Some(true),
+        Ok(status) if program == "pkexec" && matches!(status.code(), Some(126 | 127)) => None,
+        Ok(status) => {
+            eprintln!("{program} {args:?}: {status}");
+            Some(false)
+        }
+        Err(error) => {
+            eprintln!("Could not start {program}: {error}");
+            Some(false)
+        }
+    }
+}
+
+fn refresh() -> Task<Message> {
+    Task::perform(
+        async {
+            tokio::task::spawn_blocking(read_status)
+                .await
+                .unwrap_or_else(|e| Err(e.to_string()))
+        },
+        |status| cosmic::Action::App(Message::Status(status)),
+    )
+}
+
+fn background(busy: Busy, program: &'static str, args: Vec<&'static str>) -> Task<Message> {
+    Task::perform(run(program, args), move |result| {
+        cosmic::Action::App(Message::Done(busy, result))
+    })
+}
+
+impl App {
+    fn toast(&mut self, message: &'static str) -> Task<Message> {
+        self.toasts
+            .push(widget::toaster::Toast::new(tr(message)))
+            .map(cosmic::Action::App)
+    }
+}
+
+impl Application for App {
+    type Executor = executor::Default;
+    type Flags = ();
+    type Message = Message;
+    const APP_ID: &'static str = "io.github.cosmic_blue_os.Updates";
+
+    fn core(&self) -> &Core {
+        &self.core
+    }
+
+    fn core_mut(&mut self) -> &mut Core {
+        &mut self.core
+    }
+
+    fn init(core: Core, _flags: ()) -> (Self, Task<Message>) {
+        let mut app = App {
+            core,
+            status: None,
+            busy: None,
+            toasts: Toasts::new(Message::CloseToast),
+            banner: Path::new(BANNER)
+                .exists()
+                .then(|| widget::svg::Handle::from_path(BANNER)),
+        };
+        let title = match app.core.main_window_id() {
+            Some(id) => app.set_window_title(tr("Updates").to_owned(), id),
+            None => Task::none(),
+        };
+        (app, Task::batch([title, refresh()]))
+    }
+
+    fn update(&mut self, message: Message) -> Task<Message> {
+        match message {
+            Message::Status(status) => self.status = Some(status),
+            Message::CheckNow => {
+                self.busy = Some(Busy::Checking);
+                // Allowed without a password by uupd's own polkit rule
+                return background(
+                    Busy::Checking,
+                    "systemctl",
+                    vec!["start", "uupd-manual.service"],
+                );
+            }
+            Message::Rollback => {
+                self.busy = Some(Busy::RollingBack);
+                return background(Busy::RollingBack, "pkexec", vec![HELPER, "rollback"]);
+            }
+            Message::Early(early) => {
+                self.busy = Some(Busy::Switching);
+                let channel = if early { "testing" } else { "stable" };
+                return background(Busy::Switching, "pkexec", vec![HELPER, "channel", channel]);
+            }
+            Message::Done(busy, result) => {
+                self.busy = None;
+                let staged_before = self
+                    .status
+                    .as_ref()
+                    .and_then(|status| status.as_ref().ok())
+                    .and_then(|status| status.staged.clone());
+                let toast = match (busy, result) {
+                    (_, None) => Task::none(),
+                    (Busy::Checking, Some(false)) => {
+                        self.toast("The check did not work. Are you online?")
+                    }
+                    (_, Some(false)) => self.toast("Something went wrong, nothing was changed."),
+                    (Busy::Checking, Some(true)) => {
+                        // Nothing new staged by the check: say so (a new
+                        // version shows as its own row)
+                        match read_status() {
+                            Ok(status) if status.staged == staged_before => {
+                                self.toast("You are up to date.")
+                            }
+                            _ => Task::none(),
+                        }
+                    }
+                    (_, Some(true)) => Task::none(),
+                };
+                return Task::batch([toast, refresh()]);
+            }
+            Message::Restart => {
+                if let Err(error) = std::process::Command::new("systemctl")
+                    .arg("reboot")
+                    .spawn()
+                {
+                    eprintln!("Could not restart: {error}");
+                }
+            }
+            Message::OpenReleases => {
+                if let Err(error) = std::process::Command::new("xdg-open").arg(RELEASES).spawn() {
+                    eprintln!("Could not open {RELEASES}: {error}");
+                }
+            }
+            Message::CloseToast(id) => self.toasts.remove(id),
+        }
+        Task::none()
+    }
+
+    fn view(&self) -> Element<'_, Message> {
+        let cosmic_theme::Spacing {
+            space_xxs,
+            space_s,
+            space_m,
+            space_l,
+            ..
+        } = theme::spacing();
+
+        let icon = widget::icon::from_name(ICON).size(64);
+        let header: Element<'_, Message> = match &self.banner {
+            Some(banner) => cosmic::iced::widget::stack![
+                widget::svg(banner.clone()).width(600).height(100),
+                widget::container(icon).center(Length::Fill),
+            ]
+            .width(600)
+            .height(100)
+            .apply(widget::container)
+            .center_x(Length::Fill)
+            .into(),
+            None => widget::container(icon).center_x(Length::Fill).into(),
+        };
+
+        let mut content = widget::column::with_capacity(8)
+            .spacing(space_m)
+            .align_x(Alignment::Center)
+            .push(
+                text::body(tr(
+                    "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you.",
+                ))
+                .align_x(Alignment::Center)
+                .width(Length::Fill),
+            );
+        match &self.status {
+            None => {}
+            Some(Err(error)) => {
+                eprintln!("{error}");
+                content = content.push(
+                    settings::section().add(settings::item_row(vec![two_lines(
+                        text::body(tr(
+                            "The system version could not be read: is this computer installed with cosmic-blue?",
+                        ))
+                        .into(),
+                        error.clone(),
+                    )])),
+                );
+            }
+            Some(Ok(status)) => {
+                content = content.push(self.versions(status, space_s));
+                if let Some(section) = self.channel_section(status, space_s) {
+                    content = content.push(section);
+                }
+            }
+        }
+        content = content
+            .push(
+                text::caption(tr("Apps from COSMIC Store update by themselves too."))
+                    .align_x(Alignment::Center)
+                    .width(Length::Fill),
+            )
+            .push(
+                widget::button::link(tr("What's new"))
+                    .trailing_icon(true)
+                    .on_press(Message::OpenReleases),
+            );
+
+        let page = widget::column::with_capacity(6)
+            .push(widget::space::vertical().height(space_s))
+            .push(header)
+            .push(widget::space::vertical().height(space_xxs))
+            .push(text::title2(tr("Updates")).center().width(Length::Fill))
+            .push(widget::space::vertical().height(space_s))
+            .push(content)
+            .push(widget::space::vertical().height(space_l))
+            .max_width(640.0)
+            .width(640.0)
+            .align_x(Alignment::Center)
+            .apply(widget::container)
+            .center_x(Length::Fill)
+            .apply(widget::scrollable);
+
+        widget::toaster(&self.toasts, page)
+    }
+}
+
+impl App {
+    /// Current version, update waiting for a restart, previous version
+    fn versions<'a>(&'a self, status: &'a Status, space_s: u16) -> Element<'a, Message> {
+        let idle = self.busy.is_none();
+        let mut section = settings::section();
+
+        let channel_text = match status.booted.channel() {
+            Some(Channel::Stable) => tr("Weekly updates, tested before they come out"),
+            Some(Channel::Testing) => tr("Daily updates, sooner but less tested"),
+            Some(Channel::Dev) => tr("dev channel: every change, for testers"),
+            Some(Channel::Pinned) | None => {
+                tr("This system stays on this version: it does not update by itself.")
+            }
+        };
+        let check: Element<'a, Message> = if self.busy == Some(Busy::Checking) {
+            text::body(tr("Checking…")).into()
+        } else {
+            widget::button::standard(tr("Check now"))
+                .on_press_maybe(idle.then_some(Message::CheckNow))
+                .into()
+        };
+        section = section.add(
+            settings::item_row(vec![
+                state_icon("emblem-ok-symbolic", true),
+                two_lines(
+                    text::body(fill(tr("Current version: {}"), &status.booted.version)).into(),
+                    channel_text.to_owned(),
+                ),
+                check,
+            ])
+            .spacing(space_s),
+        );
+
+        if status.rollback_queued {
+            if let Some(previous) = &status.previous {
+                section = section.add(
+                    settings::item_row(vec![
+                        state_icon("system-reboot-symbolic", false),
+                        two_lines(
+                            text::body(fill(tr("Back to {} at the next restart"), &previous.version))
+                                .into(),
+                            tr("Your files and settings stay as they are. The version you leave will not be installed again: updates start again with the next one.").to_owned(),
+                        ),
+                        widget::button::suggested(tr("Restart"))
+                            .on_press(Message::Restart)
+                            .into(),
+                    ])
+                    .spacing(space_s),
+                );
+            }
+            return section.into();
+        }
+
+        if let Some(staged) = &status.staged {
+            section = section.add(
+                settings::item_row(vec![
+                    state_icon("software-update-available-symbolic", false),
+                    two_lines(
+                        text::body(fill(tr("Ready for the next restart: {}"), &staged.version))
+                            .into(),
+                        tr("Downloaded and checked. It starts when you restart the computer.")
+                            .to_owned(),
+                    ),
+                    widget::button::suggested(tr("Restart"))
+                        .on_press(Message::Restart)
+                        .into(),
+                ])
+                .spacing(space_s),
+            );
+        }
+
+        if let Some(held) = &status.held {
+            section = section.add(
+                settings::item_row(vec![
+                    state_icon("media-playback-pause-symbolic", false),
+                    two_lines(
+                        text::body(fill(tr("Version {} is set aside"), held)).into(),
+                        tr("You went back from it, so it will not be installed again. Updates start again with the next version.").to_owned(),
+                    ),
+                ])
+                .spacing(space_s),
+            );
+        }
+
+        if let Some(previous) = &status.previous {
+            let button: Element<'a, Message> = if self.busy == Some(Busy::RollingBack) {
+                widget::progress_bar::indeterminate_circular().into()
+            } else {
+                widget::button::standard(tr("Go back to it"))
+                    .on_press_maybe(idle.then_some(Message::Rollback))
+                    .into()
+            };
+            section = section.add(
+                settings::item_row(vec![
+                    state_icon("edit-undo-symbolic", false),
+                    two_lines(
+                        text::body(fill(tr("Previous version: {}"), &previous.version)).into(),
+                        tr("Something wrong since the last update? Go back to this version. Your files and settings stay as they are.").to_owned(),
+                    ),
+                    button,
+                ])
+                .spacing(space_s),
+            );
+        }
+        section.into()
+    }
+
+    /// The "Get new features early" switch (stable or testing), for systems
+    /// that follow a channel
+    fn channel_section<'a>(
+        &'a self,
+        status: &'a Status,
+        space_s: u16,
+    ) -> Option<Element<'a, Message>> {
+        let channel = status.channel()?;
+        if channel == Channel::Pinned {
+            return None;
+        }
+        let caption = if self.busy == Some(Busy::Switching) {
+            tr("Downloading the new version… This can take a few minutes.")
+        } else if channel == Channel::Dev {
+            tr(
+                "You follow the dev channel, chosen in a terminal. Turn this off to go back to one tested update a week.",
+            )
+        } else {
+            tr(
+                "Off (recommended): one tested update a week.\nOn: an update every day, sooner but less tested.",
+            )
+        };
+        let toggler = widget::toggler(channel != Channel::Stable);
+        let toggler = if self.busy.is_none() && !status.rollback_queued {
+            toggler.on_toggle(Message::Early)
+        } else {
+            toggler
+        };
+        Some(
+            settings::section()
+                .add(
+                    settings::item_row(vec![
+                        two_lines(
+                            text::body(tr("Get new features early")).into(),
+                            caption.to_owned(),
+                        ),
+                        toggler.into(),
+                    ])
+                    .spacing(space_s),
+                )
+                .into(),
+        )
+    }
+}
+
+/// A translated text with its {} replaced
+fn fill(text: &str, value: &str) -> String {
+    text.replacen("{}", value, 1)
+}
+
+/// The symbol in front of a row: in the accent color for the version running
+fn state_icon<'a>(name: &'static str, accent: bool) -> Element<'a, Message> {
+    let icon = widget::icon::from_name(name)
+        .size(24)
+        .apply(widget::container);
+    if accent {
+        icon.class(theme::Container::custom(|theme| {
+            cosmic::iced::widget::container::Style {
+                icon_color: Some(theme.cosmic().accent_color().into()),
+                ..Default::default()
+            }
+        }))
+        .into()
+    } else {
+        icon.into()
+    }
+}
+
+/// A row's text: a first line, and a caption under it
+fn two_lines<'a>(first: Element<'a, Message>, caption: String) -> Element<'a, Message> {
+    widget::column::with_capacity(2)
+        .spacing(2)
+        .push(first)
+        .push(text::caption(caption).wrapping(Wrapping::Word))
+        .width(Length::Fill)
+        .into()
+}
