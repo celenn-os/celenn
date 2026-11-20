@@ -143,6 +143,8 @@ jq -e '.policies.DisableTelemetry and .policies.DisableAppUpdate
     and .policies.ExtensionSettings."uBlock0@raymondhill.net".installation_mode == "normal_installed"' \
     "${FIREFOX_POLICIES}" >/dev/null
 SYSTEMCONFIG=/var/lib/flatpak/extension/org.mozilla.firefox.systemconfig/x86_64/stable
+# (Fedora 45's systemd-tmpfiles refuses a --root that does not exist yet)
+mkdir -p /tmp/tmpfiles-root
 SYSTEMD_LOG_LEVEL=warning systemd-tmpfiles --create --root=/tmp/tmpfiles-root - \
     </usr/lib/tmpfiles.d/cosmic-blue-firefox.conf
 test "$(readlink "/tmp/tmpfiles-root${SYSTEMCONFIG}")" = /usr/share/cosmic-blue/firefox
