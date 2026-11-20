@@ -3,8 +3,8 @@
 
 Usage: bibata.py SOURCE_DIR OUTPUT_DIR VERSION
 
-SOURCE_DIR is a checkout of https://github.com/ful1e5/Bibata_Cursor. Its SVGs
-use placeholder colors (see its render.json), replaced here by ours; its
+SOURCE_DIR holds the Bibata_Cursor sources (build_files/cursor_theme/bibata,
+see its README). Its SVGs use placeholder colors, replaced here by ours; its
 configs/normal/x.build.toml gives the sizes, hotspots, frame delays and alias
 names of each cursor. Upstream renders the SVGs with cbmp (Node.js and a
 headless browser) and builds the cursors with clickgen (ctgen); rsvg-convert
