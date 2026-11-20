@@ -121,12 +121,19 @@ case "${expected}" in
         grep -qx "channel: ${expected}" <<<"${updates}" \
             || { echo "::error::cosmic-blue-updates --status does not show the ${expected} channel"; errors=1; } ;;
 esac
+# The older stable versions it offers (stable-YYYYMMDD tags of the registry)
+older="$(vm "/usr/libexec/cosmic-blue-updates --older" 2>&1)" || older=""
+echo "Older stable versions: ${older//$'\n'/ }"
+grep -qE '^stable-[0-9]{8}$' <<<"${older}" \
+    || echo "::warning::cosmic-blue-updates --older lists no older stable version (${older})"
 # Its root helper only does what it is meant to: no rollback without a
-# previous version, no dev channel (ujust only)
+# previous version, no dev channel (ujust only), no tag other than stable-YYYYMMDD
 vm "/usr/libexec/cosmic-blue-updates-helper rollback" 2>/dev/null \
     && { echo "::error::cosmic-blue-updates-helper rolled back without a previous version"; errors=1; }
 vm "/usr/libexec/cosmic-blue-updates-helper channel dev" 2>/dev/null \
     && { echo "::error::cosmic-blue-updates-helper accepted the dev channel"; errors=1; }
+vm "/usr/libexec/cosmic-blue-updates-helper pin testing" 2>/dev/null \
+    && { echo "::error::cosmic-blue-updates-helper pinned something else than a stable-YYYYMMDD tag"; errors=1; }
 # A version left behind with "Go back" is not installed again by uupd
 # (through cosmic-blue-bootc), until a newer one is out. The published
 # image of TARGET_IMGREF is an update for this test build: set it aside as

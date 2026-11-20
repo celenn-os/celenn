@@ -440,6 +440,24 @@ desktop_tour() {
         sleep 3
     done
 
+    # Updates once more with the light theme: its symbols and accent must
+    # read on both (COSMIC apps follow the setting as it changes)
+    local mode_dir="~${DEMO_USER}/.config/cosmic/com.system76.CosmicTheme.Mode/v1"
+    if vm "test -x /usr/libexec/cosmic-blue-updates" \
+        && vm "runuser -u ${DEMO_USER} -- sh -c 'mkdir -p ${mode_dir} && printf false > ${mode_dir}/is_dark'"; then
+        sleep 5
+        if vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
+                setsid -f /usr/libexec/cosmic-blue-updates >/dev/null 2>&1 </dev/null"; then
+            sleep 12
+            screenshot "${SHOTS}/06-updates-light"
+            vm "pkill -u ${DEMO_USER} -f '^/usr/libexec/cosmic-blue-updates'" || true
+            sleep 3
+        fi
+        vm "runuser -u ${DEMO_USER} -- sh -c 'printf true > ${mode_dir}/is_dark'" \
+            || warn "could not switch back to the dark theme"
+        sleep 5
+    fi
+
     # Firefox, a first-boot flatpak in the dock, with the cosmic-blue
     # policies it reads from its systemconfig extension (mounted at
     # /app/etc/firefox in its sandbox, see cosmic-blue-firefox.conf)

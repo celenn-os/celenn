@@ -95,3 +95,36 @@ msgstr "Les applications de COSMIC Store se mettent aussi à jour toutes seules.
 
 msgid "What's new"
 msgstr "Nouveautés"
+
+msgid "An older version"
+msgstr "Une version plus ancienne"
+
+msgid "Choose the stable version of a past week. The system then stays on it, without updates, until you resume them."
+msgstr "Choisir la version stable d'une semaine passée. Le système reste alors dessus, sans mises à jour, jusqu'à ce que vous les repreniez."
+
+msgid "Choose…"
+msgstr "Choisir…"
+
+msgid "Hide"
+msgstr "Masquer"
+
+msgid "Stable version of {}"
+msgstr "Version stable du {}"
+
+msgid "Use this one"
+msgstr "Utiliser celle-ci"
+
+msgid "No older version found. Are you online?"
+msgstr "Aucune version plus ancienne trouvée. Êtes-vous connecté à Internet ?"
+
+msgid "{y}-{m}-{d}"
+msgstr "{d}/{m}/{y}"
+
+msgid "Updates are paused"
+msgstr "Les mises à jour sont en pause"
+
+msgid "This system stays on this version. Resume them to get one tested update a week again."
+msgstr "Ce système reste sur cette version. Reprenez-les pour recevoir de nouveau une mise à jour testée par semaine."
+
+msgid "Resume updates"
+msgstr "Reprendre les mises à jour"

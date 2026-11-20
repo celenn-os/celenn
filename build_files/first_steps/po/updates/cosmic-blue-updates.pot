@@ -92,3 +92,36 @@ msgstr ""
 
 msgid "What's new"
 msgstr ""
+
+msgid "An older version"
+msgstr ""
+
+msgid "Choose the stable version of a past week. The system then stays on it, without updates, until you resume them."
+msgstr ""
+
+msgid "Choose…"
+msgstr ""
+
+msgid "Hide"
+msgstr ""
+
+msgid "Stable version of {}"
+msgstr ""
+
+msgid "Use this one"
+msgstr ""
+
+msgid "No older version found. Are you online?"
+msgstr ""
+
+msgid "{y}-{m}-{d}"
+msgstr ""
+
+msgid "Updates are paused"
+msgstr ""
+
+msgid "This system stays on this version. Resume them to get one tested update a week again."
+msgstr ""
+
+msgid "Resume updates"
+msgstr ""

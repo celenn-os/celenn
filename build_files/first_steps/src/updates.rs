@@ -7,12 +7,16 @@
 //     rollback), then offers to restart;
 //   - one switch, "Get new features early": off follows the stable channel
 //     (one tested image a week, the default), on follows testing (every
-//     day). dev stays a ujust command for testers.
+//     day). dev stays a ujust command for testers;
+//   - last, in its own quieter row, "An older version": the stable image of
+//     a past week (stable-YYYYMMDD tags), which pauses updates until
+//     "Resume updates". The previous version above stays the one to go
+//     back to.
 //
 // Changing the version needs root: the app runs
 // /usr/libexec/cosmic-blue-updates-helper through pkexec, which asks for an
 // administrator password (polkit action io.github.cosmic_blue_os.updates.manage)
-// and only accepts those two changes. After going back, that helper records
+// and only accepts those changes. After going back, that helper records
 // the version left behind (/var/lib/cosmic-blue/update-hold), so that the
 // automatic updates do not install it again (/usr/libexec/cosmic-blue-bootc);
 // they start again with the next version.
@@ -21,6 +25,7 @@
 //
 //   cosmic-blue-updates            the window
 //   cosmic-blue-updates --status   what the window would show, as text (tests)
+//   cosmic-blue-updates --older    the older stable versions it would list
 //   cosmic-blue-updates --check    image build test: every text has its
 //                                  translations (no window)
 //
@@ -88,6 +93,17 @@ const TEXTS: &[&str] = &[
     "The system version could not be read: is this computer installed with cosmic-blue?",
     "Apps from COSMIC Store update by themselves too.",
     "What's new",
+    "An older version",
+    "Choose the stable version of a past week. The system then stays on it, without updates, until you resume them.",
+    "Choose…",
+    "Hide",
+    "Stable version of {}",
+    "Use this one",
+    "No older version found. Are you online?",
+    "{y}-{m}-{d}",
+    "Updates are paused",
+    "This system stays on this version. Resume them to get one tested update a week again.",
+    "Resume updates",
 ];
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -95,13 +111,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if args.iter().any(|arg| arg == "--check") {
         std::process::exit(if i18n::check(TEXTS) { 0 } else { 1 });
     }
+    if args.iter().any(|arg| arg == "--older") {
+        let status = read_status()?;
+        for tag in stable_tags(status.booted.image()) {
+            println!("{tag}");
+        }
+        return Ok(());
+    }
     if args.iter().any(|arg| arg == "--status") {
         let status = read_status()?;
         println!("{}", status.summary());
         return Ok(());
     }
     let settings = Settings::default()
-        .size(cosmic::iced::Size::new(760.0, 700.0))
+        .size(cosmic::iced::Size::new(760.0, 780.0))
         .size_limits(Limits::NONE.min_width(520.0).min_height(480.0));
     cosmic::app::run::<App>(settings, ())?;
     Ok(())
@@ -137,6 +160,11 @@ impl Deployment {
         image
             .strip_prefix("ostree-unverified-registry:")
             .unwrap_or(image)
+    }
+
+    /// The image tag ("stable", "stable-20261119"...)
+    fn tag(&self) -> Option<&str> {
+        self.image().rsplit_once(':').map(|(_, tag)| tag)
     }
 
     fn channel(&self) -> Option<Channel> {
@@ -252,6 +280,8 @@ enum Busy {
     Checking,
     Switching,
     RollingBack,
+    /// Switching to an older stable version
+    Pinning,
 }
 
 #[derive(Clone, Debug)]
@@ -260,6 +290,11 @@ enum Message {
     CheckNow,
     Rollback,
     Early(bool),
+    /// Show or hide the list of older stable versions
+    ShowOlder,
+    Older(Vec<String>),
+    /// Stay on an older stable version (its tag)
+    Pin(String),
     /// End of a background command: what it was, and whether it worked
     /// (None: the password prompt was cancelled)
     Done(Busy, Option<bool>),
@@ -272,6 +307,8 @@ struct App {
     core: Core,
     status: Option<Result<Status, String>>,
     busy: Option<Busy>,
+    /// Tags of the older stable versions, once listed (None: list closed)
+    older: Option<Vec<String>>,
     toasts: Toasts<Message>,
     banner: Option<widget::svg::Handle>,
 }
@@ -279,7 +316,7 @@ struct App {
 /// Runs a command in the background: Some(true) when it worked, None when
 /// pkexec says the password prompt was dismissed (126) or the password was
 /// wrong three times (127)
-async fn run(program: &'static str, args: Vec<&'static str>) -> Option<bool> {
+async fn run(program: &'static str, args: Vec<String>) -> Option<bool> {
     match tokio::process::Command::new(program)
         .args(&args)
         .status()
@@ -309,7 +346,8 @@ fn refresh() -> Task<Message> {
     )
 }
 
-fn background(busy: Busy, program: &'static str, args: Vec<&'static str>) -> Task<Message> {
+fn background(busy: Busy, program: &'static str, args: &[&str]) -> Task<Message> {
+    let args = args.iter().map(|arg| (*arg).to_owned()).collect();
     Task::perform(run(program, args), move |result| {
         cosmic::Action::App(Message::Done(busy, result))
     })
@@ -342,6 +380,7 @@ impl Application for App {
             core,
             status: None,
             busy: None,
+            older: None,
             toasts: Toasts::new(Message::CloseToast),
             banner: Path::new(BANNER)
                 .exists()
@@ -363,17 +402,46 @@ impl Application for App {
                 return background(
                     Busy::Checking,
                     "systemctl",
-                    vec!["start", "uupd-manual.service"],
+                    &["start", "uupd-manual.service"],
                 );
             }
             Message::Rollback => {
                 self.busy = Some(Busy::RollingBack);
-                return background(Busy::RollingBack, "pkexec", vec![HELPER, "rollback"]);
+                return background(Busy::RollingBack, "pkexec", &[HELPER, "rollback"]);
             }
             Message::Early(early) => {
                 self.busy = Some(Busy::Switching);
                 let channel = if early { "testing" } else { "stable" };
-                return background(Busy::Switching, "pkexec", vec![HELPER, "channel", channel]);
+                return background(Busy::Switching, "pkexec", &[HELPER, "channel", channel]);
+            }
+            Message::ShowOlder => {
+                if self.older.take().is_none() {
+                    let image = self
+                        .status
+                        .as_ref()
+                        .and_then(|status| status.as_ref().ok())
+                        .map(|status| status.booted.image().to_owned())
+                        .unwrap_or_default();
+                    return Task::perform(
+                        async move {
+                            tokio::task::spawn_blocking(move || stable_tags(&image))
+                                .await
+                                .unwrap_or_default()
+                        },
+                        |tags| cosmic::Action::App(Message::Older(tags)),
+                    );
+                }
+            }
+            Message::Older(tags) => {
+                if tags.is_empty() {
+                    return self.toast("No older version found. Are you online?");
+                }
+                self.older = Some(tags);
+            }
+            Message::Pin(tag) => {
+                self.busy = Some(Busy::Pinning);
+                self.older = None;
+                return background(Busy::Pinning, "pkexec", &[HELPER, "pin", &tag]);
             }
             Message::Done(busy, result) => {
                 self.busy = None;
@@ -470,6 +538,9 @@ impl Application for App {
             Some(Ok(status)) => {
                 content = content.push(self.versions(status, space_s));
                 if let Some(section) = self.channel_section(status, space_s) {
+                    content = content.push(section);
+                }
+                if let Some(section) = self.older_section(status, space_s) {
                     content = content.push(section);
                 }
             }
@@ -621,9 +692,34 @@ impl App {
     ) -> Option<Element<'a, Message>> {
         let channel = status.channel()?;
         if channel == Channel::Pinned {
-            return None;
+            let button: Element<'a, Message> =
+                if matches!(self.busy, Some(Busy::Switching | Busy::Pinning)) {
+                    widget::progress_bar::indeterminate_circular().into()
+                } else {
+                    widget::button::standard(tr("Resume updates"))
+                        .on_press_maybe(
+                            (self.busy.is_none() && !status.rollback_queued)
+                                .then_some(Message::Early(false)),
+                        )
+                        .into()
+                };
+            return Some(
+                settings::section()
+                    .add(
+                        settings::item_row(vec![
+                            state_icon("media-playback-pause-symbolic", false),
+                            two_lines(
+                                text::body(tr("Updates are paused")).into(),
+                                tr("This system stays on this version. Resume them to get one tested update a week again.").to_owned(),
+                            ),
+                            button,
+                        ])
+                        .spacing(space_s),
+                    )
+                    .into(),
+            );
         }
-        let caption = if self.busy == Some(Busy::Switching) {
+        let caption = if matches!(self.busy, Some(Busy::Switching | Busy::Pinning)) {
             tr("Downloading the new version… This can take a few minutes.")
         } else if channel == Channel::Dev {
             tr(
@@ -655,6 +751,113 @@ impl App {
                 .into(),
         )
     }
+}
+
+impl App {
+    /// "An older version": the stable versions of past weeks, listed once
+    /// "Choose…" is clicked (the previous version above is the one put
+    /// forward)
+    fn older_section<'a>(
+        &'a self,
+        status: &'a Status,
+        space_s: u16,
+    ) -> Option<Element<'a, Message>> {
+        status.channel()?;
+        let available = self.busy.is_none() && !status.rollback_queued;
+        let current = status.staged.as_ref().unwrap_or(&status.booted).tag();
+        let mut section = settings::section().add(
+            settings::item_row(vec![
+                two_lines(
+                    text::body(tr("An older version")).into(),
+                    tr("Choose the stable version of a past week. The system then stays on it, without updates, until you resume them.").to_owned(),
+                ),
+                widget::button::standard(tr(if self.older.is_some() { "Hide" } else { "Choose…" }))
+                    .on_press_maybe(available.then_some(Message::ShowOlder))
+                    .into(),
+            ])
+            .spacing(space_s),
+        );
+        let tags = self.older.as_deref().unwrap_or_default();
+        for tag in tags.iter().filter(|tag| Some(tag.as_str()) != current) {
+            section = section.add(
+                settings::item_row(vec![
+                    text::body(fill(tr("Stable version of {}"), &date(tag)))
+                        .width(Length::Fill)
+                        .into(),
+                    widget::button::standard(tr("Use this one"))
+                        .on_press_maybe(available.then(|| Message::Pin(tag.clone())))
+                        .into(),
+                ])
+                .spacing(space_s),
+            );
+        }
+        Some(section.into())
+    }
+}
+
+/// Older stable versions of the image (newest first, at most 8): its
+/// stable-YYYYMMDD tags, listed anonymously from the registry. The newest
+/// is the current stable, which the "Get new features early" switch covers.
+fn stable_tags(image: &str) -> Vec<String> {
+    let Some(path) = image
+        .strip_prefix("ghcr.io/")
+        .and_then(|rest| rest.rsplit_once(':'))
+        .map(|(path, _)| path.to_owned())
+    else {
+        return Vec::new();
+    };
+    let curl = |args: &[&str]| -> Option<serde_json::Value> {
+        let output = std::process::Command::new("curl")
+            .args(["-fsSL", "--max-time", "20"])
+            .args(args)
+            .output()
+            .ok()?;
+        if !output.status.success() {
+            eprintln!("curl: {}", String::from_utf8_lossy(&output.stderr).trim());
+            return None;
+        }
+        serde_json::from_slice(&output.stdout).ok()
+    };
+    let Some(token) = curl(&[&format!(
+        "https://ghcr.io/token?scope=repository:{path}:pull"
+    )])
+    .and_then(|value| value["token"].as_str().map(str::to_owned)) else {
+        return Vec::new();
+    };
+    let Some(list) = curl(&[
+        "-H",
+        &format!("Authorization: Bearer {token}"),
+        &format!("https://ghcr.io/v2/{path}/tags/list?n=10000"),
+    ]) else {
+        return Vec::new();
+    };
+    let mut tags: Vec<String> = list["tags"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|tag| tag.as_str())
+        .filter(|tag| is_stable_tag(tag))
+        .map(str::to_owned)
+        .collect();
+    tags.sort_unstable_by(|a, b| b.cmp(a));
+    tags.into_iter().skip(1).take(8).collect()
+}
+
+fn is_stable_tag(tag: &str) -> bool {
+    tag.strip_prefix("stable-")
+        .is_some_and(|date| date.len() == 8 && date.bytes().all(|b| b.is_ascii_digit()))
+}
+
+/// "stable-20261119" as a date in the session language
+fn date(tag: &str) -> String {
+    let digits = tag.trim_start_matches("stable-");
+    if digits.len() != 8 {
+        return tag.to_owned();
+    }
+    tr("{y}-{m}-{d}")
+        .replace("{y}", &digits[..4])
+        .replace("{m}", &digits[4..6])
+        .replace("{d}", &digits[6..])
 }
 
 /// A translated text with its {} replaced
