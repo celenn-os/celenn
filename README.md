@@ -14,9 +14,9 @@ effect on the next reboot, and can be rolled back.
 ## Versions
 
 <!-- versions:start (written by release-notes.yml on each stable release) -->
-In the current `stable` image (cosmic-blue 44.20261119.6):
+In the current `stable` image (cosmic-blue 45.20261120):
 
-![Fedora 44](https://img.shields.io/badge/Fedora-44-4f8dff)
+![Fedora 45](https://img.shields.io/badge/Fedora-45-4f8dff)
 ![Kernel 7.3.4](https://img.shields.io/badge/Kernel-7.3.4-4f8dff)
 ![COSMIC 1.11.0](https://img.shields.io/badge/COSMIC-1.11.0-4f8dff)
 ![Mesa 26.2.7](https://img.shields.io/badge/Mesa-26.2.7-4f8dff)
