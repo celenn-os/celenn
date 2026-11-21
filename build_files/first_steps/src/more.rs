@@ -1047,28 +1047,29 @@ impl Page {
             ));
         // The dock only exists with the top bar
         if !state.bottom_bar {
-            look = look.add(self.row(
-                "view-app-grid-symbolic",
-                "Dock always visible",
-                "Off: it hides when a window covers it.",
-                widget::toggler(state.dock_visible)
-                    .on_toggle(Message::DockVisible)
-                    .into(),
-                None,
-            ));
-        }
-        let look = look
-            .add(
+            look = look.add(
                 self.row(
-                    "preferences-desktop-appearance-symbolic",
-                    "More in Settings",
-                    "Accent color, wallpaper, panel, dock, fonts…",
-                    widget::button::standard(tr("Open"))
-                        .on_press(Message::OpenSettings)
+                    "view-app-grid-symbolic",
+                    "Dock always visible",
+                    "Off: it hides when a window covers it.",
+                    widget::toggler(state.dock_visible)
+                        .on_toggle(Message::DockVisible)
                         .into(),
                     None,
                 ),
             );
+        }
+        let look = look.add(
+            self.row(
+                "preferences-desktop-appearance-symbolic",
+                "More in Settings",
+                "Accent color, wallpaper, panel, dock, fonts…",
+                widget::button::standard(tr("Open"))
+                    .on_press(Message::OpenSettings)
+                    .into(),
+                None,
+            ),
+        );
         let settings_section = settings::section()
             .add(self.row(
                 "edit-undo-symbolic",

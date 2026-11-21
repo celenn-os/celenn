@@ -55,6 +55,10 @@ write_rules() {
     printf '%s\n' "${rules}" > "${CONFIG_DIR}/${user}.json.tmp"
     chmod 0644 "${CONFIG_DIR}/${user}.json.tmp"
     mv -f "${CONFIG_DIR}/${user}.json.tmp" "${CONFIG_DIR}/${user}.json"
+    # The group of the child accounts (polkit and D-Bus rules: no VPN of
+    # their own, no time zone change), at once; the service keeps it
+    groupadd -f cosmic-blue-children
+    usermod -aG cosmic-blue-children "${user}"
     systemctl start cosmic-blue-parental-controls.service
 }
 
