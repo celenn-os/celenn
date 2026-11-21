@@ -793,7 +793,7 @@ impl App {
                 if let Some(gauge) = gauge {
                     lines = lines
                         .push(widget::space::vertical().height(4))
-                        .push(widget::progress_bar::determinate_linear(gauge).girth(6));
+                        .push(widget::progress_bar::determinate_linear(gauge).width(Length::Fill).girth(6));
                 }
                 section = section.add(
                     widget::button::custom(
