@@ -50,7 +50,9 @@ const TICK: Duration = Duration::from_secs(15);
 const TABLE: &str = "cosmic_blue_parental";
 /// The family filter (dnsmasq, see cosmic-blue-family-dns.service)
 const FILTER_SERVICE: &str = "cosmic-blue-family-dns.service";
-const FILTER_PORT: u16 = 53530;
+/// Port 53 on 127.0.0.1: systemd-resolved only listens on 127.0.0.53 and
+/// 127.0.0.54, and SELinux lets dnsmasq bind the DNS port
+const FILTER_PORT: u16 = 53;
 /// systemd-resolved's socket, used by glibc's name lookups (nss-resolve)
 /// before DNS: closed to the filtered accounts, whose lookups then go
 /// through DNS (/etc/resolv.conf), which nftables sends to the filter
@@ -333,12 +335,19 @@ fn login_check() -> i32 {
         return 0;
     };
     system_language();
+    // stderr goes to the journal of the login screen
     match refusal(&user) {
         Some(message) => {
+            eprintln!("cosmic-blue-parental-daemon: login refused for {user}");
             println!("{message}");
             1
         }
-        None => 0,
+        None => {
+            if Rules::load(&user).is_some() {
+                eprintln!("cosmic-blue-parental-daemon: login allowed for {user}");
+            }
+            0
+        }
     }
 }
 

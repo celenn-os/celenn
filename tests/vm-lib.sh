@@ -621,7 +621,19 @@ parental_checks() {
         || problem "no nftables rules for the web filter"
     wait_for 30 'systemctl is-active cosmic-blue-family-dns.service' \
         || problem "cosmic-blue-family-dns.service did not start"
-    local child_answer root_answer
+    # The filter answers this name itself (Firefox's DNS-over-HTTPS canary):
+    # "no such name" for the child shows that its queries reach the filter,
+    # without needing the family DNS servers on the internet
+    local child_answer root_answer canary
+    canary="$(vm "runuser -u ${PARENTAL_CHILD} -- python3 -c 'import socket
+try:
+    socket.getaddrinfo(\"use-application-dns.net\", 443)
+    print(\"resolved\")
+except socket.gaierror as error:
+    print(\"noname\" if error.errno == socket.EAI_NONAME else error)'" 2>&1)" || true
+    echo "DNS-over-HTTPS canary for the child: ${canary}"
+    [[ "${canary}" == noname ]] \
+        || problem "the child's DNS queries do not reach the family filter (${canary})"
     child_answer="$(vm "runuser -u ${PARENTAL_CHILD} -- getent ahostsv4 example.com" 2>&1 | head -n 1)" || true
     if [[ -z "${child_answer}" ]]; then
         echo "::warning::Parental controls: the child account resolves nothing (family filter unreachable?)"
@@ -704,6 +716,15 @@ parental_checks() {
     sleep 20
     vm "pgrep -u ${DEMO_USER} -x cosmic-panel" >/dev/null \
         && problem "the login screen let the test user in after its time was up"
+    vm "env -i PAM_USER=${DEMO_USER} /usr/libexec/cosmic-blue-parental-daemon login-check" \
+        && problem "the login check lets the test user in after its time was up"
+    # pam_exec logs the refusal (the login check's own stderr is not kept)
+    if ! vm "journalctl -b --no-pager -g 'pam_exec\\(cosmic-greeter:account\\): /usr/libexec/cosmic-blue-parental-daemon failed: exit code 1'" >/dev/null; then
+        problem "the login screen did not run the login check"
+        vm "grep -rs . /etc/greetd/ | grep -v '^#'; ls /etc/pam.d /usr/lib/pam.d | grep -i greet; \
+            journalctl -b --no-pager -g 'pam_exec|parental-daemon: login' | tail -n 10; \
+            ausearch -m avc -ts boot 2>/dev/null | grep -i parental | tail -n 10" || true
+    fi
     vm "journalctl -b --no-pager -u cosmic-blue-parental-controls.service" | tail -n 20 || true
     vm "journalctl -b --no-pager -t pam_exec -g cosmic-blue" | tail -n 5 || true
     vm "rm -f /etc/cosmic-blue/parental-controls/${DEMO_USER}.json"

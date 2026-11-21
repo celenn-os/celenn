@@ -547,8 +547,10 @@ done
 grep -q '<allow_active>auth_admin</allow_active>' /usr/share/polkit-1/actions/io.github.cosmic_blue_os.parental.policy
 systemctl is-enabled cosmic-blue-parental-controls.service
 command -v dnsmasq nft setfacl notify-send >/dev/null
-grep -qE '^account +required +pam_exec\.so quiet stdout /usr/libexec/cosmic-blue-parental-daemon login-check$' \
-    /etc/pam.d/greetd
+for service in cosmic-greeter greetd; do
+    grep -qE '^account +required +pam_exec\.so stdout /usr/libexec/cosmic-blue-parental-daemon login-check$' \
+        "/etc/pam.d/${service}"
+done
 PAM_USER=root /usr/libexec/cosmic-blue-parental-daemon login-check \
     || { echo "The parental controls login check refuses root"; exit 1; }
 # Wrong arguments are refused before anything runs
