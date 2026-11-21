@@ -69,7 +69,10 @@ fn main() {
         Some("refusal") => {
             // The login screen's message when the check gives no reason
             system_language();
-            println!("{}", tr("Parental controls do not allow logging in now. Ask a parent."));
+            println!(
+                "{}",
+                tr("Parental controls do not allow logging in now. Ask a parent.")
+            );
         }
         _ => {
             eprintln!("Usage: cosmic-blue-parental-daemon run | login-check | refusal | status");
@@ -103,7 +106,16 @@ fn sessions(user: &str) -> Vec<Session> {
         .split_whitespace()
         .filter_map(|id| {
             let props = Command::new("loginctl")
-                .args(["show-session", id, "-p", "State", "-p", "LockedHint", "-p", "Class"])
+                .args([
+                    "show-session",
+                    id,
+                    "-p",
+                    "State",
+                    "-p",
+                    "LockedHint",
+                    "-p",
+                    "Class",
+                ])
                 .output()
                 .ok()?;
             let props = String::from_utf8_lossy(&props.stdout).into_owned();
@@ -252,7 +264,11 @@ fn tick(now: &Now, elapsed: u64, applied: &mut Applied) {
             println!(
                 "{user}: {} session(s), {}",
                 mine.len(),
-                if on_screen { "on screen: counting" } else { "not on screen" }
+                if on_screen {
+                    "on screen: counting"
+                } else {
+                    "not on screen"
+                }
             );
             applied.on_screen.insert(user.clone(), on_screen);
         }
@@ -279,7 +295,10 @@ fn tick(now: &Now, elapsed: u64, applied: &mut Applied) {
                         Block::Limit => "screen time used up",
                         Block::Bedtime => "bedtime",
                     },
-                    mine.iter().map(|s| s.id.as_str()).collect::<Vec<_>>().join(" ")
+                    mine.iter()
+                        .map(|s| s.id.as_str())
+                        .collect::<Vec<_>>()
+                        .join(" ")
                 );
                 if !run_quiet("loginctl", &["terminate-user", &user]) {
                     eprintln!("{user}: could not close the sessions");
@@ -332,7 +351,11 @@ fn refusal(user: &str) -> Option<String> {
         Block::Limit => format!(
             "{}\n{}",
             tr("Screen time is over for today."),
-            tr("You can log in again tomorrow at {}.").replacen("{}", &parental_rules::clock(back), 1)
+            tr("You can log in again tomorrow at {}.").replacen(
+                "{}",
+                &parental_rules::clock(back),
+                1
+            )
         ),
     })
 }
@@ -376,7 +399,9 @@ fn status() {
             verdict
                 .allowed_today
                 .map_or("unlimited".to_owned(), |s| format!("{s}s")),
-            verdict.remaining.map_or("unlimited".to_owned(), |s| format!("{s}s")),
+            verdict
+                .remaining
+                .map_or("unlimited".to_owned(), |s| format!("{s}s")),
             match verdict.blocked {
                 Some(Block::Limit) => "limit",
                 Some(Block::Bedtime) => "bedtime",

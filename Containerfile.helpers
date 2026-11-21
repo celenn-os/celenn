@@ -41,13 +41,15 @@ COPY --from=theme-build /out /
 FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS tour-build
 COPY build_files/first_steps /tour
 ENV CARGO_HOME=/cargo/home CARGO_TARGET_DIR=/cargo/target
-RUN dnf5 -y install cargo rust gcc pkgconf-pkg-config libxkbcommon-devel wayland-devel \
+# Every unit test of every program runs here (cargo test), and clippy
+# reports its warnings in the build log (not fatal for now)
+RUN dnf5 -y install cargo rust clippy gcc pkgconf-pkg-config libxkbcommon-devel wayland-devel \
     && cd /tour && cargo build --release --locked \
     && /cargo/target/release/cosmic-blue-tour --check \
     && /cargo/target/release/cosmic-blue-tools --check \
-    && cargo test --release --locked --bin cosmic-blue-tools \
     && /cargo/target/release/cosmic-blue-parental-controls --check \
-    && cargo test --release --locked --bin cosmic-blue-parental-daemon \
+    && cargo test --release --locked \
+    && { cargo clippy --release --locked --all-targets 2>&1 | grep -A12 -E '^(warning|error)' || true; } \
     && install -D -m 0755 /cargo/target/release/cosmic-blue-tour /out/cosmic-blue-tour \
     && install -D -m 0755 /cargo/target/release/cosmic-blue-tools /out/cosmic-blue-tools \
     && install -D -m 0755 /cargo/target/release/cosmic-blue-parental-controls /out/cosmic-blue-parental-controls \

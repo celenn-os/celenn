@@ -79,7 +79,11 @@ impl Rules {
             weekdays: minutes(&value["limit"]["weekdays"], 24 * 60, default.weekdays),
             weekend: minutes(&value["limit"]["weekend"], 24 * 60, default.weekend),
             bedtime_enabled: value["bedtime"]["enabled"].as_bool().unwrap_or(false),
-            bedtime_start: minutes(&value["bedtime"]["start"], 24 * 60 - 1, default.bedtime_start),
+            bedtime_start: minutes(
+                &value["bedtime"]["start"],
+                24 * 60 - 1,
+                default.bedtime_start,
+            ),
             bedtime_end: minutes(&value["bedtime"]["end"], 24 * 60 - 1, default.bedtime_end),
             web_filter: value["web_filter"].as_bool().unwrap_or(false),
         })
@@ -105,8 +109,11 @@ impl Rules {
 
     /// Minutes allowed on a day (1 = Monday ... 7 = Sunday)
     pub fn daily_limit(&self, weekday: u32) -> Option<u32> {
-        self.limit_enabled
-            .then_some(if weekday >= 6 { self.weekend } else { self.weekdays })
+        self.limit_enabled.then_some(if weekday >= 6 {
+            self.weekend
+        } else {
+            self.weekdays
+        })
     }
 
     /// True when `minute` (after midnight) is in the bedtime hours
@@ -125,7 +132,9 @@ impl Rules {
 /// Account names this feature accepts (what useradd makes by default)
 pub fn valid_user(user: &str) -> bool {
     let mut chars = user.chars();
-    chars.next().is_some_and(|c| c.is_ascii_lowercase() || c == '_')
+    chars
+        .next()
+        .is_some_and(|c| c.is_ascii_lowercase() || c == '_')
         && chars.all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-' || c == '_')
         && user.len() <= 32
 }
@@ -339,13 +348,21 @@ pub fn verdict(rules: &Rules, used: u64, extra: &[(i64, u32)], now: &Now) -> Ver
     };
     let override_until = extra
         .iter()
-        .map(|(at, minutes)| if *minutes == 0 { until_morning(*at) } else { at + i64::from(*minutes) * 60 })
+        .map(|(at, minutes)| {
+            if *minutes == 0 {
+                until_morning(*at)
+            } else {
+                at + i64::from(*minutes) * 60
+            }
+        })
         .max()
         .filter(|until| *until > now.unix);
 
     // 0 minutes granted: no screen time limit for the rest of the day (the
     // bedtime hours still apply)
-    let unlimited_today = extra.iter().any(|(at, minutes)| *at >= day_start && *minutes == 0);
+    let unlimited_today = extra
+        .iter()
+        .any(|(at, minutes)| *at >= day_start && *minutes == 0);
     let allowed_today = rules
         .daily_limit(now.weekday)
         .filter(|_| !unlimited_today)
@@ -389,7 +406,11 @@ pub fn verdict(rules: &Rules, used: u64, extra: &[(i64, u32)], now: &Now) -> Ver
     });
     Verdict {
         blocked,
-        remaining: if blocked.is_some() { Some(0) } else { remaining },
+        remaining: if blocked.is_some() {
+            Some(0)
+        } else {
+            remaining
+        },
         allowed_today,
         back_at,
     }
@@ -441,7 +462,10 @@ mod tests {
         assert_eq!(v.remaining, Some(15 * 60));
         // No limit today, but not tomorrow
         let v = verdict(&rules, 300 * 60, &[(n.unix - 60, 0)], &n);
-        assert_eq!((v.blocked, v.remaining, v.allowed_today), (None, None, None));
+        assert_eq!(
+            (v.blocked, v.remaining, v.allowed_today),
+            (None, None, None)
+        );
         let v = verdict(&rules, 300 * 60, &[(n.unix - 86400, 0)], &n);
         assert_eq!(v.blocked, Some(Block::Limit));
     }
