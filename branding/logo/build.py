@@ -53,5 +53,12 @@ def horizontal(fill, moon):
 
 
 (HERE / "cosmic-blue-logo.svg").write_text(svg("-50 -50 100 100", mark()))
+# One-color mark for symbolic uses (the cosmic-blue group of the App Library);
+# the desktop recolors symbolic icons, #bebebe is only the convention
+(HERE / "cosmic-blue-logo-symbolic.svg").write_text(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100"><title>cosmic-blue</title>'
+    '<g fill="#bebebe"><path d="M30.3 -25.4 A40 40 0 1 0 30.3 25.4" fill="none" stroke="#bebebe" '
+    'stroke-width="13" stroke-linecap="round"/><circle cx="-2" cy="0" r="13"/>'
+    '<circle cx="38" cy="0" r="6.5"/></g></svg>\n')
 (HERE / "cosmic-blue-logo-horizontal-dark.svg").write_text(horizontal("#e6f3ff", "#e6f3ff"))
 (HERE / "cosmic-blue-logo-horizontal-light.svg").write_text(horizontal("#0b2a8a", "#2f6bff"))

@@ -1,0 +1,49 @@
+[
+    (
+        name: "cosmic-blue",
+        icon: "cosmic-blue-logo-symbolic",
+        filter: AppIds([
+            "io.github.cosmic_blue_os.FirstSteps",
+            "io.github.cosmic_blue_os.Welcome",
+            "io.github.cosmic_blue_os.Updates",
+            "io.github.cosmic_blue_os.ParentalControls",
+            "io.github.cosmic_blue_os.Shortcuts",
+            "documentation",
+        ]),
+    ),
+    (
+        name: "cosmic-office",
+        icon: "folder-symbolic",
+        filter: Categories(
+            categories: ["Office"],
+            exclude: [],
+            include: ["org.gnome.Totem", "org.gnome.eog", "simple-scan", "thunderbird"],
+        ),
+    ),
+    (
+        name: "cosmic-system",
+        icon: "folder-symbolic",
+        filter: Categories(
+            categories: ["System", "Settings"],
+            exclude: [
+                "com.system76.CosmicStore",
+                "com.system76.CosmicTerm",
+                "io.github.cosmic_blue_os.FirstSteps",
+                "io.github.cosmic_blue_os.Welcome",
+                "io.github.cosmic_blue_os.Updates",
+                "io.github.cosmic_blue_os.ParentalControls",
+                "io.github.cosmic_blue_os.Shortcuts",
+            ],
+            include: [],
+        ),
+    ),
+    (
+        name: "cosmic-utilities",
+        icon: "folder-symbolic",
+        filter: Categories(
+            categories: ["Utility"],
+            exclude: ["com.system76.CosmicEdit", "com.system76.CosmicFiles", "documentation"],
+            include: ["nm-connection-editor"],
+        ),
+    ),
+]
