@@ -1,0 +1,7 @@
+# Clean graphical boot: no "[  OK  ] Finished ..." status lines on screen.
+# With "quiet", systemd shows its status lines anyway once a boot job takes
+# more than a few seconds (show_status=auto), and they stay on screen
+# between the boot logo (Plymouth) and the login screen. "error" still shows
+# failures. The full log stays in the journal (journalctl -b).
+# bootc adds these to existing installs at their next update.
+kargs = ["rd.systemd.show_status=error", "systemd.show_status=error"]

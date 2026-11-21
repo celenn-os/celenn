@@ -213,6 +213,16 @@ done
 compgen -G "${PLYMOUTH_THEME}/throbber-*.png" >/dev/null
 test -e "${PLYMOUTH_THEME}/lock.png"
 test -e "${PLYMOUTH_THEME}/entry.png"
+# Clean graphical boot: systemd status lines hidden, GRUB menu hidden after a
+# good boot (needs bootupd's static GRUB configuration and Fedora's
+# boot-success flag)
+grep -q '"systemd.show_status=error"' /usr/lib/bootc/kargs.d/10-cosmic-blue-quiet-boot.toml
+grep -q '"rd.systemd.show_status=error"' /usr/lib/bootc/kargs.d/10-cosmic-blue-quiet-boot.toml
+test -f /usr/lib/bootupd/grub2-static/grub-static-pre.cfg
+test -f /usr/lib/bootupd/grub2-static/configs.d/12_cosmic-blue-menu-auto-hide.cfg
+test -x /usr/sbin/grub2-set-bootflag
+test -f /usr/lib/systemd/user/grub-boot-success.timer
+systemctl --global is-enabled grub-boot-success.timer
 KVER="$(rpm -q --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' kernel-core | head -n1)"
 lsinitrd "/usr/lib/modules/${KVER}/initramfs.img" > /tmp/initramfs.txt
 grep -q 'plymouth/themes/cosmic-blue/bgrt-fallback.png' /tmp/initramfs.txt
