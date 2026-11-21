@@ -1,0 +1,18 @@
+# Parental controls: the web filter of the child accounts. Their DNS queries
+# are sent here (nftables rules of cosmic-blue-parental-controls.service),
+# and from here to the CleanBrowsing family filter (adult content, gambling,
+# malicious sites, safe search forced in search engines and YouTube).
+# Started and stopped by cosmic-blue-parental-controls.service, on systems
+# where a child account has the filter on. Only on 127.0.0.1: the other
+# accounts keep using systemd-resolved (127.0.0.53).
+[Unit]
+Description=cosmic-blue parental controls: family web filter
+After=network.target
+
+[Service]
+ExecStart=/usr/sbin/dnsmasq --keep-in-foreground --conf-file=/dev/null --pid-file \
+    --listen-address=127.0.0.1 --bind-interfaces --port=53 --no-resolv --no-hosts \
+    --server=185.228.168.168 --server=185.228.169.168 \
+    --server=2a0d:2a00:1:: --server=2a0d:2a00:2:: \
+    --address=/use-application-dns.net/ --cache-size=1000
+Restart=on-failure

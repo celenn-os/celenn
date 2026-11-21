@@ -6,6 +6,7 @@ systemctl enable \
     brew-setup.service \
     cosmic-blue-flatpark-off.service \
     cosmic-blue-migrate-defaults.service \
+    cosmic-blue-parental-controls.service \
     cosmic-blue-user-defaults.service \
     cosmic-blue-root-mount-options.service \
     cosmic-blue-signed-updates.timer \

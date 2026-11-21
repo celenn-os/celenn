@@ -200,6 +200,8 @@ if (( errors == 0 )); then
         while IFS= read -r line; do
             [[ "${line}" == "FAIL "* ]] && { echo "::error::${line#FAIL }"; errors=1; }
         done <<< "${ujust_checks}"
+        # Last: it closes the test user's session
+        parental_checks || errors=1
     fi
     demo_journal
 fi

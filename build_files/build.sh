@@ -17,6 +17,7 @@ for step in \
     24-store.sh \
     24-filemanager.sh \
     25-icon-theme.sh \
+    26-parental-controls.sh \
     30-packages.sh \
     35-nvidia.sh \
     40-image-info.sh \

@@ -588,3 +588,123 @@ firefox_shot() {
 demo_journal() {
     vm "journalctl -b _UID=\$(id -u ${DEMO_USER}) --no-pager" > "${OUT}/journal-${DEMO_USER}${1:+-$1}.log" 2>/dev/null || true
 }
+
+# Parental controls, after the desktop tour (the test user's session is
+# open, locked by the tour's last step): a child account created with the
+# app's helper (rules, service, web filter), screenshots of the app, then the
+# test user itself as a child: the warning before its time is up, the more
+# time window, more time given, its session closed when the time is up, and
+# the login refused. Returns 1 when a rule is not applied; a missing
+# screenshot or an unreachable family filter is a warning.
+PARENTAL_CHILD=lea
+parental_checks() {
+    local parental_failed=0 rules state day json
+    problem() { echo "::error::Parental controls: $*"; parental_failed=1; }
+    rules='{"limit":{"enabled":true,"weekdays":120,"weekend":180},"bedtime":{"enabled":true,"start":1230,"end":420},"web_filter":true}'
+    vm "printf '%s\n%s\n' ${DEMO_PASSWORD} '${rules}' \
+            | /usr/libexec/cosmic-blue-parental-helper add-child ${PARENTAL_CHILD} 'Léa'" \
+        || { problem "cosmic-blue-parental-helper could not create a child account"; return 1; }
+    vm "id -nG ${PARENTAL_CHILD} | grep -qw wheel" && problem "the child account is an administrator"
+    wait_for 30 'systemctl is-active cosmic-blue-parental-controls.service' \
+        || problem "cosmic-blue-parental-controls.service did not start"
+    # A week of screen time for the chart
+    json='{"today":{"date":"'"$(vm 'date +%F')"'","weekday":'"$(vm 'date +%u')"',"seconds":4800},"history":['
+    for day in 6 5 4 3 2 1; do
+        json+='{"date":"'"$(vm "date -d -${day}day +%F")"'","weekday":'"$(vm "date -d -${day}day +%u")"',"seconds":'$(( (day * 1931) % 7200 + 1500 ))'}'
+        (( day > 1 )) && json+=','
+    done
+    json+=']}'
+    vm "echo '${json}' > /var/lib/cosmic-blue/parental-controls/${PARENTAL_CHILD}.json"
+
+    # Web filter: the child's DNS queries go to the family filter
+    wait_for 30 'nft list table inet cosmic_blue_parental' \
+        || problem "no nftables rules for the web filter"
+    wait_for 30 'systemctl is-active cosmic-blue-family-dns.service' \
+        || problem "cosmic-blue-family-dns.service did not start"
+    local child_answer root_answer
+    child_answer="$(vm "runuser -u ${PARENTAL_CHILD} -- getent ahostsv4 example.com" 2>&1 | head -n 1)" || true
+    if [[ -z "${child_answer}" ]]; then
+        echo "::warning::Parental controls: the child account resolves nothing (family filter unreachable?)"
+    else
+        child_answer="$(vm "runuser -u ${PARENTAL_CHILD} -- getent ahostsv4 pornhub.com" 2>&1 | head -n 1)" || true
+        root_answer="$(vm 'getent ahostsv4 pornhub.com' 2>&1 | head -n 1)" || true
+        echo "Adult site for the child: ${child_answer:-none}, for root: ${root_answer:-none}"
+        [[ "${child_answer}" != "${root_answer}" ]] \
+            || problem "the web filter does not change what the child account resolves"
+        echo "Google for the child: $(vm "runuser -u ${PARENTAL_CHILD} -- getent ahostsv4 www.google.com" 2>&1 | head -n 1)"
+    fi
+
+    # Unlock the test user's session (locked by the tour)
+    vm 'loginctl unlock-sessions' || true
+    sleep 5
+    if vm "loginctl show-user ${DEMO_USER} -p Sessions --value | xargs -n1 loginctl show-session -p LockedHint --value | grep -qx yes"; then
+        type_text "${DEMO_PASSWORD}"
+        monitor "sendkey ret"
+        sleep 8
+    fi
+
+    # The app: home, and the child's page
+    local entry
+    for entry in "09-parental-controls|" "09-parental-controls-child|--user ${PARENTAL_CHILD}"; do
+        if vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
+                setsid -f /usr/libexec/cosmic-blue-parental-controls ${entry#*|} >/dev/null 2>&1 </dev/null"; then
+            sleep 12
+            screenshot "${SHOTS}/${entry%%|*}"
+            vm "pkill -u ${DEMO_USER} -f '^/usr/libexec/cosmic-blue-parental-controls( --user|$)'" || true
+            sleep 3
+        else
+            warn "could not open Parental controls"
+        fi
+    done
+
+    # The test user becomes a child with 10 minutes a day, 4 min 40 s left:
+    # the agent of its session warns
+    vm "echo '{\"limit\":{\"enabled\":true,\"weekdays\":10,\"weekend\":10},\"bedtime\":{\"enabled\":false,\"start\":0,\"end\":0},\"web_filter\":false}' \
+            | /usr/libexec/cosmic-blue-parental-helper set ${DEMO_USER}" \
+        || problem "cosmic-blue-parental-helper set failed"
+    set_used() {
+        vm "echo '{\"today\":{\"date\":\"'\$(date +%F)'\",\"weekday\":'\$(date +%u)',\"seconds\":$1}}' \
+            > /var/lib/cosmic-blue/parental-controls/${DEMO_USER}.json"
+    }
+    set_used 320
+    vm "pgrep -u ${DEMO_USER} -f -- 'cosmic-blue-parental-controls --agent'" >/dev/null \
+        || problem "the warnings agent does not run in the session"
+    sleep 15
+    screenshot "${SHOTS}/09-parental-warning"
+    state="$(vm '/usr/libexec/cosmic-blue-parental-daemon status' 2>&1)" || true
+    echo "${state}"
+    grep -q "^${DEMO_USER}: .*blocked no" <<<"${state}" || problem "the test user is blocked too early"
+
+    # The more time window, and more time given (as a parent would)
+    if vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
+            setsid -f /usr/libexec/cosmic-blue-parental-controls --more-time >/dev/null 2>&1 </dev/null"; then
+        sleep 10
+        screenshot "${SHOTS}/09-parental-more-time"
+        vm "pkill -u ${DEMO_USER} -f -- 'cosmic-blue-parental-controls --more-time'" || true
+    fi
+    vm "/usr/libexec/cosmic-blue-parental-extend ${DEMO_USER} 15" || problem "cosmic-blue-parental-extend failed"
+    state="$(vm '/usr/libexec/cosmic-blue-parental-daemon status' 2>&1)" || true
+    grep -q "^${DEMO_USER}: .*allowed 1500s" <<<"${state}" || problem "more time was not added: ${state}"
+    vm "/usr/libexec/cosmic-blue-parental-extend ${DEMO_USER} 600" 2>/dev/null \
+        && problem "cosmic-blue-parental-extend accepted 600 minutes"
+
+    # Time up: the service closes the session, the login screen refuses it
+    set_used 1600
+    if wait_for 60 "! pgrep -u ${DEMO_USER} -x cosmic-panel"; then
+        log "Parental controls closed the session when its time was up"
+    else
+        problem "the session was not closed when its time was up"
+    fi
+    sleep 20
+    type_text "${DEMO_PASSWORD}"
+    monitor "sendkey ret"
+    sleep 10
+    screenshot "${SHOTS}/09-parental-refused"
+    sleep 20
+    vm "pgrep -u ${DEMO_USER} -x cosmic-panel" >/dev/null \
+        && problem "the login screen let the test user in after its time was up"
+    vm "journalctl -b --no-pager -u cosmic-blue-parental-controls.service" | tail -n 20 || true
+    vm "journalctl -b --no-pager -t pam_exec -g cosmic-blue" | tail -n 5 || true
+    vm "rm -f /etc/cosmic-blue/parental-controls/${DEMO_USER}.json"
+    return "${parental_failed}"
+}

@@ -1,0 +1,186 @@
+# Brazilian Portuguese translation of cosmic-blue Parental controls
+# (build_files/first_steps/src/parental.rs).
+msgid ""
+msgstr ""
+"Language: pt_BR\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Parental controls"
+msgstr "Controle parental"
+
+msgid "Choose how long and when your children can use this computer."
+msgstr "Escolha por quanto tempo e quando seus filhos podem usar este computador."
+
+msgid "Child accounts"
+msgstr "Contas infantis"
+
+msgid "Other accounts"
+msgstr "Outras contas"
+
+msgid "Administrator · no limits"
+msgstr "Administrador · sem limites"
+
+msgid "No limits"
+msgstr "Sem limites"
+
+msgid "Today: {} of {}"
+msgstr "Hoje: {} de {}"
+
+msgid "Today: {}"
+msgstr "Hoje: {}"
+
+msgid "Add a child account"
+msgstr "Adicionar uma conta infantil"
+
+msgid "An account without administrator rights, ready in one click"
+msgstr "Uma conta sem direitos de administrador, pronta com um clique"
+
+msgid "Add…"
+msgstr "Adicionar…"
+
+msgid "Settings are protected by your password."
+msgstr "As configurações são protegidas pela sua senha."
+
+msgid "Back"
+msgstr "Voltar"
+
+msgid "Screen time"
+msgstr "Tempo de tela"
+
+msgid "Limit screen time"
+msgstr "Limitar o tempo de tela"
+
+msgid "Only time in front of the screen counts. Warnings 10, 5 and 1 minutes before the end."
+msgstr "Só conta o tempo em frente à tela. Avisos 10, 5 e 1 minuto antes do fim."
+
+msgid "Monday to Friday"
+msgstr "De segunda a sexta"
+
+msgid "Saturday and Sunday"
+msgstr "Sábado e domingo"
+
+msgid "Bedtime"
+msgstr "Hora de dormir"
+
+msgid "No computer at night"
+msgstr "Sem computador à noite"
+
+msgid "The session closes and logging in is refused during these hours."
+msgstr "A sessão é encerrada e o login é recusado nesse horário."
+
+msgid "From"
+msgstr "Das"
+
+msgid "To"
+msgstr "Às"
+
+msgid "Internet"
+msgstr "Internet"
+
+msgid "Block unsuitable websites"
+msgstr "Bloquear sites inadequados"
+
+msgid "Adult content, gambling and malicious sites, in every browser. Safe search is forced. Uses the CleanBrowsing family filter."
+msgstr "Conteúdo adulto, apostas e sites maliciosos, em todos os navegadores. A pesquisa segura é forçada. Usa o filtro familiar CleanBrowsing."
+
+msgid "This week"
+msgstr "Esta semana"
+
+msgid "Average: {} a day"
+msgstr "Média: {} por dia"
+
+msgid "Mon"
+msgstr "seg"
+
+msgid "Tue"
+msgstr "ter"
+
+msgid "Wed"
+msgstr "qua"
+
+msgid "Thu"
+msgstr "qui"
+
+msgid "Fri"
+msgstr "sex"
+
+msgid "Sat"
+msgstr "sáb"
+
+msgid "Sun"
+msgstr "dom"
+
+msgid "{h} h {m} min"
+msgstr "{h} h {m} min"
+
+msgid "{h} h"
+msgstr "{h} h"
+
+msgid "{m} min"
+msgstr "{m} min"
+
+msgid "Name"
+msgstr "Nome"
+
+msgid "Password"
+msgstr "Senha"
+
+msgid "The child logs in with this name and password."
+msgstr "A criança entra com este nome e esta senha."
+
+msgid "Create"
+msgstr "Criar"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Something went wrong, nothing was changed."
+msgstr "Algo deu errado, nada foi alterado."
+
+msgid "Recommended"
+msgstr "Recomendado"
+
+msgid "More time for {}"
+msgstr "Mais tempo para {}"
+
+msgid "A parent confirms with their password."
+msgstr "Um responsável confirma com a senha dele."
+
+msgid "+15 min"
+msgstr "+15 min"
+
+msgid "+30 min"
+msgstr "+30 min"
+
+msgid "+1 h"
+msgstr "+1 h"
+
+msgid "Give"
+msgstr "Conceder"
+
+msgid "{} minutes left"
+msgstr "Faltam {} minutos"
+
+msgid "1 minute left"
+msgstr "Falta 1 minuto"
+
+msgid "Your session closes at {}. Save your work."
+msgstr "Sua sessão termina às {}. Salve seu trabalho."
+
+msgid "Ask for more time"
+msgstr "Pedir mais tempo"
+
+msgid "It is bedtime."
+msgstr "É hora de dormir."
+
+msgid "Screen time is over for today."
+msgstr "O tempo de tela acabou por hoje."
+
+msgid "You can log in again at {}."
+msgstr "Você poderá entrar de novo às {}."
+
+msgid "You can log in again tomorrow."
+msgstr "Você poderá entrar de novo amanhã."
+
+msgid "You can log in again tomorrow at {}."
+msgstr "Você poderá entrar de novo amanhã às {}."

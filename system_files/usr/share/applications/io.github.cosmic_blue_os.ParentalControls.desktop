@@ -1,0 +1,25 @@
+[Desktop Entry]
+Type=Application
+Name=Parental controls
+Name[fr]=Contrôle parental
+Name[de]=Jugendschutz
+Name[es]=Control parental
+Name[it]=Controllo parentale
+Name[pt_BR]=Controle parental
+Comment=Choose how long and when children can use this computer, and block unsuitable websites
+Comment[fr]=Choisir combien de temps et quand les enfants peuvent utiliser cet ordinateur, et bloquer les sites inadaptés
+Comment[de]=Festlegen, wie lange und wann Kinder diesen Computer nutzen dürfen, und ungeeignete Websites sperren
+Comment[es]=Elegir cuánto tiempo y cuándo pueden usar los niños este ordenador, y bloquear sitios web inapropiados
+Comment[it]=Scegliere per quanto tempo e quando i bambini possono usare questo computer, e bloccare i siti non adatti
+Comment[pt_BR]=Escolher por quanto tempo e quando as crianças podem usar este computador, e bloquear sites inadequados
+Keywords=cosmic-blue;Parental;Children;Screen time;Bedtime;Filter;
+Keywords[fr]=cosmic-blue;Parental;Enfants;Temps d'écran;Coucher;Filtre;
+Keywords[de]=cosmic-blue;Eltern;Kinder;Bildschirmzeit;Schlafenszeit;Filter;
+Keywords[es]=cosmic-blue;Parental;Niños;Tiempo de pantalla;Dormir;Filtro;
+Keywords[it]=cosmic-blue;Parentale;Bambini;Tempo di utilizzo;Dormire;Filtro;
+Keywords[pt_BR]=cosmic-blue;Parental;Crianças;Tempo de tela;Dormir;Filtro;
+Icon=cosmic-blue-parental-controls
+Exec=/usr/libexec/cosmic-blue-parental-controls
+Terminal=false
+StartupNotify=true
+Categories=System;Settings;
