@@ -172,6 +172,39 @@ msgstr ""
 msgid "Everything was already tidy."
 msgstr ""
 
+msgid "Trash"
+msgstr ""
+
+msgid "{} in the trash"
+msgstr ""
+
+msgid "The trash is empty."
+msgstr ""
+
+msgid "Empty"
+msgstr ""
+
+msgid "Emptying…"
+msgstr ""
+
+msgid "Automatically"
+msgstr ""
+
+msgid "Delete files that stayed in the trash for more than 30 days"
+msgstr ""
+
+msgid "Like on Windows and the Mac. Newer ones can still be put back."
+msgstr ""
+
+msgid "Warn when the disk is almost full"
+msgstr ""
+
+msgid "The disk is almost full"
+msgstr ""
+
+msgid "{} left. Updates and new apps need room."
+msgstr ""
+
 msgid "Apps that come with cosmic-blue"
 msgstr ""
 
