@@ -40,13 +40,15 @@ Regenerate the SVGs with `python3 logo/build.py`.
 All 5120x2880, in `system_files/usr/share/backgrounds/cosmic-blue/`:
 
 - `cosmic-blue-arcs.jpg`: the logo mark, left of centre, its orbit
-  echoing outwards in fainter arcs, and the name small towards the bottom
-  right, inside the part every common screen shape shows once COSMIC crops
-  the wallpaper to fill (16:9, 16:10, 3:2, 4:3, 5:4, 21:9), with no stars
+  echoing outwards in fainter arcs, and the name small near the bottom
+  right corner, whole on 16:9, 16:10 and 3:2 screens once COSMIC crops the
+  wallpaper to fill (4:3, 5:4 and 21:9 screens cut part of it), with no stars
   next to it (`wallpaper/shaders/echoes.frag`, `wallpaper/logo_mark.py`), the
   default COSMIC wallpaper and the greeter background
 - `cosmic-blue-deep-spiral.jpg`: a flat illustration, a calm night-blue field
   with a large tone-on-tone spiral and small round stars, offered in Settings
+- `cosmic-blue-eclipse.jpg`: a deep blue planet in front of its star, ringed with
+  blue light and soft rays, offered in Settings
 - `cosmic-blue-galaxy.jpg`: a tilted spiral galaxy, offered in Settings
 - `cosmic-blue-galactic-river.jpg`: a diagonal river of stars and gas, offered in
   Settings
@@ -54,6 +56,8 @@ All 5120x2880, in `system_files/usr/share/backgrounds/cosmic-blue/`:
   in Settings
 - `cosmic-blue-line-orbits.jpg`: line art, bundles of orbit lines from two
   corners, offered in Settings
+- `cosmic-blue-ringed-planet.jpg`: a giant ringed planet towards the lower
+  right, its thin rings sweeping across the frame, offered in Settings
 - `cosmic-blue-orbits.jpg`: a planetary system seen from above its plane (a
   bright star, shaded planets, a ringed giant, an asteroid belt) over the
   Milky Way, the previous default, offered in Settings
@@ -64,9 +68,8 @@ All 5120x2880, in `system_files/usr/share/backgrounds/cosmic-blue/`:
   graded with the cosmic-blue palette, offered in Settings
 
 COSMIC Settings lists the wallpapers in the order of the folders on disk
-(alphabetical in the deployed image), so the file names put the current set
-first: the default (arcs), the deep spiral, then the others, and the older wallpapers
-(`milky-way`, `orbits`, `waves`, the logo scene) after them. The build moves
+(alphabetical in the deployed image), so the file names put the default
+(arcs) and the deep spiral first, then the others in alphabetical order. The build moves
 COSMIC's own wallpapers to `/usr/share/backgrounds/cosmic-desktop` so that they
 come after ours (`build_files/20-cosmic.sh`).
 
@@ -84,7 +87,7 @@ There are no light versions: the same wallpaper serves both themes. Later
 COSMIC releases read a wallpaper per theme (`com.system76.CosmicBackground.Dark`
 / `.Light`); both point to the default.
 
-The six shader wallpapers are GLSL fragment shaders in `wallpaper/shaders/`
+The eight shader wallpapers are GLSL fragment shaders in `wallpaper/shaders/`
 (`common.glsl` holds the palette, noise, stars and the film-like finish),
 rendered tile by tile with WebGL 2 in Playwright's headless Chromium by
 `wallpaper/shaders/render.js NAME OUT.png [WIDTH HEIGHT]`. They keep the

@@ -6,12 +6,12 @@ set -euox pipefail
 jq -e '.transports.docker."ghcr.io/ublue-os"' /etc/containers/policy.json >/dev/null
 # No Bluefin wallpapers
 test ! -e /usr/share/backgrounds/bluefin
-# Profile pictures: the 18 cosmic-blue avatars only (512x512 PNG), and the
+# Profile pictures: the 22 cosmic-blue avatars only (512x512 PNG), and the
 # picture COSMIC Settings uses for accounts without one (pop-robot.png, a
 # Pop!_OS file) is the planet avatar
 faces=/usr/share/pixmaps/faces
 test ! -e "${faces}/bluefin"
-test "$(find "${faces}" -maxdepth 1 -type f -name '*.png' | wc -l)" -eq 18
+test "$(find "${faces}" -maxdepth 1 -type f -name '*.png' | wc -l)" -eq 22
 test "$(find "${faces}" -mindepth 1 -maxdepth 1 ! -name '*.png' | wc -l)" -eq 0
 test "$(readlink -f "${faces}/pop-robot.png")" = "${faces}/planet.png"
 for face in "${faces}"/*.png; do
@@ -22,7 +22,8 @@ done
 # cosmic-blue wallpapers: arcs (the logo and name) is the COSMIC default, the others are
 # extras. No light duplicates.
 bg=/usr/share/backgrounds/cosmic-blue
-for name in arcs deep-spiral galactic-river galaxy gas-veils line-orbits orbits waves milky-way; do
+for name in arcs deep-spiral eclipse galactic-river galaxy gas-veils line-orbits \
+        ringed-planet orbits waves milky-way; do
     test -s "${bg}/cosmic-blue-${name}.jpg"
 done
 test -s "${bg}/cosmic-blue.jpg"
@@ -213,6 +214,16 @@ done
 compgen -G "${PLYMOUTH_THEME}/throbber-*.png" >/dev/null
 test -e "${PLYMOUTH_THEME}/lock.png"
 test -e "${PLYMOUTH_THEME}/entry.png"
+# Clean graphical boot: systemd status lines hidden, GRUB menu hidden after a
+# good boot (needs bootupd's static GRUB configuration and Fedora's
+# boot-success flag)
+grep -q '"systemd.show_status=error"' /usr/lib/bootc/kargs.d/10-cosmic-blue-quiet-boot.toml
+grep -q '"rd.systemd.show_status=error"' /usr/lib/bootc/kargs.d/10-cosmic-blue-quiet-boot.toml
+test -f /usr/lib/bootupd/grub2-static/grub-static-pre.cfg
+test -f /usr/lib/bootupd/grub2-static/configs.d/12_cosmic-blue-menu-auto-hide.cfg
+test -x /usr/sbin/grub2-set-bootflag
+test -f /usr/lib/systemd/user/grub-boot-success.timer
+systemctl --global is-enabled grub-boot-success.timer
 KVER="$(rpm -q --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' kernel-core | head -n1)"
 lsinitrd "/usr/lib/modules/${KVER}/initramfs.img" > /tmp/initramfs.txt
 grep -q 'plymouth/themes/cosmic-blue/bgrt-fallback.png' /tmp/initramfs.txt

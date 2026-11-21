@@ -11,18 +11,20 @@ OUT = pathlib.Path(__file__).parent / "svg"; OUT.mkdir(exist_ok=True)
 W = "#fff"
 # One hue per avatar, spread around the colour wheel (degrees), so that no two
 # accounts look alike; the shooting
-# star is the one neutral (slate). Gradient from light (top left) to dark.
+# star is neutral (slate), the radio dish too (stone). Gradient from light (top left) to dark.
 import colorsys
 HUES = {"astronaut": 0, "rover": 15, "rocket": 32, "constellation": 46, "ufo": 75,
         "alien": 100, "telescope": 128, "comet": 152, "earth": 175, "aurora": 193,
         "planet": 220, "galaxy": 243, "moon": 263, "black-hole": 283, "orbit": 303,
-        "satellite": 325, "eclipse": 345}
+        "satellite": 325, "eclipse": 345, "star": 60, "lander": 140, "capsule": 207}
 def hsl(h, s, l):
     r, g, b = colorsys.hls_to_rgb(h / 360, l, s)
     return "#%02x%02x%02x" % (round(r * 255), round(g * 255), round(b * 255))
 def colors(name):
     if name == "shooting-star":
         return ("#94a3b8", "#1e293b")
+    if name == "radio-dish":
+        return ("#a8a29e", "#292524")
     h = HUES[name]
     # yellows and greens look lighter: darker so the white drawing stands out
     dim = .06 if 40 <= h <= 140 else 0
@@ -117,8 +119,29 @@ def earth(d): return f'''<clipPath id="e"><circle cx="128" cy="128" r="60"/></cl
 def alien(d): return f'''<path d="M110 74L94 46M146 74L162 46" stroke="{W}" stroke-width="6" stroke-linecap="round"/><circle cx="92" cy="42" r="9" fill="{W}"/><circle cx="164" cy="42" r="9" fill="{W}"/>
 <path d="M128 64c40 0 64 28 64 60 0 38-34 82-64 82s-64-44-64-82c0-32 24-60 64-60z" fill="{W}"/>
 <path d="M90 128c14-4 28 6 30 22-14 4-28-6-30-22zM166 128c-14-4-28 6-30 22 14 4 28-6 30-22z" fill="{d}"/><path d="M118 180c7 4 13 4 20 0" stroke="{d}" stroke-width="5" stroke-linecap="round" fill="none"/>'''
+def star(d):
+    # A four-pointed sparkle, with two small ones
+    def sparkle(cx, cy, r, w):
+        return (f"M{cx} {cy - r}Q{cx + w} {cy - w} {cx + r} {cy}Q{cx + w} {cy + w} {cx} {cy + r}"
+                f"Q{cx - w} {cy + w} {cx - r} {cy}Q{cx - w} {cy - w} {cx} {cy - r}z")
+    return (f'<circle cx="122" cy="134" r="40" fill="{W}" opacity=".18"/><path d="{sparkle(122, 134, 76, 12)}" fill="{W}"/>'
+            f'<path d="{sparkle(190, 66, 22, 4)}" fill="{W}" opacity=".85"/><path d="{sparkle(196, 190, 14, 3)}" fill="{W}" opacity=".6"/>')
+def lander(d): return f'''<path d="M100 150L66 200M156 150L190 200M112 156l-14 44M144 156l14 44" stroke="{W}" stroke-width="7" stroke-linecap="round" opacity=".75"/>
+<path d="M54 202h26M176 202h26" stroke="{W}" stroke-width="8" stroke-linecap="round"/>
+<rect x="84" y="128" width="88" height="34" rx="6" fill="{W}"/><path d="M98 128l8-44h44l8 44z" fill="{W}"/>
+<rect x="114" y="96" width="28" height="18" rx="5" fill="{d}"/><path d="M128 84V60" stroke="{W}" stroke-width="5" stroke-linecap="round"/><circle cx="128" cy="56" r="7" fill="{W}"/>
+<path d="M114 162h28l-6 14h-16z" fill="{W}" opacity=".6"/>'''
+def capsule(d): return f'''<path d="M48 102a80 62 0 0 1 160 0q-20-10-40 0q-20-10-40 0q-20-10-40 0q-20-10-40 0z" fill="{W}"/>
+<path d="M88 66v36M128 40v62M168 66v36" stroke="{d}" stroke-width="4" opacity=".2"/>
+<path d="M52 104l58 80M204 104l-58 80M128 102v82" stroke="{W}" stroke-width="3.5" opacity=".7"/>
+<path d="M112 182h32l12 30h-56z" fill="{W}"/><rect x="122" y="192" width="12" height="10" rx="3" fill="{d}"/>'''
+def radiodish(d): return f'''<g transform="rotate(-30 120 120)"><path d="M58 104a62 62 0 0 0 124 0z" fill="{W}"/>
+<path d="M120 104V62" stroke="{W}" stroke-width="5"/><circle cx="120" cy="58" r="8" fill="{W}"/></g>
+<path d="M120 150l-26 56h52z" fill="{W}" opacity=".75"/><rect x="80" y="204" width="80" height="10" rx="5" fill="{W}"/>
+<path d="M166 66a26 26 0 0 1 22 22M172 46a46 46 0 0 1 38 38" stroke="{W}" stroke-width="6" stroke-linecap="round" fill="none" opacity=".8"/>'''
 GLYPHS=[("planet",planet),("moon",moon),("comet",comet),("rocket",rocket),("satellite",satellite),("telescope",telescope),
-        ("astronaut",helmet),("constellation",constellation),("galaxy",galaxy),("aurora",aurora),("orbit",orbit),("shooting-star",shooting),("ufo",ufo),("eclipse",eclipse),("black-hole",blackhole),("rover",rover),("earth",earth),("alien",alien)]
+        ("astronaut",helmet),("constellation",constellation),("galaxy",galaxy),("aurora",aurora),("orbit",orbit),("shooting-star",shooting),("ufo",ufo),("eclipse",eclipse),("black-hole",blackhole),("rover",rover),("earth",earth),("alien",alien),
+        ("star",star),("lander",lander),("capsule",capsule),("radio-dish",radiodish)]
 # Ground drawn edge to edge, outside the centred drawing
 GROUND={"rover":'<path d="M-10 190c50-16 90-10 140-4s80 4 136-8v90H-10z" fill="#fff" opacity=".3"/>'}
 OFF={k:tuple(v) for k,v in json.loads((pathlib.Path(__file__).parent/"offsets.json").read_text()).items()} if (pathlib.Path(__file__).parent/"offsets.json").exists() else {}
