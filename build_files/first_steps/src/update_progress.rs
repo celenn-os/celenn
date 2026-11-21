@@ -5,14 +5,14 @@
 // PROGRESS. Each line is an event: "ProgressBytes" while the image is
 // downloaded (task "pulling": bytes and bytesTotal of what is left to
 // download), then "ProgressSteps" while it is imported and staged. Only the
-// last complete line matters.
+// last complete line matters. The file is removed when bootc ends.
 
 use crate::i18n::{language, tr};
 use std::time::{Duration, SystemTime};
 
 pub const PROGRESS: &str = "/run/cosmic-blue/update-progress.jsonl";
 /// bootc writes an event at least every few seconds while it downloads;
-/// an older file is a finished (or stopped) download
+/// an older file was left by a download that was stopped
 const FRESH: Duration = Duration::from_secs(60);
 
 pub const TEXTS: &[&str] = &[
@@ -57,7 +57,11 @@ impl Progress {
 pub fn read() -> Option<Progress> {
     let file = std::fs::File::open(PROGRESS).ok()?;
     let modified = file.metadata().ok()?.modified().ok()?;
-    if SystemTime::now().duration_since(modified).unwrap_or_default() > FRESH {
+    if SystemTime::now()
+        .duration_since(modified)
+        .unwrap_or_default()
+        > FRESH
+    {
         return None;
     }
     parse_last(&std::fs::read_to_string(PROGRESS).ok()?)

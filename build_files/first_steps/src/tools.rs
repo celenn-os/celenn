@@ -40,6 +40,7 @@ mod help;
 mod i18n;
 mod maintenance;
 mod more;
+mod update_progress;
 mod updates_page;
 use i18n::tr;
 
@@ -74,6 +75,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let texts: Vec<&str> = [
             TEXTS,
             updates_page::TEXTS,
+            update_progress::TEXTS,
             maintenance::TEXTS,
             more::TEXTS,
             help::TEXTS,
@@ -245,6 +247,10 @@ impl Application for App {
                 .update(message)
                 .map(|action| action.map(Message::Help)),
         }
+    }
+
+    fn subscription(&self) -> cosmic::iced::Subscription<Message> {
+        self.updates.subscription().map(Message::Updates)
     }
 
     fn view(&self) -> Element<'_, Message> {

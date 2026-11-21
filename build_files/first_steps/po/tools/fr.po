@@ -84,6 +84,18 @@ msgstr "Vous suivez le canal dev, choisi dans un terminal. Désactivez ceci pour
 msgid "Downloading the new version… This can take a few minutes."
 msgstr "Téléchargement de la nouvelle version… Cela peut prendre quelques minutes."
 
+msgid "Downloading the new version: {done} of {total} ({percent}%)"
+msgstr "Téléchargement de la nouvelle version : {done} sur {total} ({percent} %)"
+
+msgid "Installing the new version…"
+msgstr "Installation de la nouvelle version…"
+
+msgid "MB"
+msgstr "Mo"
+
+msgid "GB"
+msgstr "Go"
+
 msgid "Something went wrong, nothing was changed."
 msgstr "Un problème est survenu, rien n'a été modifié."
 

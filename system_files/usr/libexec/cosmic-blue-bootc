@@ -13,7 +13,7 @@
 # Downloads (`upgrade` without --check, `switch`, also run by
 # cosmic-blue-updates-helper) copy bootc's progress, JSON lines written to
 # --progress-fd, to /run/cosmic-blue/update-progress.jsonl, readable by
-# everyone: the Updates app shows a progress bar from it. uupd reads that
+# everyone, while bootc runs: the Updates app shows a progress bar from it. uupd reads that
 # progress itself on fd 3: it gets the same lines.
 set -euo pipefail
 
@@ -21,24 +21,28 @@ BOOTC=/usr/bin/bootc
 HOLD=/var/lib/cosmic-blue/update-hold
 PROGRESS=/run/cosmic-blue/update-progress.jsonl
 
-# Runs bootc in place of this script, copying the progress of a download
+# Runs bootc and exits with its status, copying the progress of a download
+# (the copy is removed when bootc ends, which hides the bar)
 run_bootc() {
-    local download=false
+    local download=false status=0
     case "${1:-}" in
         upgrade) [[ " $* " == *" --check "* ]] || download=true ;;
         switch) download=true ;;
     esac
-    if [[ "${download}" == true ]] && mkdir -p "${PROGRESS%/*}" && : > "${PROGRESS}"; then
-        chmod 0644 "${PROGRESS}"
-        if [[ " $* " == *" --progress-fd 3 "* ]]; then
-            # uupd's pipe stays on fd 4 for the copy
-            exec 4>&3
-            exec "${BOOTC}" "$@" 3> >(tee -a "${PROGRESS}" >&4)
-        fi
-        # bootc wants a pipe there
-        exec "${BOOTC}" "$@" --progress-fd 3 3> >(cat >> "${PROGRESS}")
+    if [[ "${download}" != true ]] || ! { mkdir -p "${PROGRESS%/*}" && : > "${PROGRESS}"; }; then
+        exec "${BOOTC}" "$@"
     fi
-    exec "${BOOTC}" "$@"
+    chmod 0644 "${PROGRESS}"
+    if [[ " $* " == *" --progress-fd 3 "* ]]; then
+        # uupd's pipe stays on fd 4 for the copy
+        exec 4>&3
+        "${BOOTC}" "$@" 3> >(tee -a "${PROGRESS}" >&4) || status=$?
+    else
+        # bootc wants a pipe there
+        "${BOOTC}" "$@" --progress-fd 3 3> >(cat >> "${PROGRESS}") || status=$?
+    fi
+    rm -f "${PROGRESS}"
+    exit "${status}"
 }
 
 if [[ "${1:-}" != upgrade || ! -s "${HOLD}" ]]; then
