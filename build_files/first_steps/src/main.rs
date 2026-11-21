@@ -739,6 +739,7 @@ const TEXTS: &[&str] = &[
     "Open COSMIC Store",
     "A Windows program with no equivalent? Bottles, in COSMIC Store, runs some of them.",
     "Open with Bottles",
+    "See the equivalents of Windows programs",
     "For advanced users: distrobox installs it in a container of another distribution.",
     // Keyboard shortcuts
     "Keyboard shortcuts",
@@ -2282,6 +2283,16 @@ impl<T: Tour> App<T> {
             )
             .push(text::body(tr(explanation)).wrapping(Wrapping::Word))
             .push(text::caption(tr(hint)).wrapping(Wrapping::Word))
+            // The site's table of Windows and Mac programs and their
+            // equivalents (a link: the buttons row is full)
+            .push_maybe((kind == Package::Windows).then(|| {
+                widget::button::link(tr("See the equivalents of Windows programs"))
+                    .trailing_icon(true)
+                    .on_press(Message::Run(Action::OpenUri(format!(
+                        "{}#alternatives",
+                        docs_url()
+                    ))))
+            }))
             .push(widget::space::vertical())
             .push(buttons)
             .padding(space_l)

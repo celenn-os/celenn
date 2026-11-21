@@ -260,6 +260,9 @@ msgstr "Ein Windows-Programm ohne Gegenstück? Bottles aus COSMIC Store kann ein
 msgid "Open with Bottles"
 msgstr "Mit Bottles öffnen"
 
+msgid "See the equivalents of Windows programs"
+msgstr "Gleichwertige Programme für Windows-Programme ansehen"
+
 msgid "For advanced users: distrobox installs it in a container of another distribution."
 msgstr "Für Fortgeschrittene: distrobox installiert es in einem Container einer anderen Distribution."
 

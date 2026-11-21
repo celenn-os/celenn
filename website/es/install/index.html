@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Instalar · cosmic-blue</title>
+  <meta name="description" content="Instalar cosmic-blue paso a paso: memoria USB, menú de arranque, junto a Windows o en su lugar, NVIDIA.">
+  <meta name="theme-color" content="#060b1c">
+  <link rel="alternate" hreflang="de" href="https://cosmic-blue-os.github.io/cosmic-blue/de/install/">
+  <link rel="alternate" hreflang="en" href="https://cosmic-blue-os.github.io/cosmic-blue/install/">
+  <link rel="alternate" hreflang="es" href="https://cosmic-blue-os.github.io/cosmic-blue/es/install/">
+  <link rel="alternate" hreflang="fr" href="https://cosmic-blue-os.github.io/cosmic-blue/fr/install/">
+  <link rel="alternate" hreflang="it" href="https://cosmic-blue-os.github.io/cosmic-blue/it/install/">
+  <link rel="alternate" hreflang="pt-BR" href="https://cosmic-blue-os.github.io/cosmic-blue/pt-br/install/">
+  <link rel="alternate" hreflang="x-default" href="https://cosmic-blue-os.github.io/cosmic-blue/install/">
+  <link rel="icon" href="../../img/cosmic-blue-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <header class="page-head">
+    <nav class="top">
+      <a class="brand" href="../"><img src="../../img/cosmic-blue-logo.svg" alt="" width="28" height="28">cosmic-blue</a>
+      <span class="links">
+        <a class="text" href="../docs/">Docs</a>
+        <a class="text" href="../screenshots/">Capturas</a>
+        <details class="lang">
+          <summary class="icon" title="Idioma" aria-label="Idioma: Español"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><ellipse cx="12" cy="12" rx="4" ry="9.5"/><path d="M2.5 12h19M4.2 7h15.6M4.2 17h15.6"/></svg><span aria-hidden="true">ES</span></summary>
+          <ul>
+            <li><a href="../../de/docs/" hreflang="de" lang="de">Deutsch</a></li>
+            <li><a href="../../docs/" hreflang="en" lang="en">English</a></li>
+            <li><a href="../../es/docs/" hreflang="es" lang="es" aria-current="page">Español</a></li>
+            <li><a href="../../fr/docs/" hreflang="fr" lang="fr">Français</a></li>
+            <li><a href="../../it/docs/" hreflang="it" lang="it">Italiano</a></li>
+            <li><a href="../../pt-br/docs/" hreflang="pt-BR" lang="pt-BR">Português</a></li>
+          </ul>
+        </details>
+        <a class="icon" href="https://github.com/cosmic-blue-os/cosmic-blue" title="GitHub" aria-label="GitHub"><svg viewBox="0 0 16 16" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+      </span>
+    </nav>
+  </header>
+
+  <main class="docs">
+    <section class="block">
+      <h1>Instalar cosmic-blue paso a paso</h1>
+      <p>Calcule media hora. Puede probar cosmic-blue primero desde la memoria USB: nada cambia en el ordenador hasta que inicie la instalación.</p>
+      <div class="needs">
+        <div><strong>Memoria USB de 8 GB</strong>se borrará</div>
+        <div><strong>64 GB de disco</strong>128 GB recomendados</div>
+        <div><strong>4 GB de memoria</strong>8 GB recomendados</div>
+        <div><strong>PC de 64 bits</strong>Intel o AMD</div>
+      </div>
+    </section>
+
+    <section class="block">
+      <ol class="steps">
+        <li id="backup"><h2>Haga una copia de sus archivos</h2>
+          <p>Copie sus documentos y fotos en un disco externo o en línea. Hágalo aunque conserve Windows: un error de disco ocurre rápido.</p></li>
+        <li id="download"><h2>Descargue la versión correcta</h2>
+          <p>¿Una tarjeta gráfica NVIDIA (GeForce GTX&nbsp;16xx, RTX)? Elija la versión NVIDIA; si no, la estándar. Para saberlo, en Windows: <em>Administrador de dispositivos → Adaptadores de pantalla</em>.</p>
+          <p><a class="button primary" href="../#install">Descargar</a></p></li>
+        <li id="usb"><h2>Prepare la memoria USB</h2>
+          <p>Instale <a href="https://fedoraproject.org/workstation/download">Fedora Media Writer</a> (Windows o Mac), elija <em>Seleccionar archivo .iso</em>, luego su memoria y luego <em>Escribir</em>.</p></li>
+        <li id="boot"><h2>Arranque desde la memoria</h2>
+          <p>Con la memoria conectada, encienda el ordenador pulsando varias veces la tecla de su marca y elija la memoria USB.</p>
+          <table class="keys"><thead><tr><th>Marca</th><th>Tecla</th></tr></thead><tbody><tr><td>Acer, Dell, Lenovo</td><td><kbd>F12</kbd></td></tr><tr><td>HP</td><td><kbd>F9</kbd> / <kbd>Esc</kbd></td></tr><tr><td>ASUS</td><td><kbd>F8</kbd> / <kbd>Esc</kbd></td></tr><tr><td>MSI</td><td><kbd>F11</kbd></td></tr><tr><td>Otra</td><td><kbd>F12</kbd>, <kbd>F11</kbd> / <kbd>Esc</kbd></td></tr></tbody></table>
+          <p class="note">¿No funciona? Desde Windows: <em>Configuración → Sistema → Recuperación → Inicio avanzado → Reiniciar ahora</em> y luego <em>Usar un dispositivo</em>.</p></li>
+        <li id="try"><h2>Pruebe y luego instale</h2>
+          <p>El escritorio de cosmic-blue arranca desde la memoria. Compruebe el Wi-Fi, el sonido y la pantalla. Si todo va bien, abra <strong>Install cosmic-blue</strong> en el escritorio.</p></li>
+        <li id="disk"><h2>Elija dónde instalar</h2>
+          <div class="choices">
+            <div><h3>Reemplazar Windows <span class="tag">lo más sencillo</span></h3><p>En el instalador, elija el disco y libere espacio borrándolo todo. Se borra todo el disco.</p></div>
+            <div><h3>Junto a Windows</h3><p>Primero, en Windows, abra <em>Administración de discos</em>, haga clic derecho en la partición de Windows y elija <em>Reducir volumen</em> para liberar al menos 64 GB. El instalador usará ese espacio libre por sí solo.</p></div>
+          </div>
+          <p class="note warn">Antes de reducir, desactive el cifrado en Windows: <em>Configuración → Privacidad y seguridad → Cifrado de dispositivo</em> (o BitLocker). Un segundo disco solo para cosmic-blue es aún más sencillo.</p>
+          <p>Después, cosmic-blue arranca por defecto. Para iniciar Windows, use la tecla del paso 4 y elija <em>Windows Boot Manager</em>.</p></li>
+        <li id="nvidia"><h2>Versión NVIDIA: una pantalla azul en el primer reinicio</h2>
+          <p>Es normal y solo pasa una vez, con Secure Boot activado: permite cargar el controlador de NVIDIA. Use las flechas y <kbd>Intro</kbd>. La contraseña es <code>cosmicblue</code> (el teclado puede estar en QWERTY inglés).</p>
+          <div class="mok">
+          <figure><svg viewBox="0 0 320 200" role="img" aria-label="Enroll key from disk"><rect width="320" height="200" fill="#0000a8"/><rect x="40" y="30" width="240" height="140" fill="#a8a8a8"/><text x="160" y="50" text-anchor="middle">Perform MOK management</text><text x="160" y="85" text-anchor="middle">Continue boot</text><rect x="60" y="94" width="200" height="18" fill="#000"/><text x="160" y="107" text-anchor="middle" fill="#fff">Enroll MOK</text><text x="160" y="129" text-anchor="middle">Enroll key from disk</text></svg><figcaption>1. <em>Enroll MOK</em></figcaption></figure>
+          <figure><svg viewBox="0 0 320 200" role="img" aria-label="Continue"><rect width="320" height="200" fill="#0000a8"/><rect x="40" y="30" width="240" height="140" fill="#a8a8a8"/><text x="160" y="50" text-anchor="middle">Enroll MOK</text><text x="160" y="85" text-anchor="middle">View key 0</text><rect x="60" y="94" width="200" height="18" fill="#000"/><text x="160" y="107" text-anchor="middle" fill="#fff">Continue</text></svg><figcaption>2. <em>Continue</em></figcaption></figure>
+          <figure><svg viewBox="0 0 320 200" role="img" aria-label="Yes"><rect width="320" height="200" fill="#0000a8"/><rect x="40" y="30" width="240" height="140" fill="#a8a8a8"/><text x="160" y="50" text-anchor="middle">Enroll the key(s)?</text><text x="160" y="85" text-anchor="middle">No</text><rect x="60" y="94" width="200" height="18" fill="#000"/><text x="160" y="107" text-anchor="middle" fill="#fff">Yes</text></svg><figcaption>3. <em>Yes</em></figcaption></figure>
+          <figure><svg viewBox="0 0 320 200" role="img" aria-label="Reboot"><rect width="320" height="200" fill="#0000a8"/><rect x="40" y="30" width="240" height="140" fill="#a8a8a8"/><text x="160" y="50" text-anchor="middle">Password:</text><text x="160" y="85" text-anchor="middle">**********</text><text x="160" y="107" text-anchor="middle"></text><rect x="60" y="116" width="200" height="18" fill="#000"/><text x="160" y="129" text-anchor="middle" fill="#fff">Reboot</text></svg><figcaption>4. <code>cosmicblue</code> y luego <em>Reboot</em></figcaption></figure>
+          </div>
+          <p>¿Se le pasó? El escritorio arranca igual, sin el controlador de NVIDIA. Ejecute <code>ujust enroll-secure-boot-key</code> en un terminal y reinicie.</p></li>
+        <li id="welcome"><h2>Bienvenida</h2>
+          <p>Tras el reinicio, cree su cuenta. Después se abre el recorrido, que le ayuda a configurarlo todo.</p></li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <p>cosmic-blue está construido sobre <a href="https://universal-blue.org/">Universal Blue</a>, <a href="https://projectbluefin.io/">Bluefin</a>, <a href="https://fedoraproject.org/">Fedora</a> y <a href="https://system76.com/cosmic">COSMIC</a>. cosmic-blue es un proyecto independiente, no afiliado a estos proyectos ni respaldado por ellos.</p>
+    <p><a href="../docs/troubleshooting/">Solución de problemas</a> ·
+    <a href="https://github.com/cosmic-blue-os/cosmic-blue">Código fuente</a> ·
+    <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues">Informar de un problema</a></p>
+  </footer>
+
+  <script src="../../site.js"></script>
+</body>
+</html>
