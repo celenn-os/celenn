@@ -353,6 +353,63 @@ TILING = tela_app(
     '<rect x="33" y="33" width="15" height="14" rx="2.5" fill="#fff" opacity=".45"/>'
 )
 
+# The first steps tour's page icons, in the same style as the dock buttons
+# (and the Keyboard shortcuts app's icon)
+# Your computer: a screen on its stand
+TOUR_COMPUTER = tela_app(
+    '<path d="M27.5 43h9l1.5 5h-12z" fill="#fff" opacity=".45"/>'
+    '<rect x="21" y="47" width="22" height="3.4" rx="1.7" fill="#fff"/>'
+    '<rect x="14" y="16" width="36" height="27" rx="3.5" fill="#fff"/>'
+    '<rect x="17.5" y="19.5" width="29" height="20" rx="1.5" fill="#4f8dff"/>'
+    '<path d="M17.5 33.5L31 19.5h8L17.5 39.5z" fill="#fff" opacity=".3"/>'
+)
+# Keyboard shortcuts: a keyboard
+TOUR_KEYBOARD = tela_app(
+    '<rect x="12" y="20" width="40" height="25" rx="4" fill="#fff"/>'
+    + "".join(f'<rect x="{16 + i * 6.6:.1f}" y="24" width="5" height="5" rx="1.2" fill="#4f8dff" opacity=".55"/>'
+              for i in range(5))
+    + "".join(f'<rect x="{19.3 + i * 6.6:.1f}" y="30.5" width="5" height="5" rx="1.2" fill="#4f8dff" opacity=".55"/>'
+              for i in range(4))
+    + '<rect x="22" y="37.5" width="20" height="4" rx="1.2" fill="#4f8dff"/>'
+)
+# Your bearings: a compass
+TOUR_BEARINGS = tela_app(
+    '<circle cx="32" cy="32" r="16" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="3.5"/>'
+    '<path d="M32 18.5l5 13.5h-10z" fill="#fff"/>'
+    '<path d="M32 45.5l5-13.5h-10z" fill="#fff" opacity=".45"/>'
+    '<circle cx="32" cy="32" r="2.6" fill="#4f8dff"/>'
+)
+# Try it: a pointer that clicks
+TOUR_TRY = tela_app(
+    '<path d="M19.5 22.5l-3.5-3.5M25 18v-5M19 27h-5" stroke="#fff" stroke-opacity=".45" stroke-width="3" '
+    'stroke-linecap="round"/>'
+    '<path d="M24 22.5L44 31.5l-8.6 2.8 6.3 8.6-4.6 3.4-6.3-8.6-5.2 7.4z" fill="#fff" '
+    'stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>'
+)
+# Good to know: a light bulb
+TOUR_TIPS = tela_app(
+    '<path d="M32 14a12 12 0 0 1 7 21.7c-1.3 1-2 2.3-2 3.8V40h-10v-.5c0-1.5-.7-2.8-2-3.8A12 12 0 0 1 32 14z" '
+    'fill="#fff"/>'
+    '<rect x="27" y="42" width="10" height="3.2" rx="1.6" fill="#fff" opacity=".45"/>'
+    '<rect x="28.5" y="46.5" width="7" height="3.2" rx="1.6" fill="#fff" opacity=".45"/>'
+    '<path d="M28.5 25.5a5 5 0 0 1 4-3.5" fill="none" stroke="#4f8dff" stroke-width="2.4" stroke-linecap="round"/>'
+)
+# Accessibility (the welcome page's row): a person, arms open
+TOUR_ACCESSIBILITY = tela_app(
+    '<circle cx="32" cy="18.5" r="4" fill="#fff"/>'
+    '<path d="M19 26.5l13 2 13-2M32 28.5v8M32 36.5l-6 11M32 36.5l6 11" fill="none" stroke="#fff" '
+    'stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>'
+)
+TOUR_ICONS = {
+    "cosmic-blue-tour-accessibility": TOUR_ACCESSIBILITY,
+    "cosmic-blue-tour-computer": TOUR_COMPUTER,
+    "cosmic-blue-tour-keyboard": TOUR_KEYBOARD,
+    "cosmic-blue-tour-bearings": TOUR_BEARINGS,
+    "cosmic-blue-tour-try": TOUR_TRY,
+    "cosmic-blue-tour-tips": TOUR_TIPS,
+}
+
+
 # Icon -> names (the desktop entries of the dock buttons and of the apps
 # they open). The first name gets the file, the others are links to it.
 # COSMIC Files: a folder, its back panel with the tab in translucent white
@@ -438,6 +495,9 @@ def main():
     UPDATE_ICON.write_text(UPDATE)
     TOOLS_ICON.write_text(TOOLS)
     TOUR_STORE_ICON.write_text(TOUR_STORE)
+    # Bring your things: COSMIC Files' folder
+    for name, icon in {**TOUR_ICONS, "cosmic-blue-tour-files": FILES}.items():
+        (HICOLOR_APPS / f"{name}.svg").write_text(icon)
     (APPS / "cosmic-blue-installer.svg").write_text(INSTALLER)
 
 

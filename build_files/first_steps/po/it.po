@@ -17,12 +17,6 @@ msgstr "Chiudi"
 msgid "Later"
 msgstr "Più tardi"
 
-msgid "Copy"
-msgstr "Copia"
-
-msgid "Copied"
-msgstr "Copiato"
-
 msgid "Welcome to cosmic-blue"
 msgstr "Ti diamo il benvenuto in cosmic-blue"
 
@@ -40,18 +34,6 @@ msgstr "Primi passi"
 
 msgid "Open COSMIC Store"
 msgstr "Apri COSMIC Store"
-
-msgid "Command line tools, installed in your home folder with Homebrew"
-msgstr "Strumenti da riga di comando, installati nella tua cartella home con Homebrew"
-
-msgid "Packages from other distributions, in a container that shares your home folder"
-msgstr "Pacchetti di altre distribuzioni, in un container che condivide la tua cartella home"
-
-msgid "Update everything now, without waiting"
-msgstr "Aggiorna tutto subito, senza aspettare"
-
-msgid "An update broke something? Go back to the previous version, then restart"
-msgstr "Un aggiornamento ha rotto qualcosa? Torna alla versione precedente, poi riavvia"
 
 msgid "Protect your files"
 msgstr "Proteggi i tuoi file"
@@ -164,23 +146,14 @@ msgstr "Installato"
 msgid "Development"
 msgstr "Sviluppo"
 
-msgid "Docker, VS Code, Podman Desktop… picked from a menu, in a terminal"
-msgstr "Docker, VS Code, Podman Desktop… scelti da un menu, in un terminale"
-
 msgid "Choose…"
 msgstr "Scegli…"
-
-msgid "Install the selection"
-msgstr "Installa la selezione"
 
 msgid "Installing: {} of {}"
 msgstr "Installazione: {} di {}"
 
 msgid "Some apps did not install. Are you online? They are also in COSMIC Store."
 msgstr "Alcune app non sono state installate. Sei connesso a Internet? Si trovano anche in COSMIC Store."
-
-msgid "Press Enter to close this window."
-msgstr "Premi Invio per chiudere questa finestra."
 
 msgid "Checking your computer…"
 msgstr "Controllo del computer…"
@@ -305,9 +278,6 @@ msgstr "I tuoi punti di riferimento da Windows"
 msgid "Your bearings from the Mac"
 msgstr "I tuoi punti di riferimento dal Mac"
 
-msgid "The short version, with the commands"
-msgstr "La versione breve, con i comandi"
-
 msgid "Office"
 msgstr "Ufficio"
 
@@ -320,17 +290,11 @@ msgstr "Giochi"
 msgid "Steam, and Heroic Games Launcher for Epic Games and GOG"
 msgstr "Steam, e Heroic Games Launcher per Epic Games e GOG"
 
-msgid "Creative work"
-msgstr "Creatività"
-
-msgid "GIMP for photos, Inkscape for drawings, Krita for painting, Kdenlive for videos"
-msgstr "GIMP per le foto, Inkscape per i disegni, Krita per dipingere, Kdenlive per i video"
-
 msgid "Open the launcher"
 msgstr "Apri il launcher"
 
-msgid "Press Super, type the name of an app, then Enter. Super is the key with the Windows logo on most keyboards."
-msgstr "Premi Super, digita il nome di un’app, poi Invio. Super è il tasto con il logo di Windows sulla maggior parte delle tastiere."
+msgid "Press Super, type the name of an app, then Enter."
+msgstr "Premi Super, digita il nome di un’app, poi Invio."
 
 msgid "See all your apps"
 msgstr "Vedi tutte le tue app"
@@ -430,9 +394,6 @@ msgstr "Prova, non c’è rischio"
 
 msgid "Each button does the real thing."
 msgstr "Ogni pulsante lo fa davvero."
-
-msgid "The Keyboard shortcuts app lists them all."
-msgstr "L’app Scorciatoie da tastiera le elenca tutte."
 
 msgid "Bring your things"
 msgstr "Porta le tue cose"
@@ -581,17 +542,83 @@ msgstr "Impostazioni di Sistema → Impostazioni"
 msgid "Everything in one place, Settings → Desktop for the look"
 msgstr "Tutto in un unico posto, Impostazioni → Desktop per l’aspetto"
 
-msgid "cosmic-blue in a nutshell"
-msgstr "cosmic-blue in breve"
+msgid "Docker, VS Code, Zed, Neovim…: choose your tools"
+msgstr "Docker, VS Code, Zed, Neovim…: scegli i tuoi strumenti"
 
-msgid "Fedora Atomic with COSMIC: the system is a signed, read-only image that updates as a whole. Apps and tools go on top of it."
-msgstr "Fedora Atomic con COSMIC: il sistema è un’immagine firmata, in sola lettura, che si aggiorna tutta insieme. App e strumenti si aggiungono sopra."
+msgid "Chosen: {}"
+msgstr "Scelti: {}"
 
-msgid "Tiling: Super + Y. The Keyboard shortcuts app lists them all."
-msgstr "Affiancamento: Super + Y. L’app Scorciatoie da tastiera le elenca tutte."
+msgid "Install and continue"
+msgstr "Installa e continua"
 
-msgid "The system's recipes: developer tools, command line tools, update channel… Type ujust to list them."
-msgstr "Le ricette del sistema: strumenti per sviluppatori, da riga di comando, canale degli aggiornamenti… Digita ujust per elencarle."
+msgid "Some apps did not install"
+msgstr "Alcune app non si sono installate"
 
-msgid "Follow the stable (weekly), testing (daily) or dev image"
-msgstr "Seguire l’immagine stable (settimanale), testing (giornaliera) o dev"
+msgid "Are you online? They are also in COSMIC Store."
+msgstr "Sei connesso? Sono anche in COSMIC Store."
+
+msgid "Containers"
+msgstr "Container"
+
+msgid "Code editors"
+msgstr "Editor di codice"
+
+msgid "In the terminal"
+msgstr "Nel terminale"
+
+msgid "Ticked and grey: already installed. Lima and virtual machines: ujust install-dev-tools and ujust install-vms, in a terminal."
+msgstr "Spuntato e grigio: già installato. Lima e le macchine virtuali: ujust install-dev-tools e ujust install-vms, in un terminale."
+
+msgid "Homebrew is still being set up: the code editors and terminal tools can be chosen in a few minutes."
+msgstr "Homebrew è ancora in configurazione: potrai scegliere gli editor di codice e gli strumenti del terminale tra qualche minuto."
+
+msgid "Back to the list"
+msgstr "Torna all’elenco"
+
+msgid "What is different from your distribution"
+msgstr "Cosa cambia rispetto alla tua distribuzione"
+
+msgid "Graphics and drawing"
+msgstr "Grafica e disegno"
+
+msgid "GIMP for photos, Inkscape for illustrations and logos, Krita for digital painting"
+msgstr "GIMP per le foto, Inkscape per illustrazioni e loghi, Krita per la pittura digitale"
+
+msgid "Videos and streaming"
+msgstr "Video e streaming"
+
+msgid "OBS Studio to record and stream, Kdenlive to edit videos, Audacity for sound"
+msgstr "OBS Studio per registrare e trasmettere, Kdenlive per montare i video, Audacity per l’audio"
+
+msgid "What is different here"
+msgstr "Cosa cambia qui"
+
+msgid "Another Linux, with its own habits, and an app for each of them."
+msgstr "Un altro Linux, con le sue abitudini, e un’app per ciascuna."
+
+msgid "The system is an image"
+msgstr "Il sistema è un’immagine"
+
+msgid "Signed and read-only, it updates as a whole: no dnf on the system, and the previous version is one click away."
+msgstr "Firmato e in sola lettura, si aggiorna in blocco: niente dnf sul sistema, e la versione precedente è a un clic."
+
+msgid "Apps → COSMIC Store"
+msgstr "App → COSMIC Store"
+
+msgid "Flatpak apps from Flathub, kept apart from the system"
+msgstr "App Flatpak da Flathub, separate dal sistema"
+
+msgid "Packages from other distributions → DistroShelf"
+msgstr "Pacchetti di altre distribuzioni → DistroShelf"
+
+msgid "Arch, Debian, Ubuntu… in a container that shares your home folder, set up in a few clicks"
+msgstr "Arch, Debian, Ubuntu… in un container che condivide la tua cartella home, pronto in pochi clic"
+
+msgid "Open DistroShelf"
+msgstr "Apri DistroShelf"
+
+msgid "If you like the terminal"
+msgstr "Se ti piace il terminale"
+
+msgid "ujust lists the system's recipes, brew installs command line tools: the documentation has them all."
+msgstr "ujust elenca le ricette del sistema, brew installa gli strumenti da riga di comando: la documentazione li descrive tutti."

@@ -18,6 +18,18 @@ pub const WALLPAPERS: &str = "/usr/share/backgrounds/cosmic-blue";
 pub const THUMBNAILS: &str = "/usr/share/cosmic-blue/wallpapers";
 pub const AVATARS: &str = "/usr/share/pixmaps/faces";
 const IMAGE_INFO: &str = "/usr/share/ublue-os/image-info.json";
+/// Homebrew, set up at the first boot (ublue-os/brew)
+pub const BREW: &str = "/home/linuxbrew/.linuxbrew/bin/brew";
+const BREW_PREFIX: &str = "/home/linuxbrew/.linuxbrew";
+
+pub fn brew_has_formula(name: &str) -> bool {
+    Path::new(BREW_PREFIX).join("Cellar").join(name).is_dir()
+}
+
+pub fn brew_has_cask(name: &str) -> bool {
+    Path::new(BREW_PREFIX).join("Caskroom").join(name).is_dir()
+}
+
 pub const UPDATES_HELPER: &str = "/usr/libexec/cosmic-blue-updates-helper";
 
 fn config_dir() -> PathBuf {
