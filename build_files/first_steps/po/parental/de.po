@@ -134,9 +134,6 @@ msgstr "Erstellen"
 msgid "Cancel"
 msgstr "Abbrechen"
 
-msgid "Something went wrong, nothing was changed."
-msgstr "Etwas ist schiefgelaufen, nichts wurde geändert."
-
 msgid "Recommended"
 msgstr "Empfohlen"
 
@@ -196,3 +193,42 @@ msgstr "Der Jugendschutz erlaubt die Anmeldung gerade nicht. Frag einen Elternte
 
 msgid "No limit today"
 msgstr "Heute ohne Limit"
+
+msgid "Saving the settings"
+msgstr "Einstellungen speichern"
+
+msgid "“{}” did not work"
+msgstr "„{}“ hat nicht geklappt"
+
+msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
+msgstr "Keine Internetverbindung. Verbinden Sie sich mit einem Netzwerk und versuchen Sie es erneut. Nichts wurde geändert."
+
+msgid "The disk is full ({} free). Free up space with Clean up, in cosmic-blue Tools, Maintenance, then try again."
+msgstr "Die Festplatte ist voll ({} frei). Schaffen Sie Platz mit Aufräumen in cosmic-blue Werkzeuge, Pflege, und versuchen Sie es erneut."
+
+msgid "The server does not answer. Try again in a few minutes."
+msgstr "Der Server antwortet nicht. Versuchen Sie es in ein paar Minuten erneut."
+
+msgid "Something unexpected went wrong. Nothing was changed."
+msgstr "Etwas Unerwartetes ist schiefgegangen. Nichts wurde geändert."
+
+msgid "Try again"
+msgstr "Erneut versuchen"
+
+msgid "Network settings"
+msgstr "Netzwerkeinstellungen"
+
+msgid "Report the problem"
+msgstr "Problem melden"
+
+msgid "Technical details"
+msgstr "Technische Details"
+
+msgid "The report opens in your browser, filled in: the cosmic-blue version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
+msgstr "Der Bericht öffnet sich ausgefüllt im Browser: die cosmic-blue-Version, die Hardware und dieser Fehler. Keine Dateien, keine persönlichen Daten. Sie lesen ihn vor dem Senden; schreiben Sie in Ihrer Sprache. Zum Senden braucht es ein GitHub-Konto."
+
+msgid "Open the report"
+msgstr "Bericht öffnen"
+
+msgid "Close"
+msgstr "Schließen"

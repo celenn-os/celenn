@@ -1009,11 +1009,6 @@ clean-system confirm="ask":
 enroll-secure-boot-key:
     #!/usr/bin/bash
     set -euo pipefail
-    # The password is not a secret: the firmware's MOK manager asks for it
-    # once, at the machine itself, to confirm that the key was queued on purpose.
-    password="cosmicblue"
-    key=/etc/pki/akmods/certs/akmods-ublue.der
-    sudo mokutil --timeout -1
-    printf '%s\n%s\n' "${password}" "${password}" | sudo mokutil --import "${key}"
-    echo "At the next reboot, a blue screen (MOK manager, QWERTY keyboard layout) shows up:"
-    echo "choose \"Enroll MOK\", then \"Continue\", and type the password \"${password}\"."
+    # Same as "Allow" in cosmic-blue Tools, Computer (password cosmicblue,
+    # see the helper)
+    sudo /usr/libexec/cosmic-blue-tools-helper driver-key

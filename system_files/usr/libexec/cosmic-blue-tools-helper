@@ -7,15 +7,21 @@
 #            for everyone needs any more, and the system's update caches
 #            (rpm-ostree cleanup --base --repomd: the deployments, so the
 #            previous version, stay). Run by /usr/libexec/cosmic-blue-clean.
+#   driver-key
+#            queue the key that signs NVIDIA's driver for enrollment with
+#            Secure Boot: at the next restart the firmware's MOK manager (a
+#            blue screen) asks for the password "cosmicblue". Not a secret:
+#            it only confirms, at the machine itself, that the key was
+#            queued on purpose. Also run by `ujust enroll-secure-boot-key`.
 set -euo pipefail
 
 usage() {
-    echo "Usage: ${0##*/} clean" >&2
+    echo "Usage: ${0##*/} clean | driver-key" >&2
     exit 2
 }
 
 case "${1:-} $#" in
-    "clean 1") ;;
+    "clean 1" | "driver-key 1") ;;
     *) usage ;;
 esac
 
@@ -23,5 +29,16 @@ case "$1" in
     clean)
         flatpak uninstall --system --unused --noninteractive -y
         rpm-ostree cleanup --base --repomd
+        ;;
+    driver-key)
+        key=/etc/pki/akmods/certs/akmods-ublue.der
+        if mokutil --test-key "${key}" 2>/dev/null | grep -q 'already enrolled'; then
+            echo "The driver key is already enrolled."
+            exit 0
+        fi
+        mokutil --timeout -1 || :
+        printf '%s\n%s\n' cosmicblue cosmicblue | mokutil --import "${key}"
+        echo "At the next restart, a blue screen (MOK manager, QWERTY keyboard layout) shows up:"
+        echo "choose \"Enroll MOK\", then \"Continue\", and type the password \"cosmicblue\"."
         ;;
 esac

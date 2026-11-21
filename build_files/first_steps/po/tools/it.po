@@ -189,9 +189,6 @@ msgstr "Installazione in corso…"
 msgid "The apps are back."
 msgstr "Le app sono tornate."
 
-msgid "The apps could not be installed. Are you online?"
-msgstr "Non è stato possibile installare le app. Sei connesso?"
-
 msgid "Firmware updates"
 msgstr "Aggiornamenti del firmware"
 
@@ -446,3 +443,48 @@ msgstr "Steam, Heroic, Lutris… Seleziona quelli che vuoi, deseleziona quelli d
 
 msgid "Your game apps are ready."
 msgstr "Le tue app per i giochi sono pronte."
+
+msgid "Allow"
+msgstr "Consenti"
+
+msgid "At the next restart, a blue screen asks for the password cosmicblue: choose Enroll MOK, Continue, Yes, type cosmicblue, then Reboot. The keyboard may be in QWERTY."
+msgstr "Al prossimo riavvio, una schermata blu chiede la password cosmicblue: scegliete Enroll MOK, Continue, Yes, digitate cosmicblue, poi Reboot. La tastiera può essere in QWERTY inglese."
+
+msgid "Close"
+msgstr "Chiudi"
+
+msgid "Network settings"
+msgstr "Impostazioni di rete"
+
+msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
+msgstr "Nessuna connessione a Internet. Collegatevi a una rete, poi riprovate. Non è stato modificato nulla."
+
+msgid "Open the report"
+msgstr "Apri il rapporto"
+
+msgid "Report the problem"
+msgstr "Segnala il problema"
+
+msgid "Secure Boot does not let NVIDIA's driver load yet. Allow it once: at the next restart, a blue screen asks for the password cosmicblue."
+msgstr "Secure Boot non lascia ancora caricare il driver NVIDIA. Consentitelo una volta: al prossimo riavvio, una schermata blu chiede la password cosmicblue."
+
+msgid "Something unexpected went wrong. Nothing was changed."
+msgstr "Qualcosa di inatteso è andato storto. Non è stato modificato nulla."
+
+msgid "Technical details"
+msgstr "Dettagli tecnici"
+
+msgid "The disk is full ({} free). Free up space with Clean up, in cosmic-blue Tools, Maintenance, then try again."
+msgstr "Il disco è pieno ({} liberi). Liberate spazio con Pulisci, in Strumenti di cosmic-blue, Manutenzione, poi riprovate."
+
+msgid "The report opens in your browser, filled in: the cosmic-blue version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
+msgstr "Il rapporto si apre nel browser, già compilato: la versione di cosmic-blue, l'hardware e questo errore. Nessun file né dato personale. Lo rileggete prima di inviarlo; scrivete nella vostra lingua. Per inviarlo serve un account GitHub."
+
+msgid "The server does not answer. Try again in a few minutes."
+msgstr "Il server non risponde. Riprovate tra qualche minuto."
+
+msgid "Try again"
+msgstr "Riprova"
+
+msgid "“{}” did not work"
+msgstr "«{}» non è riuscito"

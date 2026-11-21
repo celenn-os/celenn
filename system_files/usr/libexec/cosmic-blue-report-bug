@@ -6,6 +6,9 @@
 #
 #   cosmic-blue-report-bug open    open the form in the browser
 #   cosmic-blue-report-bug url     print the form's address with the details
+#
+# COSMIC_BLUE_REPORT_ERROR: an error to add to the details (the "Report the
+# problem" button of an error in cosmic-blue Tools or Parental controls).
 set -euo pipefail
 
 form="https://github.com/cosmic-blue-os/cosmic-blue/issues/new?template=bug_report.yml"
@@ -19,6 +22,9 @@ case "${1:-} $#" in
 esac
 
 info="$(/usr/libexec/cosmic-blue-system-info)"
+if [[ -n "${COSMIC_BLUE_REPORT_ERROR:-}" ]]; then
+    info+=$'\n\nError:\n'"${COSMIC_BLUE_REPORT_ERROR}"
+fi
 url="${form}&system-info=$(printf '%s\n' "${info}" | jq -sRr @uri)"
 # Browsers and GitHub refuse very long addresses: then the details are pasted
 if [[ "${#url}" -gt 7000 ]]; then

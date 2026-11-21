@@ -187,9 +187,6 @@ msgstr ""
 msgid "The apps are back."
 msgstr ""
 
-msgid "The apps could not be installed. Are you online?"
-msgstr ""
-
 msgid "Firmware updates"
 msgstr ""
 
@@ -443,4 +440,49 @@ msgid "Steam, Heroic, Lutris… Tick the ones you want, untick the ones to remov
 msgstr ""
 
 msgid "Your game apps are ready."
+msgstr ""
+
+msgid "Allow"
+msgstr ""
+
+msgid "At the next restart, a blue screen asks for the password cosmicblue: choose Enroll MOK, Continue, Yes, type cosmicblue, then Reboot. The keyboard may be in QWERTY."
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Network settings"
+msgstr ""
+
+msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
+msgstr ""
+
+msgid "Open the report"
+msgstr ""
+
+msgid "Report the problem"
+msgstr ""
+
+msgid "Secure Boot does not let NVIDIA's driver load yet. Allow it once: at the next restart, a blue screen asks for the password cosmicblue."
+msgstr ""
+
+msgid "Something unexpected went wrong. Nothing was changed."
+msgstr ""
+
+msgid "Technical details"
+msgstr ""
+
+msgid "The disk is full ({} free). Free up space with Clean up, in cosmic-blue Tools, Maintenance, then try again."
+msgstr ""
+
+msgid "The report opens in your browser, filled in: the cosmic-blue version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
+msgstr ""
+
+msgid "The server does not answer. Try again in a few minutes."
+msgstr ""
+
+msgid "Try again"
+msgstr ""
+
+msgid "“{}” did not work"
 msgstr ""
