@@ -153,9 +153,6 @@ msgstr ""
 msgid "Installing: {} of {}"
 msgstr ""
 
-msgid "Some apps did not install. Are you online? They are also in COSMIC Store."
-msgstr ""
-
 msgid "Checking your computer…"
 msgstr ""
 
@@ -555,12 +552,6 @@ msgstr ""
 msgid "Install and continue"
 msgstr ""
 
-msgid "Some apps did not install"
-msgstr ""
-
-msgid "Are you online? They are also in COSMIC Store."
-msgstr ""
-
 msgid "Containers"
 msgstr ""
 
@@ -625,4 +616,37 @@ msgid "If you like the terminal"
 msgstr ""
 
 msgid "ujust lists the system's recipes, brew installs command line tools: the documentation has them all."
+msgstr ""
+
+msgid "“{}” did not work"
+msgstr ""
+
+msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
+msgstr ""
+
+msgid "The disk is full ({} free). Free up space with Clean up, in cosmic-blue Tools, Maintenance, then try again."
+msgstr ""
+
+msgid "The server does not answer. Try again in a few minutes."
+msgstr ""
+
+msgid "Something unexpected went wrong. Nothing was changed."
+msgstr ""
+
+msgid "Try again"
+msgstr ""
+
+msgid "Report the problem"
+msgstr ""
+
+msgid "Technical details"
+msgstr ""
+
+msgid "The report opens in your browser, filled in: the cosmic-blue version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
+msgstr ""
+
+msgid "Open the report"
+msgstr ""
+
+msgid "Cancel"
 msgstr ""

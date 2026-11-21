@@ -100,29 +100,6 @@ pub fn label<'a, M: 'static>(title: &'static str, caption: String) -> Element<'a
     two_lines(text::body(title).into(), caption)
 }
 
-/// Runs a command in the background: Some(true) when it worked, None when
-/// pkexec says the password prompt was dismissed (126) or the password was
-/// wrong three times (127). Commands that run pkexec themselves pass its
-/// exit code on.
-pub async fn run(program: &'static str, args: Vec<String>) -> Option<bool> {
-    match tokio::process::Command::new(program)
-        .args(&args)
-        .status()
-        .await
-    {
-        Ok(status) if status.success() => Some(true),
-        Ok(status) if matches!(status.code(), Some(126 | 127)) => None,
-        Ok(status) => {
-            eprintln!("{program} {args:?}: {status}");
-            Some(false)
-        }
-        Err(error) => {
-            eprintln!("Could not start {program}: {error}");
-            Some(false)
-        }
-    }
-}
-
 /// Starts a program without waiting for it (a browser, another app)
 pub fn spawn(program: &str, args: &[&str]) {
     if let Err(error) = std::process::Command::new(program).args(args).spawn() {

@@ -38,9 +38,11 @@ use std::process::Command;
 use std::time::Duration;
 
 mod devtools;
+mod failure;
 mod i18n;
 mod system;
 use devtools::{DEV_TOOLS, DevTool, ToolKind, brew_install, brew_installed, dev_tools};
+use failure::{Card, CardAction, CardMessage, Failure, Outcome};
 use i18n::{language, tr};
 use system::{Computer, Package};
 
@@ -685,9 +687,6 @@ const TEXTS: &[&str] = &[
     "Choose…",
     "Install and continue",
     "Installing: {} of {}",
-    "Some apps did not install. Are you online? They are also in COSMIC Store.",
-    "Some apps did not install",
-    "Are you online? They are also in COSMIC Store.",
     "Containers",
     "Code editors",
     "In the terminal",
@@ -750,6 +749,7 @@ const TEXTS: &[&str] = &[
 /// Every text of the tours and windows, for the translation check
 fn all_texts() -> Vec<&'static str> {
     let mut texts: Vec<&'static str> = TEXTS.to_vec();
+    texts.extend(failure::TEXTS);
     for origin in Origin::ALL {
         // (names of operating systems are not translated)
         texts.push(origin.card().2);
@@ -844,7 +844,8 @@ enum Install {
         apps: Vec<String>,
         tools: Vec<usize>,
         pending: u8,
-        failed: bool,
+        /// The first install that did not work
+        failed: Option<Failure>,
     },
     Done,
     Failed,
@@ -876,7 +877,9 @@ enum Message {
     DevTool(usize, bool),
     /// Install what was chosen, then turn the page
     InstallAndNext,
-    InstallDone(bool),
+    InstallDone(Outcome),
+    /// The card of an install that did not work
+    InstallCard(CardMessage),
     /// Every few seconds: which apps are installed now
     Tick,
     /// Flatpak apps, Homebrew tools, first-boot apps still installing
@@ -943,6 +946,9 @@ struct App<T: Tour> {
     dev_chosen: BTreeSet<usize>,
     dev_open: bool,
     install: Install,
+    /// An install that did not work, with the apps and developer tools to
+    /// try again
+    install_card: Option<Card<(Vec<String>, Vec<usize>)>>,
     // Computer
     computer: Option<Computer>,
     nvidia: Nvidia,
@@ -988,6 +994,56 @@ impl<T: Tour> App<T> {
     }
 
     /// Progress of the chosen apps and tools: (installed, all)
+    /// Installs Flathub apps and developer tools (numbers of dev_tools()) in
+    /// the background: the flatpak and the Homebrew installs run side by side
+    fn start_install(&mut self, apps: Vec<String>, tools: Vec<usize>) -> Vec<Task<Message>> {
+        self.install_card = None;
+        let pending = u8::from(!apps.is_empty()) + u8::from(!tools.is_empty());
+        if pending == 0 {
+            return Vec::new();
+        }
+        let mut tasks = Vec::new();
+        if !apps.is_empty() {
+            let mut args: Vec<String> =
+                ["install", "--system", "--noninteractive", "-y", "flathub"]
+                    .map(str::to_owned)
+                    .to_vec();
+            args.extend(apps.iter().cloned());
+            tasks.push(Task::perform(
+                failure::run("flatpak", args, None),
+                |outcome| cosmic::Action::App(Message::InstallDone(outcome)),
+            ));
+        }
+        if !tools.is_empty() {
+            let mut formulas: Vec<&'static str> = Vec::new();
+            let mut casks: Vec<String> = Vec::new();
+            for tool in tools.iter().filter_map(|i| dev_tools().nth(*i)) {
+                match tool.kind {
+                    ToolKind::Formula(names) => formulas.extend(names),
+                    ToolKind::Cask(name, tap) => casks.push(devtools::cask_name(name, tap)),
+                    ToolKind::Flatpak(_) => {}
+                }
+            }
+            tasks.push(Task::perform(
+                async move {
+                    Some(
+                        brew_install(formulas, casks)
+                            .await
+                            .map_err(|error| failure::failure(&error)),
+                    )
+                },
+                |outcome| cosmic::Action::App(Message::InstallDone(outcome)),
+            ));
+        }
+        self.install = Install::Running {
+            apps,
+            tools,
+            pending,
+            failed: None,
+        };
+        tasks
+    }
+
     fn install_count(&self) -> Option<(usize, usize)> {
         let Install::Running { apps, tools, .. } = &self.install else {
             return None;
@@ -1116,6 +1172,7 @@ impl<T: Tour> Application for App<T> {
             dev_chosen: BTreeSet::new(),
             dev_open: false,
             install: Install::Idle,
+            install_card: None,
             computer: None,
             nvidia: Nvidia::Idle,
             tried: BTreeSet::new(),
@@ -1232,79 +1289,72 @@ impl<T: Tour> Application for App<T> {
                     .map(|app| (*app).to_owned())
                     .collect();
                 let mut tools = Vec::new();
-                let mut formulas: Vec<&'static str> = Vec::new();
-                let mut casks: Vec<String> = Vec::new();
                 for (i, tool) in dev_tools().enumerate() {
                     if !self.dev_chosen.contains(&i) || self.tool_installed(i, tool) {
                         continue;
                     }
                     match tool.kind {
                         ToolKind::Flatpak(app) => apps.push(app.to_owned()),
-                        ToolKind::Formula(names) => {
-                            tools.push(i);
-                            formulas.extend(names);
-                        }
-                        ToolKind::Cask(name, tap) => {
-                            tools.push(i);
-                            casks.push(devtools::cask_name(name, tap));
-                        }
+                        ToolKind::Formula(_) | ToolKind::Cask(..) => tools.push(i),
                     }
                 }
                 self.chosen.clear();
                 self.dev_chosen.clear();
                 self.dev_open = false;
                 let mut tasks = vec![self.update(Message::Turn(1))];
-                let pending = u8::from(!apps.is_empty()) + u8::from(!tools.is_empty());
-                if pending == 0 {
-                    return Task::batch(tasks);
-                }
-                if !apps.is_empty() {
-                    let mut args: Vec<String> =
-                        ["install", "--system", "--noninteractive", "-y", "flathub"]
-                            .map(str::to_owned)
-                            .to_vec();
-                    args.extend(apps.iter().cloned());
-                    tasks.push(Task::perform(
-                        async move {
-                            tokio::process::Command::new("flatpak")
-                                .args(&args)
-                                .stdin(std::process::Stdio::null())
-                                .status()
-                                .await
-                                .is_ok_and(|status| status.success())
-                        },
-                        |ok| cosmic::Action::App(Message::InstallDone(ok)),
-                    ));
-                }
-                if !tools.is_empty() {
-                    tasks.push(Task::perform(brew_install(formulas, casks), |ok| {
-                        cosmic::Action::App(Message::InstallDone(ok))
-                    }));
-                }
-                self.install = Install::Running {
+                tasks.extend(self.start_install(apps, tools));
+                return Task::batch(tasks);
+            }
+            Message::InstallDone(outcome) => {
+                if let Install::Running {
                     apps,
                     tools,
                     pending,
-                    failed: false,
-                };
-                return Task::batch(tasks);
-            }
-            Message::InstallDone(ok) => {
-                if let Install::Running {
-                    pending, failed, ..
+                    failed,
                 } = &mut self.install
                 {
                     *pending = pending.saturating_sub(1);
-                    *failed |= !ok;
+                    if let Some(Err(failure)) = outcome {
+                        failed.get_or_insert(failure);
+                    }
                     if *pending == 0 {
-                        self.install = if *failed {
-                            Install::Failed
-                        } else {
-                            Install::Done
+                        let retry = (std::mem::take(apps), std::mem::take(tools));
+                        self.install = match failed.take() {
+                            Some(failure) => {
+                                self.install_card =
+                                    Some(Card::new(tr("Install and continue"), failure, retry));
+                                Install::Failed
+                            }
+                            None => Install::Done,
                         };
                     }
                 }
                 return check_apps();
+            }
+            Message::InstallCard(message) => {
+                let Some(card) = &mut self.install_card else {
+                    return Task::none();
+                };
+                match card.update(message) {
+                    CardAction::None => {}
+                    CardAction::Close => self.install_card = None,
+                    CardAction::Retry((apps, tools)) => {
+                        // What is still missing
+                        let apps = apps
+                            .into_iter()
+                            .filter(|app| !self.installed.contains(app))
+                            .collect();
+                        let tools = tools
+                            .into_iter()
+                            .filter(|i| {
+                                dev_tools()
+                                    .nth(*i)
+                                    .is_some_and(|tool| !self.tool_installed(*i, tool))
+                            })
+                            .collect();
+                        return Task::batch(self.start_install(apps, tools));
+                    }
+                }
             }
             Message::Tick => {
                 return check_apps();
@@ -1904,15 +1954,8 @@ impl<T: Tour> App<T> {
                 all,
                 space_s,
             ));
-        } else if self.install == Install::Failed {
-            body.push(
-                text::caption(tr(
-                    "Some apps did not install. Are you online? They are also in COSMIC Store.",
-                ))
-                .align_x(Alignment::Center)
-                .width(Length::Fill)
-                .into(),
-            );
+        } else if let Some(card) = &self.install_card {
+            body.push(card.view(Message::InstallCard));
         }
         body
     }
@@ -2160,10 +2203,6 @@ impl<T: Tour> App<T> {
                 ));
             }
             (Install::Done, _) => done.push(check(tr("Your apps are installed").to_owned(), None)),
-            (Install::Failed, _) => done.push(check(
-                tr("Some apps did not install").to_owned(),
-                Some(tr("Are you online? They are also in COSMIC Store.").to_owned()),
-            )),
             _ => {}
         }
         if self.nvidia == Nvidia::Switched {
@@ -2207,7 +2246,11 @@ impl<T: Tour> App<T> {
             .into()
         })
         .collect::<Vec<Element<'a, Message>>>();
-        let mut column = widget::column::with_capacity(4).spacing(theme::spacing().space_m);
+        let mut column = widget::column::with_capacity(5).spacing(theme::spacing().space_m);
+        // An install that did not work, with "Try again"
+        if let Some(card) = &self.install_card {
+            column = column.push(card.view(Message::InstallCard));
+        }
         if !done.is_empty() {
             column = column.push(section(done));
         }
