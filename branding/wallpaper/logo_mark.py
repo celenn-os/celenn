@@ -20,11 +20,12 @@ W, H = 5120, 2880
 SCALE = 2900 / 559.7
 MARK = (W / 2 - 559.7 * SCALE / 2 + 50 * SCALE, H / 2 + 60)
 # COSMIC scales the wallpaper to fill the screen and crops the rest. The name
-# sits close to the bottom right corner of a 16:10 screen, as far from the
-# right edge as from the bottom (just above the dock), and must stay whole on
-# these screen shapes (4:3, 5:4 and 21:9 screens cut part of it).
+# sits close to the bottom right corner, just above the dock, as far right as
+# it can while staying whole on these screen shapes (4:3, 5:4 and 21:9
+# screens cut part of it).
 RATIOS = {"16:9": 16 / 9, "16:10": 16 / 10, "3:2": 3 / 2}
-CORNER = 0.075 * H  # from the bottom, and from the right edge at 16:10
+BOTTOM = 0.075 * H  # from the bottom edge
+RIGHT = 20  # from the right edge of the narrowest shape (3:2)
 
 
 def visible(ratio):
@@ -44,7 +45,7 @@ def safe_box():
 # to 81 in logo units)
 NAME_WIDTH = 760
 NAME_K = NAME_WIDTH / (559.7 - 118)
-_right, _bottom = visible(16 / 10)[2] - CORNER, H - CORNER
+_right, _bottom = safe_box()[2] - RIGHT, H - BOTTOM
 NAME_BOX = (_right - NAME_WIDTH, _bottom - 62 * NAME_K, _right, _bottom)
 
 
