@@ -589,8 +589,8 @@ done
 for theme in Dark Light; do
     grep -qx true "/usr/share/cosmic/com.system76.CosmicTheme.${theme}/v2/frosted_windows"
     grep -qx true "/usr/share/cosmic/com.system76.CosmicTheme.${theme}.Builder/v2/frosted_panel"
-    # Frosted glass a notch thicker than COSMIC's middle setting
-    grep -qx High "/usr/share/cosmic/com.system76.CosmicTheme.${theme}.Builder/v2/frosted"
+    # Thin frosted glass (Thickness Low) so the wallpaper shows through
+    grep -qx Low "/usr/share/cosmic/com.system76.CosmicTheme.${theme}.Builder/v2/frosted"
     # COSMIC's own "Round" style (160 px radius_xl: pill-shaped panel and dock)
     for dir in "${theme}" "${theme}.Builder"; do
         grep -q '160' "/usr/share/cosmic/com.system76.CosmicTheme.${dir}/v2/corner_radii"
@@ -667,7 +667,7 @@ grep -q ' gsettings/org.gnome.desktop.interface/icon-theme$' "${DEFAULTS_LIST}"
 if grep -q 'xkb_config$' "${DEFAULTS_LIST}"; then exit 1; fi
 cmp <("${MIGRATE}" --manifest) "${DEFAULTS_LIST}"
 for variant in /ctx/previous_defaults/theme/stock/cosmic /ctx/previous_defaults/theme/frosted/cosmic \
-    /ctx/previous_defaults/theme/glass-0.8/cosmic \
+    /ctx/previous_defaults/theme/glass-0.8/cosmic /ctx/previous_defaults/theme/glass-0.65/cosmic \
     /ctx/build_files/previous_defaults/upstream; do
     "${MIGRATE}" --hash-tree "${variant}" | grep ' com.system76.CosmicT' >/dev/null
     missing="$(comm -23 <("${MIGRATE}" --hash-tree "${variant}" | sort) <(sort "${PREVIOUS_LIST}"))"

@@ -53,17 +53,27 @@ fn frosted(mut builder: ThemeBuilder) -> ThemeBuilder {
     builder
 }
 
-/// Frosted glass settings of COSMIC Settings (Appearance > Frosted glass):
-/// "Thickness" one notch above COSMIC's middle (High instead of Medium), so
-/// the bright lines of the wallpaper melt into a soft glow behind windows,
-/// and "Glass opacity" at 0.65 instead of 0.5. The panel and the dock use the
-/// theme's background, so this one setting gives windows, panel and dock the
-/// same glass: on the default wallpaper they still stand out clearly, while
-/// a little of it shows through.
-const THICKNESS: BlurStrength = BlurStrength::High;
-const GLASS_OPACITY: f32 = 0.65;
-/// Glass opacity of earlier images (until 2026-11), for the previous defaults
-const OLD_GLASS_OPACITY: f32 = 0.8;
+/// Frosted glass settings of COSMIC Settings (Appearance > Frosted glass).
+///
+/// The default wallpaper is a fairly even blue with thin bright arcs, close
+/// to the night blue of windows. With COSMIC's defaults (Thickness Medium,
+/// Glass opacity 0.5, about 75 % opaque) the blur erases the arcs and the
+/// surface looks plain, not like glass. So:
+/// - "Thickness" Low: the arcs stay visible as soft lines behind windows,
+///   the panel and the dock, which is what makes the glass readable;
+/// - "Glass opacity" 0.2 in the dark theme (surfaces about 45 % opaque,
+///   headers and cards about 75 %), 0.35 in the light theme (about 63 %),
+///   which keeps dark text readable over the dark wallpaper.
+///
+/// The panel and the dock use the theme's background, so the same values
+/// give windows, panel and dock the same glass.
+const THICKNESS: BlurStrength = BlurStrength::Low;
+const GLASS_OPACITY_DARK: f32 = 0.2;
+const GLASS_OPACITY_LIGHT: f32 = 0.35;
+
+/// Frosted glass of earlier images: (thickness, glass opacity)
+const GLASS_0_8: (BlurStrength, f32) = (BlurStrength::High, 0.8); // until 2026-11-19
+const GLASS_0_65: (BlurStrength, f32) = (BlurStrength::High, 0.65); // until 2026-11-21
 
 /// The alpha map COSMIC Settings writes for a "Glass opacity" value (same
 /// formula as cosmic-settings 1.11.0, appearance/mod.rs, Message::Glass).
@@ -78,19 +88,25 @@ fn glass_alpha_map(glass: f32) -> AlphaMap {
     alpha_map.offset(offset)
 }
 
-fn frosted_glass(mut builder: ThemeBuilder, glass: f32) -> ThemeBuilder {
-    builder.frosted = THICKNESS;
+fn frosted_glass(mut builder: ThemeBuilder, thickness: BlurStrength, glass: f32) -> ThemeBuilder {
+    builder.frosted = thickness;
     builder.alpha_map = glass_alpha_map(glass);
     builder
 }
 
-/// The cosmic-blue dark and light themes with the given glass opacity.
-fn cosmic_blue(glass: f32) {
+/// The cosmic-blue dark and light themes with the given frosted glass
+/// (thickness, glass opacity of the dark theme, of the light theme).
+fn cosmic_blue(thickness: BlurStrength, glass_dark: f32, glass_light: f32) {
     write(
-        frosted_glass(colors(frosted(ThemeBuilder::dark()), ACCENT_DARK, BG_DARK), glass),
+        frosted_glass(
+            colors(frosted(ThemeBuilder::dark()), ACCENT_DARK, BG_DARK),
+            thickness,
+            glass_dark,
+        ),
         frosted_glass(
             colors(frosted(ThemeBuilder::light()), ACCENT_LIGHT, BG_LIGHT),
-            glass,
+            thickness,
+            glass_light,
         ),
     )
 }
@@ -112,17 +128,18 @@ fn write(dark: ThemeBuilder, light: ThemeBuilder) {
         .expect("write light theme");
 }
 
-/// Without an argument: the cosmic-blue themes. With "stock", "frosted" or
-/// "glass-0.8": themes from earlier images, which accounts may still hold as
+/// Without an argument: the cosmic-blue themes. With "stock", "frosted",
+/// "glass-0.8" or "glass-0.65": themes from earlier images, which accounts may still hold as
 /// a copy (COSMIC's own default, written by the first-run assistant, the same
 /// with frosted glass, the default before the blue colors, and the blue
-/// themes with the earlier glass opacity). They go into
+/// themes with earlier frosted glass settings). They go into
 /// /usr/share/cosmic-blue/previous-defaults.list, so that
 /// cosmic-blue-migrate-defaults can tell them from a user's own choice.
 fn main() {
     match std::env::args().nth(1).as_deref() {
-        None => cosmic_blue(GLASS_OPACITY),
-        Some("glass-0.8") => cosmic_blue(OLD_GLASS_OPACITY),
+        None => cosmic_blue(THICKNESS, GLASS_OPACITY_DARK, GLASS_OPACITY_LIGHT),
+        Some("glass-0.8") => cosmic_blue(GLASS_0_8.0, GLASS_0_8.1, GLASS_0_8.1),
+        Some("glass-0.65") => cosmic_blue(GLASS_0_65.0, GLASS_0_65.1, GLASS_0_65.1),
         Some("stock") => write(ThemeBuilder::dark(), ThemeBuilder::light()),
         Some("frosted") => write(
             frosted(ThemeBuilder::dark()),
