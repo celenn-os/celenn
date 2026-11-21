@@ -180,6 +180,39 @@ msgstr "{} liberados"
 msgid "Everything was already tidy."
 msgstr "Tudo já estava em ordem."
 
+msgid "Trash"
+msgstr "Lixeira"
+
+msgid "{} in the trash"
+msgstr "{} na lixeira"
+
+msgid "The trash is empty."
+msgstr "A lixeira está vazia."
+
+msgid "Empty"
+msgstr "Esvaziar"
+
+msgid "Emptying…"
+msgstr "Esvaziando…"
+
+msgid "Automatically"
+msgstr "Automaticamente"
+
+msgid "Delete files that stayed in the trash for more than 30 days"
+msgstr "Excluir os arquivos que estão na lixeira há mais de 30 dias"
+
+msgid "Like on Windows and the Mac. Newer ones can still be put back."
+msgstr "Como no Windows e no Mac. Os mais recentes ainda podem ser restaurados."
+
+msgid "Warn when the disk is almost full"
+msgstr "Avisar quando o disco estiver quase cheio"
+
+msgid "The disk is almost full"
+msgstr "O disco está quase cheio"
+
+msgid "{} left. Updates and new apps need room."
+msgstr "Restam {}. As atualizações e os novos aplicativos precisam de espaço."
+
 msgid "Apps that come with cosmic-blue"
 msgstr "Aplicativos que vêm com o cosmic-blue"
 

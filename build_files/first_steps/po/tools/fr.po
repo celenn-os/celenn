@@ -180,6 +180,39 @@ msgstr "{} libérés"
 msgid "Everything was already tidy."
 msgstr "Tout était déjà propre."
 
+msgid "Trash"
+msgstr "Corbeille"
+
+msgid "{} in the trash"
+msgstr "{} dans la corbeille"
+
+msgid "The trash is empty."
+msgstr "La corbeille est vide."
+
+msgid "Empty"
+msgstr "Vider"
+
+msgid "Emptying…"
+msgstr "Vidage…"
+
+msgid "Automatically"
+msgstr "Automatiquement"
+
+msgid "Delete files that stayed in the trash for more than 30 days"
+msgstr "Supprimer les fichiers restés plus de 30 jours dans la corbeille"
+
+msgid "Like on Windows and the Mac. Newer ones can still be put back."
+msgstr "Comme sur Windows et Mac. Les plus récents restent récupérables."
+
+msgid "Warn when the disk is almost full"
+msgstr "Prévenir quand le disque est presque plein"
+
+msgid "The disk is almost full"
+msgstr "Le disque est presque plein"
+
+msgid "{} left. Updates and new apps need room."
+msgstr "Il reste {}. Les mises à jour et les nouvelles applications ont besoin de place."
+
 msgid "Apps that come with cosmic-blue"
 msgstr "Applications fournies avec cosmic-blue"
 
