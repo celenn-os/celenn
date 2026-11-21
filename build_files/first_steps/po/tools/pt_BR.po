@@ -254,3 +254,165 @@ msgstr "GB"
 
 msgid "TB"
 msgstr "TB"
+
+msgid "A second app source for COSMIC Store, with apps that are not on Flathub. Less checked than Flathub."
+msgstr "Uma segunda fonte de aplicativos para a COSMIC Store, com aplicativos que não estão no Flathub. Menos verificada que o Flathub."
+
+msgid "A text file in your home folder, to keep or to compare."
+msgstr "Um arquivo de texto na sua pasta pessoal, para guardar ou comparar."
+
+msgid "Accent color, wallpaper, panel, dock, fonts…"
+msgstr "Cor de destaque, papel de parede, painel, dock, fontes…"
+
+msgid "Accept and install"
+msgstr "Aceitar e instalar"
+
+msgid "All COSMIC settings"
+msgstr "Todas as configurações do COSMIC"
+
+msgid "Appearance"
+msgstr "Aparência e configurações"
+
+msgid "Arial, Times New Roman, Verdana… for documents made on Windows. cosmic-blue already has look-alikes with the same sizes."
+msgstr "Arial, Times New Roman, Verdana… para documentos feitos no Windows. O cosmic-blue já tem fontes parecidas com as mesmas medidas."
+
+msgid "Back to the cosmic-blue colors, dark theme, icons, fonts and wallpaper. Panel, dock, keyboard and shortcuts stay."
+msgstr "Volta às cores, ao tema escuro, aos ícones, às fontes e ao papel de parede do cosmic-blue. Painel, dock, teclado e atalhos ficam."
+
+msgid "Back to the cosmic-blue defaults, for every setting. A copy of the current ones is kept."
+msgstr "Volta aos padrões do cosmic-blue em todas as configurações. Uma cópia das atuais é guardada."
+
+msgid "Battery charge limit"
+msgstr "Limite de carga da bateria"
+
+msgid "Battery, graphics card and firmware settings."
+msgstr "Bateria, placa de vídeo e configurações do firmware."
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Charging stops at 80 %: the battery lasts longer when the laptop stays plugged in."
+msgstr "A carga para em 80 %: a bateria dura mais quando o notebook fica na tomada."
+
+msgid "Computer"
+msgstr "Computador"
+
+msgid "Dark theme"
+msgstr "Tema escuro"
+
+msgid "Developer tools"
+msgstr "Ferramentas de desenvolvimento"
+
+msgid "Docker, VS Code, JetBrains Toolbox… chosen from a list, in a terminal window."
+msgstr "Docker, VS Code, JetBrains Toolbox… escolhidos de uma lista, numa janela de terminal."
+
+msgid "Every COSMIC setting goes back to the defaults. A copy is kept in your settings folder."
+msgstr "Todas as configurações do COSMIC voltam ao padrão. Uma cópia fica na sua pasta de configurações."
+
+msgid "Extra software"
+msgstr "Programas extras"
+
+msgid "Firmware settings (BIOS/UEFI)"
+msgstr "Configurações do firmware (BIOS/UEFI)"
+
+msgid "FlatPark"
+msgstr "FlatPark"
+
+msgid "Games"
+msgstr "Jogos"
+
+msgid "Install"
+msgstr "Instalar"
+
+msgid "Installed. Restart open apps to see them."
+msgstr "Instaladas. Reinicie os aplicativos abertos para vê-las."
+
+msgid "Light text on dark backgrounds. Off: the light theme."
+msgstr "Texto claro sobre fundo escuro. Desligado: o tema claro."
+
+msgid "Log out and back in to finish."
+msgstr "Saia e entre de novo para concluir."
+
+msgid "Microsoft fonts"
+msgstr "Fontes da Microsoft"
+
+msgid "Microsoft's license applies to these fonts."
+msgstr "Estas fontes seguem a licença da Microsoft."
+
+msgid "More in Settings"
+msgstr "Mais nas Configurações"
+
+msgid "NVIDIA graphics card"
+msgstr "Placa de vídeo NVIDIA"
+
+msgid "Press Enter to close this window."
+msgstr "Pressione Enter para fechar esta janela."
+
+msgid "Read it"
+msgstr "Ler"
+
+msgid "Remove"
+msgstr "Remover"
+
+msgid "Reset"
+msgstr "Redefinir"
+
+msgid "Restart into the computer's own settings: boot order, virtualization, Secure Boot…"
+msgstr "Reiniciar nas configurações do próprio computador: ordem de inicialização, virtualização, Secure Boot…"
+
+msgid "Restart now"
+msgstr "Reiniciar agora"
+
+msgid "Restore"
+msgstr "Restaurar"
+
+msgid "Save"
+msgstr "Salvar"
+
+msgid "Save my settings"
+msgstr "Salvar minhas configurações"
+
+msgid "Saved in your home folder."
+msgstr "Salvo na sua pasta pessoal."
+
+msgid "Steam and Heroic (Epic Games, GOG, Amazon). About 1.5 GB, games not included."
+msgstr "Steam e Heroic (Epic Games, GOG, Amazon). Cerca de 1,5 GB, sem contar os jogos."
+
+msgid "Switch"
+msgstr "Trocar"
+
+msgid "The NVIDIA edition is downloaded now and starts at the next restart. With Secure Boot on, a blue screen asks for the password cosmicblue once."
+msgstr "A edição NVIDIA é baixada agora e inicia na próxima reinicialização. Com o Secure Boot ligado, uma tela azul pede uma vez a senha cosmicblue."
+
+msgid "The NVIDIA edition starts at the next restart."
+msgstr "A edição NVIDIA inicia na próxima reinicialização."
+
+msgid "The computer restarts now. Save your work first."
+msgstr "O computador reinicia agora. Salve seu trabalho antes."
+
+msgid "The cosmic-blue look"
+msgstr "O visual do cosmic-blue"
+
+msgid "The look of the desktop and your COSMIC settings."
+msgstr "A aparência da área de trabalho e suas configurações do COSMIC."
+
+msgid "Use it"
+msgstr "Usar"
+
+msgid "Use the NVIDIA edition of cosmic-blue, with NVIDIA's own driver, for games and graphics apps."
+msgstr "Usar a edição NVIDIA do cosmic-blue, com o driver da NVIDIA, para jogos e aplicativos gráficos."
+
+msgid "Virtual machines"
+msgstr "Máquinas virtuais"
+
+msgid "What cosmic-blue does not install by itself, ready in one click."
+msgstr "O que o cosmic-blue não instala sozinho, pronto em um clique."
+
+msgid "Working…"
+msgstr "Em andamento…"
+
+msgid "You use the NVIDIA edition, with NVIDIA's own driver."
+msgstr "Você usa a edição NVIDIA, com o driver da NVIDIA."
+
+msgid "virt-manager, to run Windows or another Linux in a window."
+msgstr "virt-manager, para rodar Windows ou outro Linux numa janela."

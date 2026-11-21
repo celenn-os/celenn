@@ -252,3 +252,165 @@ msgstr ""
 
 msgid "TB"
 msgstr ""
+
+msgid "A second app source for COSMIC Store, with apps that are not on Flathub. Less checked than Flathub."
+msgstr ""
+
+msgid "A text file in your home folder, to keep or to compare."
+msgstr ""
+
+msgid "Accent color, wallpaper, panel, dock, fonts…"
+msgstr ""
+
+msgid "Accept and install"
+msgstr ""
+
+msgid "All COSMIC settings"
+msgstr ""
+
+msgid "Appearance"
+msgstr ""
+
+msgid "Arial, Times New Roman, Verdana… for documents made on Windows. cosmic-blue already has look-alikes with the same sizes."
+msgstr ""
+
+msgid "Back to the cosmic-blue colors, dark theme, icons, fonts and wallpaper. Panel, dock, keyboard and shortcuts stay."
+msgstr ""
+
+msgid "Back to the cosmic-blue defaults, for every setting. A copy of the current ones is kept."
+msgstr ""
+
+msgid "Battery charge limit"
+msgstr ""
+
+msgid "Battery, graphics card and firmware settings."
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Charging stops at 80 %: the battery lasts longer when the laptop stays plugged in."
+msgstr ""
+
+msgid "Computer"
+msgstr ""
+
+msgid "Dark theme"
+msgstr ""
+
+msgid "Developer tools"
+msgstr ""
+
+msgid "Docker, VS Code, JetBrains Toolbox… chosen from a list, in a terminal window."
+msgstr ""
+
+msgid "Every COSMIC setting goes back to the defaults. A copy is kept in your settings folder."
+msgstr ""
+
+msgid "Extra software"
+msgstr ""
+
+msgid "Firmware settings (BIOS/UEFI)"
+msgstr ""
+
+msgid "FlatPark"
+msgstr ""
+
+msgid "Games"
+msgstr ""
+
+msgid "Install"
+msgstr ""
+
+msgid "Installed. Restart open apps to see them."
+msgstr ""
+
+msgid "Light text on dark backgrounds. Off: the light theme."
+msgstr ""
+
+msgid "Log out and back in to finish."
+msgstr ""
+
+msgid "Microsoft fonts"
+msgstr ""
+
+msgid "Microsoft's license applies to these fonts."
+msgstr ""
+
+msgid "More in Settings"
+msgstr ""
+
+msgid "NVIDIA graphics card"
+msgstr ""
+
+msgid "Press Enter to close this window."
+msgstr ""
+
+msgid "Read it"
+msgstr ""
+
+msgid "Remove"
+msgstr ""
+
+msgid "Reset"
+msgstr ""
+
+msgid "Restart into the computer's own settings: boot order, virtualization, Secure Boot…"
+msgstr ""
+
+msgid "Restart now"
+msgstr ""
+
+msgid "Restore"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Save my settings"
+msgstr ""
+
+msgid "Saved in your home folder."
+msgstr ""
+
+msgid "Steam and Heroic (Epic Games, GOG, Amazon). About 1.5 GB, games not included."
+msgstr ""
+
+msgid "Switch"
+msgstr ""
+
+msgid "The NVIDIA edition is downloaded now and starts at the next restart. With Secure Boot on, a blue screen asks for the password cosmicblue once."
+msgstr ""
+
+msgid "The NVIDIA edition starts at the next restart."
+msgstr ""
+
+msgid "The computer restarts now. Save your work first."
+msgstr ""
+
+msgid "The cosmic-blue look"
+msgstr ""
+
+msgid "The look of the desktop and your COSMIC settings."
+msgstr ""
+
+msgid "Use it"
+msgstr ""
+
+msgid "Use the NVIDIA edition of cosmic-blue, with NVIDIA's own driver, for games and graphics apps."
+msgstr ""
+
+msgid "Virtual machines"
+msgstr ""
+
+msgid "What cosmic-blue does not install by itself, ready in one click."
+msgstr ""
+
+msgid "Working…"
+msgstr ""
+
+msgid "You use the NVIDIA edition, with NVIDIA's own driver."
+msgstr ""
+
+msgid "virt-manager, to run Windows or another Linux in a window."
+msgstr ""

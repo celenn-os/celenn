@@ -426,6 +426,9 @@ desktop_tour() {
     for entry in "05-files|cosmic-files" "06-settings|cosmic-settings appearance" "06-store|cosmic-store" \
         "06-updates|/usr/libexec/cosmic-blue-updates" \
         "06-tools-maintenance|/usr/libexec/cosmic-blue-tools --maintenance" \
+        "06-tools-computer|/usr/libexec/cosmic-blue-tools --computer" \
+        "06-tools-software|/usr/libexec/cosmic-blue-tools --software" \
+        "06-tools-appearance|/usr/libexec/cosmic-blue-tools --appearance" \
         "06-tools-help|/usr/libexec/cosmic-blue-tools --help-page" \
         "06-shortcuts|/usr/libexec/cosmic-blue-tour --shortcuts"; do
         name="${entry%%|*}"

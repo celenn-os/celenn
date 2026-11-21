@@ -188,14 +188,14 @@ export-cosmic-config:
 
 # Install Microsoft fonts: Arial, Times New Roman...
 [group('Apps')]
-install-microsoft-fonts: (_microsoft-fonts "install")
+install-microsoft-fonts confirm="ask": (_microsoft-fonts "install" confirm)
 
 # Remove the Microsoft fonts
 [group('Apps')]
-remove-microsoft-fonts: (_microsoft-fonts "remove")
+remove-microsoft-fonts: (_microsoft-fonts "remove" "yes")
 
 [private]
-_microsoft-fonts action:
+_microsoft-fonts action confirm:
     #!/usr/bin/bash
     set -euo pipefail
     # The fonts are free to download and use but may not be redistributed, so
@@ -237,8 +237,12 @@ _microsoft-fonts action:
     echo "  https://corefonts.sourceforge.net/eula.htm"
     echo "Most documents do not need them: cosmic-blue already has look-alike fonts"
     echo "with the same sizes (Liberation, Carlito, Caladea)."
-    read -r -p "Do you accept the license and want to install them? [y/N] " answer
-    [[ "${answer}" =~ ^[YyOo] ]] || { echo "Nothing installed."; exit 0; }
+    # `yes`: the license was accepted already ("Accept and install" in
+    # cosmic-blue Tools, which shows the license link)
+    if [[ "{{ confirm }}" != yes ]]; then
+        read -r -p "Do you accept the license and want to install them? [y/N] " answer
+        [[ "${answer}" =~ ^[YyOo] ]] || { echo "Nothing installed."; exit 0; }
+    fi
     tmp="$(mktemp -d)"
     trap 'rm -rf "${tmp}"' EXIT
     for exe in "${!installers[@]}"; do

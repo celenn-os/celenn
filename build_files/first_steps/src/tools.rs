@@ -5,6 +5,11 @@
 //                 (updates_page.rs; the Updates launcher opens this page)
 //   Maintenance   disk space and cleaning up, the apps that come with
 //                 cosmic-blue, firmware (maintenance.rs)
+//   Computer      battery charge limit, NVIDIA edition, firmware settings
+//   Extra software  Microsoft fonts, games, virtual machines, FlatPark,
+//                 developer tools
+//   Appearance    dark theme, the cosmic-blue look, reset, save settings
+//                 (these three: more.rs)
 //   Help          documentation, questions, bug report (help.rs)
 //
 // Each button runs the same program as the matching `ujust` command, so the
@@ -16,7 +21,8 @@
 //   cosmic-blue-tools               the window, on its first page
 //   cosmic-blue-tools --updates     the window, on Updates (also when run as
 //                                   /usr/libexec/cosmic-blue-updates)
-//   cosmic-blue-tools --maintenance / --help-page   the window, on that page
+//   cosmic-blue-tools --maintenance / --computer / --software /
+//                     --appearance / --help-page   the window, on that page
 //   cosmic-blue-tools --status / --older   see updates_page.rs (tests)
 //   cosmic-blue-tools --check       image build test: every text has its
 //                                   translations (no window)
@@ -32,6 +38,7 @@ mod common;
 mod help;
 mod i18n;
 mod maintenance;
+mod more;
 mod updates_page;
 use i18n::tr;
 
@@ -53,6 +60,9 @@ const TEXTS: &[&str] = &["cosmic-blue Tools"];
 pub enum PageId {
     Updates,
     Maintenance,
+    Computer,
+    Software,
+    Appearance,
     Help,
 }
 
@@ -60,8 +70,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
     let options = &args[1..];
     if options.iter().any(|arg| arg == "--check") {
-        let texts: Vec<&str> =
-            [TEXTS, updates_page::TEXTS, maintenance::TEXTS, help::TEXTS].concat();
+        let texts: Vec<&str> = [
+            TEXTS,
+            updates_page::TEXTS,
+            maintenance::TEXTS,
+            more::TEXTS,
+            help::TEXTS,
+        ]
+        .concat();
         let mut sorted = texts.clone();
         sorted.sort_unstable();
         sorted.dedup();
@@ -78,6 +94,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         PageId::Updates
     } else if options.iter().any(|arg| arg == "--maintenance") {
         PageId::Maintenance
+    } else if options.iter().any(|arg| arg == "--computer") {
+        PageId::Computer
+    } else if options.iter().any(|arg| arg == "--software") {
+        PageId::Software
+    } else if options.iter().any(|arg| arg == "--appearance") {
+        PageId::Appearance
     } else if options.iter().any(|arg| arg == "--help-page") {
         PageId::Help
     } else {
@@ -94,6 +116,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 pub enum Message {
     Updates(updates_page::Message),
     Maintenance(maintenance::Message),
+    More(more::Message),
     Help(help::Message),
 }
 
@@ -102,6 +125,7 @@ struct App {
     nav: nav_bar::Model,
     updates: updates_page::Page,
     maintenance: maintenance::Page,
+    more: more::Page,
     help: help::Page,
 }
 
@@ -142,6 +166,17 @@ impl Application for App {
                 "Maintenance",
                 "applications-utilities-symbolic",
             ),
+            (PageId::Computer, "Computer", "computer-symbolic"),
+            (
+                PageId::Software,
+                "Extra software",
+                "system-software-install-symbolic",
+            ),
+            (
+                PageId::Appearance,
+                "Appearance",
+                "preferences-desktop-appearance-symbolic",
+            ),
             (PageId::Help, "Help", "help-browser-symbolic"),
         ] {
             let entity = nav
@@ -155,12 +190,14 @@ impl Application for App {
         }
         let (updates, updates_task) = updates_page::Page::new();
         let (maintenance, maintenance_task) = maintenance::Page::new();
+        let (more, more_task) = more::Page::new();
         let (help, help_task) = help::Page::new();
         let mut app = App {
             core,
             nav,
             updates,
             maintenance,
+            more,
             help,
         };
         let title = match app.core.main_window_id() {
@@ -173,6 +210,7 @@ impl Application for App {
                 title,
                 updates_task.map(|action| action.map(Message::Updates)),
                 maintenance_task.map(|action| action.map(Message::Maintenance)),
+                more_task.map(|action| action.map(Message::More)),
                 help_task.map(|action| action.map(Message::Help)),
             ]),
         )
@@ -197,6 +235,10 @@ impl Application for App {
                 .maintenance
                 .update(message)
                 .map(|action| action.map(Message::Maintenance)),
+            Message::More(message) => self
+                .more
+                .update(message)
+                .map(|action| action.map(Message::More)),
             Message::Help(message) => self
                 .help
                 .update(message)
@@ -208,6 +250,9 @@ impl Application for App {
         match self.page() {
             PageId::Updates => self.updates.view().map(Message::Updates),
             PageId::Maintenance => self.maintenance.view().map(Message::Maintenance),
+            PageId::Computer => self.more.view(more::Kind::Computer).map(Message::More),
+            PageId::Software => self.more.view(more::Kind::Software).map(Message::More),
+            PageId::Appearance => self.more.view(more::Kind::Appearance).map(Message::More),
             PageId::Help => self.help.view().map(Message::Help),
         }
     }
