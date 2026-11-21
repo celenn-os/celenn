@@ -464,9 +464,9 @@ test -f /usr/share/applications/io.github.cosmic_blue_os.FirstSteps.desktop
 test -f /usr/share/icons/hicolor/scalable/apps/cosmic-blue-welcome.svg
 # Color icons of the tour pages (build_files/first_steps/src/main.rs), found
 # in the cosmic-blue icon theme (its layer, Tela) or hicolor
-for icon in cosmic-blue-welcome cosmic-blue-tour-store computer input-keyboard folder idea \
-    org.gnome.Terminal org.gnome.DejaDup preferences-desktop-accessibility \
-    preferences-desktop-keyboard-shortcuts; do
+for icon in cosmic-blue-welcome cosmic-blue-tour-store cosmic-blue-tour-computer \
+    cosmic-blue-tour-keyboard cosmic-blue-tour-bearings cosmic-blue-tour-try cosmic-blue-tour-tips \
+    cosmic-blue-tour-files cosmic-blue-tour-accessibility org.gnome.DejaDup; do
     [[ -n "$(find /usr/share/icons/cosmic-blue /usr/share/icons/Tela-circle-4f8dff \
         /usr/share/icons/hicolor -name "${icon}.svg" -print -quit)" ]] \
         || { echo "Tour icon ${icon} not found" >&2; exit 1; }
