@@ -20,6 +20,8 @@
 #                     `ujust enroll-secure-boot-key`)
 #
 # dev and pinned versions stay with `ujust switch-channel` and bootc.
+# Switches go through cosmic-blue-bootc, which records the download progress
+# for the app's progress bar.
 set -euo pipefail
 
 VENDOR="ghcr.io/cosmic-blue-os/"
@@ -64,7 +66,7 @@ case "$1" in
             echo "This system does not follow a cosmic-blue image (${image:-none})." >&2
             exit 1
         fi
-        bootc switch --enforce-container-sigpolicy "${repo}:${tag}"
+        /usr/libexec/cosmic-blue-bootc switch --enforce-container-sigpolicy "${repo}:${tag}"
         # Another image to follow: nothing set aside any more
         rm -f "${HOLD}"
         ;;
@@ -80,7 +82,7 @@ case "$1" in
             echo "This system already follows the NVIDIA edition."
             exit 0
         fi
-        bootc switch --enforce-container-sigpolicy "${repo}-nvidia:${tag}"
+        /usr/libexec/cosmic-blue-bootc switch --enforce-container-sigpolicy "${repo}-nvidia:${tag}"
         rm -f "${HOLD}"
         # The driver is signed with this key: without it, Secure Boot refuses
         # to load the driver. The password is not a secret (see the ujust

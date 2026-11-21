@@ -72,8 +72,18 @@ demo_journal before-update
 
 # 3. The update, then a reboot into it
 log "Updating to ${TO}"
-vm "timeout 1800 bootc switch --enforce-container-sigpolicy ${TO}" \
+# Through cosmic-blue-bootc when the old image has it, as the Updates app
+# does: it records the download progress for the app's progress bar
+bootc_cmd=bootc
+vm "test -x /usr/libexec/cosmic-blue-bootc" && bootc_cmd=/usr/libexec/cosmic-blue-bootc
+vm "timeout 1800 ${bootc_cmd} switch --enforce-container-sigpolicy ${TO}" \
     || fail "bootc could not update to ${TO} (pull or signature check failed)"
+if [[ "${bootc_cmd}" != bootc ]]; then
+    progress="$(vm "tail -n 3 /run/cosmic-blue/update-progress.jsonl" 2>&1)" || progress=""
+    echo "Download progress (last lines): ${progress}"
+    grep -q '"type":"ProgressBytes"' <(vm "cat /run/cosmic-blue/update-progress.jsonl" 2>/dev/null) \
+        || { echo "::error::cosmic-blue-bootc did not record the download progress"; errors=1; }
+fi
 staged="$(vm 'bootc status --json' | jq -r '.status.staged.image.imageDigest // empty')"
 [[ "${staged}" == "${to_digest}" ]] || fail "The staged update is '${staged}', not ${to_digest}"
 # People reboot long after the update is staged, by which time idle
