@@ -41,8 +41,8 @@ msgstr "La comprobación no funcionó. ¿Tiene conexión a Internet?"
 msgid "Ready for the next restart: {}"
 msgstr "Lista para el próximo reinicio: {}"
 
-msgid "Downloaded and checked. It starts when you restart the computer."
-msgstr "Descargada y verificada. Arranca cuando reinicie el ordenador."
+msgid "Downloaded and checked. It takes effect at the next restart."
+msgstr "Descargada y verificada. Se aplica en el próximo reinicio."
 
 msgid "Restart"
 msgstr "Reiniciar"

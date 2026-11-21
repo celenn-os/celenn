@@ -41,8 +41,8 @@ msgstr "Die Prüfung hat nicht geklappt. Sind Sie online?"
 msgid "Ready for the next restart: {}"
 msgstr "Bereit für den nächsten Neustart: {}"
 
-msgid "Downloaded and checked. It starts when you restart the computer."
-msgstr "Heruntergeladen und geprüft. Sie startet, wenn Sie den Computer neu starten."
+msgid "Downloaded and checked. It takes effect at the next restart."
+msgstr "Heruntergeladen und geprüft. Sie wird beim nächsten Neustart wirksam."
 
 msgid "Restart"
 msgstr "Neu starten"

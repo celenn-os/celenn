@@ -41,8 +41,8 @@ msgstr "La vérification n'a pas abouti. Êtes-vous connecté à Internet ?"
 msgid "Ready for the next restart: {}"
 msgstr "Prête pour le prochain redémarrage : {}"
 
-msgid "Downloaded and checked. It starts when you restart the computer."
-msgstr "Téléchargée et vérifiée. Elle démarre quand vous redémarrez l'ordinateur."
+msgid "Downloaded and checked. It takes effect at the next restart."
+msgstr "Téléchargée et vérifiée. Elle prend effet au prochain redémarrage."
 
 msgid "Restart"
 msgstr "Redémarrer"
