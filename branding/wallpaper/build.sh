@@ -25,10 +25,11 @@ curl -fsSL -o milky-way-orig.jpg \
 python3 milky_way.py milky-way-orig.jpg "${out}/cosmic-blue-milky-way.jpg"
 
 # Shader wallpapers (GLSL, rendered with headless Chromium): a spiral, a galaxy,
-# a river of stars, a nebula and orbit lines
+# a river of stars, a nebula, orbit lines, a ringed planet and an eclipse
 # (shader name:file name; the file names set the order in COSMIC Settings)
 for pair in spiral:deep-spiral galaxy:galaxy star-river:galactic-river \
-        nebula:gas-veils orbit-lines:line-orbits; do
+        nebula:gas-veils orbit-lines:line-orbits ringed-planet:ringed-planet \
+        eclipse:eclipse; do
     name="${pair%%:*}"
     node shaders/render.js "${name}" "${name}.png"
     python3 -c 'import sys; from PIL import Image; Image.open(sys.argv[1]).convert("RGB").save(sys.argv[2], quality=90, optimize=True)' \
