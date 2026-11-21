@@ -134,8 +134,41 @@ msgstr "Papel de parede"
 msgid "Your picture"
 msgstr "Sua imagem"
 
-msgid "Dock always visible"
-msgstr "Dock sempre visível"
+msgid "Send without a cable"
+msgstr "Enviar sem cabo"
+
+msgid "With LocalSend, already on this computer. The files go straight through your Wi-Fi, encrypted, not through the internet."
+msgstr "Com o LocalSend, já neste computador. Os arquivos vão direto pelo seu Wi-Fi, criptografados, sem passar pela internet."
+
+msgid "On the phone, scan this code and install LocalSend (Play Store or App Store)."
+msgstr "No celular, escaneie este código e instale o LocalSend (Play Store ou App Store)."
+
+msgid "Open LocalSend here and on the phone, on the same Wi-Fi."
+msgstr "Abra o LocalSend aqui e no celular, no mesmo Wi-Fi."
+
+msgid "On the phone, pick the photos, then this computer. They arrive in Downloads. It works the other way too."
+msgstr "No celular, escolha as fotos e depois este computador. Elas chegam em Downloads. Também funciona no sentido contrário."
+
+msgid "Open LocalSend"
+msgstr "Abrir o LocalSend"
+
+msgid "Without a cable, with LocalSend. Or plug it in and allow file transfer on the phone: it shows up in Files."
+msgstr "Sem cabo, com o LocalSend. Ou conecte-o e permita a transferência de arquivos no celular: ele aparece em Arquivos."
+
+msgid "Without a cable"
+msgstr "Sem cabo"
+
+msgid "Layout"
+msgstr "Disposição"
+
+msgid "Top bar and dock: like the Mac. One bar at the bottom: like Windows."
+msgstr "Barra em cima e dock: como no Mac. Uma barra embaixo: como no Windows."
+
+msgid "Top bar and dock"
+msgstr "Barra em cima e dock"
+
+msgid "Bar at the bottom"
+msgstr "Barra embaixo"
 
 msgid "This did not work."
 msgstr "Isso não funcionou."
@@ -412,9 +445,6 @@ msgstr "Abrir Arquivos"
 
 msgid "Photos from a phone"
 msgstr "Fotos de um celular"
-
-msgid "Plug it in with its cable and allow file transfer on the phone: it shows up in Files."
-msgstr "Conecte-o com o cabo e permita a transferência de arquivos no celular: ele aparece em Arquivos."
 
 msgid "Bookmarks and passwords"
 msgstr "Favoritos e senhas"

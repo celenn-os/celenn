@@ -99,6 +99,13 @@ pub const TEXTS: &[&str] = &[
     // Appearance
     "Dark theme",
     "Light text on dark backgrounds. Off: the light theme.",
+    "Layout",
+    "Top bar and dock: like the Mac. One bar at the bottom: like Windows.",
+    "Top bar and dock",
+    "Bar at the bottom",
+    "Dock always visible",
+    "Off: it hides when a window covers it.",
+    "This did not work.",
     "More in Settings",
     "Accent color, wallpaper, panel, dock, fonts…",
     "Open",
@@ -224,6 +231,8 @@ pub struct State {
     vms: bool,
     flatpark: bool,
     dark: bool,
+    bottom_bar: bool,
+    dock_visible: bool,
     /// The apps of each list installed (numbers of List::tools())
     installed: [BTreeSet<usize>; 2],
     brew: bool,
@@ -347,6 +356,9 @@ pub enum Message {
     Run(Job),
     Done(Job, Outcome),
     OpenSettings,
+    /// One bar at the bottom (true), or the top bar and the dock
+    Layout(bool),
+    DockVisible(bool),
     FontsLicense,
     /// Show or hide a list of apps
     ListOpen(List),
@@ -475,6 +487,8 @@ pub fn read_state() -> State {
             .lines()
             .any(|line| line.trim() == "flatpark"),
         dark: dark(),
+        bottom_bar: crate::layout::bottom_bar(),
+        dock_visible: crate::layout::dock_always_visible(),
         installed: [List::Dev, List::Games].map(|list| {
             let mut installed = match list {
                 List::Dev => devtools::brew_installed(),
@@ -567,6 +581,22 @@ impl Page {
                 return Task::batch([toast, refresh()]);
             }
             Message::OpenSettings => spawn("cosmic-settings", &["appearance"]),
+            Message::Layout(bottom) => {
+                if !crate::layout::set_bottom_bar(bottom) {
+                    return self.toast("This did not work.");
+                }
+                if let Some(state) = &mut self.state {
+                    state.bottom_bar = bottom;
+                }
+            }
+            Message::DockVisible(visible) => {
+                if !crate::layout::set_dock_always_visible(visible) {
+                    return self.toast("This did not work.");
+                }
+                if let Some(state) = &mut self.state {
+                    state.dock_visible = visible;
+                }
+            }
             Message::FontsLicense => spawn("xdg-open", &[FONTS_LICENSE]),
             Message::ListOpen(list) => {
                 let n = list as usize;
@@ -976,7 +1006,21 @@ impl Page {
     }
 
     fn appearance(&self, state: &State) -> Element<'_, Message> {
-        let look = settings::section()
+        let space_s = theme::spacing().space_s;
+        let layout_buttons = [(false, "Top bar and dock"), (true, "Bar at the bottom")]
+            .into_iter()
+            .fold(
+                widget::row::with_capacity(2).spacing(space_s),
+                |row, (bottom, label)| {
+                    let button = if state.bottom_bar == bottom {
+                        widget::button::suggested(tr(label))
+                    } else {
+                        widget::button::standard(tr(label))
+                    };
+                    row.push(button.on_press(Message::Layout(bottom)))
+                },
+            );
+        let mut look = settings::section()
             .add(self.row(
                 "weather-clear-night-symbolic",
                 "Dark theme",
@@ -984,6 +1028,26 @@ impl Page {
                 self.toggler(state.dark, Job::Dark),
                 None,
             ))
+            .add(self.row(
+                "video-display-symbolic",
+                "Layout",
+                "Top bar and dock: like the Mac. One bar at the bottom: like Windows.",
+                layout_buttons.into(),
+                None,
+            ));
+        // The dock only exists with the top bar
+        if !state.bottom_bar {
+            look = look.add(self.row(
+                "view-app-grid-symbolic",
+                "Dock always visible",
+                "Off: it hides when a window covers it.",
+                widget::toggler(state.dock_visible)
+                    .on_toggle(Message::DockVisible)
+                    .into(),
+                None,
+            ));
+        }
+        let look = look
             .add(
                 self.row(
                     "preferences-desktop-appearance-symbolic",

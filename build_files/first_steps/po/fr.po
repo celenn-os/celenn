@@ -134,8 +134,41 @@ msgstr "Fond d’écran"
 msgid "Your picture"
 msgstr "Votre image"
 
-msgid "Dock always visible"
-msgstr "Dock toujours visible"
+msgid "Send without a cable"
+msgstr "Envoyer sans câble"
+
+msgid "With LocalSend, already on this computer. The files go straight through your Wi-Fi, encrypted, not through the internet."
+msgstr "Avec LocalSend, déjà sur cet ordinateur. Les fichiers passent directement par votre Wi-Fi, chiffrés, sans passer par Internet."
+
+msgid "On the phone, scan this code and install LocalSend (Play Store or App Store)."
+msgstr "Sur le téléphone, scannez ce code et installez LocalSend (Play Store ou App Store)."
+
+msgid "Open LocalSend here and on the phone, on the same Wi-Fi."
+msgstr "Ouvrez LocalSend ici et sur le téléphone, sur le même Wi-Fi."
+
+msgid "On the phone, pick the photos, then this computer. They arrive in Downloads. It works the other way too."
+msgstr "Sur le téléphone, choisissez les photos, puis cet ordinateur. Elles arrivent dans Téléchargements. Ça marche aussi dans l’autre sens."
+
+msgid "Open LocalSend"
+msgstr "Ouvrir LocalSend"
+
+msgid "Without a cable, with LocalSend. Or plug it in and allow file transfer on the phone: it shows up in Files."
+msgstr "Sans câble, avec LocalSend. Ou branchez-le et autorisez le transfert de fichiers sur le téléphone : il apparaît dans Fichiers."
+
+msgid "Without a cable"
+msgstr "Sans câble"
+
+msgid "Layout"
+msgstr "Disposition"
+
+msgid "Top bar and dock: like the Mac. One bar at the bottom: like Windows."
+msgstr "Barre en haut et dock : comme sur Mac. Une barre en bas : comme sur Windows."
+
+msgid "Top bar and dock"
+msgstr "Barre en haut et dock"
+
+msgid "Bar at the bottom"
+msgstr "Barre en bas"
 
 msgid "This did not work."
 msgstr "Cela n’a pas marché."
@@ -412,9 +445,6 @@ msgstr "Ouvrir Fichiers"
 
 msgid "Photos from a phone"
 msgstr "Les photos d’un téléphone"
-
-msgid "Plug it in with its cable and allow file transfer on the phone: it shows up in Files."
-msgstr "Branchez-le avec son câble et autorisez le transfert de fichiers sur le téléphone : il apparaît dans Fichiers."
 
 msgid "Bookmarks and passwords"
 msgstr "Favoris et mots de passe"
