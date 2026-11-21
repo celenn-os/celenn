@@ -1058,14 +1058,15 @@ async fn apply_list(list: List, installed: BTreeSet<usize>, chosen: BTreeSet<usi
         }
     }
     let mut result = Ok(());
-    if (!formulas.is_empty() || !casks.is_empty()) && !devtools::brew_install(formulas, casks).await
+    if (!formulas.is_empty() || !casks.is_empty())
+        && let Err(error) = devtools::brew_install(formulas, casks).await
     {
-        result = Err(failure::failure("brew install: failed"));
+        result = Err(failure::failure(&error));
     }
     if (!old_formulas.is_empty() || !old_casks.is_empty())
-        && !devtools::brew_remove(old_formulas, old_casks).await
+        && let Err(error) = devtools::brew_remove(old_formulas, old_casks).await
     {
-        result = Err(failure::failure("brew uninstall: failed"));
+        result = Err(failure::failure(&error));
     }
     for (verb, apps) in [("install", apps), ("uninstall", old_apps)] {
         if apps.is_empty() {

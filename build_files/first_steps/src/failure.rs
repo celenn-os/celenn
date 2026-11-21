@@ -1,8 +1,8 @@
 // When a change made by a button does not work: a card that stays at the
 // top of the page until it is closed (a toast goes away before it is read).
 // It says what did not work and why, in plain words, and what to do:
-// retry, open the network settings, or report the problem. Shared by
-// cosmic-blue Tools and Parental controls.
+// retry, open the network settings, or report the problem. Shared by the
+// welcome tour (its app installs), cosmic-blue Tools and Parental controls.
 //
 // The cause is guessed from what the command wrote on its error output
 // (the technical details, shown folded in the card) and from the state of

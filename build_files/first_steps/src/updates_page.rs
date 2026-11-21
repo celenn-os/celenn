@@ -33,7 +33,8 @@
 //
 // The look is the tours' (main.rs): same banner, title, rows and buttons.
 
-use crate::common::{fill, header, run, state_icon, two_lines};
+use crate::common::{fill, header, state_icon, two_lines};
+use crate::failure::{self, Card, CardAction, CardMessage, Outcome};
 use crate::i18n::tr;
 use crate::update_progress::{self, Progress};
 use cosmic::app::Task;
@@ -60,7 +61,6 @@ pub const TEXTS: &[&str] = &[
     "Check now",
     "Checking…",
     "You are up to date.",
-    "The check did not work. Are you online?",
     "Ready for the next restart: {}",
     "Downloaded and checked. It takes effect at the next restart.",
     "Restart",
@@ -75,7 +75,6 @@ pub const TEXTS: &[&str] = &[
     "Off (recommended): one tested update a week.\nOn: an update every day, sooner but less tested.",
     "You follow the dev channel, chosen in a terminal. Turn this off to go back to one tested update a week.",
     "Downloading the new version… This can take a few minutes.",
-    "Something went wrong, nothing was changed.",
     "The system version could not be read: is this computer installed with cosmic-blue?",
     "Apps from COSMIC Store update by themselves too.",
     "What's new",
@@ -269,6 +268,46 @@ pub enum Busy {
     Pinning,
 }
 
+/// A change asked from the page, which "Try again" runs again when it fails
+#[derive(Clone, Debug, PartialEq)]
+pub enum Job {
+    Check,
+    /// Follow the testing channel (true) or the stable one
+    Early(bool),
+    Rollback,
+    Pin(String),
+}
+
+impl Job {
+    fn busy(&self) -> Busy {
+        match self {
+            Job::Check => Busy::Checking,
+            Job::Early(_) => Busy::Switching,
+            Job::Rollback => Busy::RollingBack,
+            Job::Pin(_) => Busy::Pinning,
+        }
+    }
+
+    /// The button that started it, for the error card
+    fn title(&self) -> &'static str {
+        match self {
+            Job::Check => tr("Check now"),
+            Job::Early(_) => tr("Get new features early"),
+            Job::Rollback => tr("Go back to it"),
+            Job::Pin(_) => tr("Use this one"),
+        }
+    }
+
+    fn message(&self) -> Message {
+        match self {
+            Job::Check => Message::CheckNow,
+            Job::Early(early) => Message::Early(*early),
+            Job::Rollback => Message::Rollback,
+            Job::Pin(tag) => Message::Pin(tag.clone()),
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub enum Message {
     Status(Result<Status, String>),
@@ -282,7 +321,9 @@ pub enum Message {
     Pin(String),
     /// End of a background command: what it was, and whether it worked
     /// (None: the password prompt was cancelled)
-    Done(Busy, Option<bool>),
+    Done(Job, Outcome),
+    /// The error card of the last change that did not work
+    Card(CardMessage),
     Restart,
     OpenReleases,
     CloseToast(widget::ToastId),
@@ -298,6 +339,8 @@ pub struct Page {
     /// Download of a new version under way, by this page or by the
     /// automatic updates
     progress: Option<Progress>,
+    /// The last change that did not work, until closed or tried again
+    card: Option<Card<Job>>,
     toasts: Toasts<Message>,
 }
 
@@ -312,11 +355,56 @@ fn refresh() -> Task<Message> {
     )
 }
 
-fn background(busy: Busy, program: &'static str, args: &[&str]) -> Task<Message> {
-    let args = args.iter().map(|arg| (*arg).to_owned()).collect();
-    Task::perform(run(program, args), move |result| {
-        cosmic::Action::App(Message::Done(busy, result))
-    })
+/// Runs a change in the background
+fn background(job: Job) -> Task<Message> {
+    let helper = |args: &[&str]| {
+        let mut all = vec![HELPER.to_owned()];
+        all.extend(args.iter().map(|arg| (*arg).to_owned()));
+        failure::run("pkexec", all, None)
+    };
+    let task = job.clone();
+    Task::perform(
+        async move {
+            match &task {
+                Job::Check => check().await,
+                Job::Early(early) => {
+                    helper(&["channel", if *early { "testing" } else { "stable" }]).await
+                }
+                Job::Rollback => helper(&["rollback"]).await,
+                Job::Pin(tag) => helper(&["pin", tag]).await,
+            }
+        },
+        move |result| cosmic::Action::App(Message::Done(job.clone(), result)),
+    )
+}
+
+/// The same update as the daily timer. Allowed without a password by
+/// uupd's own polkit rule. systemctl only says that the service failed: the
+/// details are the end of its log (readable by administrators).
+async fn check() -> Outcome {
+    let outcome = failure::run(
+        "systemctl",
+        vec!["start".to_owned(), "uupd-manual.service".to_owned()],
+        None,
+    )
+    .await;
+    let Some(Err(error)) = outcome else {
+        return outcome;
+    };
+    let log = tokio::process::Command::new("journalctl")
+        .args([
+            "--unit=uupd-manual.service",
+            "--lines=40",
+            "--no-pager",
+            "--output=cat",
+        ])
+        .stdin(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .output()
+        .await
+        .map(|output| String::from_utf8_lossy(&output.stdout).into_owned())
+        .unwrap_or_default();
+    Some(Err(failure::failure(&format!("{log}\n{}", error.details))))
 }
 
 impl Page {
@@ -328,12 +416,19 @@ impl Page {
 }
 
 impl Page {
+    fn start(&mut self, job: Job) -> Task<Message> {
+        self.card = None;
+        self.busy = Some(job.busy());
+        background(job)
+    }
+
     pub fn new() -> (Self, Task<Message>) {
         let page = Page {
             status: None,
             busy: None,
             older: None,
             progress: update_progress::read(),
+            card: None,
             toasts: Toasts::new(Message::CloseToast),
         };
         (page, refresh())
@@ -342,24 +437,9 @@ impl Page {
     pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
             Message::Status(status) => self.status = Some(status),
-            Message::CheckNow => {
-                self.busy = Some(Busy::Checking);
-                // Allowed without a password by uupd's own polkit rule
-                return background(
-                    Busy::Checking,
-                    "systemctl",
-                    &["start", "uupd-manual.service"],
-                );
-            }
-            Message::Rollback => {
-                self.busy = Some(Busy::RollingBack);
-                return background(Busy::RollingBack, "pkexec", &[HELPER, "rollback"]);
-            }
-            Message::Early(early) => {
-                self.busy = Some(Busy::Switching);
-                let channel = if early { "testing" } else { "stable" };
-                return background(Busy::Switching, "pkexec", &[HELPER, "channel", channel]);
-            }
+            Message::CheckNow => return self.start(Job::Check),
+            Message::Rollback => return self.start(Job::Rollback),
+            Message::Early(early) => return self.start(Job::Early(early)),
             Message::ShowOlder => {
                 if self.older.take().is_none() {
                     let image = self
@@ -385,24 +465,23 @@ impl Page {
                 self.older = Some(tags);
             }
             Message::Pin(tag) => {
-                self.busy = Some(Busy::Pinning);
                 self.older = None;
-                return background(Busy::Pinning, "pkexec", &[HELPER, "pin", &tag]);
+                return self.start(Job::Pin(tag));
             }
-            Message::Done(busy, result) => {
+            Message::Done(job, result) => {
                 self.busy = None;
                 let staged_before = self
                     .status
                     .as_ref()
                     .and_then(|status| status.as_ref().ok())
                     .and_then(|status| status.staged.clone());
-                let toast = match (busy, result) {
+                let toast = match (&job, result) {
                     (_, None) => Task::none(),
-                    (Busy::Checking, Some(false)) => {
-                        self.toast("The check did not work. Are you online?")
+                    (_, Some(Err(failure))) => {
+                        self.card = Some(Card::new(job.title(), failure, job.clone()));
+                        Task::none()
                     }
-                    (_, Some(false)) => self.toast("Something went wrong, nothing was changed."),
-                    (Busy::Checking, Some(true)) => {
+                    (Job::Check, Some(Ok(()))) => {
                         // Nothing new staged by the check: say so (a new
                         // version shows as its own row)
                         match read_status() {
@@ -412,9 +491,19 @@ impl Page {
                             _ => Task::none(),
                         }
                     }
-                    (_, Some(true)) => Task::none(),
+                    (_, Some(Ok(()))) => Task::none(),
                 };
                 return Task::batch([toast, refresh()]);
+            }
+            Message::Card(message) => {
+                let Some(card) = &mut self.card else {
+                    return Task::none();
+                };
+                match card.update(message) {
+                    CardAction::None => {}
+                    CardAction::Close => self.card = None,
+                    CardAction::Retry(job) => return self.update(job.message()),
+                }
             }
             Message::Restart => {
                 if let Err(error) = std::process::Command::new("systemctl")
@@ -463,6 +552,9 @@ impl Page {
                 .align_x(Alignment::Center)
                 .width(Length::Fill),
             );
+        if let Some(card) = &self.card {
+            content = content.push(card.view(Message::Card));
+        }
         match &self.status {
             None => {}
             Some(Err(error)) => {
