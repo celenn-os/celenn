@@ -694,6 +694,7 @@ parental_checks() {
         log "Parental controls closed the session when its time was up"
     else
         problem "the session was not closed when its time was up"
+        vm 'loginctl list-sessions; /usr/libexec/cosmic-blue-parental-daemon status' || true
     fi
     sleep 20
     type_text "${DEMO_PASSWORD}"

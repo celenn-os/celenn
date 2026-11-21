@@ -78,27 +78,23 @@ fn uid(user: &str) -> Option<u32> {
 /// One login session (loginctl)
 struct Session {
     id: String,
-    uid: u32,
     /// The session on screen, not locked
     on_screen: bool,
 }
 
-fn sessions() -> Vec<Session> {
+/// The login sessions of an account (none when it is not logged in)
+fn sessions(user: &str) -> Vec<Session> {
     let Ok(output) = Command::new("loginctl")
-        .args(["list-sessions", "--output=json"])
+        .args(["show-user", user, "-p", "Sessions", "--value"])
         .output()
     else {
         return Vec::new();
     };
-    let list: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap_or_default();
-    list.as_array()
-        .into_iter()
-        .flatten()
-        .filter_map(|s| {
-            let id = s["session"].as_str()?.to_owned();
-            let uid = u32::try_from(s["uid"].as_u64()?).ok()?;
+    String::from_utf8_lossy(&output.stdout)
+        .split_whitespace()
+        .filter_map(|id| {
             let props = Command::new("loginctl")
-                .args(["show-session", &id, "-p", "State", "-p", "LockedHint", "-p", "Class"])
+                .args(["show-session", id, "-p", "State", "-p", "LockedHint", "-p", "Class"])
                 .output()
                 .ok()?;
             let props = String::from_utf8_lossy(&props.stdout).into_owned();
@@ -112,7 +108,10 @@ fn sessions() -> Vec<Session> {
             let on_screen = prop("State") == "active"
                 && prop("LockedHint") != "yes"
                 && prop("Class").starts_with("user");
-            Some(Session { id, uid, on_screen })
+            Some(Session {
+                id: id.to_owned(),
+                on_screen,
+            })
         })
         .collect()
 }
@@ -148,11 +147,11 @@ fn filter_rules(uids: &BTreeSet<u32>) -> String {
         "table inet {TABLE}
 delete table inet {TABLE}
 table inet {TABLE} {{
-    chain redirect {{
+    chain dns_nat {{
         type nat hook output priority dstnat; policy accept;
         meta skuid {{ {set} }} ip daddr {{ 127.0.0.53, 127.0.0.54 }} meta l4proto {{ tcp, udp }} th dport 53 dnat ip to 127.0.0.1:{FILTER_PORT}
     }}
-    chain refuse {{
+    chain dns_filter {{
         type filter hook output priority filter; policy accept;
         meta skuid {{ {set} }} ip daddr != 127.0.0.0/8 meta l4proto {{ tcp, udp }} th dport {{ 53, 853 }} reject
         meta skuid {{ {set} }} ip6 daddr != ::1 meta l4proto {{ tcp, udp }} th dport {{ 53, 853 }} reject
@@ -166,6 +165,9 @@ table inet {TABLE} {{
 #[derive(Default)]
 struct Applied {
     filtered: Option<BTreeSet<u32>>,
+    /// Whether each child account was on screen at the last tick (logged
+    /// when it changes)
+    on_screen: std::collections::BTreeMap<String, bool>,
 }
 
 impl Applied {
@@ -224,7 +226,6 @@ fn run() {
 }
 
 fn tick(now: &Now, elapsed: u64, applied: &mut Applied) {
-    let sessions = sessions();
     let mut filtered = BTreeSet::new();
     for user in parental_rules::children() {
         let Some(rules) = Rules::load(&user) else {
@@ -236,11 +237,20 @@ fn tick(now: &Now, elapsed: u64, applied: &mut Applied) {
         if rules.web_filter {
             filtered.insert(uid);
         }
-        let mine: Vec<&Session> = sessions.iter().filter(|s| s.uid == uid).collect();
+        let mine = sessions(&user);
+        let on_screen = mine.iter().any(|s| s.on_screen);
+        if applied.on_screen.get(&user) != Some(&on_screen) {
+            println!(
+                "{user}: {} session(s), {}",
+                mine.len(),
+                if on_screen { "on screen: counting" } else { "not on screen" }
+            );
+            applied.on_screen.insert(user.clone(), on_screen);
+        }
 
         let mut usage = Usage::load(&user);
         let mut changed = usage.roll(now);
-        if mine.iter().any(|s| s.on_screen) && elapsed > 0 {
+        if on_screen && elapsed > 0 {
             usage.today.seconds += elapsed;
             changed = true;
         }
@@ -262,7 +272,9 @@ fn tick(now: &Now, elapsed: u64, applied: &mut Applied) {
                     },
                     mine.iter().map(|s| s.id.as_str()).collect::<Vec<_>>().join(" ")
                 );
-                run_quiet("loginctl", &["terminate-user", &user]);
+                if !run_quiet("loginctl", &["terminate-user", &user]) {
+                    eprintln!("{user}: could not close the sessions");
+                }
             }
         }
     }
