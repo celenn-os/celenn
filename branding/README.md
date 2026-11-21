@@ -40,9 +40,9 @@ Regenerate the SVGs with `python3 logo/build.py`.
 All 5120x2880, in `system_files/usr/share/backgrounds/cosmic-blue/`:
 
 - `cosmic-blue-arcs.jpg`: the logo mark, left of centre, its orbit
-  echoing outwards in fainter arcs, and the name small towards the bottom
-  right, inside the part every common screen shape shows once COSMIC crops
-  the wallpaper to fill (16:9, 16:10, 3:2, 4:3, 5:4, 21:9), with no stars
+  echoing outwards in fainter arcs, and the name small near the bottom
+  right corner, whole on 16:9, 16:10 and 3:2 screens once COSMIC crops the
+  wallpaper to fill (4:3, 5:4 and 21:9 screens cut part of it), with no stars
   next to it (`wallpaper/shaders/echoes.frag`, `wallpaper/logo_mark.py`), the
   default COSMIC wallpaper and the greeter background
 - `cosmic-blue-deep-spiral.jpg`: a flat illustration, a calm night-blue field
