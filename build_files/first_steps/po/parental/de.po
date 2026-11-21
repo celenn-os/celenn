@@ -232,3 +232,51 @@ msgstr "Bericht öffnen"
 
 msgid "Close"
 msgstr "Schließen"
+
+msgid "Applications"
+msgstr "Anwendungen"
+
+msgid "Applications validated by a parent"
+msgstr "Von Eltern freigegebene Anwendungen"
+
+msgid "{} only uses the applications you ticked. Installing an application needs a parent's password."
+msgstr "{} nutzt nur die Anwendungen, die Sie angekreuzt haben. Zum Installieren einer Anwendung ist das Passwort eines Elternteils nötig."
+
+msgid "Allowed applications"
+msgstr "Erlaubte Anwendungen"
+
+msgid "{} of {}"
+msgstr "{} von {}"
+
+msgid "Choose…"
+msgstr "Auswählen …"
+
+msgid "Downloaded programs (AppImages, executable files) do not run on this account."
+msgstr "Heruntergeladene Programme (AppImages, ausführbare Dateien) starten auf diesem Konto nicht."
+
+msgid "Applications of {}"
+msgstr "Anwendungen von {}"
+
+msgid "Search for an application"
+msgstr "Nach einer Anwendung suchen"
+
+msgid "Allowed"
+msgstr "Erlaubt"
+
+msgid "Blocked"
+msgstr "Gesperrt"
+
+msgid "Applications installed later are blocked until you tick them."
+msgstr "Später installierte Anwendungen bleiben gesperrt, bis Sie sie ankreuzen."
+
+msgid "{} is not allowed"
+msgstr "Die Anwendung {} ist nicht erlaubt"
+
+msgid "A parent must allow it first in Parental controls."
+msgstr "Ein Elternteil muss sie zuerst im Jugendschutz erlauben."
+
+msgid "Program blocked"
+msgstr "Programm gesperrt"
+
+msgid "«{}» cannot run on this account: downloaded programs are not allowed."
+msgstr "„{}“ kann auf diesem Konto nicht starten: Heruntergeladene Programme sind nicht erlaubt."

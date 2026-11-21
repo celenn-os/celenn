@@ -49,13 +49,55 @@ write_rules() {
         {
           limit: {enabled: (.limit.enabled | flag), weekdays: (.limit.weekdays | minutes(1440)), weekend: (.limit.weekend | minutes(1440))},
           bedtime: {enabled: (.bedtime.enabled | flag), start: (.bedtime.start | minutes(1439)), end: (.bedtime.end | minutes(1439))},
-          web_filter: (.web_filter | flag)
+          web_filter: (.web_filter | flag),
+          apps: {
+            enabled: ((.apps.enabled // false) | flag),
+            allowed: ((.apps.allowed // []) | if type == "array" then . else error("not a list") end
+                | map(select(type == "string" and test("^[A-Za-z0-9._+-]{1,255}$"))) | unique)
+          }
         }' <<<"${json}")" || { echo "Rules not understood: ${json}" >&2; exit 1; }
     install -d -m 0755 "${CONFIG_DIR}"
     printf '%s\n' "${rules}" > "${CONFIG_DIR}/${user}.json.tmp"
     chmod 0644 "${CONFIG_DIR}/${user}.json.tmp"
     mv -f "${CONFIG_DIR}/${user}.json.tmp" "${CONFIG_DIR}/${user}.json"
+    app_filter "${user}" "${rules}"
     systemctl start cosmic-blue-parental-controls.service
+}
+
+# Flatpak's own parental controls (malcontent, kept by accountsservice), for
+# "Applications validated by a parent": the child cannot install
+# applications for itself, installing one for everyone asks for an
+# administrator password, and only the allowed Flatpaks start (the service
+# stops the rest anyway, see parental_apps.rs). Without the option: the
+# defaults (no filter; installing for everyone asks for a password).
+app_filter() {
+    local user="$1" rules="$2" uid object enabled refs=() id ref
+    uid="$(id -u "${user}")"
+    object="/org/freedesktop/Accounts/User${uid}"
+    # The account known to accountsservice (it creates the object)
+    busctl call org.freedesktop.Accounts /org/freedesktop/Accounts \
+        org.freedesktop.Accounts FindUserByName s "${user}" >/dev/null \
+        || { echo "accountsservice does not know ${user}" >&2; return 0; }
+    # (Not applied: the service still stops what is not allowed)
+    prop() {
+        busctl set-property org.freedesktop.Accounts "${object}" com.endlessm.ParentalControls.AppFilter "$@" \
+            || echo "Could not set Flatpak's $1 for ${user}" >&2
+    }
+    enabled="$(jq -r '.apps.enabled' <<<"${rules}")"
+    if [[ "${enabled}" == true ]]; then
+        while IFS= read -r id; do
+            while IFS= read -r ref; do
+                if [[ -n "${ref}" ]]; then refs+=("${ref}"); fi
+            done < <(flatpak list --system --app --columns=ref 2>/dev/null | awk -F/ -v id="${id}" '$1 == id { print "app/" $0 }')
+        done < <(flatpak list --system --app --columns=application 2>/dev/null \
+            | grep -Fxf <(jq -r '.apps.allowed[]' <<<"${rules}") || true)
+        prop AppFilter '(bas)' true "${#refs[@]}" "${refs[@]}"
+        prop AllowUserInstallation b false
+    else
+        prop AppFilter '(bas)' false 0
+        prop AllowUserInstallation b true
+    fi
+    prop AllowSystemInstallation b false
 }
 
 case "${1:-} $#" in

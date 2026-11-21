@@ -232,3 +232,51 @@ msgstr "Apri il rapporto"
 
 msgid "Close"
 msgstr "Chiudi"
+
+msgid "Applications"
+msgstr "Applicazioni"
+
+msgid "Applications validated by a parent"
+msgstr "Applicazioni approvate da un genitore"
+
+msgid "{} only uses the applications you ticked. Installing an application needs a parent's password."
+msgstr "{} usa solo le applicazioni che hai spuntato. Per installare un'applicazione serve la password di un genitore."
+
+msgid "Allowed applications"
+msgstr "Applicazioni consentite"
+
+msgid "{} of {}"
+msgstr "{} su {}"
+
+msgid "Choose…"
+msgstr "Scegli…"
+
+msgid "Downloaded programs (AppImages, executable files) do not run on this account."
+msgstr "I programmi scaricati (AppImage, file eseguibili) non si avviano su questo account."
+
+msgid "Applications of {}"
+msgstr "Applicazioni di {}"
+
+msgid "Search for an application"
+msgstr "Cerca un'applicazione"
+
+msgid "Allowed"
+msgstr "Consentite"
+
+msgid "Blocked"
+msgstr "Bloccate"
+
+msgid "Applications installed later are blocked until you tick them."
+msgstr "Le applicazioni installate in seguito restano bloccate finché non le spunti."
+
+msgid "{} is not allowed"
+msgstr "L'applicazione {} non è consentita"
+
+msgid "A parent must allow it first in Parental controls."
+msgstr "Un genitore deve prima consentirla nel Controllo parentale."
+
+msgid "Program blocked"
+msgstr "Programma bloccato"
+
+msgid "«{}» cannot run on this account: downloaded programs are not allowed."
+msgstr "«{}» non può avviarsi su questo account: i programmi scaricati non sono consentiti."

@@ -598,6 +598,12 @@ if /usr/libexec/cosmic-blue-parental-extend root 600 2>/dev/null; then
     echo "cosmic-blue-parental-extend accepted 600 minutes"; exit 1
 fi
 test ! -e /etc/cosmic-blue/parental-controls
+# Applications validated by a parent: Flatpak checks malcontent's filter,
+# which accountsservice keeps
+ldd /usr/bin/flatpak /usr/libexec/flatpak-system-helper | grep -q libmalcontent \
+    || { echo "Flatpak is built without malcontent: its app filter would not apply"; exit 1; }
+ls /usr/share/accountsservice/interfaces/ | grep -q 'com.endlessm.ParentalControls.AppFilter' \
+    || { echo "accountsservice does not know malcontent's AppFilter"; exit 1; }
 
 # Login and lock screens: our rebuild, with the cosmic-blue wallpaper as the
 # background shown before a user has a saved one

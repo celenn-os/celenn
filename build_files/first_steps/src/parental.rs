@@ -39,6 +39,7 @@ use std::path::Path;
 
 mod failure;
 mod i18n;
+mod parental_apps;
 mod parental_rules;
 use i18n::tr;
 use failure::{Card, CardAction, CardMessage, Outcome};
@@ -240,6 +241,22 @@ const TEXTS: &[&str] = &[
     "Type a duration, for example 45 or 1:20.",
     "Type a time, for example 20:45.",
     "Parental controls do not allow logging in now. Ask a parent.",
+    "Applications",
+    "Applications validated by a parent",
+    "{} only uses the applications you ticked. Installing an application needs a parent's password.",
+    "Allowed applications",
+    "{} of {}",
+    "Choose…",
+    "Downloaded programs (AppImages, executable files) do not run on this account.",
+    "Applications of {}",
+    "Search for an application",
+    "Allowed",
+    "Blocked",
+    "Applications installed later are blocked until you tick them.",
+    "{} is not allowed",
+    "A parent must allow it first in Parental controls.",
+    "Program blocked",
+    "«{}» cannot run on this account: downloaded programs are not allowed.",
 ];
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -317,9 +334,21 @@ fn agent() {
     }
     let mut warned: BTreeSet<u64> = BTreeSet::new();
     let mut launcher = None;
+    let applications = Path::new(&std::env::var_os("HOME").unwrap_or_default()).join(".local/share/applications");
+    let lang = std::env::var("LANG").unwrap_or_default();
+    let mut hidden: Option<Option<BTreeSet<String>>> = None;
+    let mut rounds: u32 = 0;
     loop {
         // Rules can be added or removed while the session runs
         let rules = Rules::load(&user);
+        // The applications not allowed, hidden (again every minute: some
+        // may have been installed)
+        let allowed = rules.as_ref().filter(|r| r.apps_enabled).map(|r| r.allowed_apps.clone());
+        if hidden.as_ref() != Some(&allowed) || (allowed.is_some() && rounds % 6 == 0) {
+            parental_apps::hide(&applications, &parental_apps::installed(&lang), allowed.as_ref());
+            hidden = Some(allowed);
+        }
+        rounds = rounds.wrapping_add(1);
         let limited = rules.as_ref().is_some_and(|rules| rules.limit_enabled);
         if launcher != Some(limited) {
             more_time_launcher(limited);
@@ -580,6 +609,8 @@ enum Mode {
 enum Page {
     Home,
     Child(String),
+    /// The applications a child may use
+    Apps(String),
     Add,
 }
 
@@ -609,6 +640,14 @@ enum Message {
     /// Typing in a time setting, then done with it (Enter or elsewhere)
     Edit(Field, String),
     Commit,
+    /// The installed applications, read
+    AppsLoaded(Vec<parental_apps::App>),
+    OpenApps(String),
+    Search(String),
+    /// "Applications validated by a parent" turned on or off
+    AppsEnabled(bool),
+    /// An application ticked or unticked
+    Allow(String, bool),
 }
 
 struct App {
@@ -626,6 +665,9 @@ struct App {
     minutes: u32,
     /// The time setting being typed in, and what is typed
     editing: Option<(Field, String)>,
+    /// The applications installed (read when a child's page opens)
+    apps: Option<Vec<parental_apps::App>>,
+    search: String,
     /// What did not work, until closed or done again
     card: Option<Card<Retry>>,
     toasts: Toasts<Message>,
@@ -651,6 +693,19 @@ fn load() -> Task<Message> {
     )
 }
 
+fn load_apps() -> Task<Message> {
+    Task::perform(
+        async {
+            tokio::task::spawn_blocking(|| {
+                parental_apps::installed(&std::env::var("LANG").unwrap_or_default())
+            })
+            .await
+            .unwrap_or_default()
+        },
+        |apps| cosmic::Action::App(Message::AppsLoaded(apps)),
+    )
+}
+
 fn save(user: String, rules: Rules) -> Task<Message> {
     let user_shown = user.clone();
     let args = vec![HELPER.to_owned(), "set".to_owned(), user];
@@ -667,11 +722,17 @@ impl App {
             .map(cosmic::Action::App)
     }
 
+    /// The child account shown
+    fn shown_user(&self) -> Option<&str> {
+        match &self.page {
+            Page::Child(user) | Page::Apps(user) => Some(user),
+            _ => None,
+        }
+    }
+
     /// The rules of the child account shown
     fn shown_rules(&self) -> Option<Rules> {
-        let Page::Child(user) = &self.page else {
-            return None;
-        };
+        let user = self.shown_user()?;
         Some(self.account(user)?.rules.clone().unwrap_or_else(Rules::none))
     }
 
@@ -712,6 +773,8 @@ impl Application for App {
             busy: false,
             minutes: 30,
             editing: None,
+            apps: None,
+            search: String::new(),
             card: None,
             toasts: Toasts::new(Message::CloseToast),
             banner: Path::new(BANNER)
@@ -722,15 +785,29 @@ impl Application for App {
             Some(id) => app.set_window_title(tr("Parental controls").to_owned(), id),
             None => Task::none(),
         };
-        (app, Task::batch([title, load()]))
+        let apps = match &app.page {
+            Page::Child(_) => load_apps(),
+            _ => Task::none(),
+        };
+        (app, Task::batch([title, load(), apps]))
     }
 
     fn update(&mut self, message: Message) -> Task<Message> {
         match message {
             Message::Accounts(accounts) => self.accounts = accounts,
-            Message::Open(user) => self.page = Page::Child(user),
+            Message::Open(user) => {
+                self.page = Page::Child(user);
+                if self.apps.is_none() {
+                    return load_apps();
+                }
+            }
             Message::Back => {
                 self.editing = None;
+                // From the applications, back to the child's page
+                if let Page::Apps(user) = &self.page {
+                    self.page = Page::Child(user.clone());
+                    return Task::none();
+                }
                 self.page = Page::Home;
                 return load();
             }
@@ -740,7 +817,7 @@ impl Application for App {
                 self.page = Page::Add;
             }
             Message::Rules(rules) => {
-                let Page::Child(user) = self.page.clone() else {
+                let Some(user) = self.shown_user().map(str::to_owned) else {
                     return Task::none();
                 };
                 // Shown at once; saved one change at a time (the password
@@ -880,6 +957,44 @@ impl Application for App {
                     }
                 }
             }
+            Message::AppsLoaded(apps) => self.apps = Some(apps),
+            Message::OpenApps(user) => {
+                self.search.clear();
+                self.page = Page::Apps(user);
+                if self.apps.is_none() {
+                    return load_apps();
+                }
+            }
+            Message::Search(search) => self.search = search,
+            Message::AppsEnabled(on) => {
+                let Some(mut rules) = self.shown_rules() else {
+                    return Task::none();
+                };
+                rules.apps_enabled = on;
+                // The first time: the usual applications ticked, not the
+                // terminal, system tools and the like
+                if on && rules.allowed_apps.is_empty() {
+                    rules.allowed_apps = self
+                        .apps
+                        .iter()
+                        .flatten()
+                        .filter(|app| app.ticked_first())
+                        .map(|app| app.id.clone())
+                        .collect();
+                }
+                return self.update(Message::Rules(rules));
+            }
+            Message::Allow(id, on) => {
+                let Some(mut rules) = self.shown_rules() else {
+                    return Task::none();
+                };
+                if on {
+                    rules.allowed_apps.insert(id);
+                } else {
+                    rules.allowed_apps.remove(&id);
+                }
+                return self.update(Message::Rules(rules));
+            }
             Message::Close => std::process::exit(0),
             Message::CloseToast(id) => self.toasts.remove(id),
         }
@@ -891,6 +1006,7 @@ impl Application for App {
             (Mode::MoreTime, _) => self.more_time(),
             (Mode::Parent(_), Page::Home) => self.home(),
             (Mode::Parent(_), Page::Child(user)) => self.child(user),
+            (Mode::Parent(_), Page::Apps(user)) => self.apps_page(user),
             (Mode::Parent(_), Page::Add) => self.add(),
         };
         let page = match &self.card {
@@ -1233,13 +1349,125 @@ impl App {
             .spacing(space_s),
         );
 
-        let content = widget::column::with_capacity(4)
+        let content = widget::column::with_capacity(5)
             .spacing(space_m)
             .push(screen)
             .push(bedtime)
             .push(internet)
+            .push(self.apps_section(account, &rules))
             .push(self.week(account, &rules));
         frame(self.banner.as_ref(), account.name.clone(), true, content.into())
+    }
+
+    /// The "Applications" section of a child's page
+    fn apps_section<'a>(&'a self, account: &Account, rules: &Rules) -> Element<'a, Message> {
+        let space_s = theme::spacing().space_s;
+        let mut section = settings::section().title(tr("Applications")).add(
+            settings::item_row(vec![
+                two_lines(
+                    tr("Applications validated by a parent"),
+                    fill(
+                        tr("{} only uses the applications you ticked. Installing an application needs a parent's password."),
+                        &account.name,
+                    ),
+                ),
+                widget::toggler(rules.apps_enabled)
+                    .on_toggle(Message::AppsEnabled)
+                    .into(),
+            ])
+            .spacing(space_s),
+        );
+        if rules.apps_enabled {
+            let caption = match &self.apps {
+                Some(apps) => tr("{} of {}")
+                    .replacen(
+                        "{}",
+                        &apps.iter().filter(|a| rules.allowed_apps.contains(&a.id)).count().to_string(),
+                        1,
+                    )
+                    .replacen("{}", &apps.len().to_string(), 1),
+                None => String::new(),
+            };
+            section = section
+                .add(
+                    settings::item_row(vec![
+                        two_lines(tr("Allowed applications"), caption),
+                        widget::button::standard(tr("Choose…"))
+                            .on_press(Message::OpenApps(account.user.clone()))
+                            .into(),
+                    ])
+                    .spacing(space_s),
+                )
+                .add(settings::item_row(vec![
+                    text::caption(tr("Downloaded programs (AppImages, executable files) do not run on this account."))
+                        .wrapping(Wrapping::Word)
+                        .width(Length::Fill)
+                        .into(),
+                ]));
+        }
+        section.into()
+    }
+
+    /// The applications a child may use, to tick
+    fn apps_page(&self, user: &str) -> Element<'_, Message> {
+        let space_s = theme::spacing().space_s;
+        let space_m = theme::spacing().space_m;
+        let Some(account) = self.account(user) else {
+            return frame(self.banner.as_ref(), user.to_owned(), true, widget::column::with_capacity(0).into());
+        };
+        let rules = account.rules.clone().unwrap_or_else(Rules::none);
+        let title = fill(tr("Applications of {}"), &account.name);
+        let mut content = widget::column::with_capacity(4).spacing(space_m).push(
+            widget::search_input(tr("Search for an application"), self.search.clone())
+                .on_input(Message::Search)
+                .on_clear(Message::Search(String::new()))
+                .width(Length::Fill),
+        );
+        let Some(apps) = &self.apps else {
+            return frame(self.banner.as_ref(), title, true, content.into());
+        };
+        let search = self.search.trim().to_lowercase();
+        let found = |app: &&parental_apps::App| {
+            search.is_empty()
+                || app.name.to_lowercase().contains(&search)
+                || app.comment.to_lowercase().contains(&search)
+        };
+        for (heading, allowed) in [(tr("Allowed"), true), (tr("Blocked"), false)] {
+            let mut section = settings::section().title(heading);
+            let mut any = false;
+            for app in apps
+                .iter()
+                .filter(|a| rules.allowed_apps.contains(&a.id) == allowed)
+                .filter(found)
+            {
+                any = true;
+                let icon = if app.icon.starts_with('/') {
+                    widget::icon::from_path(app.icon.clone().into())
+                } else {
+                    widget::icon::from_name(app.icon.clone()).size(32).handle()
+                };
+                let id = app.id.clone();
+                section = section.add(
+                    settings::item_row(vec![
+                        widget::icon(icon).size(32).into(),
+                        two_lines(app.name.clone(), app.comment.clone()),
+                        widget::checkbox(allowed)
+                            .on_toggle(move |on| Message::Allow(id.clone(), on))
+                            .into(),
+                    ])
+                    .spacing(space_s),
+                );
+            }
+            if any {
+                content = content.push(section);
+            }
+        }
+        content = content.push(
+            text::caption(tr("Applications installed later are blocked until you tick them."))
+                .align_x(Alignment::Center)
+                .width(Length::Fill),
+        );
+        frame(self.banner.as_ref(), title, true, content.into())
     }
 
     /// The screen time of the last seven days, as bars

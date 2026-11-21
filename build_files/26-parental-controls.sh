@@ -7,8 +7,11 @@ set -euox pipefail
 # dnsmasq: the family web filter (cosmic-blue-family-dns.service); nftables:
 # sends the child accounts' DNS queries to it; acl (setfacl): closes
 # systemd-resolved's socket to them; libnotify (notify-send): the warnings
-# before the session closes
-dnf5 -y install acl dnsmasq libnotify nftables
+# before the session closes; malcontent: Flatpak's parental controls
+# (accountsservice's AppFilter, set by cosmic-blue-parental-helper for
+# "Applications validated by a parent": no installing for the child itself,
+# only the allowed Flatpaks start)
+dnf5 -y install acl dnsmasq libnotify malcontent nftables
 
 # The login check: during bedtime, or once the day's screen time is used up,
 # the login screen refuses a child account with a message saying when it can

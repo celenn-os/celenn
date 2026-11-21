@@ -7,8 +7,10 @@
 //       parent in the app (through cosmic-blue-parental-helper):
 //       {"limit": {"enabled": true, "weekdays": 120, "weekend": 180},
 //        "bedtime": {"enabled": true, "start": 1230, "end": 420},
-//        "web_filter": true}
-//       (minutes a day; start and end in minutes after midnight)
+//        "web_filter": true,
+//        "apps": {"enabled": false, "allowed": ["org.mozilla.firefox"]}}
+//       (minutes a day; start and end in minutes after midnight; apps:
+//       only the applications allowed can be used, see parental_apps.rs)
 //   /var/lib/cosmic-blue/parental-controls/<user>.json  the time used, kept
 //       by the service: today's, and the days before for the weekly chart
 //   /var/lib/cosmic-blue/parental-controls/<user>.extra more time granted
@@ -20,6 +22,7 @@
 #![allow(dead_code)]
 
 use serde_json::{Value, json};
+use std::collections::BTreeSet;
 use std::path::PathBuf;
 
 pub const CONFIG_DIR: &str = "/etc/cosmic-blue/parental-controls";
@@ -39,6 +42,10 @@ pub struct Rules {
     pub bedtime_start: u32,
     pub bedtime_end: u32,
     pub web_filter: bool,
+    /// Only the applications allowed by a parent can be used
+    pub apps_enabled: bool,
+    /// Launcher ids (see parental_apps.rs)
+    pub allowed_apps: BTreeSet<String>,
 }
 
 impl Default for Rules {
@@ -52,6 +59,8 @@ impl Default for Rules {
             bedtime_start: 20 * 60 + 30,
             bedtime_end: 7 * 60,
             web_filter: true,
+            apps_enabled: false,
+            allowed_apps: BTreeSet::new(),
         }
     }
 }
@@ -82,6 +91,11 @@ impl Rules {
             bedtime_start: minutes(&value["bedtime"]["start"], 24 * 60 - 1, default.bedtime_start),
             bedtime_end: minutes(&value["bedtime"]["end"], 24 * 60 - 1, default.bedtime_end),
             web_filter: value["web_filter"].as_bool().unwrap_or(false),
+            apps_enabled: value["apps"]["enabled"].as_bool().unwrap_or(false),
+            allowed_apps: value["apps"]["allowed"]
+                .as_array()
+                .map(|ids| ids.iter().filter_map(|id| id.as_str()).map(str::to_owned).collect())
+                .unwrap_or_default(),
         })
     }
 
@@ -90,6 +104,7 @@ impl Rules {
             "limit": {"enabled": self.limit_enabled, "weekdays": self.weekdays, "weekend": self.weekend},
             "bedtime": {"enabled": self.bedtime_enabled, "start": self.bedtime_start, "end": self.bedtime_end},
             "web_filter": self.web_filter,
+            "apps": {"enabled": self.apps_enabled, "allowed": self.allowed_apps},
         })
         .to_string()
     }
@@ -507,7 +522,11 @@ mod tests {
     #[test]
     fn json() {
         let rules = Rules::default();
-        assert_eq!(Rules::from_json(&rules.to_json()), Some(rules));
+        assert_eq!(Rules::from_json(&rules.to_json()), Some(rules.clone()));
+        let mut apps = rules;
+        apps.apps_enabled = true;
+        apps.allowed_apps = ["org.mozilla.firefox".to_owned(), "com.system76.CosmicFiles".to_owned()].into();
+        assert_eq!(Rules::from_json(&apps.to_json()), Some(apps));
         let mut usage = Usage::default();
         for day in 1..=9 {
             let n = Now {

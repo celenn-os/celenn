@@ -12,6 +12,10 @@
 //           a family filter (cosmic-blue-family-dns.service): nftables rules
 //           for their user ids, and no access to systemd-resolved's own
 //           socket, so that the name lookups go through DNS.
+//       and, every 2 s (another thread), for the accounts whose
+//       applications are validated by a parent (parental_apps.rs): stops the
+//       applications not allowed and the downloaded programs, and tells the
+//       child why.
 //   cosmic-blue-parental-daemon login-check
 //       PAM (pam_exec, account): refuses a login during bedtime or once the
 //       day's time is used up, with a message saying when it is possible
@@ -29,6 +33,8 @@ use std::time::{Duration, Instant};
 
 #[allow(dead_code)] // (the translation check is the app's)
 mod i18n;
+#[allow(dead_code)] // (the app list's labels are the app's)
+mod parental_apps;
 mod parental_rules;
 use i18n::tr;
 use parental_rules::{Block, Now, Rules, Usage};
@@ -222,6 +228,7 @@ impl Applied {
 }
 
 fn run() {
+    std::thread::spawn(watch_apps);
     let mut applied = Applied::default();
     let mut last = Instant::now();
     loop {
@@ -384,5 +391,83 @@ fn status() {
             },
             if rules.web_filter { "on" } else { "off" },
         );
+        if rules.apps_enabled {
+            println!("{user}: applications validated by a parent: {}", rules.allowed_apps.len());
+        }
     }
+}
+
+/// Applications validated by a parent: every 2 s, stops what the children
+/// with that option may not run (see parental_apps.rs)
+fn watch_apps() {
+    const EVERY: Duration = Duration::from_secs(2);
+    /// The installed applications are read again after this (new ones)
+    const APPS_AGAIN: Duration = Duration::from_secs(60);
+    system_language();
+    let lang = std::env::var("LANG").unwrap_or_default();
+    let mut apps: Option<(Instant, Vec<parental_apps::App>)> = None;
+    // Last message per child and reason, not to repeat it every 2 s
+    let mut told: std::collections::BTreeMap<(u32, parental_apps::Stop), Instant> = Default::default();
+    loop {
+        std::thread::sleep(EVERY);
+        let children: Vec<(String, u32, Rules)> = parental_rules::children()
+            .into_iter()
+            .filter_map(|user| {
+                let rules = Rules::load(&user).filter(|rules| rules.apps_enabled)?;
+                Some((user.clone(), uid(&user)?, rules))
+            })
+            .collect();
+        if children.is_empty() {
+            continue;
+        }
+        if apps.as_ref().is_none_or(|(read, _)| read.elapsed() > APPS_AGAIN) {
+            apps = Some((Instant::now(), parental_apps::installed(&lang)));
+        }
+        let Some((_, list)) = &apps else {
+            continue;
+        };
+        for (user, uid, rules) in children {
+            let policy = parental_apps::Policy::new(list, &rules.allowed_apps);
+            for (pid, exe, cgroup) in parental_apps::processes(uid) {
+                let Some(stop) = policy.check(exe.as_deref(), &cgroup) else {
+                    continue;
+                };
+                // At once, without letting it save: it should not run at all
+                let _ = Command::new("kill").args(["-KILL", &pid.to_string()]).status();
+                let key = (uid, stop.clone());
+                if told.get(&key).is_some_and(|at| at.elapsed() < Duration::from_secs(10)) {
+                    continue;
+                }
+                println!(
+                    "{user}: stopped {} ({stop:?})",
+                    exe.as_deref().map(|e| e.display().to_string()).unwrap_or_default()
+                );
+                tell_child(&user, uid, &stop);
+                told.insert(key, Instant::now());
+            }
+        }
+        told.retain(|_, at| at.elapsed() < Duration::from_secs(60));
+    }
+}
+
+/// A notification in the child's session saying what was stopped and why
+fn tell_child(user: &str, uid: u32, stop: &parental_apps::Stop) {
+    let (title, body) = match stop {
+        parental_apps::Stop::App(name) => (
+            tr("{} is not allowed").replacen("{}", name, 1),
+            tr("A parent must allow it first in Parental controls.").to_owned(),
+        ),
+        parental_apps::Stop::Downloaded(name) => (
+            tr("Program blocked").to_owned(),
+            tr("«{}» cannot run on this account: downloaded programs are not allowed.").replacen("{}", name, 1),
+        ),
+    };
+    let bus = format!("DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/{uid}/bus");
+    let _ = Command::new("runuser")
+        .args(["-u", user, "--", "env", &bus, "notify-send", "--app-name", &tr("Parental controls")])
+        .args(["--icon", "cosmic-blue-parental-controls", &title, &body])
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .and_then(|mut child| child.wait());
 }
