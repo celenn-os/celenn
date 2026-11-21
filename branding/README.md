@@ -148,8 +148,7 @@ The `cosmic-blue` icon theme is Tela circle, recolored with the accent
 `icons/build.py` draws them as SVG:
 
 - folders, home, desktop, network and trash (`build_files/icon_theme/layer/places/`):
-  a white folder on an accent disk, like the dock buttons, with its symbol in
-  the accent on the folder's front
+  a disk in the logo blues with a folder tab and a white symbol
 - common file types (`build_files/icon_theme/layer/mimetypes/`): a light page
   whose symbol and folded corner take the color of the type (documents blue,
   spreadsheets green, archives amber...). Language-specific icons (Python,
