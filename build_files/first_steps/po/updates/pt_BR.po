@@ -41,8 +41,8 @@ msgstr "A verificação não funcionou. Você está conectado à internet?"
 msgid "Ready for the next restart: {}"
 msgstr "Pronta para a próxima reinicialização: {}"
 
-msgid "Downloaded and checked. It starts when you restart the computer."
-msgstr "Baixada e verificada. Ela começa quando você reiniciar o computador."
+msgid "Downloaded and checked. It takes effect at the next restart."
+msgstr "Baixada e verificada. Ela entra em vigor na próxima reinicialização."
 
 msgid "Restart"
 msgstr "Reiniciar"

@@ -41,8 +41,8 @@ msgstr "Il controllo non è riuscito. Sei connesso a Internet?"
 msgid "Ready for the next restart: {}"
 msgstr "Pronta per il prossimo riavvio: {}"
 
-msgid "Downloaded and checked. It starts when you restart the computer."
-msgstr "Scaricata e verificata. Parte quando riavvii il computer."
+msgid "Downloaded and checked. It takes effect at the next restart."
+msgstr "Scaricata e verificata. Si applica al prossimo riavvio."
 
 msgid "Restart"
 msgstr "Riavvia"

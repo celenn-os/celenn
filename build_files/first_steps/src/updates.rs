@@ -76,7 +76,7 @@ const TEXTS: &[&str] = &[
     "You are up to date.",
     "The check did not work. Are you online?",
     "Ready for the next restart: {}",
-    "Downloaded and checked. It starts when you restart the computer.",
+    "Downloaded and checked. It takes effect at the next restart.",
     "Restart",
     "Previous version: {}",
     "Something wrong since the last update? Go back to this version. Your files and settings stay as they are.",
@@ -124,7 +124,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
     let settings = Settings::default()
-        .size(cosmic::iced::Size::new(760.0, 780.0))
+        .size(cosmic::iced::Size::new(760.0, 760.0))
         .size_limits(Limits::NONE.min_width(520.0).min_height(480.0));
     cosmic::app::run::<App>(settings, ())?;
     Ok(())
@@ -492,8 +492,8 @@ impl Application for App {
         let cosmic_theme::Spacing {
             space_xxs,
             space_s,
-            space_m,
-            space_l,
+            space_m: _,
+            space_l: _,
             ..
         } = theme::spacing();
 
@@ -512,7 +512,7 @@ impl Application for App {
         };
 
         let mut content = widget::column::with_capacity(8)
-            .spacing(space_m)
+            .spacing(space_s)
             .align_x(Alignment::Center)
             .push(
                 text::body(tr(
@@ -545,26 +545,31 @@ impl Application for App {
                 }
             }
         }
-        content = content
-            .push(
-                text::caption(tr("Apps from COSMIC Store update by themselves too."))
-                    .align_x(Alignment::Center)
-                    .width(Length::Fill),
-            )
-            .push(
-                widget::button::link(tr("What's new"))
-                    .trailing_icon(true)
-                    .on_press(Message::OpenReleases),
-            );
+        // One line at the bottom, so that the window needs no scroll bar
+        // while nothing is unfolded, even on small screens
+        content = content.push(
+            widget::row::with_capacity(2)
+                .spacing(space_xxs)
+                .align_y(Alignment::Center)
+                .push(text::caption(tr(
+                    "Apps from COSMIC Store update by themselves too.",
+                )))
+                .push(
+                    widget::button::link(tr("What's new"))
+                        .trailing_icon(true)
+                        .on_press(Message::OpenReleases),
+                )
+                .apply(widget::container)
+                .center_x(Length::Fill),
+        );
 
         let page = widget::column::with_capacity(6)
-            .push(widget::space::vertical().height(space_s))
             .push(header)
             .push(widget::space::vertical().height(space_xxs))
             .push(text::title2(tr("Updates")).center().width(Length::Fill))
             .push(widget::space::vertical().height(space_s))
             .push(content)
-            .push(widget::space::vertical().height(space_l))
+            .push(widget::space::vertical().height(space_s))
             .max_width(640.0)
             .width(640.0)
             .align_x(Alignment::Center)
@@ -636,7 +641,7 @@ impl App {
                     two_lines(
                         text::body(fill(tr("Ready for the next restart: {}"), &staged.version))
                             .into(),
-                        tr("Downloaded and checked. It starts when you restart the computer.")
+                        tr("Downloaded and checked. It takes effect at the next restart.")
                             .to_owned(),
                     ),
                     widget::button::suggested(tr("Restart"))

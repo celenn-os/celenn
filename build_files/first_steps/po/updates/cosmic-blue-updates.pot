@@ -40,7 +40,7 @@ msgstr ""
 msgid "Ready for the next restart: {}"
 msgstr ""
 
-msgid "Downloaded and checked. It starts when you restart the computer."
+msgid "Downloaded and checked. It takes effect at the next restart."
 msgstr ""
 
 msgid "Restart"
