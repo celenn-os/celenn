@@ -77,7 +77,7 @@ const TEXTS: &[&str] = &[
     "Add a child account",
     "An account without administrator rights, ready in one click",
     "Add…",
-    "Settings are protected by your password.",
+    "Only a parent (an administrator account) can change these settings.",
     "Back",
     "Screen time",
     "Limit screen time",
@@ -843,7 +843,7 @@ impl App {
             content = content.push(section);
         }
         content = content.push(
-            text::caption(tr("Settings are protected by your password."))
+            text::caption(tr("Only a parent (an administrator account) can change these settings."))
                 .align_x(Alignment::Center)
                 .width(Length::Fill),
         );
