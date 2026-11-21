@@ -38,7 +38,7 @@ msgstr ""
 msgid "Add…"
 msgstr ""
 
-msgid "Settings are protected by your password."
+msgid "Only a parent (an administrator account) can change these settings."
 msgstr ""
 
 msgid "Back"

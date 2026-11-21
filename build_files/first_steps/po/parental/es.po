@@ -38,8 +38,8 @@ msgstr "Una cuenta sin derechos de administrador, lista con un clic"
 msgid "Add…"
 msgstr "Añadir…"
 
-msgid "Settings are protected by your password."
-msgstr "Los ajustes están protegidos por su contraseña."
+msgid "Only a parent (an administrator account) can change these settings."
+msgstr "Solo un padre o una madre (cuenta de administrador) puede cambiar estos ajustes."
 
 msgid "Back"
 msgstr "Atrás"
