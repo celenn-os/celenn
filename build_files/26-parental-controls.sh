@@ -24,7 +24,7 @@ if [[ ! -f "${pam}" ]]; then
     fi
     cp /usr/lib/pam.d/greetd "${pam}"
 fi
-line='account    required     pam_exec.so quiet stdout /usr/libexec/cosmic-blue-parental-daemon login-check'
+line='account    required     pam_exec.so stdout /usr/libexec/cosmic-blue-parental-daemon login-check'
 if ! grep -qF 'cosmic-blue-parental-daemon login-check' "${pam}"; then
     # Before the first account line, so that it runs whatever follows
     awk -v line="${line}" '!done && /^account/ { print line; done = 1 } { print }' "${pam}" > "${pam}.new"
