@@ -1,0 +1,35 @@
+#!/usr/bin/bash
+# More screen time for a child account, given by a parent with their password
+# from the child's session ("Ask for more time", run through pkexec: polkit
+# action io.github.cosmic_blue_os.parental.extend, asked every time).
+#
+#   cosmic-blue-parental-extend <user> 15|30|60
+#
+# The minutes add to today's limit and, given during bedtime or just before,
+# allow that long past it (see build_files/first_steps/src/parental_rules.rs).
+set -euo pipefail
+
+STATE_DIR=/var/lib/cosmic-blue/parental-controls
+
+case "${1:-} ${2:-} $#" in
+    *" 15 2" | *" 30 2" | *" 60 2") ;;
+    *) echo "Usage: ${0##*/} <user> 15|30|60" >&2; exit 2 ;;
+esac
+user="$1"
+if [[ ! "${user}" =~ ^[a-z_][a-z0-9_-]{0,31}$ || ! -f "/etc/cosmic-blue/parental-controls/${user}.json" ]]; then
+    echo "${user} has no parental controls." >&2
+    exit 1
+fi
+install -d -m 0755 "${STATE_DIR}"
+file="${STATE_DIR}/${user}.extra"
+now="$(date +%s)"
+# Keep only the last two days
+{
+    if [[ -f "${file}" ]]; then
+        awk -v since="$((now - 2 * 86400))" '$1 >= since' "${file}"
+    fi
+    printf '%s %s\n' "${now}" "$2"
+} > "${file}.tmp"
+chmod 0644 "${file}.tmp"
+mv -f "${file}.tmp" "${file}"
+echo "${user}: $2 more minutes."

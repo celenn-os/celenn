@@ -1,0 +1,16 @@
+# Parental controls: screen time, bedtime and web filter of the child accounts
+# (rules in /etc/cosmic-blue/parental-controls, set with the Parental controls
+# app; see build_files/first_steps/src/parental_daemon.rs). Starts only on
+# systems with child accounts: the app's helper starts it with the first one.
+[Unit]
+Description=cosmic-blue parental controls
+ConditionDirectoryNotEmpty=/etc/cosmic-blue/parental-controls
+After=systemd-logind.service
+
+[Service]
+ExecStart=/usr/libexec/cosmic-blue-parental-daemon run
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

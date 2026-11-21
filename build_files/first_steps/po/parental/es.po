@@ -1,0 +1,186 @@
+# Spanish translation of cosmic-blue Parental controls
+# (build_files/first_steps/src/parental.rs).
+msgid ""
+msgstr ""
+"Language: es\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Parental controls"
+msgstr "Control parental"
+
+msgid "Choose how long and when your children can use this computer."
+msgstr "Elija cuánto tiempo y cuándo pueden usar sus hijos este ordenador."
+
+msgid "Child accounts"
+msgstr "Cuentas infantiles"
+
+msgid "Other accounts"
+msgstr "Otras cuentas"
+
+msgid "Administrator · no limits"
+msgstr "Administrador · sin límites"
+
+msgid "No limits"
+msgstr "Sin límites"
+
+msgid "Today: {} of {}"
+msgstr "Hoy: {} de {}"
+
+msgid "Today: {}"
+msgstr "Hoy: {}"
+
+msgid "Add a child account"
+msgstr "Añadir una cuenta infantil"
+
+msgid "An account without administrator rights, ready in one click"
+msgstr "Una cuenta sin derechos de administrador, lista con un clic"
+
+msgid "Add…"
+msgstr "Añadir…"
+
+msgid "Settings are protected by your password."
+msgstr "Los ajustes están protegidos por su contraseña."
+
+msgid "Back"
+msgstr "Atrás"
+
+msgid "Screen time"
+msgstr "Tiempo de pantalla"
+
+msgid "Limit screen time"
+msgstr "Limitar el tiempo de pantalla"
+
+msgid "Only time in front of the screen counts. Warnings 10, 5 and 1 minutes before the end."
+msgstr "Solo cuenta el tiempo frente a la pantalla. Avisos 10, 5 y 1 minuto antes del final."
+
+msgid "Monday to Friday"
+msgstr "De lunes a viernes"
+
+msgid "Saturday and Sunday"
+msgstr "Sábado y domingo"
+
+msgid "Bedtime"
+msgstr "Hora de dormir"
+
+msgid "No computer at night"
+msgstr "Sin ordenador por la noche"
+
+msgid "The session closes and logging in is refused during these hours."
+msgstr "La sesión se cierra y no se puede iniciar sesión durante estas horas."
+
+msgid "From"
+msgstr "Desde"
+
+msgid "To"
+msgstr "Hasta"
+
+msgid "Internet"
+msgstr "Internet"
+
+msgid "Block unsuitable websites"
+msgstr "Bloquear sitios web inapropiados"
+
+msgid "Adult content, gambling and malicious sites, in every browser. Safe search is forced. Uses the CleanBrowsing family filter."
+msgstr "Contenido para adultos, apuestas y sitios maliciosos, en todos los navegadores. Se fuerza la búsqueda segura. Usa el filtro familiar de CleanBrowsing."
+
+msgid "This week"
+msgstr "Esta semana"
+
+msgid "Average: {} a day"
+msgstr "Media: {} al día"
+
+msgid "Mon"
+msgstr "lun"
+
+msgid "Tue"
+msgstr "mar"
+
+msgid "Wed"
+msgstr "mié"
+
+msgid "Thu"
+msgstr "jue"
+
+msgid "Fri"
+msgstr "vie"
+
+msgid "Sat"
+msgstr "sáb"
+
+msgid "Sun"
+msgstr "dom"
+
+msgid "{h} h {m} min"
+msgstr "{h} h {m} min"
+
+msgid "{h} h"
+msgstr "{h} h"
+
+msgid "{m} min"
+msgstr "{m} min"
+
+msgid "Name"
+msgstr "Nombre"
+
+msgid "Password"
+msgstr "Contraseña"
+
+msgid "The child logs in with this name and password."
+msgstr "El niño inicia sesión con este nombre y esta contraseña."
+
+msgid "Create"
+msgstr "Crear"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Something went wrong, nothing was changed."
+msgstr "Algo salió mal, no se ha cambiado nada."
+
+msgid "Recommended"
+msgstr "Recomendado"
+
+msgid "More time for {}"
+msgstr "Más tiempo para {}"
+
+msgid "A parent confirms with their password."
+msgstr "Un padre o una madre confirma con su contraseña."
+
+msgid "+15 min"
+msgstr "+15 min"
+
+msgid "+30 min"
+msgstr "+30 min"
+
+msgid "+1 h"
+msgstr "+1 h"
+
+msgid "Give"
+msgstr "Conceder"
+
+msgid "{} minutes left"
+msgstr "Quedan {} minutos"
+
+msgid "1 minute left"
+msgstr "Queda 1 minuto"
+
+msgid "Your session closes at {}. Save your work."
+msgstr "Tu sesión se cierra a las {}. Guarda tu trabajo."
+
+msgid "Ask for more time"
+msgstr "Pedir más tiempo"
+
+msgid "It is bedtime."
+msgstr "Es hora de dormir."
+
+msgid "Screen time is over for today."
+msgstr "Se acabó el tiempo de pantalla por hoy."
+
+msgid "You can log in again at {}."
+msgstr "Podrás volver a iniciar sesión a las {}."
+
+msgid "You can log in again tomorrow."
+msgstr "Podrás volver a iniciar sesión mañana."
+
+msgid "You can log in again tomorrow at {}."
+msgstr "Podrás volver a iniciar sesión mañana a las {}."

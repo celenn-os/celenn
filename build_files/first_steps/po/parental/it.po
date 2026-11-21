@@ -1,0 +1,186 @@
+# Italian translation of cosmic-blue Parental controls
+# (build_files/first_steps/src/parental.rs).
+msgid ""
+msgstr ""
+"Language: it\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Parental controls"
+msgstr "Controllo parentale"
+
+msgid "Choose how long and when your children can use this computer."
+msgstr "Scegli per quanto tempo e quando i tuoi figli possono usare questo computer."
+
+msgid "Child accounts"
+msgstr "Account dei figli"
+
+msgid "Other accounts"
+msgstr "Altri account"
+
+msgid "Administrator · no limits"
+msgstr "Amministratore · nessun limite"
+
+msgid "No limits"
+msgstr "Nessun limite"
+
+msgid "Today: {} of {}"
+msgstr "Oggi: {} su {}"
+
+msgid "Today: {}"
+msgstr "Oggi: {}"
+
+msgid "Add a child account"
+msgstr "Aggiungi un account per un figlio"
+
+msgid "An account without administrator rights, ready in one click"
+msgstr "Un account senza diritti di amministratore, pronto con un clic"
+
+msgid "Add…"
+msgstr "Aggiungi…"
+
+msgid "Settings are protected by your password."
+msgstr "Le impostazioni sono protette dalla tua password."
+
+msgid "Back"
+msgstr "Indietro"
+
+msgid "Screen time"
+msgstr "Tempo di utilizzo"
+
+msgid "Limit screen time"
+msgstr "Limita il tempo di utilizzo"
+
+msgid "Only time in front of the screen counts. Warnings 10, 5 and 1 minutes before the end."
+msgstr "Conta solo il tempo davanti allo schermo. Avvisi 10, 5 e 1 minuto prima della fine."
+
+msgid "Monday to Friday"
+msgstr "Dal lunedì al venerdì"
+
+msgid "Saturday and Sunday"
+msgstr "Sabato e domenica"
+
+msgid "Bedtime"
+msgstr "Ora di dormire"
+
+msgid "No computer at night"
+msgstr "Niente computer di notte"
+
+msgid "The session closes and logging in is refused during these hours."
+msgstr "La sessione si chiude e l'accesso è negato in queste ore."
+
+msgid "From"
+msgstr "Dalle"
+
+msgid "To"
+msgstr "Alle"
+
+msgid "Internet"
+msgstr "Internet"
+
+msgid "Block unsuitable websites"
+msgstr "Blocca i siti non adatti"
+
+msgid "Adult content, gambling and malicious sites, in every browser. Safe search is forced. Uses the CleanBrowsing family filter."
+msgstr "Contenuti per adulti, gioco d'azzardo e siti dannosi, in ogni browser. La ricerca sicura è forzata. Usa il filtro famiglia di CleanBrowsing."
+
+msgid "This week"
+msgstr "Questa settimana"
+
+msgid "Average: {} a day"
+msgstr "Media: {} al giorno"
+
+msgid "Mon"
+msgstr "lun"
+
+msgid "Tue"
+msgstr "mar"
+
+msgid "Wed"
+msgstr "mer"
+
+msgid "Thu"
+msgstr "gio"
+
+msgid "Fri"
+msgstr "ven"
+
+msgid "Sat"
+msgstr "sab"
+
+msgid "Sun"
+msgstr "dom"
+
+msgid "{h} h {m} min"
+msgstr "{h} h {m} min"
+
+msgid "{h} h"
+msgstr "{h} h"
+
+msgid "{m} min"
+msgstr "{m} min"
+
+msgid "Name"
+msgstr "Nome"
+
+msgid "Password"
+msgstr "Password"
+
+msgid "The child logs in with this name and password."
+msgstr "Il bambino accede con questo nome e questa password."
+
+msgid "Create"
+msgstr "Crea"
+
+msgid "Cancel"
+msgstr "Annulla"
+
+msgid "Something went wrong, nothing was changed."
+msgstr "Qualcosa è andato storto, non è stato cambiato nulla."
+
+msgid "Recommended"
+msgstr "Consigliato"
+
+msgid "More time for {}"
+msgstr "Più tempo per {}"
+
+msgid "A parent confirms with their password."
+msgstr "Un genitore conferma con la sua password."
+
+msgid "+15 min"
+msgstr "+15 min"
+
+msgid "+30 min"
+msgstr "+30 min"
+
+msgid "+1 h"
+msgstr "+1 h"
+
+msgid "Give"
+msgstr "Concedi"
+
+msgid "{} minutes left"
+msgstr "Mancano {} minuti"
+
+msgid "1 minute left"
+msgstr "Manca 1 minuto"
+
+msgid "Your session closes at {}. Save your work."
+msgstr "La tua sessione si chiude alle {}. Salva il tuo lavoro."
+
+msgid "Ask for more time"
+msgstr "Chiedi più tempo"
+
+msgid "It is bedtime."
+msgstr "È ora di dormire."
+
+msgid "Screen time is over for today."
+msgstr "Il tempo di utilizzo per oggi è finito."
+
+msgid "You can log in again at {}."
+msgstr "Potrai accedere di nuovo alle {}."
+
+msgid "You can log in again tomorrow."
+msgstr "Potrai accedere di nuovo domani."
+
+msgid "You can log in again tomorrow at {}."
+msgstr "Potrai accedere di nuovo domani alle {}."

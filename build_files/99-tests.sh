@@ -524,6 +524,42 @@ if /usr/libexec/cosmic-blue-updates-helper edition amd 2>/dev/null; then
     echo "cosmic-blue-updates-helper accepted an unknown edition"; exit 1
 fi
 
+# Parental controls: the app (launcher, translations, warnings agent), its
+# root helpers run with pkexec (polkit actions limited to those programs, more
+# time asked every time), the service and its web filter, and the login check
+# (PAM), which lets in accounts without rules
+grep -qx 'Exec=/usr/libexec/cosmic-blue-parental-controls' \
+    /usr/share/applications/io.github.cosmic_blue_os.ParentalControls.desktop
+test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-parental-controls.svg
+grep -qx 'Exec=/usr/libexec/cosmic-blue-parental-controls --agent' \
+    /etc/xdg/autostart/io.github.cosmic_blue_os.ParentalControlsAgent.desktop
+for program in cosmic-blue-parental-controls cosmic-blue-parental-daemon; do
+    if ldd "/usr/libexec/${program}" | grep 'not found'; then
+        echo "${program}: missing libraries"; exit 1
+    fi
+done
+/usr/libexec/cosmic-blue-parental-controls --check
+for helper in cosmic-blue-parental-helper cosmic-blue-parental-extend; do
+    test -x "/usr/libexec/${helper}"
+    grep -q "<annotate key=\"org.freedesktop.policykit.exec.path\">/usr/libexec/${helper}</annotate>" \
+        /usr/share/polkit-1/actions/io.github.cosmic_blue_os.parental.policy
+done
+grep -q '<allow_active>auth_admin</allow_active>' /usr/share/polkit-1/actions/io.github.cosmic_blue_os.parental.policy
+systemctl is-enabled cosmic-blue-parental-controls.service
+command -v dnsmasq nft setfacl notify-send >/dev/null
+grep -qE '^account +required +pam_exec\.so quiet stdout /usr/libexec/cosmic-blue-parental-daemon login-check$' \
+    /etc/pam.d/greetd
+PAM_USER=root /usr/libexec/cosmic-blue-parental-daemon login-check \
+    || { echo "The parental controls login check refuses root"; exit 1; }
+# Wrong arguments are refused before anything runs
+if /usr/libexec/cosmic-blue-parental-helper set root </dev/null 2>/dev/null; then
+    echo "cosmic-blue-parental-helper gave rules to root"; exit 1
+fi
+if /usr/libexec/cosmic-blue-parental-extend root 600 2>/dev/null; then
+    echo "cosmic-blue-parental-extend accepted 600 minutes"; exit 1
+fi
+test ! -e /etc/cosmic-blue/parental-controls
+
 # Login and lock screens: our rebuild, with the cosmic-blue wallpaper as the
 # background shown before a user has a saved one
 cmp /ctx/greeter/cosmic-greeter /usr/bin/cosmic-greeter

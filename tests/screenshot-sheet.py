@@ -37,6 +37,11 @@ CAPTIONS = {
     "terminal": "Terminal: welcome message and system information",
     "terminal-zoom": "Terminal, full size",
     "lock-screen": "Lock screen",
+    "parental-controls": "Parental controls",
+    "parental-controls-child": "Parental controls: a child's rules",
+    "parental-warning": "Parental controls: warning before the session closes",
+    "parental-more-time": "Parental controls: asking for more time",
+    "parental-refused": "Parental controls: login refused after the time is up",
 }
 WIDTH = 1280
 MARGIN = 24

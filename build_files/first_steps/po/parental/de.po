@@ -1,0 +1,186 @@
+# German translation of cosmic-blue Parental controls
+# (build_files/first_steps/src/parental.rs).
+msgid ""
+msgstr ""
+"Language: de\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Parental controls"
+msgstr "Jugendschutz"
+
+msgid "Choose how long and when your children can use this computer."
+msgstr "Legen Sie fest, wie lange und wann Ihre Kinder diesen Computer nutzen dürfen."
+
+msgid "Child accounts"
+msgstr "Kinderkonten"
+
+msgid "Other accounts"
+msgstr "Weitere Konten"
+
+msgid "Administrator · no limits"
+msgstr "Administrator · keine Einschränkungen"
+
+msgid "No limits"
+msgstr "Keine Einschränkungen"
+
+msgid "Today: {} of {}"
+msgstr "Heute: {} von {}"
+
+msgid "Today: {}"
+msgstr "Heute: {}"
+
+msgid "Add a child account"
+msgstr "Kinderkonto hinzufügen"
+
+msgid "An account without administrator rights, ready in one click"
+msgstr "Ein Konto ohne Administratorrechte, mit einem Klick bereit"
+
+msgid "Add…"
+msgstr "Hinzufügen …"
+
+msgid "Settings are protected by your password."
+msgstr "Die Einstellungen sind durch Ihr Passwort geschützt."
+
+msgid "Back"
+msgstr "Zurück"
+
+msgid "Screen time"
+msgstr "Bildschirmzeit"
+
+msgid "Limit screen time"
+msgstr "Bildschirmzeit begrenzen"
+
+msgid "Only time in front of the screen counts. Warnings 10, 5 and 1 minutes before the end."
+msgstr "Nur die Zeit vor dem Bildschirm zählt. Hinweise 10, 5 und 1 Minute vor dem Ende."
+
+msgid "Monday to Friday"
+msgstr "Montag bis Freitag"
+
+msgid "Saturday and Sunday"
+msgstr "Samstag und Sonntag"
+
+msgid "Bedtime"
+msgstr "Schlafenszeit"
+
+msgid "No computer at night"
+msgstr "Kein Computer in der Nacht"
+
+msgid "The session closes and logging in is refused during these hours."
+msgstr "Die Sitzung wird beendet und die Anmeldung ist in diesen Stunden gesperrt."
+
+msgid "From"
+msgstr "Von"
+
+msgid "To"
+msgstr "Bis"
+
+msgid "Internet"
+msgstr "Internet"
+
+msgid "Block unsuitable websites"
+msgstr "Ungeeignete Websites sperren"
+
+msgid "Adult content, gambling and malicious sites, in every browser. Safe search is forced. Uses the CleanBrowsing family filter."
+msgstr "Inhalte für Erwachsene, Glücksspiel und schädliche Websites, in jedem Browser. SafeSearch wird erzwungen. Nutzt den Familienfilter von CleanBrowsing."
+
+msgid "This week"
+msgstr "Diese Woche"
+
+msgid "Average: {} a day"
+msgstr "Durchschnitt: {} pro Tag"
+
+msgid "Mon"
+msgstr "Mo"
+
+msgid "Tue"
+msgstr "Di"
+
+msgid "Wed"
+msgstr "Mi"
+
+msgid "Thu"
+msgstr "Do"
+
+msgid "Fri"
+msgstr "Fr"
+
+msgid "Sat"
+msgstr "Sa"
+
+msgid "Sun"
+msgstr "So"
+
+msgid "{h} h {m} min"
+msgstr "{h} Std. {m} Min."
+
+msgid "{h} h"
+msgstr "{h} Std."
+
+msgid "{m} min"
+msgstr "{m} Min."
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Password"
+msgstr "Passwort"
+
+msgid "The child logs in with this name and password."
+msgstr "Das Kind meldet sich mit diesem Namen und Passwort an."
+
+msgid "Create"
+msgstr "Erstellen"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Something went wrong, nothing was changed."
+msgstr "Etwas ist schiefgelaufen, nichts wurde geändert."
+
+msgid "Recommended"
+msgstr "Empfohlen"
+
+msgid "More time for {}"
+msgstr "Mehr Zeit für {}"
+
+msgid "A parent confirms with their password."
+msgstr "Ein Elternteil bestätigt mit seinem Passwort."
+
+msgid "+15 min"
+msgstr "+15 Min."
+
+msgid "+30 min"
+msgstr "+30 Min."
+
+msgid "+1 h"
+msgstr "+1 Std."
+
+msgid "Give"
+msgstr "Gewähren"
+
+msgid "{} minutes left"
+msgstr "Noch {} Minuten"
+
+msgid "1 minute left"
+msgstr "Noch 1 Minute"
+
+msgid "Your session closes at {}. Save your work."
+msgstr "Deine Sitzung endet um {}. Speichere deine Arbeit."
+
+msgid "Ask for more time"
+msgstr "Um mehr Zeit bitten"
+
+msgid "It is bedtime."
+msgstr "Es ist Schlafenszeit."
+
+msgid "Screen time is over for today."
+msgstr "Die Bildschirmzeit für heute ist vorbei."
+
+msgid "You can log in again at {}."
+msgstr "Du kannst dich um {} wieder anmelden."
+
+msgid "You can log in again tomorrow."
+msgstr "Du kannst dich morgen wieder anmelden."
+
+msgid "You can log in again tomorrow at {}."
+msgstr "Du kannst dich morgen um {} wieder anmelden."
