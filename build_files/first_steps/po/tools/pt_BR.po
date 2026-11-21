@@ -1,5 +1,5 @@
-# Brazilian Portuguese translation of cosmic-blue Updates
-# (build_files/first_steps/src/updates.rs).
+# Brazilian Portuguese translation of cosmic-blue Tools
+# (build_files/first_steps/src/tools.rs and its pages).
 msgid ""
 msgstr ""
 "Language: pt_BR\n"
@@ -128,3 +128,129 @@ msgstr "Este sistema fica nesta versão. Retome-as para voltar a receber uma atu
 
 msgid "Resume updates"
 msgstr "Retomar as atualizações"
+
+msgid "cosmic-blue Tools"
+msgstr "Ferramentas do cosmic-blue"
+
+msgid "Maintenance"
+msgstr "Manutenção"
+
+msgid "Keep the computer tidy and in shape, without typing commands."
+msgstr "Manter o computador organizado e em forma, sem digitar comandos."
+
+msgid "Disk space"
+msgstr "Espaço em disco"
+
+msgid "{used} used of {total}"
+msgstr "{used} usados de {total}"
+
+msgid "{} free"
+msgstr "{} livres"
+
+msgid "See what takes space"
+msgstr "Ver o que ocupa espaço"
+
+msgid "Free up space"
+msgstr "Liberar espaço"
+
+msgid "Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of tools. Your files stay as they are."
+msgstr "Remove o que nada mais usa: restos de aplicativos removidos, imagens de contêiner sem uso, downloads antigos de ferramentas. Seus arquivos ficam como estão."
+
+msgid "Clean up"
+msgstr "Limpar"
+
+msgid "Cleaning up…"
+msgstr "Limpando…"
+
+msgid "{} freed"
+msgstr "{} liberados"
+
+msgid "Everything was already tidy."
+msgstr "Tudo já estava em ordem."
+
+msgid "Apps that come with cosmic-blue"
+msgstr "Aplicativos que vêm com o cosmic-blue"
+
+msgid "All of them are installed."
+msgstr "Todos estão instalados."
+
+msgid "One of them was removed. Put it back?"
+msgstr "Um deles foi removido. Reinstalar?"
+
+msgid "{} of them were removed. Put them back?"
+msgstr "{} deles foram removidos. Reinstalar?"
+
+msgid "Reinstall"
+msgstr "Reinstalar"
+
+msgid "Installing…"
+msgstr "Instalando…"
+
+msgid "The apps are back."
+msgstr "Os aplicativos estão de volta."
+
+msgid "The apps could not be installed. Are you online?"
+msgstr "Não foi possível instalar os aplicativos. Você está conectado?"
+
+msgid "Firmware updates"
+msgstr "Atualizações de firmware"
+
+msgid "New versions of the BIOS, SSD, dock… from their makers."
+msgstr "Novas versões do BIOS, SSD, dock… dos fabricantes."
+
+msgid "Open"
+msgstr "Abrir"
+
+msgid "Help"
+msgstr "Ajuda"
+
+msgid "Find answers, ask a question, or tell us what goes wrong."
+msgstr "Encontrar respostas, fazer uma pergunta ou nos contar o que dá errado."
+
+msgid "Documentation"
+msgstr "Documentação"
+
+msgid "Updates, software, commands and tips"
+msgstr "Atualizações, programas, comandos e dicas"
+
+msgid "Ask a question"
+msgstr "Fazer uma pergunta"
+
+msgid "Other cosmic-blue users and its makers answer, on GitHub."
+msgstr "Outros usuários do cosmic-blue e seus autores respondem, no GitHub."
+
+msgid "Report a problem"
+msgstr "Relatar um problema"
+
+msgid "Opens the bug report form with the details of this computer filled in. They hold no personal data. A GitHub account is needed."
+msgstr "Abre o formulário de relato de erro com os detalhes deste computador já preenchidos. Eles não contêm dados pessoais. É preciso uma conta do GitHub."
+
+msgid "Show the details"
+msgstr "Ver os detalhes"
+
+msgid "Hide the details"
+msgstr "Ocultar os detalhes"
+
+msgid "Report"
+msgstr "Relatar"
+
+msgid "Copy"
+msgstr "Copiar"
+
+msgid "Copied."
+msgstr "Copiado."
+
+msgid "B"
+msgstr "B"
+
+msgid "kB"
+msgstr "kB"
+
+msgid "MB"
+msgstr "MB"
+
+msgid "GB"
+msgstr "GB"
+
+msgid "TB"
+msgstr "TB"

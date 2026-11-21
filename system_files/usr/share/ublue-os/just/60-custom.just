@@ -952,7 +952,8 @@ report-bug mode="open":
     set -euo pipefail
     # The details (cosmic-blue-system-info) hold no personal data. They go
     # into the "System details" field of the bug report form through its
-    # URL: nothing is sent until the report is submitted on GitHub.
+    # URL (cosmic-blue-report-bug, also run by "Report a problem" in
+    # cosmic-blue Tools): nothing is sent until the report is submitted.
     form="https://github.com/cosmic-blue-os/cosmic-blue/issues/new?template=bug_report.yml"
     info="$(/usr/libexec/cosmic-blue-system-info)"
     case "{{ mode }}" in
@@ -973,23 +974,31 @@ report-bug mode="open":
     if [[ -n "${WAYLAND_DISPLAY:-}" ]] && printf '%s\n' "${info}" | wl-copy 2>/dev/null; then
         echo "Copied to the clipboard."
     fi
-    url="${form}&system-info=$(printf '%s\n' "${info}" | jq -sRr @uri)"
-    # Browsers and GitHub refuse very long addresses: then paste the details
-    if [[ "${#url}" -gt 7000 ]]; then
-        url="${form}"
-    fi
     if [[ -z "${WAYLAND_DISPLAY:-}${DISPLAY:-}" ]]; then
         echo "Report the bug at ${form}"
         echo "and paste the details above into the \"System details\" field."
         exit 0
     fi
     if gum confirm "Open the bug report form in the browser?"; then
-        xdg-open "${url}" >/dev/null 2>&1 &
-        disown
+        /usr/libexec/cosmic-blue-report-bug open
         echo "Describe the problem in the form, then submit it (a GitHub account is needed)."
     else
         echo "Report the bug later at ${form}"
     fi
+
+# Free disk space: what nothing uses any more (your files stay)
+[group('System')]
+clean-system confirm="ask":
+    #!/usr/bin/bash
+    set -euo pipefail
+    # Same script as "Clean up" in cosmic-blue Tools (Maintenance page).
+    # Unused Flatpak runtimes, dangling Podman/Docker images, old Homebrew
+    # downloads, update caches. Named images, containers and volumes stay:
+    # `podman system prune` removes those when you are sure.
+    if [[ "{{ confirm }}" != yes ]]; then
+        gum confirm "Remove what nothing uses any more (your files stay)?" || exit 0
+    fi
+    /usr/libexec/cosmic-blue-clean
 
 # NVIDIA with Secure Boot: enroll the driver key (password "cosmicblue")
 [group('System')]

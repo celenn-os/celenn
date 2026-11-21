@@ -1,4 +1,5 @@
-# Texts of cosmic-blue Updates (build_files/first_steps/src/updates.rs).
+# Texts of cosmic-blue Tools (build_files/first_steps/src/tools.rs and its
+# pages: updates_page.rs, maintenance.rs, help.rs).
 # Each language has a copy with its translations: <language>.po
 msgid ""
 msgstr ""
@@ -124,4 +125,130 @@ msgid "This system stays on this version. Resume them to get one tested update a
 msgstr ""
 
 msgid "Resume updates"
+msgstr ""
+
+msgid "cosmic-blue Tools"
+msgstr ""
+
+msgid "Maintenance"
+msgstr ""
+
+msgid "Keep the computer tidy and in shape, without typing commands."
+msgstr ""
+
+msgid "Disk space"
+msgstr ""
+
+msgid "{used} used of {total}"
+msgstr ""
+
+msgid "{} free"
+msgstr ""
+
+msgid "See what takes space"
+msgstr ""
+
+msgid "Free up space"
+msgstr ""
+
+msgid "Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of tools. Your files stay as they are."
+msgstr ""
+
+msgid "Clean up"
+msgstr ""
+
+msgid "Cleaning up…"
+msgstr ""
+
+msgid "{} freed"
+msgstr ""
+
+msgid "Everything was already tidy."
+msgstr ""
+
+msgid "Apps that come with cosmic-blue"
+msgstr ""
+
+msgid "All of them are installed."
+msgstr ""
+
+msgid "One of them was removed. Put it back?"
+msgstr ""
+
+msgid "{} of them were removed. Put them back?"
+msgstr ""
+
+msgid "Reinstall"
+msgstr ""
+
+msgid "Installing…"
+msgstr ""
+
+msgid "The apps are back."
+msgstr ""
+
+msgid "The apps could not be installed. Are you online?"
+msgstr ""
+
+msgid "Firmware updates"
+msgstr ""
+
+msgid "New versions of the BIOS, SSD, dock… from their makers."
+msgstr ""
+
+msgid "Open"
+msgstr ""
+
+msgid "Help"
+msgstr ""
+
+msgid "Find answers, ask a question, or tell us what goes wrong."
+msgstr ""
+
+msgid "Documentation"
+msgstr ""
+
+msgid "Updates, software, commands and tips"
+msgstr ""
+
+msgid "Ask a question"
+msgstr ""
+
+msgid "Other cosmic-blue users and its makers answer, on GitHub."
+msgstr ""
+
+msgid "Report a problem"
+msgstr ""
+
+msgid "Opens the bug report form with the details of this computer filled in. They hold no personal data. A GitHub account is needed."
+msgstr ""
+
+msgid "Show the details"
+msgstr ""
+
+msgid "Hide the details"
+msgstr ""
+
+msgid "Report"
+msgstr ""
+
+msgid "Copy"
+msgstr ""
+
+msgid "Copied."
+msgstr ""
+
+msgid "B"
+msgstr ""
+
+msgid "kB"
+msgstr ""
+
+msgid "MB"
+msgstr ""
+
+msgid "GB"
+msgstr ""
+
+msgid "TB"
 msgstr ""
