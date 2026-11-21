@@ -553,8 +553,8 @@ done
 for theme in Dark Light; do
     grep -qx true "/usr/share/cosmic/com.system76.CosmicTheme.${theme}/v2/frosted_windows"
     grep -qx true "/usr/share/cosmic/com.system76.CosmicTheme.${theme}.Builder/v2/frosted_panel"
-    # Frosted glass a notch thicker than COSMIC's middle setting
-    grep -qx High "/usr/share/cosmic/com.system76.CosmicTheme.${theme}.Builder/v2/frosted"
+    # Thin frosted glass (Thickness Low) so the wallpaper shows through
+    grep -qx Low "/usr/share/cosmic/com.system76.CosmicTheme.${theme}.Builder/v2/frosted"
     # COSMIC's own "Round" style (160 px radius_xl: pill-shaped panel and dock)
     for dir in "${theme}" "${theme}.Builder"; do
         grep -q '160' "/usr/share/cosmic/com.system76.CosmicTheme.${dir}/v2/corner_radii"
