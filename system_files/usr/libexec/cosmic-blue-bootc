@@ -9,13 +9,44 @@
 # serves that same image, `upgrade` reports no update; once a newer image is
 # out, the note is removed and updates go on as usual. Every other command
 # goes straight to bootc.
+#
+# Downloads (`upgrade` without --check, `switch`, also run by
+# cosmic-blue-updates-helper) copy bootc's progress, JSON lines written to
+# --progress-fd, to /run/cosmic-blue/update-progress.jsonl, readable by
+# everyone, while bootc runs: the Updates app shows a progress bar from it. uupd reads that
+# progress itself on fd 3: it gets the same lines.
 set -euo pipefail
 
 BOOTC=/usr/bin/bootc
 HOLD=/var/lib/cosmic-blue/update-hold
+PROGRESS=/run/cosmic-blue/update-progress.jsonl
+
+# Runs bootc and exits with its status, copying the progress of a download
+# (the copy is removed when bootc ends, which hides the bar)
+run_bootc() {
+    local download=false status=0
+    case "${1:-}" in
+        upgrade) [[ " $* " == *" --check "* ]] || download=true ;;
+        switch) download=true ;;
+    esac
+    if [[ "${download}" != true ]] || ! { mkdir -p "${PROGRESS%/*}" && : > "${PROGRESS}"; }; then
+        exec "${BOOTC}" "$@"
+    fi
+    chmod 0644 "${PROGRESS}"
+    if [[ " $* " == *" --progress-fd 3 "* ]]; then
+        # uupd's pipe stays on fd 4 for the copy
+        exec 4>&3
+        "${BOOTC}" "$@" 3> >(tee -a "${PROGRESS}" >&4) || status=$?
+    else
+        # bootc wants a pipe there
+        "${BOOTC}" "$@" --progress-fd 3 3> >(cat >> "${PROGRESS}") || status=$?
+    fi
+    rm -f "${PROGRESS}"
+    exit "${status}"
+}
 
 if [[ "${1:-}" != upgrade || ! -s "${HOLD}" ]]; then
-    exec "${BOOTC}" "$@"
+    run_bootc "$@"
 fi
 
 read -r held version < "${HOLD}" || true
@@ -23,13 +54,13 @@ booted="$("${BOOTC}" status --json | jq -r '.status.booted.image.imageDigest // 
 if [[ -z "${held:-}" || "${booted}" == "${held}" ]]; then
     # Running the version that was set aside after all: nothing to hold
     rm -f "${HOLD}"
-    exec "${BOOTC}" "$@"
+    run_bootc "$@"
 fi
 
 # What the registry serves now (only its manifest is downloaded)
 if ! check="$("${BOOTC}" upgrade --check 2>&1)"; then
     # Offline or registry error: let bootc report it
-    exec "${BOOTC}" "$@"
+    run_bootc "$@"
 fi
 available="$(sed -n 's/^  Digest: //p' <<<"${check}" | head -n 1)"
 if [[ "${available}" == "${held}" ]]; then
@@ -44,4 +75,4 @@ if [[ " $* " == *" --check "* ]]; then
     echo "${check}"
     exit 0
 fi
-exec "${BOOTC}" "$@"
+run_bootc "$@"

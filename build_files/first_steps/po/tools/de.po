@@ -84,6 +84,18 @@ msgstr "Sie folgen dem dev-Kanal, im Terminal gewählt. Schalten Sie dies aus, u
 msgid "Downloading the new version… This can take a few minutes."
 msgstr "Die neue Version wird heruntergeladen… Das kann einige Minuten dauern."
 
+msgid "Downloading the new version: {done} of {total} ({percent}%)"
+msgstr "Neue Version wird heruntergeladen: {done} von {total} ({percent} %)"
+
+msgid "Installing the new version…"
+msgstr "Neue Version wird installiert…"
+
+msgid "MB"
+msgstr "MB"
+
+msgid "GB"
+msgstr "GB"
+
 msgid "Something went wrong, nothing was changed."
 msgstr "Etwas ist schiefgelaufen, nichts wurde geändert."
 

@@ -82,6 +82,18 @@ msgstr ""
 msgid "Downloading the new version… This can take a few minutes."
 msgstr ""
 
+msgid "Downloading the new version: {done} of {total} ({percent}%)"
+msgstr ""
+
+msgid "Installing the new version…"
+msgstr ""
+
+msgid "MB"
+msgstr ""
+
+msgid "GB"
+msgstr ""
+
 msgid "Something went wrong, nothing was changed."
 msgstr ""
 

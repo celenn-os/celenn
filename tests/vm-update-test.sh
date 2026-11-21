@@ -72,8 +72,28 @@ demo_journal before-update
 
 # 3. The update, then a reboot into it
 log "Updating to ${TO}"
-vm "timeout 1800 bootc switch --enforce-container-sigpolicy ${TO}" \
+# Through cosmic-blue-bootc when the old image records the download
+# progress, as the Updates app does. The copy only exists while bootc runs:
+# a watcher keeps the last one it saw
+bootc_cmd=bootc
+vm "grep -q update-progress /usr/libexec/cosmic-blue-bootc" 2>/dev/null \
+    && bootc_cmd=/usr/libexec/cosmic-blue-bootc
+vm "(while sleep 1; do cp /run/cosmic-blue/update-progress.jsonl /run/progress-seen 2>/dev/null; done) >/dev/null 2>&1 &
+    watcher=\$!
+    timeout 1800 ${bootc_cmd} switch --enforce-container-sigpolicy ${TO}; status=\$?
+    kill \${watcher}
+    exit \${status}" \
     || fail "bootc could not update to ${TO} (pull or signature check failed)"
+if [[ "${bootc_cmd}" != bootc ]]; then
+    seen="$(vm "cat /run/progress-seen" 2>/dev/null)" || seen=""
+    echo "Download progress (last lines): $(tail -n 3 <<<"${seen}")"
+    grep -q '"type":"ProgressBytes"' <<<"${seen}" \
+        || { echo "::error::cosmic-blue-bootc did not record the download progress"; errors=1; }
+    if vm "test -e /run/cosmic-blue/update-progress.jsonl"; then
+        echo "::error::the download progress was not removed after the download"
+        errors=1
+    fi
+fi
 staged="$(vm 'bootc status --json' | jq -r '.status.staged.image.imageDigest // empty')"
 [[ "${staged}" == "${to_digest}" ]] || fail "The staged update is '${staged}', not ${to_digest}"
 # People reboot long after the update is staged, by which time idle

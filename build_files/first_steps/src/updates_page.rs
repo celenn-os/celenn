@@ -1,8 +1,10 @@
 // cosmic-blue Updates: the system version in one window, without jargon.
 //
 //   - the current version, a "Check now" button (uupd-manual.service, the
-//     same update as the daily timer: system, flatpaks, Homebrew), and the
-//     version waiting for the next restart, if any;
+//     same update as the daily timer: system, flatpaks, Homebrew), a
+//     progress bar while a new version downloads (update_progress.rs, also
+//     for the automatic updates), and the version waiting for the next
+//     restart, if any;
 //   - the previous version, with a button that goes back to it (bootc
 //     rollback), then offers to restart;
 //   - one switch, "Get new features early": off follows the stable channel
@@ -33,8 +35,9 @@
 
 use crate::common::{fill, header, run, state_icon, two_lines};
 use crate::i18n::tr;
+use crate::update_progress::{self, Progress};
 use cosmic::app::Task;
-use cosmic::iced::{Alignment, Length};
+use cosmic::iced::{Alignment, Length, Subscription};
 use cosmic::widget::{self, settings, text, toaster::Toasts};
 use cosmic::{Apply, Element, cosmic_theme, theme};
 
@@ -283,6 +286,8 @@ pub enum Message {
     Restart,
     OpenReleases,
     CloseToast(widget::ToastId),
+    /// Time to read the download progress again
+    Tick,
 }
 
 pub struct Page {
@@ -290,6 +295,9 @@ pub struct Page {
     busy: Option<Busy>,
     /// Tags of the older stable versions, once listed (None: list closed)
     older: Option<Vec<String>>,
+    /// Download of a new version under way, by this page or by the
+    /// automatic updates
+    progress: Option<Progress>,
     toasts: Toasts<Message>,
 }
 
@@ -325,6 +333,7 @@ impl Page {
             status: None,
             busy: None,
             older: None,
+            progress: update_progress::read(),
             toasts: Toasts::new(Message::CloseToast),
         };
         (page, refresh())
@@ -421,8 +430,22 @@ impl Page {
                 }
             }
             Message::CloseToast(id) => self.toasts.remove(id),
+            Message::Tick => {
+                let was_downloading = self.progress.is_some();
+                self.progress = update_progress::read();
+                // A download just ended: show the version it staged
+                if was_downloading && self.progress.is_none() {
+                    return refresh();
+                }
+            }
         }
         Task::none()
+    }
+
+    /// Reads the download progress every second (a file of a few lines, or
+    /// none at all most of the time)
+    pub fn subscription(&self) -> Subscription<Message> {
+        cosmic::iced::time::every(std::time::Duration::from_secs(1)).map(|_| Message::Tick)
     }
 
     pub fn view(&self) -> Element<'_, Message> {
@@ -459,7 +482,7 @@ impl Page {
                 );
             }
             Some(Ok(status)) => {
-                content = content.push(self.versions(status, space_s));
+                content = content.push(self.versions(status, space_xxs, space_s));
                 if let Some(section) = self.channel_section(status, space_s) {
                     content = content.push(section);
                 }
@@ -493,7 +516,12 @@ impl Page {
 
 impl Page {
     /// Current version, update waiting for a restart, previous version
-    fn versions<'a>(&'a self, status: &'a Status, space_s: u16) -> Element<'a, Message> {
+    fn versions<'a>(
+        &'a self,
+        status: &'a Status,
+        space_xxs: u16,
+        space_s: u16,
+    ) -> Element<'a, Message> {
         let idle = self.busy.is_none();
         let mut section = settings::section();
 
@@ -509,7 +537,8 @@ impl Page {
             text::body(tr("Checking…")).into()
         } else {
             widget::button::standard(tr("Check now"))
-                .on_press_maybe(idle.then_some(Message::CheckNow))
+                // Not while a new version downloads (the automatic update)
+                .on_press_maybe((idle && self.progress.is_none()).then_some(Message::CheckNow))
                 .into()
         };
         section = section.add(
@@ -523,6 +552,28 @@ impl Page {
             ])
             .spacing(space_s),
         );
+
+        if let Some(progress) = &self.progress {
+            section = section.add(
+                settings::item_row(vec![
+                    state_icon("folder-download-symbolic", false),
+                    widget::column::with_capacity(2)
+                        .spacing(space_xxs)
+                        .width(Length::Fill)
+                        .push(text::body(progress.text()))
+                        .push(match progress.fraction() {
+                            Some(fraction) => widget::progress_bar::determinate_linear(fraction)
+                                .width(Length::Fill)
+                                .into(),
+                            None => Element::from(
+                                widget::progress_bar::indeterminate_linear().width(Length::Fill),
+                            ),
+                        })
+                        .into(),
+                ])
+                .spacing(space_s),
+            );
+        }
 
         if status.rollback_queued {
             if let Some(previous) = &status.previous {
@@ -634,7 +685,10 @@ impl Page {
                     .into(),
             );
         }
-        let caption = if matches!(self.busy, Some(Busy::Switching | Busy::Pinning)) {
+        let caption = if matches!(self.busy, Some(Busy::Switching | Busy::Pinning))
+            && self.progress.is_none()
+        {
+            // Until the progress bar above shows
             tr("Downloading the new version… This can take a few minutes.")
         } else if channel == Channel::Dev {
             tr(
