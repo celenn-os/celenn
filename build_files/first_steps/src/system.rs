@@ -120,13 +120,16 @@ pub fn set_wallpaper(path: &Path) -> bool {
     cosmic_write(id, "same-on-all", "true") && cosmic_write(id, "all", &value)
 }
 
-/// cosmic-blue's avatars (512 x 512 PNG), sorted by name
+/// cosmic-blue's avatars (512 x 512 PNG), sorted by name. Links are left out:
+/// pop-robot.png, COSMIC Settings' default picture, is a link to planet.png
+/// and would show the planet twice.
 pub fn avatars() -> Vec<PathBuf> {
     let Ok(entries) = std::fs::read_dir(AVATARS) else {
         return Vec::new();
     };
     let mut found: Vec<PathBuf> = entries
         .flatten()
+        .filter(|entry| entry.file_type().is_ok_and(|kind| kind.is_file()))
         .map(|entry| entry.path())
         .filter(|path| path.extension().is_some_and(|ext| ext == "png"))
         .collect();
