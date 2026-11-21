@@ -19,11 +19,12 @@ W, H = 5120, 2880
 # where the mark sat in the horizontal logo, centred 60 px below the middle
 SCALE = 2900 / 559.7
 MARK = (W / 2 - 559.7 * SCALE / 2 + 50 * SCALE, H / 2 + 60)
-# COSMIC scales the wallpaper to fill the screen and crops the rest: the name
-# in the corner must stay inside the part every common screen shows (4:3 crops
-# the sides, 21:9 the top and bottom), with a margin.
-RATIOS = {"16:9": 16 / 9, "16:10": 16 / 10, "3:2": 3 / 2, "4:3": 4 / 3, "5:4": 5 / 4, "21:9": 21 / 9}
-MARGIN = 0.03  # of the visible width and height
+# COSMIC scales the wallpaper to fill the screen and crops the rest. The name
+# sits close to the bottom right corner of a 16:10 screen, as far from the
+# right edge as from the bottom (just above the dock), and must stay whole on
+# these screen shapes (4:3, 5:4 and 21:9 screens cut part of it).
+RATIOS = {"16:9": 16 / 9, "16:10": 16 / 10, "3:2": 3 / 2}
+CORNER = 0.075 * H  # from the bottom, and from the right edge at 16:10
 
 
 def visible(ratio):
@@ -33,19 +34,18 @@ def visible(ratio):
 
 
 def safe_box():
-    """The part every ratio shows, minus the margin."""
+    """The part every ratio in RATIOS shows."""
     boxes = [visible(r) for r in RATIOS.values()]
-    x0, y0 = max(b[0] for b in boxes), max(b[1] for b in boxes)
-    x1, y1 = min(b[2] for b in boxes), min(b[3] for b in boxes)
-    mx, my = (x1 - x0) * MARGIN, (y1 - y0) * MARGIN
-    return x0 + mx, y0 + my, x1 - mx, y1 - my
+    return (max(b[0] for b in boxes), max(b[1] for b in boxes),
+            min(b[2] for b in boxes), min(b[3] for b in boxes))
 
 
-# the name, bottom right of the safe box (the horizontal logo's text runs from
-# x 118 to 559.7 and from y 19 to 81 in logo units)
+# the name (the horizontal logo's text runs from x 118 to 559.7 and from y 19
+# to 81 in logo units)
 NAME_WIDTH = 760
 NAME_K = NAME_WIDTH / (559.7 - 118)
-NAME_BOX = (safe_box()[2] - NAME_WIDTH, safe_box()[3] - 62 * NAME_K, safe_box()[2], safe_box()[3])
+_right, _bottom = visible(16 / 10)[2] - CORNER, H - CORNER
+NAME_BOX = (_right - NAME_WIDTH, _bottom - 62 * NAME_K, _right, _bottom)
 
 
 def defines():
