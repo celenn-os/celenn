@@ -14,7 +14,13 @@ void main() {
   col = mix(col, hex(0x22407e), exp(-dot(p - LOGO, p - LOGO) / .5) * .6);
   // flat stars
   vec2 g = floor(frag / (res.y / 26.)), f = fract(frag / (res.y / 26.));
-  if (hash12(g) < .40) {
+  bool keep = true;
+#ifdef CLEAR
+  // no stars in this box (x0, y0, x1, y1 in frame heights, y up)
+  vec2 cell = (g + .5) / 26. - vec2(.5 * res.x / res.y, .5);
+  keep = any(lessThan(cell, CLEAR.xy - .5 / 26.)) || any(greaterThan(cell, CLEAR.zw + .5 / 26.));
+#endif
+  if (keep && hash12(g) < .40) {
     vec2 c = vec2(hash12(g + 7.1), hash12(g + 3.3)) * .7 + .15;
     float rad = mix(.8, 2.6, pow(hash12(g + 1.9), 3.)) * res.y / 1440.;
     float s = smoothstep(rad + .8, rad - .8, length(f - c) * res.y / 26.);
