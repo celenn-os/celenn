@@ -13,9 +13,17 @@ dnf5 -y install acl dnsmasq libnotify nftables
 # The login check: during bedtime, or once the day's screen time is used up,
 # the login screen refuses a child account with a message saying when it can
 # log in again (pam_exec prints it). Accounts without rules are not affected.
-# The login screen (cosmic-greeter) logs in through greetd.
+# The login screen (cosmic-greeter) logs in through greetd, whose PAM file
+# Fedora ships in /usr/lib/pam.d: a copy in /etc/pam.d takes precedence.
 pam=/etc/pam.d/greetd
-test -f "${pam}"
+if [[ ! -f "${pam}" ]]; then
+    if [[ ! -f /usr/lib/pam.d/greetd ]]; then
+        ls /etc/pam.d /usr/lib/pam.d || true
+        echo "No PAM file for greetd" >&2
+        exit 1
+    fi
+    cp /usr/lib/pam.d/greetd "${pam}"
+fi
 line='account    required     pam_exec.so quiet stdout /usr/libexec/cosmic-blue-parental-daemon login-check'
 if ! grep -qF 'cosmic-blue-parental-daemon login-check' "${pam}"; then
     # Before the first account line, so that it runs whatever follows
