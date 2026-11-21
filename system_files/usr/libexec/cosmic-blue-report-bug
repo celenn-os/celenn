@@ -23,7 +23,14 @@ esac
 
 info="$(/usr/libexec/cosmic-blue-system-info)"
 if [[ -n "${COSMIC_BLUE_REPORT_ERROR:-}" ]]; then
-    info+=$'\n\nError:\n'"${COSMIC_BLUE_REPORT_ERROR}"
+    # The error may name the home folder or the account: hide them, the
+    # report is public
+    error="${COSMIC_BLUE_REPORT_ERROR//"${HOME:-/nonexistent}"/'~'}"
+    user="$(id -un)"
+    if [[ ${#user} -ge 3 ]]; then
+        error="${error//"${user}"/<user>}"
+    fi
+    info+=$'\n\nError:\n'"${error}"
 fi
 url="${form}&system-info=$(printf '%s\n' "${info}" | jq -sRr @uri)"
 # Browsers and GitHub refuse very long addresses: then the details are pasted
