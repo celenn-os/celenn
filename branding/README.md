@@ -160,6 +160,10 @@ The `cosmic-blue` icon theme is Tela circle, recolored with the accent
   Rust...) stay Tela's.
 - the live ISO's welcome tour and installer (`iso_files/welcome/*.svg`): the
   mark on a night-blue disk
+- the first steps tour's page icons and the Keyboard shortcuts app's icon
+  (`system_files/usr/share/icons/hicolor/scalable/apps/cosmic-blue-tour-*.svg`),
+  in the style of the dock buttons: an accent disk, white symbols, the less
+  important parts in translucent white
 
 The files are named like Tela's, and the theme also takes every name that
 Tela links to them (`build_files/icon_theme/compose.py`). Regenerate them with

@@ -109,7 +109,7 @@ impl Origin {
             Origin::Linux => (
                 "utilities-terminal-symbolic",
                 "Linux",
-                "The short version, with the commands",
+                "What is different from your distribution",
             ),
         }
     }
@@ -136,16 +136,118 @@ const PROFILES: &[Profile] = &[
         apps: &["com.valvesoftware.Steam", "com.heroicgameslauncher.hgl"],
     },
     Profile {
-        title: "Creative work",
-        caption: "GIMP for photos, Inkscape for drawings, Krita for painting, Kdenlive for videos",
+        title: "Graphics and drawing",
+        caption: "GIMP for photos, Inkscape for illustrations and logos, Krita for digital painting",
+        apps: &["org.gimp.GIMP", "org.inkscape.Inkscape", "org.kde.krita"],
+    },
+    Profile {
+        title: "Videos and streaming",
+        caption: "OBS Studio to record and stream, Kdenlive to edit videos, Audacity for sound",
         apps: &[
-            "org.gimp.GIMP",
-            "org.inkscape.Inkscape",
-            "org.kde.krita",
+            "com.obsproject.Studio",
             "org.kde.kdenlive",
+            "org.audacityteam.Audacity",
         ],
     },
 ];
+
+/// Developer tools, as in `ujust install-dev-tools` (Bluefin's menu), but
+/// picked in the tour: Homebrew formulas and casks for the user, Podman
+/// Desktop from Flathub. Lima stays with ujust (its setup needs a restart).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum ToolKind {
+    /// Homebrew formulas (the first one tells if it is installed)
+    Formula(&'static [&'static str]),
+    /// A Homebrew cask, its name in the ublue-os tap or Homebrew's
+    Cask(&'static str, bool),
+    Flatpak(&'static str),
+}
+
+struct DevTool {
+    name: &'static str,
+    kind: ToolKind,
+}
+
+/// Groups of developer tools: a heading, then its tools
+const DEV_TOOLS: &[(&str, &[DevTool])] = &[
+    (
+        "Containers",
+        &[
+            DevTool {
+                name: "Docker",
+                kind: ToolKind::Formula(&["docker", "docker-compose", "lazydocker", "dive"]),
+            },
+            DevTool {
+                name: "Podman Desktop",
+                kind: ToolKind::Flatpak("io.podman_desktop.PodmanDesktop"),
+            },
+        ],
+    ),
+    (
+        "Code editors",
+        &[
+            DevTool {
+                name: "VS Code",
+                kind: ToolKind::Cask("visual-studio-code-linux", true),
+            },
+            DevTool {
+                name: "VSCodium",
+                kind: ToolKind::Cask("vscodium-linux", true),
+            },
+            DevTool {
+                name: "Zed",
+                kind: ToolKind::Cask("zed", false),
+            },
+            DevTool {
+                name: "JetBrains Toolbox",
+                kind: ToolKind::Cask("jetbrains-toolbox-linux", true),
+            },
+            DevTool {
+                name: "Antigravity",
+                kind: ToolKind::Cask("antigravity-ide-linux", true),
+            },
+        ],
+    ),
+    (
+        "In the terminal",
+        &[
+            DevTool {
+                name: "Neovim",
+                kind: ToolKind::Formula(&["neovim"]),
+            },
+            DevTool {
+                name: "Helix",
+                kind: ToolKind::Formula(&["helix"]),
+            },
+            DevTool {
+                name: "vim",
+                kind: ToolKind::Formula(&["vim"]),
+            },
+            DevTool {
+                name: "micro",
+                kind: ToolKind::Formula(&["micro"]),
+            },
+        ],
+    ),
+];
+
+/// Every developer tool, numbered in the order of DEV_TOOLS
+fn dev_tools() -> impl Iterator<Item = &'static DevTool> {
+    DEV_TOOLS.iter().flat_map(|(_, tools)| tools.iter())
+}
+
+/// The Homebrew tools that are installed (numbers of dev_tools())
+fn brew_installed() -> BTreeSet<usize> {
+    dev_tools()
+        .enumerate()
+        .filter(|(_, tool)| match tool.kind {
+            ToolKind::Formula(names) => system::brew_has_formula(names[0]),
+            ToolKind::Cask(name, _) => system::brew_has_cask(name),
+            ToolKind::Flatpak(_) => false,
+        })
+        .map(|(i, _)| i)
+        .collect()
+}
 
 /// Things to try on the "Try it" page: each button does the real thing
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -170,7 +272,7 @@ impl Try {
         match self {
             Try::Launcher => (
                 "Open the launcher",
-                "Press Super, type the name of an app, then Enter. Super is the key with the Windows logo on most keyboards.",
+                "Press Super, type the name of an app, then Enter.",
             ),
             Try::AppLibrary => ("See all your apps", "Super + A"),
             Try::Workspaces => (
@@ -257,8 +359,6 @@ enum Body {
     Ready,
     /// A large icon of the icon theme, as an illustration
     Icon(&'static str),
-    /// Terminal commands, each with a button that copies it
-    Commands(Vec<(&'static str, &'static str)>),
     /// Title and subtitle rows, without action
     Features(Vec<(&'static str, &'static str)>),
     /// Title and subtitle rows, some with a button
@@ -312,6 +412,7 @@ fn docs_url() -> String {
     format!("{SITE}{lang}docs/")
 }
 
+const DISTROSHELF: &[&str] = &["flatpak", "run", "com.ranfdev.DistroShelf"];
 const FLATSEAL: &[&str] = &["flatpak", "run", "com.github.tchx84.Flatseal"];
 const FIREFOX: &[&str] = &["flatpak", "run", "org.mozilla.firefox"];
 const THUNDERBIRD: &[&str] = &["flatpak", "run", "org.mozilla.thunderbird"];
@@ -319,6 +420,32 @@ const FIRMWARE: &[&str] = &["flatpak", "run", "org.gnome.Firmware"];
 
 fn bearings(origin: Origin) -> Page {
     let rows = match origin {
+        Origin::Linux => vec![
+            row_button(
+                "The system is an image",
+                "Signed and read-only, it updates as a whole: no dnf on the system, and the previous version is one click away.",
+                "Updates",
+                Action::Launch(&[UPDATES_APP]),
+            ),
+            row_button(
+                "Apps → COSMIC Store",
+                "Flatpak apps from Flathub, kept apart from the system",
+                "Open COSMIC Store",
+                Action::Launch(&["cosmic-store"]),
+            ),
+            row_button(
+                "Packages from other distributions → DistroShelf",
+                "Arch, Debian, Ubuntu… in a container that shares your home folder, set up in a few clicks",
+                "Open DistroShelf",
+                Action::Launch(DISTROSHELF),
+            ),
+            row_button(
+                "If you like the terminal",
+                "ujust lists the system's recipes, brew installs command line tools: the documentation has them all.",
+                "Documentation",
+                Action::OpenUri(docs_url()),
+            ),
+        ],
         Origin::Mac => vec![
             row(
                 "Command key → Ctrl, most of the time",
@@ -370,14 +497,21 @@ fn bearings(origin: Origin) -> Page {
         ],
     };
     Page {
-        icon: Some("preferences-desktop-keyboard-shortcuts"),
+        icon: Some(if origin == Origin::Linux {
+            "cosmic-blue-welcome"
+        } else {
+            "cosmic-blue-tour-bearings"
+        }),
         ..Page::new(
-            if origin == Origin::Mac {
-                "Your bearings from the Mac"
-            } else {
-                "Your bearings from Windows"
+            match origin {
+                Origin::Mac => "Your bearings from the Mac",
+                Origin::Windows => "Your bearings from Windows",
+                Origin::Linux => "What is different here",
             },
-            Some("What changes, and what stays the same."),
+            Some(match origin {
+                Origin::Linux => "Another Linux, with its own habits, and an app for each of them.",
+                _ => "What changes, and what stays the same.",
+            }),
             Body::Rows(rows),
         )
     }
@@ -406,7 +540,7 @@ fn pages(mode: &Mode, origin: Option<Origin>) -> Vec<Page> {
                 )
             };
             let computer = Page {
-                icon: Some("computer"),
+                icon: Some("cosmic-blue-tour-computer"),
                 ..Page::new(
                     "Your computer",
                     Some("Checked for you: only what concerns this computer shows up."),
@@ -414,8 +548,7 @@ fn pages(mode: &Mode, origin: Option<Origin>) -> Vec<Page> {
                 )
             };
             let try_it = Page {
-                icon: Some("input-keyboard"),
-                note: Some("The Keyboard shortcuts app lists them all."),
+                icon: Some("cosmic-blue-tour-try"),
                 ..Page::new(
                     "Try it, it is safe",
                     Some("Each button does the real thing."),
@@ -423,7 +556,7 @@ fn pages(mode: &Mode, origin: Option<Origin>) -> Vec<Page> {
                 )
             };
             let belongings = Page {
-                icon: Some("folder"),
+                icon: Some("cosmic-blue-tour-files"),
                 ..Page::new(
                     "Bring your things",
                     Some("Your files, bookmarks and email from before."),
@@ -454,7 +587,7 @@ fn pages(mode: &Mode, origin: Option<Origin>) -> Vec<Page> {
                 )
             };
             let good_to_know = Page {
-                icon: Some("idea"),
+                icon: Some("cosmic-blue-tour-tips"),
                 ..Page::new(
                     "Good to know",
                     Some("Three things that work differently here."),
@@ -480,46 +613,12 @@ fn pages(mode: &Mode, origin: Option<Origin>) -> Vec<Page> {
                     ]),
                 )
             };
-            let linux = Page {
-                icon: Some("org.gnome.Terminal"),
-                note: Some("Tiling: Super + Y. The Keyboard shortcuts app lists them all."),
-                ..Page::new(
-                    "cosmic-blue in a nutshell",
-                    Some(
-                        "Fedora Atomic with COSMIC: the system is a signed, read-only image that updates as a whole. Apps and tools go on top of it.",
-                    ),
-                    Body::Commands(vec![
-                        (
-                            "ujust",
-                            "The system's recipes: developer tools, command line tools, update channel… Type ujust to list them.",
-                        ),
-                        (
-                            "brew install",
-                            "Command line tools, installed in your home folder with Homebrew",
-                        ),
-                        (
-                            "distrobox create",
-                            "Packages from other distributions, in a container that shares your home folder",
-                        ),
-                        ("ujust update", "Update everything now, without waiting"),
-                        (
-                            "sudo bootc rollback",
-                            "An update broke something? Go back to the previous version, then restart",
-                        ),
-                        (
-                            "ujust switch-channel",
-                            "Follow the stable (weekly), testing (daily) or dev image",
-                        ),
-                    ]),
-                )
-            };
             let ready = Page::new(
                 "You are ready",
                 Some("One more thing worth doing: backups."),
                 Body::Ready,
             );
             match origin {
-                Some(Origin::Linux) => vec![welcome, linux, profiles, computer, ready],
                 Some(origin) => vec![
                     welcome,
                     look,
@@ -649,8 +748,6 @@ const TEXTS: &[&str] = &[
     "Next",
     "Close",
     "Later",
-    "Copy",
-    "Copied",
     "First steps",
     "Open",
     "Get started",
@@ -673,12 +770,20 @@ const TEXTS: &[&str] = &[
     // Profiles
     "Installed",
     "Development",
-    "Docker, VS Code, Podman Desktop… picked from a menu, in a terminal",
+    "Docker, VS Code, Zed, Neovim…: choose your tools",
+    "Chosen: {}",
     "Choose…",
-    "Install the selection",
+    "Install and continue",
     "Installing: {} of {}",
     "Some apps did not install. Are you online? They are also in COSMIC Store.",
-    "Press Enter to close this window.",
+    "Some apps did not install",
+    "Are you online? They are also in COSMIC Store.",
+    "Containers",
+    "Code editors",
+    "In the terminal",
+    "Ticked and grey: already installed. Lima and virtual machines: ujust install-dev-tools and ujust install-vms, in a terminal.",
+    "Homebrew is still being set up: the code editors and terminal tools can be chosen in a few minutes.",
+    "Back to the list",
     // Computer
     "Checking your computer…",
     "Connected to the internet",
@@ -761,9 +866,6 @@ fn all_texts() -> Vec<&'static str> {
             texts.extend(page.note);
             texts.extend(page.button_after.map(|(label, _)| label));
             match page.body {
-                Body::Commands(rows) => {
-                    texts.extend(rows.into_iter().map(|(_, description)| description));
-                }
                 Body::Features(rows) => {
                     texts.extend(
                         rows.into_iter()
@@ -790,8 +892,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if args.iter().any(|arg| arg == "--check") {
         std::process::exit(if i18n::check(&all_texts()) { 0 } else { 1 });
     }
-    // Same window as cosmic-initial-setup
-    let tour = Settings::default().size_limits(Limits::NONE.max_width(900.0).max_height(650.0));
+    // As wide as cosmic-initial-setup, a little taller, so that every
+    // page fits without scrolling (the page scrolls on smaller screens)
+    let tour = Settings::default()
+        .size(cosmic::iced::Size::new(900.0, 720.0))
+        .size_limits(Limits::NONE.max_width(900.0).max_height(720.0));
     match args.first().map(String::as_str) {
         Some("--live") => cosmic::app::run::<App<LiveTour>>(tour, Mode::Live)?,
         Some("--open") => {
@@ -817,8 +922,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 enum Install {
     #[default]
     Idle,
-    Running(Vec<String>),
-    Done(Vec<String>),
+    /// Flathub apps and developer tools (numbers of dev_tools()), and how
+    /// many of the two installs (flatpak, Homebrew) still run
+    Running {
+        apps: Vec<String>,
+        tools: Vec<usize>,
+        pending: u8,
+        failed: bool,
+    },
+    Done,
     Failed,
 }
 
@@ -835,7 +947,6 @@ enum Message {
     /// Next (1) or previous (-1) page
     Turn(isize),
     Run(Action),
-    Copy(&'static str),
     CloseToast(widget::ToastId),
     Exit,
     Origin(Origin),
@@ -844,12 +955,16 @@ enum Message {
     Avatar(usize),
     Dock(bool),
     Profile(usize, bool),
-    InstallProfiles,
+    /// Show the developer tools (true) or the profiles again
+    DevOpen(bool),
+    DevTool(usize, bool),
+    /// Install what was chosen, then turn the page
+    InstallAndNext,
     InstallDone(bool),
-    DevTools,
     /// Every few seconds: which apps are installed now
     Tick,
-    Apps(BTreeSet<String>, bool),
+    /// Flatpak apps, Homebrew tools, first-boot apps still installing
+    Apps(BTreeSet<String>, BTreeSet<usize>, bool),
     Computer(Computer),
     SwitchNvidia,
     NvidiaDone(Option<bool>),
@@ -908,6 +1023,9 @@ struct App<T: Tour> {
     preinstall: Vec<String>,
     preinstall_running: bool,
     chosen: BTreeSet<usize>,
+    brew: BTreeSet<usize>,
+    dev_chosen: BTreeSet<usize>,
+    dev_open: bool,
     install: Install,
     // Computer
     computer: Option<Computer>,
@@ -941,6 +1059,31 @@ impl<T: Tour> App<T> {
         (done < self.preinstall.len()).then_some((done, self.preinstall.len()))
     }
 
+    fn tool_installed(&self, i: usize, tool: &DevTool) -> bool {
+        match tool.kind {
+            ToolKind::Flatpak(app) => self.installed.contains(app),
+            _ => self.brew.contains(&i),
+        }
+    }
+
+    /// Something to install is chosen
+    fn anything_chosen(&self) -> bool {
+        !self.chosen.is_empty() || !self.dev_chosen.is_empty()
+    }
+
+    /// Progress of the chosen apps and tools: (installed, all)
+    fn install_count(&self) -> Option<(usize, usize)> {
+        let Install::Running { apps, tools, .. } = &self.install else {
+            return None;
+        };
+        let tools_done = tools
+            .iter()
+            .filter(|i| dev_tools().nth(**i).is_some_and(|tool| self.tool_installed(**i, tool)))
+            .count();
+        let apps_done = apps.iter().filter(|app| self.installed.contains(*app)).count();
+        Some((apps_done + tools_done, apps.len() + tools.len()))
+    }
+
     fn profile_installed(&self, profile: &Profile) -> bool {
         profile
             .apps
@@ -963,10 +1106,37 @@ fn blocking<R: Send + 'static>(
     )
 }
 
+/// Installs developer tools with Homebrew, as the user (like `ujust
+/// install-dev-tools`, with the devcontainer CLI it always adds)
+async fn brew_install(formulas: Vec<&'static str>, casks: Vec<String>) -> bool {
+    let brew = |args: Vec<String>| async move {
+        tokio::process::Command::new(system::BREW)
+            .args(&args)
+            .env("HOMEBREW_NO_ENV_HINTS", "1")
+            .stdin(std::process::Stdio::null())
+            .status()
+            .await
+            .is_ok_and(|status| status.success())
+    };
+    let mut ok = true;
+    if casks.iter().any(|cask| cask.starts_with("ublue-os/tap/")) {
+        brew(vec!["tap".into(), "ublue-os/tap".into()]).await;
+    }
+    if !formulas.is_empty() {
+        let mut args = vec!["install".to_owned(), "devcontainer".to_owned()];
+        args.extend(formulas.iter().map(|name| (*name).to_owned()));
+        ok &= brew(args).await;
+    }
+    for cask in casks {
+        ok &= brew(vec!["install".into(), "--cask".into(), cask]).await;
+    }
+    ok
+}
+
 fn check_apps() -> Task<Message> {
     blocking(
-        || (system::installed_apps(), system::preinstall_running()),
-        |(apps, running)| Message::Apps(apps, running),
+        || (system::installed_apps(), brew_installed(), system::preinstall_running()),
+        |(apps, brew, running)| Message::Apps(apps, brew, running),
     )
 }
 
@@ -1043,6 +1213,9 @@ impl<T: Tour> Application for App<T> {
             },
             preinstall_running: false,
             chosen: BTreeSet::new(),
+            brew: BTreeSet::new(),
+            dev_chosen: BTreeSet::new(),
+            dev_open: false,
             install: Install::Idle,
             computer: None,
             nvidia: Nvidia::Idle,
@@ -1090,12 +1263,6 @@ impl<T: Tour> Application for App<T> {
                     spawn(command[0], &args);
                 }
                 return cosmic::iced::exit();
-            }
-            Message::Copy(command) => {
-                return Task::batch([
-                    cosmic::iced::clipboard::write(command.to_owned()),
-                    self.toast("Copied"),
-                ]);
             }
             Message::CloseToast(id) => self.toasts.remove(id),
             Message::Exit => return cosmic::iced::exit(),
@@ -1149,71 +1316,108 @@ impl<T: Tour> Application for App<T> {
                     self.chosen.remove(&i);
                 }
             }
-            Message::InstallProfiles => {
-                let apps: Vec<String> = self
+            Message::DevOpen(open) => self.dev_open = open,
+            Message::DevTool(i, chosen) => {
+                if chosen {
+                    self.dev_chosen.insert(i);
+                } else {
+                    self.dev_chosen.remove(&i);
+                }
+            }
+            Message::InstallAndNext => {
+                let mut apps: Vec<String> = self
                     .chosen
                     .iter()
                     .flat_map(|i| PROFILES[*i].apps.iter())
                     .filter(|app| !self.installed.contains(**app))
                     .map(|app| (*app).to_owned())
                     .collect();
-                self.chosen.clear();
-                if apps.is_empty() {
-                    return Task::none();
+                let mut tools = Vec::new();
+                let mut formulas: Vec<&'static str> = Vec::new();
+                let mut casks: Vec<String> = Vec::new();
+                for (i, tool) in dev_tools().enumerate() {
+                    if !self.dev_chosen.contains(&i) || self.tool_installed(i, tool) {
+                        continue;
+                    }
+                    match tool.kind {
+                        ToolKind::Flatpak(app) => apps.push(app.to_owned()),
+                        ToolKind::Formula(names) => {
+                            tools.push(i);
+                            formulas.extend(names);
+                        }
+                        ToolKind::Cask(name, tap) => {
+                            tools.push(i);
+                            casks.push(if tap {
+                                format!("ublue-os/tap/{name}")
+                            } else {
+                                name.to_owned()
+                            });
+                        }
+                    }
                 }
-                self.install = Install::Running(apps.clone());
-                let mut args: Vec<String> = [
-                    "install",
-                    "--system",
-                    "--noninteractive",
-                    "-y",
-                    "flathub",
-                ]
-                .map(str::to_owned)
-                .to_vec();
-                args.extend(apps);
-                return Task::perform(
-                    async move {
-                        tokio::process::Command::new("flatpak")
-                            .args(&args)
-                            .stdin(std::process::Stdio::null())
-                            .status()
-                            .await
-                            .is_ok_and(|status| status.success())
-                    },
-                    |ok| cosmic::Action::App(Message::InstallDone(ok)),
-                );
+                self.chosen.clear();
+                self.dev_chosen.clear();
+                self.dev_open = false;
+                let mut tasks = vec![self.update(Message::Turn(1))];
+                let pending = u8::from(!apps.is_empty()) + u8::from(!tools.is_empty());
+                if pending == 0 {
+                    return Task::batch(tasks);
+                }
+                if !apps.is_empty() {
+                    let mut args: Vec<String> =
+                        ["install", "--system", "--noninteractive", "-y", "flathub"]
+                            .map(str::to_owned)
+                            .to_vec();
+                    args.extend(apps.iter().cloned());
+                    tasks.push(Task::perform(
+                        async move {
+                            tokio::process::Command::new("flatpak")
+                                .args(&args)
+                                .stdin(std::process::Stdio::null())
+                                .status()
+                                .await
+                                .is_ok_and(|status| status.success())
+                        },
+                        |ok| cosmic::Action::App(Message::InstallDone(ok)),
+                    ));
+                }
+                if !tools.is_empty() {
+                    tasks.push(Task::perform(
+                        brew_install(formulas, casks),
+                        |ok| cosmic::Action::App(Message::InstallDone(ok)),
+                    ));
+                }
+                self.install = Install::Running {
+                    apps,
+                    tools,
+                    pending,
+                    failed: false,
+                };
+                return Task::batch(tasks);
             }
             Message::InstallDone(ok) => {
-                if let Install::Running(apps) = &self.install {
-                    self.install = if ok {
-                        Install::Done(apps.clone())
-                    } else {
-                        Install::Failed
-                    };
+                if let Install::Running {
+                    pending, failed, ..
+                } = &mut self.install
+                {
+                    *pending = pending.saturating_sub(1);
+                    *failed |= !ok;
+                    if *pending == 0 {
+                        self.install = if *failed {
+                            Install::Failed
+                        } else {
+                            Install::Done
+                        };
+                    }
                 }
                 return check_apps();
-            }
-            Message::DevTools => {
-                // ujust's menu, in a terminal that stays open at the end
-                let prompt = tr("Press Enter to close this window.");
-                spawn(
-                    "cosmic-term",
-                    &[
-                        "-e",
-                        "bash",
-                        "-c",
-                        "ujust install-dev-tools; echo; read -r -p \"$1\"",
-                        "bash",
-                        prompt,
-                    ],
-                );
             }
             Message::Tick => {
                 return check_apps();
             }
-            Message::Apps(apps, running) => {
+            Message::Apps(apps, brew, running) => {
                 self.installed = apps;
+                self.brew = brew;
                 self.preinstall_running = running;
             }
             Message::Computer(computer) => {
@@ -1303,7 +1507,7 @@ impl<T: Tour> Application for App<T> {
         });
         // While apps install, look again every few seconds
         let installing = self.preinstall_progress().is_some()
-            || matches!(self.install, Install::Running(_));
+            || matches!(self.install, Install::Running { .. });
         if installing {
             Subscription::batch([
                 keys,
@@ -1354,7 +1558,13 @@ impl<T: Tour> Application for App<T> {
                 .push(widget::button::standard(tr("Back")).on_press(Message::PageOpen(page_i)));
         }
         button_row = button_row.push(if !last {
-            widget::button::suggested(tr("Next")).on_press(Message::PageOpen(self.page_i + 1))
+            // On the apps page, Next installs what is chosen (in the
+            // background: the tour goes on meanwhile)
+            if matches!(page.body, Body::Profiles) && self.anything_chosen() {
+                widget::button::suggested(tr("Install and continue")).on_press(Message::InstallAndNext)
+            } else {
+                widget::button::suggested(tr("Next")).on_press(Message::PageOpen(self.page_i + 1))
+            }
         } else if self.mode == Mode::Live {
             let install = widget::button::suggested(tr("Install cosmic-blue"));
             if installer().is_some() {
@@ -1436,9 +1646,9 @@ impl<T: Tour> Application for App<T> {
         }
         if let Some(note) = page.note {
             content = content.push(
-                text::caption(tr(note))
-                    .align_x(Alignment::Center)
-                    .width(Length::Fill),
+                with_keys(tr(note))
+                    .apply(widget::container)
+                    .center_x(Length::Fill),
             );
         }
         let content = content
@@ -1497,10 +1707,10 @@ fn accessibility_row<'a>(space_s: u16) -> Element<'a, Message> {
     // Accessibility, from the first page: what COSMIC's first-run assistant
     // (skipped, see build_files/20-cosmic.sh) offered
     settings::item_row(vec![
-        widget::icon::from_name("preferences-desktop-accessibility")
+        widget::icon::from_name("cosmic-blue-tour-accessibility")
             .size(40)
             .into(),
-        two_lines(text::body(tr("Accessibility")).into(), tr(ACCESSIBILITY)),
+        two_lines(text::heading(tr("Accessibility")).into(), tr(ACCESSIBILITY)),
         action_button(
             "Settings",
             &Action::Launch(&["cosmic-settings", "accessibility"]),
@@ -1511,6 +1721,12 @@ fn accessibility_row<'a>(space_s: u16) -> Element<'a, Message> {
 }
 
 /// A state symbol in front of a row: done (accent color) or to look at
+/// A row's symbolic icon, the size of state_icon(), so that the texts of
+/// all rows start at the same place
+fn row_icon<'a>(name: &'static str) -> Element<'a, Message> {
+    widget::icon::from_name(name).size(20).into()
+}
+
 fn state_icon<'a>(done: bool) -> Element<'a, Message> {
     let icon = widget::icon::from_name(if done {
         "object-select-symbolic"
@@ -1559,7 +1775,11 @@ impl<T: Tour> App<T> {
             }
             Body::Origin => return self.origin_view(space_s),
             Body::Look => return self.look_view(space_s),
-            Body::Profiles => self.profile_rows(space_s),
+            Body::Profiles => {
+                return widget::column::with_children(self.profile_rows(space_s))
+                    .spacing(space_s)
+                    .into();
+            }
             Body::Computer => self.computer_rows(space_s),
             Body::Try => Try::ALL
                 .iter()
@@ -1575,7 +1795,7 @@ impl<T: Tour> App<T> {
                         .on_press_maybe(available.then_some(Message::Try(*thing)));
                     settings::item_row(vec![
                         state_icon(self.tried.contains(thing)),
-                        two_lines(text::body(tr(title)).into(), tr(caption)),
+                        two_lines(text::heading(tr(title)).into(), tr(caption)),
                         button.into(),
                     ])
                     .spacing(space_s)
@@ -1589,37 +1809,17 @@ impl<T: Tour> App<T> {
                     .center_x(Length::Fill)
                     .into();
             }
-            Body::Commands(rows) => rows
-                .iter()
-                .map(|(command, description)| {
-                    settings::item_row(vec![
-                        two_lines(text::monotext(*command).into(), tr(description)),
-                        widget::tooltip(
-                            // Named for screen readers, which otherwise only
-                            // say "button" for an icon
-                            widget::button::icon(widget::icon::from_name("edit-copy-symbolic"))
-                                .name(tr("Copy"))
-                                .description(*command)
-                                .on_press(Message::Copy(command)),
-                            text::body(tr("Copy")),
-                            widget::tooltip::Position::Left,
-                        )
-                        .into(),
-                    ])
-                    .into()
-                })
-                .collect(),
             Body::Features(rows) => rows
                 .iter()
                 .map(|(title, subtitle)| {
-                    settings::item_row(vec![two_lines(text::body(tr(title)).into(), tr(subtitle))])
+                    settings::item_row(vec![two_lines(text::heading(tr(title)).into(), tr(subtitle))])
                         .into()
                 })
                 .collect(),
             Body::Rows(rows) => rows
                 .iter()
                 .map(|row| {
-                    let mut items = vec![two_lines(text::body(tr(row.title)).into(), tr(row.caption))];
+                    let mut items = vec![two_lines(title_line(tr(row.title)), tr(row.caption))];
                     if let Some((label, action)) = &row.button {
                         items.push(action_button(label, action));
                     }
@@ -1744,7 +1944,10 @@ impl<T: Tour> App<T> {
     }
 
     fn profile_rows<'a>(&'a self, space_s: u16) -> Vec<Element<'a, Message>> {
-        let running = matches!(self.install, Install::Running(_));
+        if self.dev_open {
+            return self.dev_rows(space_s);
+        }
+        let running = matches!(self.install, Install::Running { .. });
         let mut rows: Vec<Element<'a, Message>> = PROFILES
             .iter()
             .enumerate()
@@ -1758,51 +1961,138 @@ impl<T: Tour> App<T> {
                         .into()
                 };
                 settings::item_row(vec![
-                    two_lines(text::body(tr(profile.title)).into(), tr(profile.caption)),
+                    two_lines(text::heading(tr(profile.title)).into(), tr(profile.caption)),
                     check,
                 ])
                 .spacing(space_s)
                 .into()
             })
             .collect();
+        let chosen = self.dev_chosen.len();
+        let caption = if chosen == 0 {
+            tr("Docker, VS Code, Zed, Neovim…: choose your tools").to_owned()
+        } else {
+            fill(tr("Chosen: {}"), &chosen.to_string())
+        };
         rows.push(
             settings::item_row(vec![
-                two_lines(
-                    text::body(tr("Development")).into(),
-                    tr("Docker, VS Code, Podman Desktop… picked from a menu, in a terminal"),
-                ),
+                widget::column::with_capacity(2)
+                    .spacing(2)
+                    .push(text::heading(tr("Development")))
+                    .push(dim_caption(caption).wrapping(Wrapping::Word))
+                    .width(Length::Fill)
+                    .into(),
                 widget::button::standard(tr("Choose…"))
-                    .on_press_maybe(in_path("cosmic-term").then_some(Message::DevTools))
+                    .on_press_maybe((!running).then_some(Message::DevOpen(true)))
                     .into(),
             ])
             .spacing(space_s)
             .into(),
         );
-        let status: Element<'a, Message> = match &self.install {
-            Install::Running(apps) => {
-                let done = apps.iter().filter(|app| self.installed.contains(*app)).count();
-                return vec![
-                    section(rows),
-                    install_progress(
-                        fill(&fill(tr("Installing: {} of {}"), &done.to_string()), &apps.len().to_string()),
-                        tr("They show up in the app library as they arrive."),
-                        done,
-                        apps.len(),
-                        space_s,
-                    ),
-                ];
+        let mut body = vec![section(rows)];
+        if let Some((done, all)) = self.install_count() {
+            body.push(install_progress(
+                fill(&fill(tr("Installing: {} of {}"), &done.to_string()), &all.to_string()),
+                tr("They show up in the app library as they arrive."),
+                done,
+                all,
+                space_s,
+            ));
+        } else if self.install == Install::Failed {
+            body.push(
+                text::caption(tr(
+                    "Some apps did not install. Are you online? They are also in COSMIC Store.",
+                ))
+                .align_x(Alignment::Center)
+                .width(Length::Fill)
+                .into(),
+            );
+        }
+        body
+    }
+
+    /// The developer tools, by group, each with its checkbox
+    fn dev_rows<'a>(&'a self, space_s: u16) -> Vec<Element<'a, Message>> {
+        let brew = Path::new(system::BREW).exists();
+        let mut i = 0;
+        let mut rows = Vec::with_capacity(DEV_TOOLS.len());
+        for (heading, tools) in DEV_TOOLS {
+            let mut grid: Vec<Element<'a, Message>> = Vec::new();
+            for tool in tools.iter() {
+                let n = i;
+                i += 1;
+                let installed = self.tool_installed(n, tool);
+                let available = brew || matches!(tool.kind, ToolKind::Flatpak(_));
+                let checkbox = widget::checkbox(installed || self.dev_chosen.contains(&n))
+                    .on_toggle_maybe(
+                        (!installed && available).then_some(move |on| Message::DevTool(n, on)),
+                    );
+                // The tool's name, aligned with its checkbox: clicking it
+                // ticks the box too
+                let label = text::body(tool.name).apply(widget::mouse_area);
+                let label = if installed || !available {
+                    label
+                } else {
+                    label.on_press(Message::DevTool(n, !self.dev_chosen.contains(&n)))
+                };
+                grid.push(
+                    widget::row::with_capacity(2)
+                        .spacing(space_s / 2)
+                        .align_y(Alignment::Center)
+                        .push(checkbox)
+                        .push(label)
+                        .width(Length::Fixed(148.0))
+                        .into(),
+                );
             }
-            Install::Failed => text::caption(tr(
-                "Some apps did not install. Are you online? They are also in COSMIC Store.",
-            ))
-            .into(),
-            Install::Idle | Install::Done(_) => widget::button::suggested(tr("Install the selection"))
-                .on_press_maybe((!self.chosen.is_empty()).then_some(Message::InstallProfiles))
+            // The group's name on the left, its tools in columns on the right
+            rows.push(
+                settings::item_row(vec![
+                    text::heading(tr(heading))
+                        .width(Length::Fixed(140.0))
+                        .into(),
+                    // Three columns
+                    {
+                        let mut lines = widget::column::with_capacity(grid.len().div_ceil(3))
+                            .spacing(space_s / 2)
+                            .width(Length::Fill);
+                        let mut cells = grid.into_iter().peekable();
+                        while cells.peek().is_some() {
+                            lines = lines.push(
+                                cells
+                                    .by_ref()
+                                    .take(3)
+                                    .fold(widget::row::with_capacity(3).spacing(space_s), |row, cell| {
+                                        row.push(cell)
+                                    }),
+                            );
+                        }
+                        lines.into()
+                    },
+                ])
+                .spacing(space_s)
+                .align_y(Alignment::Start)
+                .into(),
+            );
+        }
+        let note = if brew {
+            tr("Ticked and grey: already installed. Lima and virtual machines: ujust install-dev-tools and ujust install-vms, in a terminal.")
+        } else {
+            tr("Homebrew is still being set up: the code editors and terminal tools can be chosen in a few minutes.")
+        };
+        vec![
+            section(rows),
+            text::caption(note)
+                .wrapping(Wrapping::Word)
+                .align_x(Alignment::Center)
+                .width(Length::Fill)
+                .into(),
+            widget::button::standard(tr("Back to the list"))
+                .on_press(Message::DevOpen(false))
                 .apply(widget::container)
                 .center_x(Length::Fill)
                 .into(),
-        };
-        vec![section(rows), status]
+        ]
     }
 
     fn computer_rows<'a>(&'a self, space_s: u16) -> Vec<Element<'a, Message>> {
@@ -1815,15 +2105,14 @@ impl<T: Tour> App<T> {
             ];
         };
         let item = |done: bool, title: String, caption: String, end: Option<Element<'a, Message>>| {
-            let mut items = vec![
-                state_icon(done),
-                widget::column::with_capacity(2)
-                    .spacing(2)
-                    .push(text::body(title))
-                    .push(text::caption(caption).wrapping(Wrapping::Word))
-                    .width(Length::Fill)
-                    .into(),
-            ];
+            let mut text_column = widget::column::with_capacity(2)
+                .spacing(2)
+                .push(text::heading(title))
+                .width(Length::Fill);
+            if !caption.is_empty() {
+                text_column = text_column.push(dim_caption(caption).wrapping(Wrapping::Word));
+            }
+            let mut items = vec![state_icon(done), text_column.into()];
             items.extend(end);
             Element::from(settings::item_row(items).spacing(space_s))
         };
@@ -1902,8 +2191,9 @@ impl<T: Tour> App<T> {
         if let Some(on) = computer.battery_limit {
             rows.push(
                 settings::item_row(vec![
+                    row_icon("battery-good-symbolic"),
                     two_lines(
-                        text::body(tr("Take care of the battery")).into(),
+                        text::heading(tr("Take care of the battery")).into(),
                         tr("Stop charging at 80 % when the laptop stays plugged in: the battery lasts longer."),
                     ),
                     widget::toggler(on).on_toggle(Message::Battery).into(),
@@ -1914,8 +2204,9 @@ impl<T: Tour> App<T> {
         }
         rows.push(
             settings::item_row(vec![
+                row_icon("video-display-symbolic"),
                 two_lines(
-                    text::body(tr("Screen scale")).into(),
+                    text::heading(tr("Screen scale")).into(),
                     tr("Text and windows too small or too big? Change the scale of the screen."),
                 ),
                 action_button(
@@ -1934,9 +2225,9 @@ impl<T: Tour> App<T> {
         let check = |title: String, caption: Option<String>| -> Element<'a, Message> {
             let mut column = widget::column::with_capacity(2)
                 .spacing(2)
-                .push(text::body(title));
+                .push(text::heading(title));
             if let Some(caption) = caption {
-                column = column.push(text::caption(caption).wrapping(Wrapping::Word));
+                column = column.push(dim_caption(caption).wrapping(Wrapping::Word));
             }
             settings::item_row(vec![state_icon(true), column.width(Length::Fill).into()])
                 .spacing(space_s)
@@ -1945,15 +2236,18 @@ impl<T: Tour> App<T> {
         if self.look_changed {
             done.push(check(tr("Your look is set").to_owned(), None));
         }
-        match &self.install {
-            Install::Running(apps) => {
-                let finished = apps.iter().filter(|app| self.installed.contains(*app)).count();
+        match (&self.install, self.install_count()) {
+            (_, Some((finished, all))) => {
                 done.push(check(
-                    fill(&fill(tr("Installing: {} of {}"), &finished.to_string()), &apps.len().to_string()),
+                    fill(&fill(tr("Installing: {} of {}"), &finished.to_string()), &all.to_string()),
                     Some(tr("They show up in the app library as they arrive.").to_owned()),
                 ));
             }
-            Install::Done(_) => done.push(check(tr("Your apps are installed").to_owned(), None)),
+            (Install::Done, _) => done.push(check(tr("Your apps are installed").to_owned(), None)),
+            (Install::Failed, _) => done.push(check(
+                tr("Some apps did not install").to_owned(),
+                Some(tr("Are you online? They are also in COSMIC Store.").to_owned()),
+            )),
             _ => {}
         }
         if self.nvidia == Nvidia::Switched {
@@ -1965,7 +2259,7 @@ impl<T: Tour> App<T> {
         let backups = settings::item_row(vec![
             widget::icon::from_name("org.gnome.DejaDup").size(40).into(),
             two_lines(
-                text::body(tr("Protect your files")).into(),
+                text::heading(tr("Protect your files")).into(),
                 tr("Plug in a USB drive and turn on automatic backups: Déjà Dup keeps a copy of your home folder."),
             ),
             widget::button::suggested(tr("Set up backups"))
@@ -1984,7 +2278,7 @@ impl<T: Tour> App<T> {
         .into_iter()
         .map(|(title, caption, uri)| {
             settings::item_row(vec![
-                two_lines(text::body(tr(title)).into(), tr(caption)),
+                two_lines(text::heading(tr(title)).into(), tr(caption)),
                 widget::button::standard(tr("Open"))
                     .trailing_icon(widget::button::link::icon())
                     .on_press(Message::Run(Action::OpenUri(uri)))
@@ -2082,7 +2376,7 @@ impl<T: Tour> App<T> {
                             .wrapping(Wrapping::Word)
                             .width(Length::Fill)
                             .into(),
-                        text::monotext(*keys).into(),
+                        with_keys_end(keys),
                     ])
                     .spacing(space_s),
                 );
@@ -2164,9 +2458,9 @@ fn install_progress<'a>(
         .add(
             widget::column::with_capacity(3)
                 .spacing(space_s)
-                .push(text::body(title))
+                .push(text::heading(title))
                 .push(widget::determinate_linear(progress).width(Length::Fill))
-                .push(text::caption(caption).wrapping(Wrapping::Word))
+                .push(dim_caption(caption).wrapping(Wrapping::Word))
                 .apply(widget::container)
                 .padding([space_s, space_s + 8]),
         )
@@ -2179,7 +2473,207 @@ fn two_lines<'a>(first: Element<'a, Message>, caption: &'static str) -> Element<
     widget::column::with_capacity(2)
         .spacing(2)
         .push(first)
-        .push(text::caption(caption).wrapping(Wrapping::Word))
+        .push(with_keys(caption))
+        .width(Length::Fill)
+        .into()
+}
+
+/// Names of keys found in the texts (and their translations), drawn as
+/// keyboard keys when they are part of a combination such as "Super + A"
+const KEY_NAMES: &[&str] = &[
+    "Super", "Alt", "Ctrl", "Strg", "Shift", "Maj", "Umschalt", "Mayús", "Maiusc", "Tab",
+    "Esc", "Escape", "Échap", "Enter", "Print", "←", "↑", "↓", "→",
+];
+
+fn is_key(word: &str) -> bool {
+    KEY_NAMES.contains(&word)
+        || (word.chars().count() == 1 && !matches!(word, "+" | "/" | "…"))
+}
+
+/// The pieces of a line: plain words, and key combinations (their keys)
+#[derive(Debug, PartialEq)]
+enum Piece<'s> {
+    Word(&'s str),
+    Keys(Vec<&'s str>),
+}
+
+fn pieces(line: &str) -> Vec<Piece<'_>> {
+    let words: Vec<&str> = line.split(' ').filter(|word| !word.is_empty()).collect();
+    let mut pieces = Vec::new();
+    let mut i = 0;
+    while i < words.len() {
+        // A key, then "+" and a key, maybe more: a combination
+        let strip = |word: &str| -> usize {
+            let trimmed = word.trim_end_matches([',', '.', ':', ';', ')']);
+            let key = if trimmed.is_empty() { word } else { trimmed };
+            key.len()
+        };
+        let starts = is_key(words[i])
+            && words.get(i + 1) == Some(&"+")
+            && words.get(i + 2).is_some_and(|next| {
+                is_key(&next[..strip(next)])
+            });
+        if !starts {
+            pieces.push(Piece::Word(words[i]));
+            i += 1;
+            continue;
+        }
+        let mut keys = vec![words[i]];
+        let mut rest = None;
+        i += 1;
+        while words.get(i) == Some(&"+") {
+            let Some(next) = words.get(i + 1) else { break };
+            let len = strip(next);
+            if !is_key(&next[..len]) {
+                break;
+            }
+            keys.push(&next[..len]);
+            i += 2;
+            if len < next.len() {
+                rest = Some(&next[len..]);
+                break;
+            }
+            // Arrows or a range after the last "+": "← ↑ ↓ →", "1 … 9"
+            while rest.is_none()
+                && words.get(i).is_some_and(|word| {
+                    matches!(*word, "←" | "↑" | "↓" | "→" | "…")
+                        || (keys.last().is_some_and(|last| *last == "…")
+                            && word.chars().all(|c| c.is_ascii_digit()))
+                })
+            {
+                keys.push(words[i]);
+                i += 1;
+            }
+        }
+        pieces.push(Piece::Keys(keys));
+        if let Some(rest) = rest {
+            pieces.push(Piece::Word(rest));
+        }
+    }
+    pieces
+}
+
+/// A keyboard key: its name in a small rounded box
+fn keycap<'a>(name: &'a str) -> Element<'a, Message> {
+    text::caption(name)
+        .apply(widget::container)
+        .padding([1, 6])
+        .class(theme::Container::custom(|theme| {
+            let cosmic = theme.cosmic();
+            let mut background = cosmic.on_bg_color();
+            background.alpha = 0.1;
+            let mut border = cosmic.on_bg_color();
+            border.alpha = 0.35;
+            cosmic::iced::widget::container::Style {
+                background: Some(cosmic::iced::Color::from(background).into()),
+                border: cosmic::iced::Border {
+                    color: border.into(),
+                    width: 1.0,
+                    radius: 5.0.into(),
+                },
+                ..Default::default()
+            }
+        }))
+        .into()
+}
+
+/// A combination of keys: "Super + A" as two keys joined by "+"
+fn key_combo<'a>(keys: &[&'a str]) -> Element<'a, Message> {
+    let mut row = widget::row::with_capacity(keys.len() * 2).spacing(3).align_y(Alignment::Center);
+    let mut previous: Option<&str> = None;
+    for key in keys {
+        // "+" between the keys, but not inside a group of arrows or a range
+        let grouped = previous.is_some_and(|p| matches!(p, "←" | "↑" | "↓" | "→" | "…"))
+            || matches!(*key, "↑" | "↓" | "→" | "…")
+            || previous == Some("…");
+        if previous.is_some() && !grouped {
+            row = row.push(text::caption("+"));
+        }
+        row = row.push(if *key == "…" { text::caption("…").into() } else { keycap(key) });
+        previous = Some(key);
+    }
+    row.into()
+}
+
+/// A row's description: smaller and dimmer than its title
+fn dim_caption<'a>(caption: impl Into<std::borrow::Cow<'a, str>> + 'a) -> widget::Text<'a, cosmic::Theme> {
+    text::caption(caption).class(theme::Text::Custom(|theme| {
+        let mut color = theme.cosmic().on_bg_color();
+        color.alpha = 0.72;
+        cosmic::iced::widget::text::Style {
+            color: Some(color.into()),
+            ..Default::default()
+        }
+    }))
+}
+
+/// A row's title; "A → B" shows A, an arrow and B, and keys as keys
+fn title_line<'a>(title: &'a str) -> Element<'a, Message> {
+    let part = |part: &'a str| -> Element<'a, Message> {
+        let pieces = pieces(part);
+        if !pieces.iter().any(|piece| matches!(piece, Piece::Keys(_))) {
+            return text::heading(part).into();
+        }
+        pieces
+            .into_iter()
+            .fold(
+                widget::row::with_capacity(3).spacing(4).align_y(Alignment::Center),
+                |row, piece| match piece {
+                    Piece::Word(word) => row.push(text::heading(word)),
+                    Piece::Keys(keys) => row.push(key_combo(&keys)),
+                },
+            )
+            .into()
+    };
+    match title.split_once(" → ") {
+        Some((from, to)) => widget::row::with_capacity(3)
+            .spacing(8)
+            .align_y(Alignment::Center)
+            .push(part(from))
+            .push(widget::icon::from_name("go-next-symbolic").size(16))
+            .push(part(to))
+            .into(),
+        None => part(title),
+    }
+}
+
+/// The keys of a shortcut, as keys, at the end of a row
+fn with_keys_end<'a>(keys: &'a str) -> Element<'a, Message> {
+    pieces(keys)
+        .into_iter()
+        .fold(
+            widget::row::with_capacity(3).spacing(6).align_y(Alignment::Center),
+            |row, piece| match piece {
+                Piece::Word(word) => row.push(dim_caption(word)),
+                Piece::Keys(keys) => row.push(key_combo(&keys)),
+            },
+        )
+        .into()
+}
+
+/// A caption where key combinations show as keys; each line of the text is
+/// a line on screen, and long lines wrap between words
+fn with_keys<'a>(caption: &'a str) -> Element<'a, Message> {
+    if !caption.lines().any(|line| pieces(line).iter().any(|p| matches!(p, Piece::Keys(_)))) {
+        return dim_caption(caption).wrapping(Wrapping::Word).into();
+    }
+    caption
+        .lines()
+        .fold(widget::column::with_capacity(2).spacing(4), |column, line| {
+            let words: Vec<Element<'a, Message>> = pieces(line)
+                .into_iter()
+                .map(|piece| match piece {
+                    Piece::Word(word) => dim_caption(word).into(),
+                    Piece::Keys(keys) => key_combo(&keys),
+                })
+                .collect();
+            column.push(
+                widget::flex_row(words)
+                    .column_spacing(4)
+                    .row_spacing(4)
+                    .align_items(Alignment::Center),
+            )
+        })
         .width(Length::Fill)
         .into()
 }
@@ -2227,5 +2721,35 @@ fn run(action: &Action) {
                 std::process::exit(0);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Piece, pieces};
+
+    #[test]
+    fn key_combinations() {
+        use Piece::{Keys, Word};
+        assert_eq!(pieces("Super + A"), vec![Keys(vec!["Super", "A"])]);
+        assert_eq!(
+            pieces("Screen reader: Super + Alt + S"),
+            vec![Word("Screen"), Word("reader:"), Keys(vec!["Super", "Alt", "S"])]
+        );
+        assert_eq!(
+            pieces("Tiling: Super + Y. The app"),
+            vec![Word("Tiling:"), Keys(vec!["Super", "Y"]), Word("."), Word("The"), Word("app")]
+        );
+        assert_eq!(
+            pieces("Super + = and Super + -"),
+            vec![Keys(vec!["Super", "="]), Word("and"), Keys(vec!["Super", "-"])]
+        );
+        assert_eq!(pieces("Super + ← ↑ ↓ →"), vec![Keys(vec!["Super", "←", "↑", "↓", "→"])]);
+        assert_eq!(pieces("Super + 1 … 9"), vec![Keys(vec!["Super", "1", "…", "9"])]);
+        assert_eq!(
+            pieces("Super + Ctrl + flèches"),
+            vec![Keys(vec!["Super", "Ctrl"]), Word("+"), Word("flèches")]
+        );
+        assert_eq!(pieces("Press Super, type"), vec![Word("Press"), Word("Super,"), Word("type")]);
     }
 }
