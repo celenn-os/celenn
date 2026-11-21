@@ -193,3 +193,6 @@ msgstr "Escribe una hora, por ejemplo 20:45."
 
 msgid "Parental controls do not allow logging in now. Ask a parent."
 msgstr "El control parental no permite iniciar sesión ahora. Pregunta a tu padre o a tu madre."
+
+msgid "No limit today"
+msgstr "Sin límite hoy"

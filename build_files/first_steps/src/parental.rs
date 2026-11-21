@@ -56,6 +56,8 @@ pub(crate) const TEMPLATE_NAME: &str = "cosmic-blue-parental-controls.pot";
 const HELPER: &str = "/usr/libexec/cosmic-blue-parental-helper";
 const EXTEND: &str = "/usr/libexec/cosmic-blue-parental-extend";
 const ICON: &str = "cosmic-blue-parental-controls";
+/// The child's launcher (see more_time_launcher)
+const MORE_TIME_ID: &str = "io.github.cosmic_blue_os.ParentalControls.MoreTime";
 /// Banner of the tours (branding/tour/build.py), behind the app icon
 const BANNER: &str = "/usr/share/cosmic-blue/tour-banner.svg";
 const AVATARS: &str = "/var/lib/AccountsService/icons";
@@ -222,6 +224,7 @@ const TEXTS: &[&str] = &[
     "+15 min",
     "+30 min",
     "+1 h",
+    "No limit today",
     "Give",
     "{} minutes left",
     "1 minute left",
@@ -306,12 +309,20 @@ fn agent() {
         .map(|output| String::from_utf8_lossy(&output.stdout).into_owned())
         .unwrap_or_default();
     if groups.split_whitespace().any(|group| group == "wheel") {
+        more_time_launcher(false);
         return;
     }
     let mut warned: BTreeSet<u64> = BTreeSet::new();
+    let mut launcher = None;
     loop {
         // Rules can be added or removed while the session runs
-        if let (Some(rules), Some(now)) = (Rules::load(&user), Now::read()) {
+        let rules = Rules::load(&user);
+        let limited = rules.as_ref().is_some_and(|rules| rules.limit_enabled);
+        if launcher != Some(limited) {
+            more_time_launcher(limited);
+            launcher = Some(limited);
+        }
+        if let (Some(rules), Some(now)) = (rules, Now::read()) {
             let usage = Usage::load(&user);
             let extra = parental_rules::load_extra(&user);
             let verdict = parental_rules::verdict(&rules, usage.used_today(&now), &extra, &now);
@@ -331,6 +342,34 @@ fn agent() {
             }
         }
         std::thread::sleep(std::time::Duration::from_secs(10));
+    }
+}
+
+/// The child's "Ask for more time" launcher, in its applications: present
+/// while its screen time is limited, so that it can ask at any time, not only
+/// from a warning
+fn more_time_launcher(show: bool) {
+    let Some(home) = std::env::var_os("HOME") else {
+        return;
+    };
+    let path = Path::new(&home).join(format!(".local/share/applications/{MORE_TIME_ID}.desktop"));
+    if !show {
+        let _ = std::fs::remove_file(&path);
+        return;
+    }
+    let entry = format!(
+        "[Desktop Entry]\nType=Application\nName={}\nComment={}\nIcon={ICON}\nExec=/usr/libexec/cosmic-blue-parental-controls --more-time\nCategories=Utility;\nTerminal=false\n",
+        tr("Ask for more time"),
+        tr("A parent confirms with their password."),
+    );
+    if std::fs::read_to_string(&path).ok().as_deref() == Some(entry.as_str()) {
+        return;
+    }
+    if let Some(dir) = path.parent() {
+        let _ = std::fs::create_dir_all(dir);
+    }
+    if let Err(error) = std::fs::write(&path, entry) {
+        eprintln!("{}: {error}", path.display());
     }
 }
 
@@ -782,7 +821,9 @@ impl Application for App {
             Message::Minutes(minutes) => self.minutes = minutes,
             Message::Give => {
                 self.busy = true;
-                let args = vec![EXTEND.to_owned(), user_name(), self.minutes.to_string()];
+                // 0: no limit for the rest of the day
+                let amount = if self.minutes == 0 { "day".to_owned() } else { self.minutes.to_string() };
+                let args = vec![EXTEND.to_owned(), user_name(), amount];
                 return Task::perform(pkexec(args, String::new()), |result| {
                     cosmic::Action::App(Message::Given(result))
                 });
@@ -1309,7 +1350,7 @@ impl App {
         } else {
             widget::button::suggested(tr("Give")).on_press(Message::Give).into()
         };
-        widget::column::with_capacity(6)
+        widget::column::with_capacity(7)
             .spacing(space_m)
             .padding(space_m)
             .align_x(Alignment::Center)
@@ -1328,6 +1369,7 @@ impl App {
                 ])
                 .spacing(space_s),
             )
+            .push(choice("No limit today", 0))
             .push(
                 widget::row::with_capacity(3)
                     .spacing(space_s)
