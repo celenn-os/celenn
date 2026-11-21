@@ -7,6 +7,9 @@ wordmark is Montserrat Light, stored as outlines in `logo/glyphs.json` so the
 SVGs need no font.
 
 - `logo/cosmic-blue-logo.svg`: the mark (installed as the `cosmic-blue-logo` icon)
+- `logo/cosmic-blue-logo-symbolic.svg`: the mark in one color (installed as
+  `cosmic-blue-logo-symbolic`, the icon of the cosmic-blue group in the App
+  Library)
 - `logo/cosmic-blue-readme-banner.svg`: the README header, the logo and the
   name in white on the night sky of the tour (`tour/build.py`)
 - `logo/cosmic-blue-logo.png`: the mark, 512 px (Artifact Hub)

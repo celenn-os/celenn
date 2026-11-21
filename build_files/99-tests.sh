@@ -118,6 +118,19 @@ done
 for app in $(grep -o '"com\.system76\.[A-Za-z]*"' "${APP_LIST}" | tr -d '"'); do
     test -e "/usr/share/applications/${app}.desktop"
 done
+# App Library: our own apps in a "cosmic-blue" group (and not in COSMIC's
+# System/Utilities groups); every visible launcher of ours must be listed
+APP_GROUPS=/usr/share/cosmic/com.system76.CosmicAppLibrary/v1/groups
+grep -q 'name: "cosmic-blue"' "${APP_GROUPS}"
+test -s /usr/share/icons/hicolor/symbolic/apps/cosmic-blue-logo-symbolic.svg
+for desktop in /usr/share/applications/io.github.cosmic_blue_os.*.desktop \
+    /usr/share/applications/documentation.desktop; do
+    if grep -qx 'NoDisplay=true' "${desktop}"; then
+        continue
+    fi
+    app="$(basename "${desktop}" .desktop)"
+    grep -q "\"${app}\"" "${APP_GROUPS}"
+done
 # Extra shortcuts (custom, so they show and can be changed in COSMIC Settings)
 # next to COSMIC's own defaults, without taking one of their key combinations
 SHORTCUTS=/usr/share/cosmic/com.system76.CosmicSettings.Shortcuts/v1
