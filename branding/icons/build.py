@@ -110,13 +110,15 @@ FOLDER_DEFS = (
 def folder(name, open_=False):
     """A planet-like folder, the size of Tela circle's icons.
 
-    The folder is a disk: dark inside, the back panel with its tab, the
-    lighter front panel, which starts lower when the folder is open.
+    The folder is a disk: the inside, the back panel with its tab, the
+    lighter front panel, which starts lower when the folder is open. The
+    inside stays a light enough blue for the disk's top edge to read as a
+    clean round on dark backgrounds (a dark navy one merged into them).
     """
     front = 22.0 if open_ else 18.6
     disk = (
         '<g clip-path="url(#disk)">'
-        '<rect x="4" y="4" width="56" height="56" fill="#15338f"/>'
+        '<rect x="4" y="4" width="56" height="56" fill="#5d93f5"/>'
         '<path d="M4 11.3H29.2L33.1 15.2H60V60H4z" fill="#2f63d8"/>'
         f'<path d="M4 {front}H60V60H4z" fill="url(#front)"/>'
         f'<path d="M4 {front + 0.6}H60" stroke="#d6e8ff" stroke-width="1.2" opacity=".8"/>'
