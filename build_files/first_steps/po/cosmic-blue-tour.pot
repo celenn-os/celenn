@@ -261,6 +261,9 @@ msgstr ""
 msgid "Open with Bottles"
 msgstr ""
 
+msgid "See the equivalents of Windows programs"
+msgstr ""
+
 msgid "For advanced users: distrobox installs it in a container of another distribution."
 msgstr ""
 

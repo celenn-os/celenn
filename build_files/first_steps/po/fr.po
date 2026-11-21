@@ -260,6 +260,9 @@ msgstr "Un programme Windows sans équivalent ? Bottles, dans COSMIC Store, en f
 msgid "Open with Bottles"
 msgstr "Ouvrir avec Bottles"
 
+msgid "See the equivalents of Windows programs"
+msgstr "Voir les équivalents des programmes Windows"
+
 msgid "For advanced users: distrobox installs it in a container of another distribution."
 msgstr "Pour les utilisateurs avancés : distrobox l’installe dans un conteneur d’une autre distribution."
 

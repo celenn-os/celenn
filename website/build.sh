@@ -57,7 +57,7 @@ fi
 # The same pages in every language: English at the root (the default), the
 # others in their own folder (fr/, de/...).
 languages=(en de es fr it pt-br)
-pages=(index.html docs/index.html docs/troubleshooting/index.html screenshots/index.html)
+pages=(index.html install/index.html docs/index.html docs/troubleshooting/index.html screenshots/index.html)
 all_pages=()
 for lang in "${languages[@]}"; do
   for page in "${pages[@]}"; do
