@@ -369,8 +369,6 @@ msgstr ""
 msgid "Saved in your home folder."
 msgstr ""
 
-msgid "Steam and Heroic (Epic Games, GOG, Amazon). About 1.5 GB, games not included."
-msgstr ""
 
 msgid "Switch"
 msgstr ""
@@ -430,4 +428,19 @@ msgid "Homebrew is not set up yet: only Podman Desktop can be installed now."
 msgstr ""
 
 msgid "The developer tools are ready."
+msgstr ""
+
+msgid "Stores"
+msgstr ""
+
+msgid "Windows games"
+msgstr ""
+
+msgid "And also"
+msgstr ""
+
+msgid "Steam, Heroic, Lutris… Tick the ones you want, untick the ones to remove. Your games and saves stay."
+msgstr ""
+
+msgid "Your game apps are ready."
 msgstr ""

@@ -18,7 +18,7 @@
 // edition, a license) ask first, in the row itself.
 
 use crate::common::{label, run, spawn, state_icon};
-use crate::devtools::{self, DEV_TOOLS, ToolKind, dev_tools};
+use crate::devtools::{self, DEV_TOOLS, DevTool, ToolKind};
 use crate::i18n::tr;
 use cosmic::app::Task;
 use cosmic::iced::{Alignment, Length};
@@ -31,7 +31,6 @@ use std::process::{Command, Stdio};
 const UPDATES_HELPER: &str = "/usr/libexec/cosmic-blue-updates-helper";
 const IMAGE_INFO: &str = "/usr/share/ublue-os/image-info.json";
 const FONTS_LICENSE: &str = "https://corefonts.sourceforge.net/eula.htm";
-const STEAM: &str = "com.valvesoftware.Steam";
 const VMS: &str = "org.virt_manager.virt-manager";
 
 pub const TEXTS: &[&str] = &[
@@ -71,7 +70,11 @@ pub const TEXTS: &[&str] = &[
     "Read it",
     "Accept and install",
     "Games",
-    "Steam and Heroic (Epic Games, GOG, Amazon). About 1.5 GB, games not included.",
+    "Steam, Heroic, Lutris… Tick the ones you want, untick the ones to remove. Your games and saves stay.",
+    "Stores",
+    "Windows games",
+    "And also",
+    "Your game apps are ready.",
     "Virtual machines",
     "virt-manager, to run Windows or another Linux in a window.",
     "FlatPark",
@@ -106,6 +109,85 @@ pub const TEXTS: &[&str] = &[
     "Saved in your home folder.",
 ];
 
+/// The game apps, from Flathub, by group. Steam and Heroic are ticked
+/// the first time the list opens
+const GAMES: &[(&str, &[DevTool])] = &[
+    (
+        "Stores",
+        &[
+            DevTool {
+                name: "Steam",
+                kind: ToolKind::Flatpak("com.valvesoftware.Steam"),
+            },
+            DevTool {
+                name: "Heroic",
+                kind: ToolKind::Flatpak("com.heroicgameslauncher.hgl"),
+            },
+            DevTool {
+                name: "Lutris",
+                kind: ToolKind::Flatpak("net.lutris.Lutris"),
+            },
+        ],
+    ),
+    (
+        "Windows games",
+        &[
+            DevTool {
+                name: "Bottles",
+                kind: ToolKind::Flatpak("com.usebottles.bottles"),
+            },
+            DevTool {
+                name: "ProtonPlus",
+                kind: ToolKind::Flatpak("com.vysp3r.ProtonPlus"),
+            },
+        ],
+    ),
+    (
+        "And also",
+        &[
+            DevTool {
+                name: "RetroArch",
+                kind: ToolKind::Flatpak("org.libretro.RetroArch"),
+            },
+            DevTool {
+                name: "Prism Launcher",
+                kind: ToolKind::Flatpak("org.prismlauncher.PrismLauncher"),
+            },
+            DevTool {
+                name: "Discord",
+                kind: ToolKind::Flatpak("com.discordapp.Discord"),
+            },
+        ],
+    ),
+];
+
+/// The lists of apps picked with checkboxes
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum List {
+    Dev = 0,
+    Games = 1,
+}
+
+impl List {
+    fn groups(self) -> &'static [(&'static str, &'static [DevTool])] {
+        match self {
+            List::Dev => DEV_TOOLS,
+            List::Games => GAMES,
+        }
+    }
+
+    fn tools(self) -> impl Iterator<Item = &'static DevTool> {
+        self.groups().iter().flat_map(|(_, tools)| tools.iter())
+    }
+
+    fn done(self) -> &'static str {
+        match self {
+            List::Dev => "The developer tools are ready.",
+            List::Games => "Your game apps are ready.",
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Kind {
     Computer,
@@ -122,12 +204,11 @@ pub struct State {
     nvidia: Option<bool>,
     efi: bool,
     fonts: bool,
-    gaming: bool,
     vms: bool,
     flatpark: bool,
     dark: bool,
-    /// Developer tools installed (numbers of devtools::dev_tools())
-    dev_installed: BTreeSet<usize>,
+    /// The apps of each list installed (numbers of List::tools())
+    installed: [BTreeSet<usize>; 2],
     brew: bool,
 }
 
@@ -138,7 +219,6 @@ pub enum Job {
     Nvidia,
     Firmware,
     Fonts(bool),
-    Gaming(bool),
     Vms(bool),
     FlatPark(bool),
     Dark(bool),
@@ -158,8 +238,6 @@ impl Job {
             Job::Firmware => ("systemctl", vec!["reboot", "--firmware-setup"]),
             Job::Fonts(true) => ujust(&["install-microsoft-fonts", "yes"]),
             Job::Fonts(false) => ujust(&["remove-microsoft-fonts"]),
-            Job::Gaming(true) => ujust(&["install-gaming"]),
-            Job::Gaming(false) => ujust(&["remove-gaming"]),
             Job::Vms(true) => ujust(&["install-vms"]),
             Job::Vms(false) => ujust(&["remove-vms"]),
             Job::FlatPark(on) => ujust(&["toggle-flatpark", on_off(on)]),
@@ -219,11 +297,11 @@ pub enum Message {
     Done(Job, Option<bool>),
     OpenSettings,
     FontsLicense,
-    /// Show or hide the developer tools
-    DevOpen,
-    DevTool(usize, bool),
-    DevApply,
-    DevDone(Option<bool>),
+    /// Show or hide a list of apps
+    ListOpen(List),
+    Tick(List, usize, bool),
+    ListApply(List),
+    ListDone(List, Option<bool>),
     CloseToast(widget::ToastId),
 }
 
@@ -231,10 +309,10 @@ pub struct Page {
     state: Option<State>,
     busy: Option<Job>,
     asking: Option<Job>,
-    /// The developer tools list is shown; the tools ticked in it
-    dev_open: bool,
-    dev_chosen: BTreeSet<usize>,
-    dev_busy: bool,
+    /// The lists shown, the apps ticked in them, the list being applied
+    open: [bool; 2],
+    chosen: [BTreeSet<usize>; 2],
+    applying: Option<List>,
     toasts: Toasts<Message>,
 }
 
@@ -308,16 +386,18 @@ pub fn read_state() -> State {
         nvidia: nvidia(),
         efi: Path::new("/sys/firmware/efi").exists(),
         fonts: data.join("fonts/microsoft-core-fonts").is_dir(),
-        gaming: has(STEAM),
         vms: has(VMS),
         flatpark: output("flatpak", &["remotes", "--user", "--columns=name"])
             .lines()
             .any(|line| line.trim() == "flatpark"),
         dark: dark(),
-        dev_installed: {
-            let mut installed = devtools::brew_installed();
+        installed: [List::Dev, List::Games].map(|list| {
+            let mut installed = match list {
+                List::Dev => devtools::brew_installed(),
+                List::Games => BTreeSet::new(),
+            };
             installed.extend(
-                dev_tools()
+                list.tools()
                     .enumerate()
                     .filter_map(|(i, tool)| match tool.kind {
                         ToolKind::Flatpak(app) if has(app) => Some(i),
@@ -325,7 +405,7 @@ pub fn read_state() -> State {
                     }),
             );
             installed
-        },
+        }),
         brew: Path::new(devtools::BREW).exists(),
     }
 }
@@ -347,9 +427,9 @@ impl Page {
             state: None,
             busy: None,
             asking: None,
-            dev_open: false,
-            dev_chosen: BTreeSet::new(),
-            dev_busy: false,
+            open: [false; 2],
+            chosen: Default::default(),
+            applying: None,
             toasts: Toasts::new(Message::CloseToast),
         };
         (page, refresh())
@@ -399,37 +479,44 @@ impl Page {
             }
             Message::OpenSettings => spawn("cosmic-settings", &["appearance"]),
             Message::FontsLicense => spawn("xdg-open", &[FONTS_LICENSE]),
-            Message::DevOpen => {
-                self.dev_open = !self.dev_open;
+            Message::ListOpen(list) => {
+                let n = list as usize;
+                self.open[n] = !self.open[n];
                 if let Some(state) = &self.state {
-                    self.dev_chosen = state.dev_installed.clone();
+                    self.chosen[n] = state.installed[n].clone();
+                    // Nothing installed yet: Steam and Heroic ticked
+                    if list == List::Games && self.chosen[n].is_empty() {
+                        self.chosen[n].extend([0, 1]);
+                    }
                 }
             }
-            Message::DevTool(i, on) => {
+            Message::Tick(list, i, on) => {
+                let chosen = &mut self.chosen[list as usize];
                 if on {
-                    self.dev_chosen.insert(i);
+                    chosen.insert(i);
                 } else {
-                    self.dev_chosen.remove(&i);
+                    chosen.remove(&i);
                 }
             }
-            Message::DevApply => {
+            Message::ListApply(list) => {
                 let Some(state) = &self.state else {
                     return Task::none();
                 };
-                self.dev_busy = true;
+                let n = list as usize;
+                self.applying = Some(list);
                 return Task::perform(
-                    apply_dev_tools(state.dev_installed.clone(), self.dev_chosen.clone()),
-                    |result| cosmic::Action::App(Message::DevDone(result)),
+                    apply_list(list, state.installed[n].clone(), self.chosen[n].clone()),
+                    move |result| cosmic::Action::App(Message::ListDone(list, result)),
                 );
             }
-            Message::DevDone(result) => {
-                self.dev_busy = false;
+            Message::ListDone(list, result) => {
+                self.applying = None;
                 let toast = match result {
                     None => Task::none(),
                     Some(false) => self.toast("Something went wrong, nothing was changed."),
                     Some(true) => {
-                        self.dev_open = false;
-                        self.toast("The developer tools are ready.")
+                        self.open[list as usize] = false;
+                        self.toast(list.done())
                     }
                 };
                 return Task::batch([toast, refresh()]);
@@ -610,14 +697,16 @@ impl Page {
                 "Arial, Times New Roman, Verdana… for documents made on Windows. cosmic-blue already has look-alikes with the same sizes.",
                 self.install(state.fonts, Job::Fonts),
                 Some(Job::Fonts(true)),
-            ))
-            .add(self.row(
-                "input-gaming-symbolic",
-                "Games",
-                "Steam and Heroic (Epic Games, GOG, Amazon). About 1.5 GB, games not included.",
-                self.install(state.gaming, Job::Gaming),
-                None,
-            ))
+            ));
+        section = self.list(
+            state,
+            section,
+            List::Games,
+            "input-gaming-symbolic",
+            "Games",
+            "Steam, Heroic, Lutris… Tick the ones you want, untick the ones to remove. Your games and saves stay.",
+        );
+        section = section
             .add(self.row(
                 "computer-symbolic",
                 "Virtual machines",
@@ -632,47 +721,63 @@ impl Page {
                 self.toggler(state.flatpark, Job::FlatPark),
                 None,
             ));
-        section = section.add(
+        section = self.list(
+            state,
+            section,
+            List::Dev,
+            "utilities-terminal-symbolic",
+            "Developer tools",
+            "Docker, VS Code, Neovim… Tick the ones you want, untick the ones to remove.",
+        );
+        section.into()
+    }
+
+    /// A row with Choose…, then when open the apps by group, each with its
+    /// checkbox, then Apply
+    fn list<'a>(
+        &'a self,
+        state: &'a State,
+        section: settings::Section<'a, Message>,
+        list: List,
+        icon: &'static str,
+        title: &'static str,
+        caption: &'static str,
+    ) -> settings::Section<'a, Message> {
+        let n = list as usize;
+        let mut section = section.add(
             self.row(
-                "utilities-terminal-symbolic",
-                "Developer tools",
-                "Docker, VS Code, Neovim… Tick the ones you want, untick the ones to remove.",
-                widget::button::standard(tr(if self.dev_open { "Hide" } else { "Choose…" }))
-                    .on_press_maybe((!self.dev_busy).then_some(Message::DevOpen))
+                icon,
+                title,
+                caption,
+                widget::button::standard(tr(if self.open[n] { "Hide" } else { "Choose…" }))
+                    .on_press_maybe(
+                        (self.applying != Some(list)).then_some(Message::ListOpen(list)),
+                    )
                     .into(),
                 None,
             ),
         );
-        if self.dev_open {
-            section = self.dev_rows(state, section);
+        if !self.open[n] {
+            return section;
         }
-        section.into()
-    }
-
-    /// The developer tools by group, each with its checkbox, then Apply
-    fn dev_rows<'a>(
-        &'a self,
-        state: &'a State,
-        mut section: settings::Section<'a, Message>,
-    ) -> settings::Section<'a, Message> {
         let cosmic_theme::Spacing {
             space_xxs, space_s, ..
         } = theme::spacing();
-        let mut n = 0;
-        for (heading, tools) in DEV_TOOLS {
+        let mut next = 0;
+        for (heading, tools) in list.groups() {
             let mut cells: Vec<Element<'a, Message>> = Vec::new();
             for tool in tools.iter() {
-                let i = n;
-                n += 1;
+                let i = next;
+                next += 1;
                 let available = state.brew || matches!(tool.kind, ToolKind::Flatpak(_));
-                let on = self.dev_chosen.contains(&i);
-                let enabled = available && !self.dev_busy;
+                let on = self.chosen[n].contains(&i);
+                let enabled = available && self.applying.is_none();
                 let checkbox = widget::checkbox(on)
-                    .on_toggle_maybe(enabled.then_some(move |on| Message::DevTool(i, on)));
+                    .on_toggle_maybe(enabled.then_some(move |on| Message::Tick(list, i, on)));
                 // The tool's name ticks the box too
                 let label = text::body(tool.name).apply(widget::mouse_area);
                 let label = if enabled {
-                    label.on_press(Message::DevTool(i, !on))
+                    label.on_press(Message::Tick(list, i, !on))
                 } else {
                     label
                 };
@@ -706,8 +811,8 @@ impl Page {
                     .padding([space_xxs, space_s, space_xxs, space_s + 36]),
             );
         }
-        let changed = self.dev_chosen != state.dev_installed;
-        let apply: Element<'a, Message> = if self.dev_busy {
+        let changed = self.chosen[n] != state.installed[n];
+        let apply: Element<'a, Message> = if self.applying == Some(list) {
             widget::row::with_capacity(2)
                 .spacing(space_xxs)
                 .align_y(Alignment::Center)
@@ -716,10 +821,13 @@ impl Page {
                 .into()
         } else {
             widget::button::suggested(tr("Apply"))
-                .on_press_maybe((changed && self.busy.is_none()).then_some(Message::DevApply))
+                .on_press_maybe(
+                    (changed && self.busy.is_none() && self.applying.is_none())
+                        .then_some(Message::ListApply(list)),
+                )
                 .into()
         };
-        let note: Element<'a, Message> = if state.brew {
+        let note: Element<'a, Message> = if state.brew || list == List::Games {
             widget::space::horizontal().width(Length::Fill).into()
         } else {
             text::caption(tr(
@@ -788,13 +896,17 @@ impl Page {
     }
 }
 
-/// Installs the developer tools ticked and removes the ones unticked, as
-/// the first steps tour installs them (devtools.rs): Homebrew for the user,
+/// Installs the apps ticked and removes the ones unticked, as the first
+/// steps tour installs developer tools (devtools.rs): Homebrew for the user,
 /// Flathub for everyone. None: the password prompt was dismissed
-async fn apply_dev_tools(installed: BTreeSet<usize>, chosen: BTreeSet<usize>) -> Option<bool> {
+async fn apply_list(
+    list: List,
+    installed: BTreeSet<usize>,
+    chosen: BTreeSet<usize>,
+) -> Option<bool> {
     let (mut formulas, mut casks, mut apps) = (Vec::new(), Vec::new(), Vec::new());
     let (mut old_formulas, mut old_casks, mut old_apps) = (Vec::new(), Vec::new(), Vec::new());
-    for (i, tool) in dev_tools().enumerate() {
+    for (i, tool) in list.tools().enumerate() {
         let add = chosen.contains(&i) && !installed.contains(&i);
         let remove = !chosen.contains(&i) && installed.contains(&i);
         if !add && !remove {
