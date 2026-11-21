@@ -37,9 +37,11 @@ use cosmic::{Application, ApplicationExt, Apply, Element, cosmic_theme, executor
 use std::collections::BTreeSet;
 use std::path::Path;
 
+mod failure;
 mod i18n;
 mod parental_rules;
 use i18n::tr;
+use failure::{Card, CardAction, CardMessage, Outcome};
 use parental_rules::{Now, Rules, Usage};
 
 pub(crate) const LANGUAGES: &[(&str, &str)] = &[
@@ -217,7 +219,7 @@ const TEXTS: &[&str] = &[
     "The child logs in with this name and password.",
     "Create",
     "Cancel",
-    "Something went wrong, nothing was changed.",
+    "Saving the settings",
     "Recommended",
     "More time for {}",
     "A parent confirms with their password.",
@@ -243,7 +245,8 @@ const TEXTS: &[&str] = &[
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     if args.iter().any(|arg| arg == "--check") {
-        std::process::exit(if i18n::check(TEXTS) { 0 } else { 1 });
+        let texts: Vec<&str> = [TEXTS, failure::TEXTS].concat();
+        std::process::exit(if i18n::check(&texts) { 0 } else { 1 });
     }
     if args.iter().any(|arg| arg == "--agent") {
         agent();
@@ -589,15 +592,16 @@ enum Message {
     /// A change to the rules of the account shown
     Rules(Rules),
     /// End of saving the rules: whether it worked (None: cancelled)
-    Saved(Option<bool>),
+    Saved(String, Rules, Outcome),
     Name(String),
     Password(String),
     TogglePassword,
     Create,
-    Created(String, Option<bool>),
+    Created(String, Outcome),
     Minutes(u32),
     Give,
-    Given(Option<bool>),
+    Given(Outcome),
+    Card(CardMessage),
     Close,
     CloseToast(widget::ToastId),
     /// - or + next to a time setting
@@ -622,41 +626,18 @@ struct App {
     minutes: u32,
     /// The time setting being typed in, and what is typed
     editing: Option<(Field, String)>,
+    /// What did not work, until closed or done again
+    card: Option<Card<Retry>>,
     toasts: Toasts<Message>,
     banner: Option<widget::svg::Handle>,
 }
 
-/// Runs pkexec in the background, with `input` on its standard input:
-/// Some(true) when it worked, None when the password prompt was dismissed
-/// (126) or the password was wrong three times (127)
-async fn pkexec(args: Vec<String>, input: String) -> Option<bool> {
-    use tokio::io::AsyncWriteExt;
-    let child = tokio::process::Command::new("pkexec")
-        .args(&args)
-        .stdin(std::process::Stdio::piped())
-        .spawn();
-    let mut child = match child {
-        Ok(child) => child,
-        Err(error) => {
-            eprintln!("Could not start pkexec: {error}");
-            return Some(false);
-        }
-    };
-    if let Some(mut stdin) = child.stdin.take() {
-        let _ = stdin.write_all(input.as_bytes()).await;
-    }
-    match child.wait().await {
-        Ok(status) if status.success() => Some(true),
-        Ok(status) if matches!(status.code(), Some(126 | 127)) => None,
-        Ok(status) => {
-            eprintln!("pkexec {args:?}: {status}");
-            Some(false)
-        }
-        Err(error) => {
-            eprintln!("pkexec: {error}");
-            Some(false)
-        }
-    }
+/// What a card's "Try again" does again
+#[derive(Clone, Debug)]
+enum Retry {
+    Save(String, Rules),
+    Create,
+    Give,
 }
 
 fn load() -> Task<Message> {
@@ -671,9 +652,11 @@ fn load() -> Task<Message> {
 }
 
 fn save(user: String, rules: Rules) -> Task<Message> {
+    let user_shown = user.clone();
     let args = vec![HELPER.to_owned(), "set".to_owned(), user];
-    Task::perform(pkexec(args, rules.to_json()), |result| {
-        cosmic::Action::App(Message::Saved(result))
+    let json = rules.to_json();
+    Task::perform(failure::run("pkexec", args, Some(json)), move |result| {
+        cosmic::Action::App(Message::Saved(user_shown.clone(), rules.clone(), result))
     })
 }
 
@@ -729,6 +712,7 @@ impl Application for App {
             busy: false,
             minutes: 30,
             editing: None,
+            card: None,
             toasts: Toasts::new(Message::CloseToast),
             banner: Path::new(BANNER)
                 .exists()
@@ -771,9 +755,9 @@ impl Application for App {
                     return save(user, rules);
                 }
             }
-            Message::Saved(result) => {
+            Message::Saved(user, rules, result) => {
                 self.saving = false;
-                if result == Some(true) {
+                if matches!(result, Some(Ok(()))) {
                     if let Some((user, rules)) = self.pending.take() {
                         self.saving = true;
                         return save(user, rules);
@@ -782,12 +766,14 @@ impl Application for App {
                 }
                 // Cancelled or failed: show what is saved
                 self.pending = None;
-                let toast = if result == Some(false) {
-                    self.toast("Something went wrong, nothing was changed.")
-                } else {
-                    Task::none()
-                };
-                return Task::batch([toast, load()]);
+                if let Some(Err(failure)) = result {
+                    self.card = Some(Card::new(
+                        tr("Saving the settings"),
+                        failure,
+                        Retry::Save(user, rules),
+                    ));
+                }
+                return load();
             }
             Message::Name(name) => self.name = name,
             Message::Password(password) => self.password = password,
@@ -802,19 +788,23 @@ impl Application for App {
                 self.busy = true;
                 let args = vec![HELPER.to_owned(), "add-child".to_owned(), user.clone(), name];
                 let input = format!("{}\n{}", self.password, Rules::default().to_json());
-                return Task::perform(pkexec(args, input), move |result| {
+                self.card = None;
+                return Task::perform(failure::run("pkexec", args, Some(input)), move |result| {
                     cosmic::Action::App(Message::Created(user.clone(), result))
                 });
             }
             Message::Created(user, result) => {
                 self.busy = false;
                 match result {
-                    Some(true) => {
+                    Some(Ok(())) => {
                         self.password.clear();
                         self.page = Page::Child(user);
                         return load();
                     }
-                    Some(false) => return self.toast("Something went wrong, nothing was changed."),
+                    Some(Err(failure)) => {
+                        self.card =
+                            Some(Card::new(tr("Add a child account"), failure, Retry::Create));
+                    }
                     None => {}
                 }
             }
@@ -824,16 +814,39 @@ impl Application for App {
                 // 0: no limit for the rest of the day
                 let amount = if self.minutes == 0 { "day".to_owned() } else { self.minutes.to_string() };
                 let args = vec![EXTEND.to_owned(), user_name(), amount];
-                return Task::perform(pkexec(args, String::new()), |result| {
+                self.card = None;
+                return Task::perform(failure::run("pkexec", args, None), |result| {
                     cosmic::Action::App(Message::Given(result))
                 });
             }
             Message::Given(result) => {
                 self.busy = false;
                 match result {
-                    Some(true) => std::process::exit(0),
-                    Some(false) => return self.toast("Something went wrong, nothing was changed."),
+                    Some(Ok(())) => std::process::exit(0),
+                    Some(Err(failure)) => {
+                        self.card = Some(Card::new(tr("Ask for more time"), failure, Retry::Give));
+                    }
                     None => {}
+                }
+            }
+            Message::Card(message) => {
+                let Some(card) = &mut self.card else {
+                    return Task::none();
+                };
+                match card.update(message) {
+                    CardAction::None => {}
+                    CardAction::Close => self.card = None,
+                    CardAction::Retry(retry) => {
+                        self.card = None;
+                        match retry {
+                            Retry::Save(user, rules) => {
+                                self.saving = true;
+                                return save(user, rules);
+                            }
+                            Retry::Create => return self.update(Message::Create),
+                            Retry::Give => return self.update(Message::Give),
+                        }
+                    }
                 }
             }
             Message::Step(field, up) => {
@@ -879,6 +892,19 @@ impl Application for App {
             (Mode::Parent(_), Page::Home) => self.home(),
             (Mode::Parent(_), Page::Child(user)) => self.child(user),
             (Mode::Parent(_), Page::Add) => self.add(),
+        };
+        let page = match &self.card {
+            None => page,
+            Some(card) => widget::column::with_capacity(2)
+                .push(
+                    widget::container(card.view(Message::Card))
+                        .max_width(640)
+                        .padding(theme::spacing().space_s)
+                        .apply(widget::container)
+                        .center_x(Length::Fill),
+                )
+                .push(page)
+                .into(),
         };
         widget::toaster(&self.toasts, page)
     }

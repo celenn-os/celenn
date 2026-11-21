@@ -134,9 +134,6 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-msgid "Something went wrong, nothing was changed."
-msgstr ""
-
 msgid "Recommended"
 msgstr ""
 
@@ -195,4 +192,43 @@ msgid "Parental controls do not allow logging in now. Ask a parent."
 msgstr ""
 
 msgid "No limit today"
+msgstr ""
+
+msgid "Saving the settings"
+msgstr ""
+
+msgid "“{}” did not work"
+msgstr ""
+
+msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
+msgstr ""
+
+msgid "The disk is full ({} free). Free up space with Clean up, in cosmic-blue Tools, Maintenance, then try again."
+msgstr ""
+
+msgid "The server does not answer. Try again in a few minutes."
+msgstr ""
+
+msgid "Something unexpected went wrong. Nothing was changed."
+msgstr ""
+
+msgid "Try again"
+msgstr ""
+
+msgid "Network settings"
+msgstr ""
+
+msgid "Report the problem"
+msgstr ""
+
+msgid "Technical details"
+msgstr ""
+
+msgid "The report opens in your browser, filled in: the cosmic-blue version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
+msgstr ""
+
+msgid "Open the report"
+msgstr ""
+
+msgid "Close"
 msgstr ""

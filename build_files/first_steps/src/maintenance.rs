@@ -12,7 +12,8 @@
 //     installed them.
 //   - Firmware updates: opens GNOME Firmware.
 
-use crate::common::{fill, label, run, spawn, state_icon, two_lines};
+use crate::common::{fill, label, spawn, state_icon, two_lines};
+use crate::failure::{self, Card, CardAction, CardMessage, Outcome};
 use crate::i18n::tr;
 use cosmic::app::Task;
 use cosmic::iced::{Alignment, Length};
@@ -45,7 +46,6 @@ pub const TEXTS: &[&str] = &[
     "GB",
     "TB",
     "Everything was already tidy.",
-    "Something went wrong, nothing was changed.",
     "Apps that come with cosmic-blue",
     "All of them are installed.",
     "One of them was removed. Put it back?",
@@ -53,7 +53,6 @@ pub const TEXTS: &[&str] = &[
     "Reinstall",
     "Installing…",
     "The apps are back.",
-    "The apps could not be installed. Are you online?",
     "Firmware updates",
     "New versions of the BIOS, SSD, dock… from their makers.",
     "Open",
@@ -86,9 +85,10 @@ pub enum Message {
     State(State),
     CleanUp,
     Reinstall,
-    /// End of a background command, and whether it worked (None: the
-    /// password prompt was dismissed)
-    Done(Busy, Option<bool>),
+    /// End of a background command (None: the password prompt was
+    /// dismissed)
+    Done(Busy, Outcome),
+    Card(CardMessage),
     Open(&'static str),
     CloseToast(widget::ToastId),
 }
@@ -98,6 +98,8 @@ pub struct Page {
     busy: Option<Busy>,
     /// Free space before cleaning up, to tell how much it freed
     free_before: Option<u64>,
+    /// What did not work, until closed or done again
+    card: Option<Card<Busy>>,
     toasts: Toasts<Message>,
 }
 
@@ -224,6 +226,7 @@ impl Page {
             state: None,
             busy: None,
             free_before: None,
+            card: None,
             toasts: Toasts::new(Message::CloseToast),
         };
         (page, refresh())
@@ -239,9 +242,10 @@ impl Page {
         match message {
             Message::State(state) => self.state = Some(state),
             Message::CleanUp => {
+                self.card = None;
                 self.busy = Some(Busy::Cleaning);
                 self.free_before = disk().map(|disk| disk.free);
-                return Task::perform(run(CLEAN, Vec::new()), |result| {
+                return Task::perform(failure::run(CLEAN, Vec::new(), None), |result| {
                     cosmic::Action::App(Message::Done(Busy::Cleaning, result))
                 });
             }
@@ -249,13 +253,14 @@ impl Page {
                 let Some(state) = &self.state else {
                     return Task::none();
                 };
+                self.card = None;
                 self.busy = Some(Busy::Reinstalling);
                 let mut args: Vec<String> =
                     ["install", "--system", "--noninteractive", "-y", "flathub"]
                         .map(str::to_owned)
                         .to_vec();
                 args.extend(state.missing.iter().cloned());
-                return Task::perform(run("flatpak", args), |result| {
+                return Task::perform(failure::run("flatpak", args, None), |result| {
                     cosmic::Action::App(Message::Done(Busy::Reinstalling, result))
                 });
             }
@@ -263,7 +268,15 @@ impl Page {
                 self.busy = None;
                 let toast = match (busy, result) {
                     (_, None) => Task::none(),
-                    (Busy::Cleaning, Some(true)) => {
+                    (_, Some(Err(failure))) => {
+                        let title = match busy {
+                            Busy::Cleaning => tr("Clean up"),
+                            Busy::Reinstalling => tr("Reinstall"),
+                        };
+                        self.card = Some(Card::new(title, failure, busy));
+                        Task::none()
+                    }
+                    (Busy::Cleaning, Some(Ok(()))) => {
                         let freed = self
                             .free_before
                             .zip(disk().map(|disk| disk.free))
@@ -275,16 +288,27 @@ impl Page {
                             self.toast(fill(tr("{} freed"), &size(freed)))
                         }
                     }
-                    (Busy::Cleaning, Some(false)) => {
-                        self.toast(tr("Something went wrong, nothing was changed.").to_owned())
-                    }
-                    (Busy::Reinstalling, Some(true)) => {
+                    (Busy::Reinstalling, Some(Ok(()))) => {
                         self.toast(tr("The apps are back.").to_owned())
                     }
-                    (Busy::Reinstalling, Some(false)) => self
-                        .toast(tr("The apps could not be installed. Are you online?").to_owned()),
                 };
                 return Task::batch([toast, refresh()]);
+            }
+            Message::Card(message) => {
+                let Some(card) = &mut self.card else {
+                    return Task::none();
+                };
+                match card.update(message) {
+                    CardAction::None => {}
+                    CardAction::Close => self.card = None,
+                    CardAction::Retry(busy) => {
+                        self.card = None;
+                        return self.update(match busy {
+                            Busy::Cleaning => Message::CleanUp,
+                            Busy::Reinstalling => Message::Reinstall,
+                        });
+                    }
+                }
             }
             Message::Open(app) => spawn("flatpak", &["run", app]),
             Message::CloseToast(id) => self.toasts.remove(id),
@@ -307,6 +331,9 @@ impl Page {
                 .align_x(Alignment::Center)
                 .width(Length::Fill),
             );
+        if let Some(card) = &self.card {
+            content = content.push(card.view(Message::Card));
+        }
         let Some(state) = &self.state else {
             return crate::common::header(ICON, tr("Maintenance"), content.into());
         };

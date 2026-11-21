@@ -5,8 +5,10 @@
 //
 //   Computer       the battery charge limit (toggle-battery-limit), the
 //                  NVIDIA edition for NVIDIA graphics cards (the Updates
-//                  helper, as the first steps tour), restarting into the
-//                  firmware settings (reboot-to-bios)
+//                  helper, as the first steps tour) and, with Secure Boot,
+//                  its driver key (Tools helper, as `ujust
+//                  enroll-secure-boot-key`), restarting into the firmware
+//                  settings (reboot-to-bios)
 //   Extra software Microsoft fonts, Steam and Heroic, virtual machines,
 //                  the FlatPark app source, developer tools (ticked in a
 //                  list, installed as the first steps tour does:
@@ -15,9 +17,11 @@
 //                  setting back to the defaults, settings saved to a file
 //
 // Changes that cannot be undone in one click (restart, reset, the NVIDIA
-// edition, a license) ask first, in the row itself.
+// edition, a license) ask first, in the row itself. A change that does not
+// work shows a card at the top of its page (failure.rs).
 
-use crate::common::{label, run, spawn, state_icon};
+use crate::common::{label, spawn, state_icon};
+use crate::failure::{self, Card, CardAction, CardMessage, Outcome};
 use crate::devtools::{self, DEV_TOOLS, DevTool, ToolKind};
 use crate::i18n::tr;
 use cosmic::app::Task;
@@ -29,6 +33,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 const UPDATES_HELPER: &str = "/usr/libexec/cosmic-blue-updates-helper";
+const TOOLS_HELPER: &str = "/usr/libexec/cosmic-blue-tools-helper";
 const IMAGE_INFO: &str = "/usr/share/ublue-os/image-info.json";
 const FONTS_LICENSE: &str = "https://corefonts.sourceforge.net/eula.htm";
 const VMS: &str = "org.virt_manager.virt-manager";
@@ -46,7 +51,6 @@ pub const TEXTS: &[&str] = &[
     "Remove",
     "Cancel",
     "Working…",
-    "Something went wrong, nothing was changed.",
     // Computer
     "Battery charge limit",
     "Charging stops at 80 %: the battery lasts longer when the laptop stays plugged in.",
@@ -57,6 +61,9 @@ pub const TEXTS: &[&str] = &[
     "The NVIDIA edition is downloaded now and starts at the next restart. With Secure Boot on, a blue screen asks for the password cosmicblue once.",
     "Switch",
     "The NVIDIA edition starts at the next restart.",
+    "Secure Boot does not let NVIDIA's driver load yet. Allow it once: at the next restart, a blue screen asks for the password cosmicblue.",
+    "Allow",
+    "At the next restart, a blue screen asks for the password cosmicblue: choose Enroll MOK, Continue, Yes, type cosmicblue, then Reboot. The keyboard may be in QWERTY.",
     "Firmware settings (BIOS/UEFI)",
     "Restart into the computer's own settings: boot order, virtualization, Secure Boot…",
     "Restart",
@@ -180,6 +187,13 @@ impl List {
         self.groups().iter().flat_map(|(_, tools)| tools.iter())
     }
 
+    fn title(self) -> &'static str {
+        match self {
+            List::Dev => "Developer tools",
+            List::Games => "Games",
+        }
+    }
+
     fn done(self) -> &'static str {
         match self {
             List::Dev => "The developer tools are ready.",
@@ -202,6 +216,9 @@ pub struct State {
     battery_limit: Option<bool>,
     /// None: no NVIDIA graphics card. Some(true): the NVIDIA edition runs
     nvidia: Option<bool>,
+    /// The NVIDIA edition with Secure Boot on: its driver key, when it is
+    /// not enrolled yet
+    driver_key: Option<DriverKey>,
     efi: bool,
     fonts: bool,
     vms: bool,
@@ -212,11 +229,20 @@ pub struct State {
     brew: bool,
 }
 
+/// The key that signs NVIDIA's driver, when Secure Boot does not know it yet
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum DriverKey {
+    Missing,
+    /// Queued: the firmware asks for it at the next restart
+    Queued,
+}
+
 /// Every change a button makes
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Job {
     BatteryLimit(bool),
     Nvidia,
+    DriverKey,
     Firmware,
     Fonts(bool),
     Vms(bool),
@@ -235,6 +261,7 @@ impl Job {
         match self {
             Job::BatteryLimit(on) => ujust(&["toggle-battery-limit", on_off(on)]),
             Job::Nvidia => ("pkexec", vec![UPDATES_HELPER, "edition", "nvidia"]),
+            Job::DriverKey => ("pkexec", vec![TOOLS_HELPER, "driver-key"]),
             Job::Firmware => ("systemctl", vec!["reboot", "--firmware-setup"]),
             Job::Fonts(true) => ujust(&["install-microsoft-fonts", "yes"]),
             Job::Fonts(false) => ujust(&["remove-microsoft-fonts"]),
@@ -246,6 +273,30 @@ impl Job {
             Job::ResetTheme => ujust(&["reset-cosmic-theme", "yes"]),
             Job::ResetConfig => ujust(&["reset-cosmic-config", "yes"]),
             Job::Export => ujust(&["export-cosmic-config"]),
+        }
+    }
+
+    /// The title of its row, for the card when it does not work
+    fn title(self) -> &'static str {
+        match self {
+            Job::BatteryLimit(_) => "Battery charge limit",
+            Job::Nvidia | Job::DriverKey => "NVIDIA graphics card",
+            Job::Firmware => "Firmware settings (BIOS/UEFI)",
+            Job::Fonts(_) => "Microsoft fonts",
+            Job::Vms(_) => "Virtual machines",
+            Job::FlatPark(_) => "FlatPark",
+            Job::Dark(_) => "Dark theme",
+            Job::ResetTheme => "The cosmic-blue look",
+            Job::ResetConfig => "All COSMIC settings",
+            Job::Export => "Save my settings",
+        }
+    }
+
+    fn kind(self) -> Kind {
+        match self {
+            Job::BatteryLimit(_) | Job::Nvidia | Job::DriverKey | Job::Firmware => Kind::Computer,
+            Job::Fonts(_) | Job::Vms(_) | Job::FlatPark(_) => Kind::Software,
+            Job::Dark(_) | Job::ResetTheme | Job::ResetConfig | Job::Export => Kind::Appearance,
         }
     }
 
@@ -294,15 +345,23 @@ pub enum Message {
     Ask(Job),
     Cancel,
     Run(Job),
-    Done(Job, Option<bool>),
+    Done(Job, Outcome),
     OpenSettings,
     FontsLicense,
     /// Show or hide a list of apps
     ListOpen(List),
     Tick(List, usize, bool),
     ListApply(List),
-    ListDone(List, Option<bool>),
+    ListDone(List, Outcome),
+    Card(CardMessage),
     CloseToast(widget::ToastId),
+}
+
+/// What a card's "Try again" runs again
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Retry {
+    Job(Job),
+    List(List),
 }
 
 pub struct Page {
@@ -313,6 +372,8 @@ pub struct Page {
     open: [bool; 2],
     chosen: [BTreeSet<usize>; 2],
     applying: Option<List>,
+    /// What did not work, until closed or done again
+    card: Option<Card<Retry>>,
     toasts: Toasts<Message>,
 }
 
@@ -353,6 +414,27 @@ fn nvidia() -> Option<bool> {
     found.then(|| image.ends_with("-nvidia"))
 }
 
+/// With Secure Boot on, whether the key that signs NVIDIA's driver is
+/// enrolled (mokutil reads the firmware's lists, no root needed)
+fn driver_key() -> Option<DriverKey> {
+    const KEY: &str = "/etc/pki/akmods/certs/akmods-ublue.der";
+    if !Path::new(KEY).exists() || !output("mokutil", &["--sb-state"]).contains("SecureBoot enabled") {
+        return None;
+    }
+    if output("mokutil", &["--test-key", KEY]).contains("already enrolled") {
+        return None;
+    }
+    // Queued for the next restart: listed among the keys to enroll
+    let queued = Command::new("mokutil")
+        .args(["--list-new"])
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .is_ok_and(|status| status.success());
+    Some(if queued { DriverKey::Queued } else { DriverKey::Missing })
+}
+
 /// The COSMIC dark theme setting: the person's, else the system default
 fn dark() -> bool {
     let key = "cosmic/com.system76.CosmicTheme.Mode/v1/is_dark";
@@ -381,9 +463,11 @@ pub fn read_state() -> State {
     let has = |id: &str| apps.lines().any(|line| line.trim() == id);
     let data = std::env::var_os("XDG_DATA_HOME")
         .map_or_else(|| home().join(".local/share"), PathBuf::from);
+    let nvidia = nvidia();
     State {
         battery_limit,
-        nvidia: nvidia(),
+        nvidia,
+        driver_key: if nvidia == Some(true) { driver_key() } else { None },
         efi: Path::new("/sys/firmware/efi").exists(),
         fonts: data.join("fonts/microsoft-core-fonts").is_dir(),
         vms: has(VMS),
@@ -430,6 +514,7 @@ impl Page {
             open: [false; 2],
             chosen: Default::default(),
             applying: None,
+            card: None,
             toasts: Toasts::new(Message::CloseToast),
         };
         (page, refresh())
@@ -454,6 +539,7 @@ impl Page {
             Message::Cancel => self.asking = None,
             Message::Run(job) => {
                 self.asking = None;
+                self.card = None;
                 self.busy = Some(job);
                 // The switch and the theme show the change at once
                 if let (Job::Dark(on), Some(state)) = (job, self.state.as_mut()) {
@@ -461,7 +547,7 @@ impl Page {
                 }
                 let (program, args) = job.command();
                 let args = args.into_iter().map(str::to_owned).collect();
-                return Task::perform(run(program, args), move |result| {
+                return Task::perform(failure::run(program, args, None), move |result| {
                     cosmic::Action::App(Message::Done(job, result))
                 });
             }
@@ -469,8 +555,11 @@ impl Page {
                 self.busy = None;
                 let toast = match result {
                     None => Task::none(),
-                    Some(false) => self.toast("Something went wrong, nothing was changed."),
-                    Some(true) => match job.done() {
+                    Some(Err(failure)) => {
+                        self.card = Some(Card::new(tr(job.title()), failure, Retry::Job(job)));
+                        Task::none()
+                    }
+                    Some(Ok(())) => match job.done() {
                         Some(text) => self.toast(text),
                         None => Task::none(),
                     },
@@ -504,6 +593,7 @@ impl Page {
                 };
                 let n = list as usize;
                 self.applying = Some(list);
+                self.card = None;
                 return Task::perform(
                     apply_list(list, state.installed[n].clone(), self.chosen[n].clone()),
                     move |result| cosmic::Action::App(Message::ListDone(list, result)),
@@ -513,13 +603,29 @@ impl Page {
                 self.applying = None;
                 let toast = match result {
                     None => Task::none(),
-                    Some(false) => self.toast("Something went wrong, nothing was changed."),
-                    Some(true) => {
+                    Some(Err(failure)) => {
+                        self.card = Some(Card::new(tr(list.title()), failure, Retry::List(list)));
+                        Task::none()
+                    }
+                    Some(Ok(())) => {
                         self.open[list as usize] = false;
                         self.toast(list.done())
                     }
                 };
                 return Task::batch([toast, refresh()]);
+            }
+            Message::Card(message) => {
+                let Some(card) = &mut self.card else {
+                    return Task::none();
+                };
+                match card.update(message) {
+                    CardAction::None => {}
+                    CardAction::Close => self.card = None,
+                    CardAction::Retry(Retry::Job(job)) => return self.update(Message::Run(job)),
+                    CardAction::Retry(Retry::List(list)) => {
+                        return self.update(Message::ListApply(list));
+                    }
+                }
             }
             Message::CloseToast(id) => self.toasts.remove(id),
         }
@@ -634,6 +740,13 @@ impl Page {
                     .align_x(Alignment::Center)
                     .width(Length::Fill),
             );
+        let card_kind = self.card.as_ref().map(|card| match card.job {
+            Retry::Job(job) => job.kind(),
+            Retry::List(_) => Kind::Software,
+        });
+        if let Some(card) = self.card.as_ref().filter(|_| card_kind == Some(kind)) {
+            content = content.push(card.view(Message::Card));
+        }
         if let Some(state) = &self.state {
             content = content.push(match kind {
                 Kind::Computer => self.computer(state),
@@ -658,13 +771,29 @@ impl Page {
         }
         match state.nvidia {
             Some(true) => {
-                section = section.add(self.row(
-                    "video-display-symbolic",
-                    "NVIDIA graphics card",
-                    "You use the NVIDIA edition, with NVIDIA's own driver.",
-                    widget::space::horizontal().width(0).into(),
-                    None,
-                ));
+                section = section.add(match state.driver_key {
+                    None => self.row(
+                        "video-display-symbolic",
+                        "NVIDIA graphics card",
+                        "You use the NVIDIA edition, with NVIDIA's own driver.",
+                        widget::space::horizontal().width(0).into(),
+                        None,
+                    ),
+                    Some(DriverKey::Missing) => self.row(
+                        "video-display-symbolic",
+                        "NVIDIA graphics card",
+                        "Secure Boot does not let NVIDIA's driver load yet. Allow it once: at the next restart, a blue screen asks for the password cosmicblue.",
+                        self.button(Job::DriverKey, "Allow", true),
+                        None,
+                    ),
+                    Some(DriverKey::Queued) => self.row(
+                        "video-display-symbolic",
+                        "NVIDIA graphics card",
+                        "At the next restart, a blue screen asks for the password cosmicblue: choose Enroll MOK, Continue, Yes, type cosmicblue, then Reboot. The keyboard may be in QWERTY.",
+                        widget::space::horizontal().width(0).into(),
+                        None,
+                    ),
+                });
             }
             Some(false) => {
                 section = section.add(self.row(
@@ -898,12 +1027,13 @@ impl Page {
 
 /// Installs the apps ticked and removes the ones unticked, as the first
 /// steps tour installs developer tools (devtools.rs): Homebrew for the user,
-/// Flathub for everyone. None: the password prompt was dismissed
+/// Flathub for everyone. None: the password prompt was dismissed; the
+/// last failure otherwise
 async fn apply_list(
     list: List,
     installed: BTreeSet<usize>,
     chosen: BTreeSet<usize>,
-) -> Option<bool> {
+) -> Outcome {
     let (mut formulas, mut casks, mut apps) = (Vec::new(), Vec::new(), Vec::new());
     let (mut old_formulas, mut old_casks, mut old_apps) = (Vec::new(), Vec::new(), Vec::new());
     for (i, tool) in list.tools().enumerate() {
@@ -921,12 +1051,16 @@ async fn apply_list(
             ToolKind::Flatpak(app) => old_apps.push(app.to_owned()),
         }
     }
-    let mut ok = true;
-    if !formulas.is_empty() || !casks.is_empty() {
-        ok &= devtools::brew_install(formulas, casks).await;
+    let mut result = Ok(());
+    if (!formulas.is_empty() || !casks.is_empty())
+        && !devtools::brew_install(formulas, casks).await
+    {
+        result = Err(failure::failure("brew install: failed"));
     }
-    if !old_formulas.is_empty() || !old_casks.is_empty() {
-        ok &= devtools::brew_remove(old_formulas, old_casks).await;
+    if (!old_formulas.is_empty() || !old_casks.is_empty())
+        && !devtools::brew_remove(old_formulas, old_casks).await
+    {
+        result = Err(failure::failure("brew uninstall: failed"));
     }
     for (verb, apps) in [("install", apps), ("uninstall", old_apps)] {
         if apps.is_empty() {
@@ -939,10 +1073,11 @@ async fn apply_list(
             args.push("flathub".to_owned());
         }
         args.extend(apps);
-        match run("flatpak", args).await {
-            Some(done) => ok &= done,
+        match failure::run("flatpak", args, None).await {
+            Some(Ok(())) => {}
+            Some(Err(failure)) => result = Err(failure),
             None => return None,
         }
     }
-    Some(ok)
+    Some(result)
 }

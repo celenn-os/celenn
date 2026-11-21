@@ -134,9 +134,6 @@ msgstr "Criar"
 msgid "Cancel"
 msgstr "Cancelar"
 
-msgid "Something went wrong, nothing was changed."
-msgstr "Algo deu errado, nada foi alterado."
-
 msgid "Recommended"
 msgstr "Recomendado"
 
@@ -196,3 +193,42 @@ msgstr "O controle parental não permite entrar agora. Peça a um responsável."
 
 msgid "No limit today"
 msgstr "Sem limite hoje"
+
+msgid "Saving the settings"
+msgstr "Salvar as configurações"
+
+msgid "“{}” did not work"
+msgstr "“{}” não funcionou"
+
+msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
+msgstr "Sem conexão com a internet. Conecte-se a uma rede e tente de novo. Nada foi alterado."
+
+msgid "The disk is full ({} free). Free up space with Clean up, in cosmic-blue Tools, Maintenance, then try again."
+msgstr "O disco está cheio ({} livres). Libere espaço com Limpar, em Ferramentas do cosmic-blue, Manutenção, e tente de novo."
+
+msgid "The server does not answer. Try again in a few minutes."
+msgstr "O servidor não responde. Tente de novo em alguns minutos."
+
+msgid "Something unexpected went wrong. Nothing was changed."
+msgstr "Algo inesperado deu errado. Nada foi alterado."
+
+msgid "Try again"
+msgstr "Tentar de novo"
+
+msgid "Network settings"
+msgstr "Configurações de rede"
+
+msgid "Report the problem"
+msgstr "Relatar o problema"
+
+msgid "Technical details"
+msgstr "Detalhes técnicos"
+
+msgid "The report opens in your browser, filled in: the cosmic-blue version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
+msgstr "O relatório abre no navegador, já preenchido: a versão do cosmic-blue, o hardware e este erro. Nenhum arquivo ou dado pessoal. Você revisa antes de enviar; escreva no seu idioma. Para enviar é preciso uma conta no GitHub."
+
+msgid "Open the report"
+msgstr "Abrir o relatório"
+
+msgid "Close"
+msgstr "Fechar"
