@@ -35,9 +35,6 @@ msgstr "Wird geprüft…"
 msgid "You are up to date."
 msgstr "Das System ist aktuell."
 
-msgid "The check did not work. Are you online?"
-msgstr "Die Prüfung hat nicht geklappt. Sind Sie online?"
-
 msgid "Ready for the next restart: {}"
 msgstr "Bereit für den nächsten Neustart: {}"
 
@@ -95,9 +92,6 @@ msgstr "MB"
 
 msgid "GB"
 msgstr "GB"
-
-msgid "Something went wrong, nothing was changed."
-msgstr "Etwas ist schiefgelaufen, nichts wurde geändert."
 
 msgid "The system version could not be read: is this computer installed with cosmic-blue?"
 msgstr "Die Systemversion konnte nicht gelesen werden: Ist dieser Computer mit cosmic-blue installiert?"

@@ -35,9 +35,6 @@ msgstr ""
 msgid "You are up to date."
 msgstr ""
 
-msgid "The check did not work. Are you online?"
-msgstr ""
-
 msgid "Ready for the next restart: {}"
 msgstr ""
 
@@ -92,9 +89,6 @@ msgid "MB"
 msgstr ""
 
 msgid "GB"
-msgstr ""
-
-msgid "Something went wrong, nothing was changed."
 msgstr ""
 
 msgid "The system version could not be read: is this computer installed with cosmic-blue?"

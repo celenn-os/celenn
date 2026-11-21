@@ -152,9 +152,6 @@ msgstr "Elegir…"
 msgid "Installing: {} of {}"
 msgstr "Instalando: {} de {}"
 
-msgid "Some apps did not install. Are you online? They are also in COSMIC Store."
-msgstr "Algunas aplicaciones no se han instalado. ¿Tienes conexión? También están en COSMIC Store."
-
 msgid "Checking your computer…"
 msgstr "Comprobando tu ordenador…"
 
@@ -554,12 +551,6 @@ msgstr "Elegidas: {}"
 msgid "Install and continue"
 msgstr "Instalar y continuar"
 
-msgid "Some apps did not install"
-msgstr "Algunas aplicaciones no se instalaron"
-
-msgid "Are you online? They are also in COSMIC Store."
-msgstr "¿Tienes conexión? También están en COSMIC Store."
-
 msgid "Containers"
 msgstr "Contenedores"
 
@@ -625,3 +616,36 @@ msgstr "Si te gusta la terminal"
 
 msgid "ujust lists the system's recipes, brew installs command line tools: the documentation has them all."
 msgstr "ujust muestra las recetas del sistema, brew instala herramientas de línea de comandos: la documentación las recoge todas."
+
+msgid "“{}” did not work"
+msgstr "«{}» no ha funcionado"
+
+msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
+msgstr "No hay conexión a Internet. Conéctese a una red y vuelva a intentarlo. No se ha cambiado nada."
+
+msgid "The disk is full ({} free). Free up space with Clean up, in cosmic-blue Tools, Maintenance, then try again."
+msgstr "El disco está lleno ({} libres). Libere espacio con Limpiar, en Herramientas de cosmic-blue, Mantenimiento, y vuelva a intentarlo."
+
+msgid "The server does not answer. Try again in a few minutes."
+msgstr "El servidor no responde. Vuelva a intentarlo en unos minutos."
+
+msgid "Something unexpected went wrong. Nothing was changed."
+msgstr "Algo inesperado ha fallado. No se ha cambiado nada."
+
+msgid "Try again"
+msgstr "Reintentar"
+
+msgid "Report the problem"
+msgstr "Informar del problema"
+
+msgid "Technical details"
+msgstr "Detalles técnicos"
+
+msgid "The report opens in your browser, filled in: the cosmic-blue version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
+msgstr "El informe se abre en el navegador, ya rellenado: la versión de cosmic-blue, el hardware y este error. Sin archivos ni datos personales. Lo revisa antes de enviarlo; escriba en su idioma. Para enviarlo hace falta una cuenta de GitHub."
+
+msgid "Open the report"
+msgstr "Abrir el informe"
+
+msgid "Cancel"
+msgstr "Cancelar"
