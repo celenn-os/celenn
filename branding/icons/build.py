@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the cosmic-blue icons drawn on top of Tela circle.
 
-- places: folders (a planet-like disk in the logo blues, with a folder tab),
+- places: folders (a white folder on an accent disk, like the dock buttons),
   the home, desktop, network and trash icons
 - mimetypes: common file types (a light page whose symbol and folded corner
   take the color of the type)
@@ -99,32 +99,25 @@ def glyph(name, x, y, scale, color):
 
 # --- Folders -----------------------------------------------------------------
 
-FOLDER_DEFS = (
-    '<clipPath id="disk"><circle cx="32" cy="32" r="28"/></clipPath>'
-    '<linearGradient id="front" x1=".15" y1="0" x2=".85" y2="1">'
-    '<stop offset="0" stop-color="#78aeff"/><stop offset=".55" stop-color="#4f8dff"/>'
-    '<stop offset="1" stop-color="#2f6bff"/></linearGradient>'
-)
-
-
 def folder(name, open_=False):
-    """A planet-like folder, the size of Tela circle's icons.
+    """A folder in the style of the dock buttons, the size of Tela circle's icons.
 
-    The folder is a disk: dark inside, the back panel with its tab, the
-    lighter front panel, which starts lower when the folder is open.
+    A round disk in the accent, the folder's back panel with its tab in
+    translucent white, the white front panel (lower when the folder is open)
+    and the folder's symbol on it in the accent. Everything stays inside the
+    disk, so its round edge reads cleanly on dark and light backgrounds.
     """
-    front = 22.0 if open_ else 18.6
-    disk = (
-        '<g clip-path="url(#disk)">'
-        '<rect x="4" y="4" width="56" height="56" fill="#15338f"/>'
-        '<path d="M4 11.3H29.2L33.1 15.2H60V60H4z" fill="#2f63d8"/>'
-        f'<path d="M4 {front}H60V60H4z" fill="url(#front)"/>'
-        f'<path d="M4 {front + 0.6}H60" stroke="#d6e8ff" stroke-width="1.2" opacity=".8"/>'
-        "</g>"
-        + glyph(name, 32, front + (60 - front) * 0.45, 1.1, "#ffffff")
+    defs, circle = disk("#4f8dff")
+    front = 30.5 if open_ else 27.5
+    return svg(
+        circle
+        + '<path d="M15 20a2.5 2.5 0 0 1 2.5-2.5h9l3.5 3.5h17.5a2.5 2.5 0 0 1 2.5 2.5v20a2.5 2.5 0 0 1'
+        '-2.5 2.5h-30a2.5 2.5 0 0 1-2.5-2.5z" fill="#fff" opacity=".45"/>'
+        f'<path d="M15 {front}a2.5 2.5 0 0 1 2.5-2.5h30a2.5 2.5 0 0 1 2.5 2.5v{43.5 - front}a2.5 2.5 0 0 1'
+        '-2.5 2.5h-30a2.5 2.5 0 0 1-2.5-2.5z" fill="#fff"/>'
+        + glyph(name, 32, (front - 2.5 + 46) / 2, 0.8, "#2f6bff"),
+        defs,
     )
-    # Drawn at 56 px, scaled to the 54 px disk of Tela circle's icons
-    return svg(f'<g transform="translate(32 32) scale({27 / 28:.4f}) translate(-32 -32)">{disk}</g>', FOLDER_DEFS)
 
 
 # Tela's file names: the icon theme also takes every Tela alias of them.
