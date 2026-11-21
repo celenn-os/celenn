@@ -303,8 +303,6 @@ msgstr "Tema scuro"
 msgid "Developer tools"
 msgstr "Strumenti per sviluppatori"
 
-msgid "Docker, VS Code, JetBrains Toolbox… chosen from a list, in a terminal window."
-msgstr "Docker, VS Code, JetBrains Toolbox… scelti da un elenco, in una finestra del terminale."
 
 msgid "Every COSMIC setting goes back to the defaults. A copy is kept in your settings folder."
 msgstr "Tutte le impostazioni di COSMIC tornano a quelle predefinite. Una copia resta nella cartella delle impostazioni."
@@ -345,8 +343,6 @@ msgstr "Altro nelle Impostazioni"
 msgid "NVIDIA graphics card"
 msgstr "Scheda grafica NVIDIA"
 
-msgid "Press Enter to close this window."
-msgstr "Premi Invio per chiudere questa finestra."
 
 msgid "Read it"
 msgstr "Leggila"
@@ -416,3 +412,24 @@ msgstr "Usi l'edizione NVIDIA, con il driver di NVIDIA."
 
 msgid "virt-manager, to run Windows or another Linux in a window."
 msgstr "virt-manager, per eseguire Windows o un altro Linux in una finestra."
+
+msgid "Apply"
+msgstr "Applica"
+
+msgid "Code editors"
+msgstr "Editor di codice"
+
+msgid "Containers"
+msgstr "Container"
+
+msgid "In the terminal"
+msgstr "Nel terminale"
+
+msgid "Docker, VS Code, Neovim… Tick the ones you want, untick the ones to remove."
+msgstr "Docker, VS Code, Neovim… Seleziona quelli che vuoi, deseleziona quelli da rimuovere."
+
+msgid "Homebrew is not set up yet: only Podman Desktop can be installed now."
+msgstr "Homebrew non è ancora pronto: per ora si può installare solo Podman Desktop."
+
+msgid "The developer tools are ready."
+msgstr "Gli strumenti per sviluppatori sono pronti."

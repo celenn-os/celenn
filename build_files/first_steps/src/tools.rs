@@ -35,6 +35,7 @@ use cosmic::widget::nav_bar;
 use cosmic::{Application, ApplicationExt, Element, executor};
 
 mod common;
+mod devtools;
 mod help;
 mod i18n;
 mod maintenance;

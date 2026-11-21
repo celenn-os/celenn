@@ -8,8 +8,9 @@
 //                  helper, as the first steps tour), restarting into the
 //                  firmware settings (reboot-to-bios)
 //   Extra software Microsoft fonts, Steam and Heroic, virtual machines,
-//                  the FlatPark app source, developer tools (a menu, in a
-//                  terminal window, for developers)
+//                  the FlatPark app source, developer tools (ticked in a
+//                  list, installed as the first steps tour does:
+//                  devtools.rs)
 //   Appearance     dark or light, the cosmic-blue look back, every COSMIC
 //                  setting back to the defaults, settings saved to a file
 //
@@ -17,11 +18,13 @@
 // edition, a license) ask first, in the row itself.
 
 use crate::common::{label, run, spawn, state_icon};
+use crate::devtools::{self, DEV_TOOLS, ToolKind, dev_tools};
 use crate::i18n::tr;
 use cosmic::app::Task;
 use cosmic::iced::{Alignment, Length};
 use cosmic::widget::{self, settings, text, toaster::Toasts};
-use cosmic::{Element, cosmic_theme, theme};
+use cosmic::{Apply, Element, cosmic_theme, theme};
+use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
@@ -74,9 +77,15 @@ pub const TEXTS: &[&str] = &[
     "FlatPark",
     "A second app source for COSMIC Store, with apps that are not on Flathub. Less checked than Flathub.",
     "Developer tools",
-    "Docker, VS Code, JetBrains Toolbox… chosen from a list, in a terminal window.",
+    "Docker, VS Code, Neovim… Tick the ones you want, untick the ones to remove.",
     "Choose…",
-    "Press Enter to close this window.",
+    "Hide",
+    "Containers",
+    "Code editors",
+    "In the terminal",
+    "Apply",
+    "Homebrew is not set up yet: only Podman Desktop can be installed now.",
+    "The developer tools are ready.",
     // Appearance
     "Dark theme",
     "Light text on dark backgrounds. Off: the light theme.",
@@ -117,7 +126,9 @@ pub struct State {
     vms: bool,
     flatpark: bool,
     dark: bool,
-    terminal: bool,
+    /// Developer tools installed (numbers of devtools::dev_tools())
+    dev_installed: BTreeSet<usize>,
+    brew: bool,
 }
 
 /// Every change a button makes
@@ -208,7 +219,11 @@ pub enum Message {
     Done(Job, Option<bool>),
     OpenSettings,
     FontsLicense,
-    DevTools,
+    /// Show or hide the developer tools
+    DevOpen,
+    DevTool(usize, bool),
+    DevApply,
+    DevDone(Option<bool>),
     CloseToast(widget::ToastId),
 }
 
@@ -216,6 +231,10 @@ pub struct Page {
     state: Option<State>,
     busy: Option<Job>,
     asking: Option<Job>,
+    /// The developer tools list is shown; the tools ticked in it
+    dev_open: bool,
+    dev_chosen: BTreeSet<usize>,
+    dev_busy: bool,
     toasts: Toasts<Message>,
 }
 
@@ -231,11 +250,6 @@ fn output(program: &str, args: &[&str]) -> String {
 
 fn home() -> PathBuf {
     std::env::var_os("HOME").map_or_else(|| PathBuf::from("."), PathBuf::from)
-}
-
-fn in_path(program: &str) -> bool {
-    std::env::var_os("PATH")
-        .is_some_and(|path| std::env::split_paths(&path).any(|dir| dir.join(program).is_file()))
 }
 
 /// An NVIDIA graphics card: Some(whether the NVIDIA edition runs)
@@ -300,7 +314,19 @@ pub fn read_state() -> State {
             .lines()
             .any(|line| line.trim() == "flatpark"),
         dark: dark(),
-        terminal: in_path("cosmic-term"),
+        dev_installed: {
+            let mut installed = devtools::brew_installed();
+            installed.extend(
+                dev_tools()
+                    .enumerate()
+                    .filter_map(|(i, tool)| match tool.kind {
+                        ToolKind::Flatpak(app) if has(app) => Some(i),
+                        _ => None,
+                    }),
+            );
+            installed
+        },
+        brew: Path::new(devtools::BREW).exists(),
     }
 }
 
@@ -321,6 +347,9 @@ impl Page {
             state: None,
             busy: None,
             asking: None,
+            dev_open: false,
+            dev_chosen: BTreeSet::new(),
+            dev_busy: false,
             toasts: Toasts::new(Message::CloseToast),
         };
         (page, refresh())
@@ -370,19 +399,40 @@ impl Page {
             }
             Message::OpenSettings => spawn("cosmic-settings", &["appearance"]),
             Message::FontsLicense => spawn("xdg-open", &[FONTS_LICENSE]),
-            Message::DevTools => {
-                // ujust's menu, in a terminal that stays open at the end
-                spawn(
-                    "cosmic-term",
-                    &[
-                        "-e",
-                        "bash",
-                        "-c",
-                        "ujust install-dev-tools; echo; read -r -p \"$1\"",
-                        "bash",
-                        tr("Press Enter to close this window."),
-                    ],
+            Message::DevOpen => {
+                self.dev_open = !self.dev_open;
+                if let Some(state) = &self.state {
+                    self.dev_chosen = state.dev_installed.clone();
+                }
+            }
+            Message::DevTool(i, on) => {
+                if on {
+                    self.dev_chosen.insert(i);
+                } else {
+                    self.dev_chosen.remove(&i);
+                }
+            }
+            Message::DevApply => {
+                let Some(state) = &self.state else {
+                    return Task::none();
+                };
+                self.dev_busy = true;
+                return Task::perform(
+                    apply_dev_tools(state.dev_installed.clone(), self.dev_chosen.clone()),
+                    |result| cosmic::Action::App(Message::DevDone(result)),
                 );
+            }
+            Message::DevDone(result) => {
+                self.dev_busy = false;
+                let toast = match result {
+                    None => Task::none(),
+                    Some(false) => self.toast("Something went wrong, nothing was changed."),
+                    Some(true) => {
+                        self.dev_open = false;
+                        self.toast("The developer tools are ready.")
+                    }
+                };
+                return Task::batch([toast, refresh()]);
             }
             Message::CloseToast(id) => self.toasts.remove(id),
         }
@@ -552,7 +602,7 @@ impl Page {
         section.into()
     }
 
-    fn software(&self, state: &State) -> Element<'_, Message> {
+    fn software<'a>(&'a self, state: &'a State) -> Element<'a, Message> {
         let mut section = settings::section()
             .add(self.row(
                 "font-x-generic-symbolic",
@@ -582,20 +632,110 @@ impl Page {
                 self.toggler(state.flatpark, Job::FlatPark),
                 None,
             ));
-        if state.terminal {
-            section = section.add(
-                self.row(
-                    "utilities-terminal-symbolic",
-                    "Developer tools",
-                    "Docker, VS Code, JetBrains Toolbox… chosen from a list, in a terminal window.",
-                    widget::button::standard(tr("Choose…"))
-                        .on_press(Message::DevTools)
-                        .into(),
-                    None,
-                ),
-            );
+        section = section.add(
+            self.row(
+                "utilities-terminal-symbolic",
+                "Developer tools",
+                "Docker, VS Code, Neovim… Tick the ones you want, untick the ones to remove.",
+                widget::button::standard(tr(if self.dev_open { "Hide" } else { "Choose…" }))
+                    .on_press_maybe((!self.dev_busy).then_some(Message::DevOpen))
+                    .into(),
+                None,
+            ),
+        );
+        if self.dev_open {
+            section = self.dev_rows(state, section);
         }
         section.into()
+    }
+
+    /// The developer tools by group, each with its checkbox, then Apply
+    fn dev_rows<'a>(
+        &'a self,
+        state: &'a State,
+        mut section: settings::Section<'a, Message>,
+    ) -> settings::Section<'a, Message> {
+        let cosmic_theme::Spacing {
+            space_xxs, space_s, ..
+        } = theme::spacing();
+        let mut n = 0;
+        for (heading, tools) in DEV_TOOLS {
+            let mut cells: Vec<Element<'a, Message>> = Vec::new();
+            for tool in tools.iter() {
+                let i = n;
+                n += 1;
+                let available = state.brew || matches!(tool.kind, ToolKind::Flatpak(_));
+                let on = self.dev_chosen.contains(&i);
+                let enabled = available && !self.dev_busy;
+                let checkbox = widget::checkbox(on)
+                    .on_toggle_maybe(enabled.then_some(move |on| Message::DevTool(i, on)));
+                // The tool's name ticks the box too
+                let label = text::body(tool.name).apply(widget::mouse_area);
+                let label = if enabled {
+                    label.on_press(Message::DevTool(i, !on))
+                } else {
+                    label
+                };
+                cells.push(
+                    widget::row::with_capacity(2)
+                        .spacing(space_xxs)
+                        .align_y(Alignment::Center)
+                        .push(checkbox)
+                        .push(label)
+                        .width(Length::Fixed(150.0))
+                        .into(),
+                );
+            }
+            // Three columns
+            let mut lines = widget::column::with_capacity(cells.len().div_ceil(3))
+                .spacing(space_xxs)
+                .width(Length::Fill);
+            let mut cells = cells.into_iter().peekable();
+            while cells.peek().is_some() {
+                let mut line = widget::row::with_capacity(3).spacing(space_s);
+                for cell in cells.by_ref().take(3) {
+                    line = line.push(cell);
+                }
+                lines = lines.push(line);
+            }
+            section = section.add(
+                widget::row::with_capacity(2)
+                    .spacing(space_s)
+                    .push(text::heading(tr(heading)).width(Length::Fixed(130.0)))
+                    .push(lines)
+                    .padding([space_xxs, space_s, space_xxs, space_s + 36]),
+            );
+        }
+        let changed = self.dev_chosen != state.dev_installed;
+        let apply: Element<'a, Message> = if self.dev_busy {
+            widget::row::with_capacity(2)
+                .spacing(space_xxs)
+                .align_y(Alignment::Center)
+                .push(widget::progress_bar::indeterminate_circular().size(20.0))
+                .push(text::body(tr("Working…")))
+                .into()
+        } else {
+            widget::button::suggested(tr("Apply"))
+                .on_press_maybe((changed && self.busy.is_none()).then_some(Message::DevApply))
+                .into()
+        };
+        let note: Element<'a, Message> = if state.brew {
+            widget::space::horizontal().width(Length::Fill).into()
+        } else {
+            text::caption(tr(
+                "Homebrew is not set up yet: only Podman Desktop can be installed now.",
+            ))
+            .width(Length::Fill)
+            .into()
+        };
+        section.add(
+            widget::row::with_capacity(2)
+                .spacing(space_s)
+                .align_y(Alignment::Center)
+                .push(note)
+                .push(apply)
+                .padding([space_xxs, space_s, space_s, space_s + 36]),
+        )
     }
 
     fn appearance(&self, state: &State) -> Element<'_, Message> {
@@ -646,4 +786,51 @@ impl Page {
             .push(settings_section)
             .into()
     }
+}
+
+/// Installs the developer tools ticked and removes the ones unticked, as
+/// the first steps tour installs them (devtools.rs): Homebrew for the user,
+/// Flathub for everyone. None: the password prompt was dismissed
+async fn apply_dev_tools(installed: BTreeSet<usize>, chosen: BTreeSet<usize>) -> Option<bool> {
+    let (mut formulas, mut casks, mut apps) = (Vec::new(), Vec::new(), Vec::new());
+    let (mut old_formulas, mut old_casks, mut old_apps) = (Vec::new(), Vec::new(), Vec::new());
+    for (i, tool) in dev_tools().enumerate() {
+        let add = chosen.contains(&i) && !installed.contains(&i);
+        let remove = !chosen.contains(&i) && installed.contains(&i);
+        if !add && !remove {
+            continue;
+        }
+        match tool.kind {
+            ToolKind::Formula(names) if add => formulas.extend(names),
+            ToolKind::Formula(names) => old_formulas.push(names[0]),
+            ToolKind::Cask(name, tap) if add => casks.push(devtools::cask_name(name, tap)),
+            ToolKind::Cask(name, tap) => old_casks.push(devtools::cask_name(name, tap)),
+            ToolKind::Flatpak(app) if add => apps.push(app.to_owned()),
+            ToolKind::Flatpak(app) => old_apps.push(app.to_owned()),
+        }
+    }
+    let mut ok = true;
+    if !formulas.is_empty() || !casks.is_empty() {
+        ok &= devtools::brew_install(formulas, casks).await;
+    }
+    if !old_formulas.is_empty() || !old_casks.is_empty() {
+        ok &= devtools::brew_remove(old_formulas, old_casks).await;
+    }
+    for (verb, apps) in [("install", apps), ("uninstall", old_apps)] {
+        if apps.is_empty() {
+            continue;
+        }
+        let mut args: Vec<String> = [verb, "--system", "--noninteractive", "-y"]
+            .map(str::to_owned)
+            .to_vec();
+        if verb == "install" {
+            args.push("flathub".to_owned());
+        }
+        args.extend(apps);
+        match run("flatpak", args).await {
+            Some(done) => ok &= done,
+            None => return None,
+        }
+    }
+    Some(ok)
 }
