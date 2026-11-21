@@ -47,7 +47,7 @@ All 5120x2880, in `system_files/usr/share/backgrounds/cosmic-blue/`:
   default COSMIC wallpaper and the greeter background
 - `cosmic-blue-deep-spiral.jpg`: a flat illustration, a calm night-blue field
   with a large tone-on-tone spiral and small round stars, offered in Settings
-- `cosmic-blue-eclipse.jpg`: a dark planet in front of its star, ringed with
+- `cosmic-blue-eclipse.jpg`: a deep blue planet in front of its star, ringed with
   blue light and soft rays, offered in Settings
 - `cosmic-blue-galaxy.jpg`: a tilted spiral galaxy, offered in Settings
 - `cosmic-blue-galactic-river.jpg`: a diagonal river of stars and gas, offered in

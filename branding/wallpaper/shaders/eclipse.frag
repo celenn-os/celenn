@@ -1,4 +1,4 @@
-// An eclipse: a dark planet in front of its star, a ring of blue light
+// An eclipse: a deep blue planet in front of its star, a ring of blue light
 // around it with long, soft rays, high on the left of a deep blue sky.
 void main() {
   vec2 frag = gl_FragCoord.xy, res = iResolution, p = (frag - .5 * res) / res.y;
@@ -20,8 +20,12 @@ void main() {
   float diamond = pow(max(0., dot(normalize(q), normalize(vec2(.7, -.7)))), 30.);
   col += ICE * rim * (.8 + 2. * diamond);
   col += HAZE * diamond * exp(-out_ / .02) * 1.2;
-  // the planet: dark, with a faint earthshine
+  // the planet: deep night blue, not black, lit faintly from the lower right
+  // by the ring of light, with soft clouds
   float body = smoothstep(pr + .001, pr - .001, r);
-  col = mix(col, INK * (.7 + .5 * fbm2(q * 18., 3)) + ABYSS * .15, body);
+  float shine = clamp(dot(q / pr, normalize(vec2(.7, -.7))), 0., 1.);
+  vec3 pc = mix(ABYSS, DEEP, .25 + .35 * shine * shine) * (.42 + .18 * fbm2(q * 9., 3));
+  pc += BRAND * .1 * pow(r / pr, 6.);
+  col = mix(col, pc, body);
   fragColor = finish(col, frag);
 }
