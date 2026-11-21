@@ -279,30 +279,30 @@ fn tick(now: &Now, elapsed: u64, applied: &mut Applied) {
             usage.today.seconds += elapsed;
             changed = true;
         }
-        if changed {
-            if let Err(error) = write_file(&parental_rules::usage_path(&user), &usage.to_json()) {
-                eprintln!("{user}: could not save the time used: {error}");
-            }
+        if changed
+            && let Err(error) = write_file(&parental_rules::usage_path(&user), &usage.to_json())
+        {
+            eprintln!("{user}: could not save the time used: {error}");
         }
 
         let extra = parental_rules::load_extra(&user);
         let verdict = parental_rules::verdict(&rules, usage.today.seconds, &extra, now);
-        if let Some(block) = verdict.blocked {
-            if !mine.is_empty() {
-                println!(
-                    "{user}: {}, closing the sessions {}",
-                    match block {
-                        Block::Limit => "screen time used up",
-                        Block::Bedtime => "bedtime",
-                    },
-                    mine.iter()
-                        .map(|s| s.id.as_str())
-                        .collect::<Vec<_>>()
-                        .join(" ")
-                );
-                if !run_quiet("loginctl", &["terminate-user", &user]) {
-                    eprintln!("{user}: could not close the sessions");
-                }
+        if let Some(block) = verdict.blocked
+            && !mine.is_empty()
+        {
+            println!(
+                "{user}: {}, closing the sessions {}",
+                match block {
+                    Block::Limit => "screen time used up",
+                    Block::Bedtime => "bedtime",
+                },
+                mine.iter()
+                    .map(|s| s.id.as_str())
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            );
+            if !run_quiet("loginctl", &["terminate-user", &user]) {
+                eprintln!("{user}: could not close the sessions");
             }
         }
     }

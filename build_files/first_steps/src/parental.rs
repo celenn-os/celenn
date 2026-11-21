@@ -462,8 +462,8 @@ fn notify(remaining: u64, end: &str) {
                 shown.1 = None;
             }
         }
-        if clicked.trim() == "more" {
-            if let Err(error) = std::process::Command::new("/proc/self/exe")
+        if clicked.trim() == "more"
+            && let Err(error) = std::process::Command::new("/proc/self/exe")
                 .arg("--more-time")
                 .spawn()
                 .or_else(|_| {
@@ -471,9 +471,8 @@ fn notify(remaining: u64, end: &str) {
                         .arg("--more-time")
                         .spawn()
                 })
-            {
-                eprintln!("Could not open the more time window: {error}");
-            }
+        {
+            eprintln!("Could not open the more time window: {error}");
         }
     });
 }
@@ -552,7 +551,7 @@ fn accounts() -> Vec<Account> {
             })
         })
         .collect();
-    accounts.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    accounts.sort_by_key(|a| a.name.to_lowercase());
     accounts
 }
 
@@ -1287,7 +1286,7 @@ impl App {
                                         let cosmic = theme.cosmic();
                                         cosmic::iced::widget::container::Style {
                                             background: Some(cosmic::iced::Color::from(cosmic.accent_color()).into()),
-                                            text_color: Some(cosmic::iced::Color::from(cosmic.accent.on).into()),
+                                            text_color: Some(cosmic::iced::Color::from(cosmic.accent.on)),
                                             border: cosmic::iced::Border {
                                                 radius: 10.0.into(),
                                                 ..Default::default()
