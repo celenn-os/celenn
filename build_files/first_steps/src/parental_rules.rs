@@ -323,9 +323,23 @@ pub fn verdict(rules: &Rules, used: u64, extra: &[(i64, u32)], now: &Now) -> Ver
         .filter(|(at, _)| *at >= day_start)
         .map(|(_, minutes)| u64::from(*minutes) * 60)
         .sum();
+    // "No limit today" (0 minutes) also lifts tonight's bedtime hours, until
+    // they end the next morning (or now, when granted during them)
+    let until_morning = |at: i64| {
+        let minute = minute_at(now, at);
+        let after = |from: u32, to: u32| i64::from((to + 24 * 60 - from) % (24 * 60)) * 60;
+        if !rules.bedtime_enabled || rules.bedtime_start == rules.bedtime_end {
+            at
+        } else if rules.is_bedtime(minute) {
+            at + after(minute, rules.bedtime_end)
+        } else {
+            let start = at + after(minute, rules.bedtime_start);
+            start + after(rules.bedtime_start, rules.bedtime_end)
+        }
+    };
     let override_until = extra
         .iter()
-        .map(|(at, minutes)| at + i64::from(*minutes) * 60)
+        .map(|(at, minutes)| if *minutes == 0 { until_morning(*at) } else { at + i64::from(*minutes) * 60 })
         .max()
         .filter(|until| *until > now.unix);
 
@@ -342,18 +356,18 @@ pub fn verdict(rules: &Rules, used: u64, extra: &[(i64, u32)], now: &Now) -> Ver
     let in_override = override_until.is_some();
     // Seconds before the bedtime starts (or before the extra time granted
     // during it ends)
+    // (the first bedtime moment once the time granted is over)
     let to_bedtime = if !rules.bedtime_enabled || rules.bedtime_start == rules.bedtime_end {
         None
-    } else if let Some(until) = override_until {
-        if bedtime_now || rules.is_bedtime(minute_at(now, until)) {
-            Some((until - now.unix) as u64)
-        } else {
-            Some(u64::from((rules.bedtime_start + 24 * 60 - now.minute) % (24 * 60)) * 60)
-        }
-    } else if bedtime_now {
-        Some(0)
     } else {
-        Some(u64::from((rules.bedtime_start + 24 * 60 - now.minute) % (24 * 60)) * 60)
+        let from = override_until.unwrap_or(now.unix);
+        let minute = minute_at(now, from);
+        let wait = if rules.is_bedtime(minute) {
+            0
+        } else {
+            u64::from((rules.bedtime_start + 24 * 60 - minute) % (24 * 60)) * 60
+        };
+        Some((from - now.unix) as u64 + wait)
     };
 
     let blocked = if bedtime_now && !in_override {
@@ -430,10 +444,39 @@ mod tests {
         assert_eq!((v.blocked, v.remaining, v.allowed_today), (None, None, None));
         let v = verdict(&rules, 300 * 60, &[(n.unix - 86400, 0)], &n);
         assert_eq!(v.blocked, Some(Block::Limit));
-        // Bedtime still applies
+    }
+
+    #[test]
+    fn no_limit_today() {
+        // Granted on Friday at 18:00 (bedtime 20:30 to 07:00)
         let rules = Rules::default();
-        let v = verdict(&rules, 300 * 60, &[(n.unix - 60, 0)], &now(21 * 60, 5));
+        let at = now(18 * 60, 5).unix;
+        let granted = [(at, 0)];
+        // Friday 21:00, all the time used: still on, no end tonight
+        let v = verdict(&rules, 300 * 60, &granted, &now(21 * 60, 5));
+        assert_eq!(v.blocked, None);
+        assert_eq!(v.allowed_today, None);
+        // Saturday 06:00 (the next morning): still on, then Saturday's own
+        // limit (3 h)
+        let mut n = now(6 * 60, 6);
+        n.unix = at + 12 * 3600;
+        let v = verdict(&rules, 0, &granted, &n);
+        assert_eq!(v.blocked, None);
+        assert_eq!(v.remaining, Some(3 * 3600));
+        // Saturday 21:00: bedtime again, and Saturday's limit again
+        let mut n = now(21 * 60, 6);
+        n.unix = at + 27 * 3600;
+        let v = verdict(&rules, 0, &granted, &n);
         assert_eq!(v.blocked, Some(Block::Bedtime));
+        let mut n = now(12 * 60, 6);
+        n.unix = at + 18 * 3600;
+        let v = verdict(&rules, 400 * 60, &granted, &n);
+        assert_eq!(v.blocked, Some(Block::Limit));
+        // Granted during bedtime (22:00): on, no limit today, and the next
+        // bedtime is Saturday's
+        let n = now(22 * 60, 5);
+        let v = verdict(&rules, 0, &[(n.unix, 0)], &n);
+        assert_eq!((v.blocked, v.remaining), (None, Some((22 * 60 + 30) * 60)));
     }
 
     #[test]

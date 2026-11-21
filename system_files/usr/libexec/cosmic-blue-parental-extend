@@ -3,7 +3,7 @@
 # from the child's session ("Ask for more time", run through pkexec: polkit
 # action io.github.cosmic_blue_os.parental.extend, asked every time).
 #
-#   cosmic-blue-parental-extend <user> 15|30|60|day (no limit for the rest of the day)
+#   cosmic-blue-parental-extend <user> 15|30|60|day (no limit for the rest of the day, bedtime included)
 #
 # The minutes add to today's limit and, given during bedtime or just before,
 # allow that long past it (see build_files/first_steps/src/parental_rules.rs).
@@ -28,7 +28,8 @@ now="$(date +%s)"
     if [[ -f "${file}" ]]; then
         awk -v since="$((now - 2 * 86400))" '$1 >= since' "${file}"
     fi
-    # 0 minutes: no screen time limit for the rest of the day
+    # 0 minutes: no screen time limit for the rest of the day, and no
+    # bedtime until it ends the next morning
     printf '%s %s\n' "${now}" "${2/day/0}"
 } > "${file}.tmp"
 chmod 0644 "${file}.tmp"
