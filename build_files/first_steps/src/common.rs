@@ -2,6 +2,7 @@
 // tours' banner with the page's icon, its title), the rows' text and
 // symbols, and running a command in the background.
 
+use crate::i18n::tr;
 use cosmic::iced::core::text::Wrapping;
 use cosmic::iced::{Alignment, Length};
 use cosmic::widget::{self, text};
@@ -51,6 +52,16 @@ pub fn header<'a, M: 'static>(
         .push(widget::space::vertical().height(space_xxs))
         .push(text::title2(title).center().width(Length::Fill))
         .push(widget::space::vertical().height(space_s))
+        .push_maybe((!is_admin()).then(|| {
+            // A child or a standard account: the changes that need root ask
+            // for someone else's password, said once at the top
+            dim_caption(tr(
+                "Some changes ask for the password of a parent or an administrator.",
+            ))
+            .center()
+            .width(Length::Fill)
+        }))
+        .push_maybe((!is_admin()).then(|| widget::space::vertical().height(space_xxs)))
         .push(content)
         .push(widget::space::vertical().height(space_s))
         .max_width(640.0)
@@ -60,6 +71,24 @@ pub fn header<'a, M: 'static>(
         .center_x(Length::Fill)
         .apply(widget::scrollable)
         .into()
+}
+
+/// Whether the account is an administrator (in the wheel group): its
+/// password is the one pkexec asks for
+pub fn is_admin() -> bool {
+    static ADMIN: OnceLock<bool> = OnceLock::new();
+    *ADMIN.get_or_init(|| {
+        std::process::Command::new("id")
+            .arg("-nG")
+            .output()
+            .map(|output| {
+                String::from_utf8_lossy(&output.stdout)
+                    .split_whitespace()
+                    .any(|group| group == "wheel")
+            })
+            // Unknown: no notice
+            .unwrap_or(true)
+    })
 }
 
 /// A translated text with its {} replaced
@@ -85,19 +114,22 @@ pub fn state_icon<'a, M: 'static>(name: &'static str, accent: bool) -> Element<'
     }
 }
 
-/// A row's text: a first line, and a caption under it
+pub use crate::style::{dim_caption, row_title};
+
+/// A row's text: a first line (usually its title, `row_title`), and a
+/// dimmed caption under it
 pub fn two_lines<'a, M: 'static>(first: Element<'a, M>, caption: String) -> Element<'a, M> {
     widget::column::with_capacity(2)
         .spacing(2)
         .push(first)
-        .push(text::caption(caption).wrapping(Wrapping::Word))
+        .push(dim_caption(caption).wrapping(Wrapping::Word))
         .width(Length::Fill)
         .into()
 }
 
 /// A row with its title and caption only (no first-line widget)
 pub fn label<'a, M: 'static>(title: &'static str, caption: String) -> Element<'a, M> {
-    two_lines(text::body(title).into(), caption)
+    two_lines(row_title(title).into(), caption)
 }
 
 /// Starts a program without waiting for it (a browser, another app)
