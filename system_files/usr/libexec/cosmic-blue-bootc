@@ -62,9 +62,16 @@ if ! check="$("${BOOTC}" upgrade --check 2>&1)"; then
     # Offline or registry error: let bootc report it
     run_bootc "$@"
 fi
-available="$(sed -n 's/^  Digest: //p' <<<"${check}" | head -n 1)"
+# The digest found, from bootc's status (JSON: the check caches it), else
+# from what the check printed
+available="$("${BOOTC}" status --json 2>/dev/null \
+    | jq -r '.status.booted.cachedUpdate.imageDigest // empty')" || available=""
+if [[ -z "${available}" ]]; then
+    available="$(sed -n 's/^  Digest: //p' <<<"${check}" | head -n 1)"
+fi
 if [[ "${available}" == "${held}" ]]; then
-    image="$(sed -n 's/^Update available for: //p' <<<"${check}" | head -n 1)"
+    image="$("${BOOTC}" status --json 2>/dev/null | jq -r '.spec.image.image // empty')" || image=""
+    [[ -n "${image}" ]] || image="$(sed -n 's/^Update available for: //p' <<<"${check}" | head -n 1)"
     # The words uupd looks for when it checks for an update
     echo "No changes in: ${image} (version ${version:-?} was set aside after going back to the previous one)"
     exit 0

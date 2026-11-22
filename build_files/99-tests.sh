@@ -108,6 +108,15 @@ test ! -e /usr/bin/chairlift-helper
 test ! -e /usr/libexec/bootc-update-stage
 # Dark theme by default (COSMIC and GTK)
 grep -qx true /usr/share/cosmic/com.system76.CosmicTheme.Mode/v1/is_dark
+# The settings the tour and Tools write (build_files/first_steps/src/system.rs,
+# more.rs) are in version 1 of COSMIC's config: a COSMIC that moves one of
+# them to a version 2 fails here, so that the apps are adapted with it
+for id in com.system76.CosmicTheme.Mode com.system76.CosmicBackground \
+    com.system76.CosmicPanel.Dock com.system76.CosmicComp; do
+    if compgen -G "/usr/share/cosmic/${id}/v[2-9]*" >/dev/null; then
+        echo "COSMIC has a new config version for ${id}: adapt the tour and Tools"; exit 1
+    fi
+done
 test "$(GSETTINGS_BACKEND=memory gsettings get org.gnome.desktop.interface color-scheme)" = "'prefer-dark'"
 # Dock: Firefox and Thunderbird are flatpaks (COSMIC's default lists the
 # Firefox RPM id "firefox"); the other favorites are installed apps
