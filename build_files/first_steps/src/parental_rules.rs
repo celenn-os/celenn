@@ -104,7 +104,13 @@ impl Rules {
             return None;
         }
         let text = std::fs::read_to_string(config_path(user)).ok()?;
-        Rules::from_json(&text)
+        // A rules file that cannot be read (only root writes it, checked)
+        // gets the default rules rather than none: a damaged file must not
+        // lift every limit
+        Some(Rules::from_json(&text).unwrap_or_else(|| {
+            eprintln!("A rules file was not understood: default rules applied");
+            Rules::default()
+        }))
     }
 
     /// Minutes allowed on a day (1 = Monday ... 7 = Sunday)
@@ -259,7 +265,7 @@ impl Usage {
 
     /// Starts a new day when the date changed; true when it did
     pub fn roll(&mut self, now: &Now) -> bool {
-        if self.today.date == now.date {
+        if self.today.date == now.date || self.clock_went_back(now) {
             return false;
         }
         if !self.today.date.is_empty() {
@@ -278,14 +284,41 @@ impl Usage {
         true
     }
 
+    /// The date is one day before the day being counted: the time zone (or
+    /// the clock) moved back over midnight. That day goes on, so that
+    /// changing the time zone does not start a new day with nothing used.
+    /// (Further back: a clock that was wrong, the days start again.)
+    fn clock_went_back(&self, now: &Now) -> bool {
+        match (day_number(&self.today.date), day_number(&now.date)) {
+            (Some(counted), Some(today)) => counted - today == 1,
+            _ => false,
+        }
+    }
+
     /// Seconds used today (0 when the file is from another day)
     pub fn used_today(&self, now: &Now) -> u64 {
-        if self.today.date == now.date {
+        if self.today.date == now.date || self.clock_went_back(now) {
             self.today.seconds
         } else {
             0
         }
     }
+}
+
+/// Days since 1970-01-01 of a "2026-11-21" date
+fn day_number(date: &str) -> Option<i64> {
+    let mut parts = date.splitn(3, '-').map(|part| part.parse::<i64>().ok());
+    let (y, m, d) = (parts.next()??, parts.next()??, parts.next()??);
+    if !(1..=12).contains(&m) || !(1..=31).contains(&d) {
+        return None;
+    }
+    // Howard Hinnant's days_from_civil
+    let y = if m <= 2 { y - 1 } else { y };
+    let era = y.div_euclid(400);
+    let yoe = y - era * 400;
+    let doy = (153 * (m + if m > 2 { -3 } else { 9 }) + 2) / 5 + d - 1;
+    let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    Some(era * 146_097 + doe - 719_468)
 }
 
 /// More time granted by a parent: (unix time of the grant, minutes)
@@ -529,6 +562,28 @@ mod tests {
     }
 
     #[test]
+    fn time_zone_moved_back() {
+        let day = |date: &str| Now {
+            date: date.into(),
+            minute: 0,
+            weekday: 6,
+            unix: 0,
+        };
+        let mut usage = Usage::default();
+        usage.roll(&day("2026-11-21"));
+        usage.today.seconds = 3600;
+        // Back over midnight (another time zone): the same day goes on
+        assert!(!usage.roll(&day("2026-11-20")));
+        assert_eq!(usage.used_today(&day("2026-11-20")), 3600);
+        // The next day starts as usual
+        assert!(usage.roll(&day("2026-11-22")));
+        assert_eq!(usage.used_today(&day("2026-11-22")), 0);
+        // Far back (a clock that was wrong): the days start again
+        assert!(usage.roll(&day("2026-11-01")));
+        assert_eq!(usage.today.seconds, 0);
+    }
+
+    #[test]
     fn json() {
         let rules = Rules::default();
         assert_eq!(Rules::from_json(&rules.to_json()), Some(rules));
@@ -546,6 +601,17 @@ mod tests {
         assert_eq!(usage.history.len(), HISTORY_DAYS - 1);
         assert_eq!(Usage::from_json(&usage.to_json()), usage);
         assert!(valid_user("lea"));
+        assert_eq!(day_number("1970-01-01"), Some(0));
+        assert_eq!(
+            day_number("2026-03-01"),
+            day_number("2026-02-28").map(|d| d + 1)
+        );
+        assert_eq!(
+            day_number("2024-03-01"),
+            day_number("2024-02-28").map(|d| d + 2)
+        );
+        assert_eq!(day_number("2026-11-21"), Some(20_778));
+        assert_eq!(day_number("nonsense"), None);
         assert!(!valid_user("../etc"));
         assert!(!valid_user("Lea"));
     }

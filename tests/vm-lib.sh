@@ -651,6 +651,37 @@ except socket.gaierror as error:
         echo "Google for the child: $(vm "runuser -u ${PARENTAL_CHILD} -- getent ahostsv4 www.google.com" 2>&1 | head -n 1)"
     fi
 
+    # What would go around the filter is refused to the child: DNS to another
+    # server, DNS over HTTPS to a public resolver, a VPN port, and
+    # systemd-resolved's D-Bus lookups. A refusal answers at once (nftables
+    # reject), unlike a network that is down.
+    local probe target host port
+    for target in "8.8.8.8 53 DNS to another server" "1.1.1.1 443 DNS over HTTPS" "9.9.9.9 1194 OpenVPN"; do
+        read -r host port _ <<<"${target}"
+        probe="$(vm "runuser -u ${PARENTAL_CHILD} -- python3 -c 'import socket
+s = socket.socket()
+s.settimeout(10)
+try:
+    s.connect((\"${host}\", ${port}))
+    print(\"open\")
+except ConnectionRefusedError:
+    print(\"refused\")
+except OSError as error:
+    print(error)'" 2>&1)" || true
+        echo "${target#* * } for the child: ${probe}"
+        [[ "${probe}" == refused ]] || problem "${target#* * } is not refused to the child (${probe})"
+    done
+    vm "id -nG ${PARENTAL_CHILD}" | grep -qw cosmic-blue-children \
+        || problem "the child account is not in the cosmic-blue-children group"
+    probe="$(vm "runuser -u ${PARENTAL_CHILD} -- busctl call org.freedesktop.resolve1 /org/freedesktop/resolve1 \
+        org.freedesktop.resolve1.Manager ResolveHostname isit 0 example.com 0 0" 2>&1)" && probe="answered: ${probe}"
+    echo "systemd-resolved over D-Bus for the child: ${probe}"
+    grep -qi 'access denied' <<<"${probe}" \
+        || problem "systemd-resolved answers the child over D-Bus (${probe})"
+    if vm "journalctl -b --no-pager -u polkit -g 'cosmic-blue-parental'" | grep -qi error; then
+        problem "polkit could not load 10-cosmic-blue-parental.rules"
+    fi
+
     # Unlock the test user's session (locked by the tour)
     vm 'loginctl unlock-sessions' || true
     sleep 5

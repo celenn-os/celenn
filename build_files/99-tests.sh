@@ -608,6 +608,12 @@ if /usr/libexec/cosmic-blue-parental-extend root 600 2>/dev/null; then
     echo "cosmic-blue-parental-extend accepted 600 minutes"; exit 1
 fi
 test ! -e /etc/cosmic-blue/parental-controls
+# The child accounts' group and what it restricts: polkit (no VPN of their
+# own, no time zone change) and D-Bus (no lookups around the filter)
+grep -qx 'g cosmic-blue-children -' /usr/lib/sysusers.d/cosmic-blue-parental.conf
+grep -q 'isInGroup("cosmic-blue-children")' /usr/share/polkit-1/rules.d/10-cosmic-blue-parental.rules
+python3 -c "import xml.dom.minidom, sys; xml.dom.minidom.parse(sys.argv[1])" \
+    /usr/share/dbus-1/system.d/cosmic-blue-parental.conf
 
 # Login and lock screens: our rebuild, with the cosmic-blue wallpaper as the
 # background shown before a user has a saved one
