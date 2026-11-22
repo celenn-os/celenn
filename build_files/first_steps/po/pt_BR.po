@@ -679,3 +679,36 @@ msgstr "Abrir o relatório"
 
 msgid "Cancel"
 msgstr "Cancelar"
+
+msgid "Install"
+msgstr "Instalar"
+
+msgid "Working…"
+msgstr "Em andamento…"
+
+msgid "Synced with my phone"
+msgstr "Sincronizadas com meu celular"
+
+msgid "Bitwarden: on this computer, your phone and in Firefox. Free account, everything is encrypted before it leaves the computer."
+msgstr "Bitwarden: neste computador, no seu celular e no Firefox. Conta gratuita, tudo é criptografado antes de sair do computador."
+
+msgid "Installed. Open it to create your account, then install Bitwarden on your phone."
+msgstr "Instalado. Abra-o para criar sua conta e depois instale o Bitwarden no seu celular."
+
+msgid "Only on this computer"
+msgstr "Só neste computador"
+
+msgid "Secrets: an encrypted file in your home folder, no account and no internet. KeePassXC opens it too."
+msgstr "Secrets: um arquivo criptografado na sua pasta pessoal, sem conta e sem internet. O KeePassXC também o abre."
+
+msgid "Installed. Open it to create your password file, and keep a copy of it on a USB drive."
+msgstr "Instalado. Abra-o para criar seu arquivo de senhas e guarde uma cópia dele em um pendrive."
+
+msgid "Your passwords"
+msgstr "Suas senhas"
+
+msgid "A password manager remembers them for you and makes up strong ones. Where do you want to keep them?"
+msgstr "Um gerenciador de senhas lembra delas por você e cria senhas fortes. Onde você quer guardá-las?"
+
+msgid "Not now? Go on: Firefox already remembers the passwords of websites, and cosmic-blue Tools offers these apps too."
+msgstr "Agora não? Siga em frente: o Firefox já lembra as senhas dos sites, e as Ferramentas do cosmic-blue também oferecem estes aplicativos."

@@ -9,7 +9,8 @@
 //                  its driver key (Tools helper, as `ujust
 //                  enroll-secure-boot-key`), restarting into the firmware
 //                  settings (reboot-to-bios)
-//   Extra software Microsoft fonts, Steam and Heroic, virtual machines,
+//   Extra software Microsoft fonts, Steam and Heroic, a password manager,
+//                  virtual machines,
 //                  the FlatPark app source, developer tools (ticked in a
 //                  list, installed as the first steps tour does:
 //                  devtools.rs)
@@ -82,6 +83,11 @@ pub const TEXTS: &[&str] = &[
     "Windows games",
     "And also",
     "Your game apps are ready.",
+    "Passwords",
+    "Bitwarden to sync them with your phone, Secrets or KeePassXC to keep them on this computer. Tick the ones you want, untick the ones to remove.",
+    "Synced",
+    "On this computer",
+    "Your password manager is ready.",
     "Virtual machines",
     "virt-manager, to run Windows or another Linux in a window.",
     "FlatPark",
@@ -175,11 +181,37 @@ const GAMES: &[(&str, &[DevTool])] = &[
     ),
 ];
 
+/// The password managers, from Flathub: the ones of the first steps tour's
+/// "Your passwords" page (main.rs), and KeePassXC
+const VAULT_APPS: &[(&str, &[DevTool])] = &[
+    (
+        "Synced",
+        &[DevTool {
+            name: "Bitwarden",
+            kind: ToolKind::Flatpak(devtools::BITWARDEN),
+        }],
+    ),
+    (
+        "On this computer",
+        &[
+            DevTool {
+                name: "Secrets",
+                kind: ToolKind::Flatpak("org.gnome.World.Secrets"),
+            },
+            DevTool {
+                name: "KeePassXC",
+                kind: ToolKind::Flatpak("org.keepassxc.KeePassXC"),
+            },
+        ],
+    ),
+];
+
 /// The lists of apps picked with checkboxes
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum List {
     Dev = 0,
     Games = 1,
+    Vault = 2,
 }
 
 impl List {
@@ -187,6 +219,7 @@ impl List {
         match self {
             List::Dev => DEV_TOOLS,
             List::Games => GAMES,
+            List::Vault => VAULT_APPS,
         }
     }
 
@@ -198,6 +231,7 @@ impl List {
         match self {
             List::Dev => "Developer tools",
             List::Games => "Games",
+            List::Vault => "Passwords",
         }
     }
 
@@ -205,6 +239,7 @@ impl List {
         match self {
             List::Dev => "The developer tools are ready.",
             List::Games => "Your game apps are ready.",
+            List::Vault => "Your password manager is ready.",
         }
     }
 }
@@ -234,7 +269,7 @@ pub struct State {
     bottom_bar: bool,
     dock_visible: bool,
     /// The apps of each list installed (numbers of List::tools())
-    installed: [BTreeSet<usize>; 2],
+    installed: [BTreeSet<usize>; 3],
     brew: bool,
 }
 
@@ -381,8 +416,8 @@ pub struct Page {
     busy: Option<Job>,
     asking: Option<Job>,
     /// The lists shown, the apps ticked in them, the list being applied
-    open: [bool; 2],
-    chosen: [BTreeSet<usize>; 2],
+    open: [bool; 3],
+    chosen: [BTreeSet<usize>; 3],
     applying: Option<List>,
     /// What did not work, until closed or done again
     card: Option<Card<Retry>>,
@@ -499,10 +534,10 @@ pub fn read_state() -> State {
         dark: dark(),
         bottom_bar: crate::layout::bottom_bar(),
         dock_visible: crate::layout::dock_always_visible(),
-        installed: [List::Dev, List::Games].map(|list| {
+        installed: [List::Dev, List::Games, List::Vault].map(|list| {
             let mut installed = match list {
                 List::Dev => devtools::brew_installed(),
-                List::Games => BTreeSet::new(),
+                List::Games | List::Vault => BTreeSet::new(),
             };
             installed.extend(
                 list.tools()
@@ -535,7 +570,7 @@ impl Page {
             state: None,
             busy: None,
             asking: None,
-            open: [false; 2],
+            open: [false; 3],
             chosen: Default::default(),
             applying: None,
             card: None,
@@ -648,7 +683,23 @@ impl Page {
                         Task::none()
                     }
                     Some(Ok(())) => {
-                        self.open[list as usize] = false;
+                        let n = list as usize;
+                        self.open[n] = false;
+                        // Bitwarden just installed: its Firefox extension
+                        // too (devtools.rs)
+                        if list == List::Vault
+                            && let Some(state) = &self.state
+                        {
+                            let bitwarden = list.tools().position(|tool| {
+                                tool.kind == ToolKind::Flatpak(devtools::BITWARDEN)
+                            });
+                            if bitwarden.is_some_and(|i| {
+                                self.chosen[n].contains(&i) && !state.installed[n].contains(&i)
+                            }) {
+                                let command = devtools::BITWARDEN_EXTENSION;
+                                spawn(command[0], &command[1..]);
+                            }
+                        }
                         self.toast(list.done())
                     }
                 };
@@ -880,6 +931,14 @@ impl Page {
             "Games",
             "Steam, Heroic, Lutris… Tick the ones you want, untick the ones to remove. Your games and saves stay.",
         );
+        section = self.list(
+            state,
+            section,
+            List::Vault,
+            "dialog-password-symbolic",
+            "Passwords",
+            "Bitwarden to sync them with your phone, Secrets or KeePassXC to keep them on this computer. Tick the ones you want, untick the ones to remove.",
+        );
         section = section
             .add(self.row(
                 "computer-symbolic",
@@ -1001,7 +1060,7 @@ impl Page {
                 )
                 .into()
         };
-        let note: Element<'a, Message> = if state.brew || list == List::Games {
+        let note: Element<'a, Message> = if state.brew || list != List::Dev {
             widget::space::horizontal().width(Length::Fill).into()
         } else {
             text::caption(tr(

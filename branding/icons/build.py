@@ -400,8 +400,16 @@ TOUR_ACCESSIBILITY = tela_app(
     '<path d="M19 26.5l13 2 13-2M32 28.5v8M32 36.5l-6 11M32 36.5l6 11" fill="none" stroke="#fff" '
     'stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>'
 )
+# Your passwords: a password field (four dots on translucent white) and a key
+TOUR_PASSWORDS = tela_app(
+    '<rect x="13" y="16" width="38" height="15" rx="4" fill="#fff" opacity=".45"/>'
+    + "".join(f'<circle cx="{x}" cy="23.5" r="2.3" fill="#fff"/>' for x in (20, 27, 34, 41))
+    + '<path d="M24 33a8 8 0 1 1 0 16a8 8 0 0 1 0-16zm0 5a3 3 0 1 0 0 6a3 3 0 0 0 0-6z'
+    'M31 39.3h17v4.4h-3v4h-4v-4h-2.5v3h-4v-3H31z" fill="#fff" fill-rule="evenodd"/>'
+)
 TOUR_ICONS = {
     "cosmic-blue-tour-accessibility": TOUR_ACCESSIBILITY,
+    "cosmic-blue-tour-passwords": TOUR_PASSWORDS,
     "cosmic-blue-tour-computer": TOUR_COMPUTER,
     "cosmic-blue-tour-keyboard": TOUR_KEYBOARD,
     "cosmic-blue-tour-bearings": TOUR_BEARINGS,
