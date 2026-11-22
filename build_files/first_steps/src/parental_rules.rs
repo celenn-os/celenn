@@ -108,7 +108,7 @@ impl Rules {
         // gets the default rules rather than none: a damaged file must not
         // lift every limit
         Some(Rules::from_json(&text).unwrap_or_else(|| {
-            eprintln!("{user}: rules not understood, default rules applied");
+            eprintln!("A rules file was not understood: default rules applied");
             Rules::default()
         }))
     }
