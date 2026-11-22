@@ -746,7 +746,12 @@ impl Page {
         }
         actions = actions
             .push(widget::button::standard(tr("Cancel")).on_press(Message::Cancel))
-            .push(widget::button::suggested(tr(job.confirm())).on_press(Message::Run(job)));
+            .push(if job == Job::ResetConfig {
+                // Settings lost (a copy kept): the warning style
+                widget::button::destructive(tr(job.confirm())).on_press(Message::Run(job))
+            } else {
+                widget::button::suggested(tr(job.confirm())).on_press(Message::Run(job))
+            });
         widget::column::with_capacity(2)
             .push(main)
             .push(widget::container(actions).padding([0, space_s, space_s, space_s + 36]))

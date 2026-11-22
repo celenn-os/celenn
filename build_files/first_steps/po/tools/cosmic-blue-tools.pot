@@ -337,7 +337,6 @@ msgstr ""
 msgid "Developer tools"
 msgstr ""
 
-
 msgid "Every COSMIC setting goes back to the defaults. A copy is kept in your settings folder."
 msgstr ""
 
@@ -398,7 +397,6 @@ msgstr ""
 msgid "NVIDIA graphics card"
 msgstr ""
 
-
 msgid "Read it"
 msgstr ""
 
@@ -425,7 +423,6 @@ msgstr ""
 
 msgid "Saved in your home folder."
 msgstr ""
-
 
 msgid "Switch"
 msgstr ""
@@ -545,4 +542,7 @@ msgid "Try again"
 msgstr ""
 
 msgid "“{}” did not work"
+msgstr ""
+
+msgid "Some changes ask for the password of a parent or an administrator."
 msgstr ""

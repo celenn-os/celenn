@@ -339,7 +339,6 @@ msgstr "Tema escuro"
 msgid "Developer tools"
 msgstr "Ferramentas de desenvolvimento"
 
-
 msgid "Every COSMIC setting goes back to the defaults. A copy is kept in your settings folder."
 msgstr "Todas as configurações do COSMIC voltam ao padrão. Uma cópia fica na sua pasta de configurações."
 
@@ -400,7 +399,6 @@ msgstr "Mais nas Configurações"
 msgid "NVIDIA graphics card"
 msgstr "Placa de vídeo NVIDIA"
 
-
 msgid "Read it"
 msgstr "Ler"
 
@@ -427,7 +425,6 @@ msgstr "Salvar minhas configurações"
 
 msgid "Saved in your home folder."
 msgstr "Salvo na sua pasta pessoal."
-
 
 msgid "Switch"
 msgstr "Trocar"
@@ -548,3 +545,6 @@ msgstr "Tentar de novo"
 
 msgid "“{}” did not work"
 msgstr "“{}” não funcionou"
+
+msgid "Some changes ask for the password of a parent or an administrator."
+msgstr "Algumas mudanças pedem a senha de um responsável ou de um administrador."

@@ -47,6 +47,7 @@ mod i18n;
 mod layout;
 mod maintenance;
 mod more;
+mod style;
 mod update_progress;
 mod updates_page;
 use i18n::tr;
@@ -63,7 +64,10 @@ pub(crate) const PO_DIR: &str = "po/tools";
 pub(crate) const TEMPLATE_NAME: &str = "cosmic-blue-tools.pot";
 
 /// The window's own texts; each page lists its own
-const TEXTS: &[&str] = &["cosmic-blue Tools"];
+const TEXTS: &[&str] = &[
+    "cosmic-blue Tools",
+    "Some changes ask for the password of a parent or an administrator.",
+];
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum PageId {
@@ -171,11 +175,9 @@ impl Application for App {
         core.nav_bar_set_toggled(true);
         let mut nav = nav_bar::Model::default();
         for (id, name, icon) in [
-            (
-                PageId::Updates,
-                "Updates",
-                "software-update-available-symbolic",
-            ),
+            // (circling arrows, like the page's own icon: the usual
+            // update symbol looks like the Settings gear in the icon theme)
+            (PageId::Updates, "Updates", "view-refresh-symbolic"),
             (
                 PageId::Maintenance,
                 "Maintenance",

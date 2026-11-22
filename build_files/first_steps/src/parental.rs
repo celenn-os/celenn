@@ -41,6 +41,7 @@ mod failure;
 mod i18n;
 mod parental_apps;
 mod parental_rules;
+mod style;
 use failure::{Card, CardAction, CardMessage, Outcome};
 use i18n::tr;
 use parental_rules::{Now, Rules, Usage};
@@ -1142,8 +1143,8 @@ fn frame<'a>(
 fn two_lines<'a>(first: impl Into<String>, caption: String) -> Element<'a, Message> {
     widget::column::with_capacity(2)
         .spacing(2)
-        .push(text::body(first.into()))
-        .push(text::caption(caption).wrapping(Wrapping::Word))
+        .push(style::row_title(first.into()))
+        .push(style::dim_caption(caption).wrapping(Wrapping::Word))
         .width(Length::Fill)
         .into()
 }
@@ -1237,8 +1238,8 @@ impl App {
                 let (caption, gauge) = today(account);
                 let mut lines = widget::column::with_capacity(3)
                     .spacing(2)
-                    .push(text::body(account.name.clone()))
-                    .push(text::caption(caption))
+                    .push(style::row_title(account.name.clone()))
+                    .push(style::dim_caption(caption))
                     .width(Length::Fill);
                 if let Some(gauge) = gauge {
                     lines = lines.push(widget::space::vertical().height(4)).push(
@@ -1411,7 +1412,7 @@ impl App {
                         widget::row::with_capacity(2)
                             .spacing(space_s)
                             .align_y(Alignment::Center)
-                            .push(text::body(tr("Block unsuitable websites")))
+                            .push(style::row_title(tr("Block unsuitable websites")))
                             .push(
                                 text::caption(tr("Recommended"))
                                     .apply(widget::container)
@@ -1431,7 +1432,7 @@ impl App {
                             ),
                     )
                     .push(
-                        text::caption(tr("Adult content, gambling and malicious sites, in every browser. Safe search is forced. Uses the CleanBrowsing family filter."))
+                        style::dim_caption(tr("Adult content, gambling and malicious sites, in every browser. Safe search is forced. Uses the CleanBrowsing family filter."))
                             .wrapping(Wrapping::Word),
                     )
                     .width(Length::Fill)

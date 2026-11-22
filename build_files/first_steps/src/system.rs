@@ -110,15 +110,51 @@ pub fn current_wallpaper() -> Option<PathBuf> {
     Some(PathBuf::from(&all[start..end]))
 }
 
-/// The same wallpaper on every screen, zoomed to fill it (cosmic-blue's
-/// default setting, /usr/share/cosmic/com.system76.CosmicBackground)
+/// The same wallpaper on every screen. Only the picture of the current
+/// setting (the person's, else cosmic-blue's default,
+/// /usr/share/cosmic/com.system76.CosmicBackground) changes: the other
+/// fields, including any a new COSMIC adds, stay as they are.
 pub fn set_wallpaper(path: &Path) -> bool {
-    let value = format!(
-        "(\n    output: \"all\",\n    source: Path({:?}),\n    filter_by_theme: true,\n    rotation_frequency: 300,\n    filter_method: Lanczos,\n    scaling_mode: Zoom,\n    sampling_method: Alphanumeric,\n)",
-        path.to_string_lossy()
-    );
     let id = "com.system76.CosmicBackground";
+    let source = format!("Path({:?})", path.to_string_lossy());
+    let value = cosmic_read(id, "all")
+        .and_then(|entry| with_source(&entry, &source))
+        .unwrap_or_else(|| {
+            format!(
+                "(\n    output: \"all\",\n    source: {source},\n    filter_by_theme: true,\n    rotation_frequency: 300,\n    filter_method: Lanczos,\n    scaling_mode: Zoom,\n    sampling_method: Alphanumeric,\n)"
+            )
+        });
     cosmic_write(id, "same-on-all", "true") && cosmic_write(id, "all", &value)
+}
+
+/// A background entry (RON) with its `source` replaced: None when it has
+/// no `source: Path("...")` field
+fn with_source(entry: &str, source: &str) -> Option<String> {
+    let start = entry.find("source:")? + "source:".len();
+    let rest = &entry[start..];
+    let value_start = start + (rest.len() - rest.trim_start().len());
+    let value = &entry[value_start..];
+    if !value.starts_with("Path(\"") {
+        return None;
+    }
+    // The end of the quoted path (escaped quotes skipped), then ")"
+    let mut escaped = false;
+    let mut end = None;
+    for (i, c) in value.char_indices().skip("Path(\"".len()) {
+        match c {
+            _ if escaped => escaped = false,
+            '\\' => escaped = true,
+            '"' => {
+                end = Some(i);
+                break;
+            }
+            _ => {}
+        }
+    }
+    let end = end?;
+    value[end + 1..]
+        .starts_with(')')
+        .then(|| format!("{}{}{}", &entry[..value_start], source, &value[end + 2..]))
 }
 
 /// cosmic-blue's avatars (512 x 512 PNG), sorted by name. Links are left out:
@@ -546,6 +582,28 @@ pub fn search_term(path: &Path) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn wallpaper_entry() {
+        let entry =
+            "(\n    output: \"all\",\n    source: Path(\"/a/b.jpg\"),\n    new_field: 3,\n)";
+        assert_eq!(
+            with_source(entry, "Path(\"/c d.jpg\")").as_deref(),
+            Some("(\n    output: \"all\",\n    source: Path(\"/c d.jpg\"),\n    new_field: 3,\n)")
+        );
+        assert_eq!(
+            with_source("(source: Color(Single([0.0, 0.0, 0.0])))", "x"),
+            None
+        );
+        assert_eq!(with_source("(output: \"all\")", "x"), None);
+        assert!(
+            with_source(
+                "(source: Path(\"/q\\\"uote.jpg\"), x: 1)",
+                "Path(\"/n.jpg\")"
+            )
+            .is_some_and(|e| e == "(source: Path(\"/n.jpg\"), x: 1)")
+        );
+    }
 
     #[test]
     fn search_terms() {
