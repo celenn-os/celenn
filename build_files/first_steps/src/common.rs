@@ -108,6 +108,13 @@ pub fn label<'a, M: 'static>(title: &'static str, caption: String) -> Element<'a
     two_lines(row_title(title).into(), caption)
 }
 
+/// What the image's screenshot test asks a page to show at once, from
+/// COSMIC_BLUE_TOOLS_PREVIEW (tests/vm-lib.sh): "failure" (a failure card on
+/// Maintenance) or "developer-tools" (the list open on Extra software)
+pub fn preview(what: &str) -> bool {
+    std::env::var("COSMIC_BLUE_TOOLS_PREVIEW").is_ok_and(|value| value == what)
+}
+
 /// Starts a program without waiting for it (a browser, another app)
 pub fn spawn(program: &str, args: &[&str]) {
     if let Err(error) = std::process::Command::new(program).args(args).spawn() {

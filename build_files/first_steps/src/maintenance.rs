@@ -254,7 +254,17 @@ impl Page {
             state: None,
             busy: None,
             free_before: None,
-            card: None,
+            // A failure as the screenshot test shows it
+            card: crate::common::preview("failure").then(|| {
+                Card::new(
+                    tr("Clean up"),
+                    failure::Failure {
+                        cause: failure::Cause::Offline,
+                        details: "error: Could not resolve hostname\nExit status: 1".to_owned(),
+                    },
+                    Busy::Cleaning,
+                )
+            }),
             toasts: Toasts::new(Message::CloseToast),
         };
         (page, refresh())

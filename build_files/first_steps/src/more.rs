@@ -424,6 +424,8 @@ pub struct Page {
     asking: Option<Job>,
     /// The lists shown, the apps ticked in them, the list being applied
     open: [bool; 3],
+    /// A list to open once the state is read (screenshot test)
+    preview_list: Option<List>,
     chosen: [BTreeSet<usize>; 3],
     applying: Option<List>,
     /// What did not work, until closed or done again
@@ -582,6 +584,7 @@ impl Page {
             applying: None,
             card: None,
             toasts: Toasts::new(Message::CloseToast),
+            preview_list: crate::common::preview("developer-tools").then_some(List::Dev),
         };
         (page, refresh())
     }
@@ -605,7 +608,12 @@ impl Page {
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
-            Message::State(state) => self.state = Some(state),
+            Message::State(state) => {
+                self.state = Some(state);
+                if let Some(list) = self.preview_list.take() {
+                    return self.update(Message::ListOpen(list));
+                }
+            }
             Message::Ask(job) => {
                 if job.question().is_some() {
                     self.asking = Some(job);
