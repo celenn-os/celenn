@@ -1,6 +1,8 @@
 // cosmic-blue Tools: what people would otherwise do with commands (`ujust`,
 // bootc...), as buttons, in one window with a sidebar like COSMIC Settings.
 //
+//   Overview      where things stand, in four cards, and a search through
+//                 every setting (overview.rs; the window's first page)
 //   Updates       the system version, check now, go back, channel
 //                 (updates_page.rs; the Updates launcher opens this page)
 //   Maintenance   disk space and cleaning up, the apps that come with
@@ -19,7 +21,7 @@
 // for when people want to look or act. The one notification is a disk almost
 // full (housekeeping.rs), which people have to act on.
 //
-//   cosmic-blue-tools               the window, on its first page
+//   cosmic-blue-tools               the window, on Overview
 //   cosmic-blue-tools --updates     the window, on Updates (also when run as
 //                                   /usr/libexec/cosmic-blue-updates)
 //   cosmic-blue-tools --maintenance / --computer / --software /
@@ -47,6 +49,7 @@ mod i18n;
 mod layout;
 mod maintenance;
 mod more;
+mod overview;
 mod style;
 mod update_progress;
 mod updates_page;
@@ -71,6 +74,7 @@ const TEXTS: &[&str] = &[
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum PageId {
+    Overview,
     Updates,
     Maintenance,
     Computer,
@@ -92,6 +96,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             help::TEXTS,
             housekeeping::TEXTS,
             failure::TEXTS,
+            overview::TEXTS,
         ]
         .concat();
         let mut sorted = texts.clone();
@@ -122,7 +127,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     } else if options.iter().any(|arg| arg == "--help-page") {
         PageId::Help
     } else {
-        PageId::Updates
+        PageId::Overview
     };
     let settings = Settings::default()
         .size(cosmic::iced::Size::new(1000.0, 760.0))
@@ -133,6 +138,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 #[derive(Clone, Debug)]
 pub enum Message {
+    Overview(overview::Message),
     Updates(updates_page::Message),
     Maintenance(maintenance::Message),
     More(more::Message),
@@ -142,6 +148,7 @@ pub enum Message {
 struct App {
     core: Core,
     nav: nav_bar::Model,
+    overview: overview::Page,
     updates: updates_page::Page,
     maintenance: maintenance::Page,
     more: more::Page,
@@ -149,11 +156,20 @@ struct App {
 }
 
 impl App {
+    /// A page was opened: the Overview reads its facts again
+    fn shown(&mut self) -> Task<Message> {
+        if self.page() == PageId::Overview {
+            overview::refresh().map(|action| action.map(Message::Overview))
+        } else {
+            Task::none()
+        }
+    }
+
     fn page(&self) -> PageId {
         self.nav
             .active_data::<PageId>()
             .copied()
-            .unwrap_or(PageId::Updates)
+            .unwrap_or(PageId::Overview)
     }
 }
 
@@ -174,45 +190,30 @@ impl Application for App {
     fn init(mut core: Core, first: PageId) -> (Self, Task<Message>) {
         core.nav_bar_set_toggled(true);
         let mut nav = nav_bar::Model::default();
-        for (id, name, icon) in [
+        for (id, icon) in [
             // The glyph of each page's icon (branding/icons/build.py,
             // TOOLS_SYMBOLIC), so that the sidebar matches the pages
-            (
-                PageId::Updates,
-                "Updates",
-                "cosmic-blue-tools-updates-symbolic",
-            ),
+            (PageId::Overview, "cosmic-blue-tools-overview-symbolic"),
+            (PageId::Updates, "cosmic-blue-tools-updates-symbolic"),
             (
                 PageId::Maintenance,
-                "Maintenance",
                 "cosmic-blue-tools-maintenance-symbolic",
             ),
-            (
-                PageId::Computer,
-                "Computer",
-                "cosmic-blue-tools-computer-symbolic",
-            ),
-            (
-                PageId::Software,
-                "Extra software",
-                "cosmic-blue-tools-software-symbolic",
-            ),
-            (
-                PageId::Appearance,
-                "Appearance",
-                "cosmic-blue-tools-appearance-symbolic",
-            ),
-            (PageId::Help, "Help", "cosmic-blue-tools-help-symbolic"),
+            (PageId::Computer, "cosmic-blue-tools-computer-symbolic"),
+            (PageId::Software, "cosmic-blue-tools-software-symbolic"),
+            (PageId::Appearance, "cosmic-blue-tools-appearance-symbolic"),
+            (PageId::Help, "cosmic-blue-tools-help-symbolic"),
         ] {
             let entity = nav
                 .insert()
-                .text(tr(name))
+                .text(tr(overview::page_name(id)))
                 .icon(cosmic::widget::icon::from_name(icon))
                 .data(id);
             if id == first {
                 entity.activate();
             }
         }
+        let (overview, overview_task) = overview::Page::new();
         let (updates, updates_task) = updates_page::Page::new();
         let (maintenance, maintenance_task) = maintenance::Page::new();
         let (more, more_task) = more::Page::new();
@@ -220,6 +221,7 @@ impl Application for App {
         let mut app = App {
             core,
             nav,
+            overview,
             updates,
             maintenance,
             more,
@@ -233,6 +235,7 @@ impl Application for App {
             app,
             Task::batch([
                 title,
+                overview_task.map(|action| action.map(Message::Overview)),
                 updates_task.map(|action| action.map(Message::Updates)),
                 maintenance_task.map(|action| action.map(Message::Maintenance)),
                 more_task.map(|action| action.map(Message::More)),
@@ -247,11 +250,25 @@ impl Application for App {
 
     fn on_nav_select(&mut self, id: nav_bar::Id) -> Task<Message> {
         self.nav.activate(id);
-        Task::none()
+        self.shown()
     }
 
     fn update(&mut self, message: Message) -> Task<Message> {
         match message {
+            Message::Overview(overview::Message::Go(page)) => {
+                let entity = self
+                    .nav
+                    .iter()
+                    .find(|&entity| self.nav.data::<PageId>(entity) == Some(&page));
+                if let Some(entity) = entity {
+                    self.nav.activate(entity);
+                }
+                self.shown()
+            }
+            Message::Overview(message) => self
+                .overview
+                .update(message)
+                .map(|action| action.map(Message::Overview)),
             Message::Updates(message) => self
                 .updates
                 .update(message)
@@ -277,6 +294,7 @@ impl Application for App {
 
     fn view(&self) -> Element<'_, Message> {
         match self.page() {
+            PageId::Overview => self.overview.view().map(Message::Overview),
             PageId::Updates => self.updates.view().map(Message::Updates),
             PageId::Maintenance => self.maintenance.view().map(Message::Maintenance),
             PageId::Computer => self.more.view(more::Kind::Computer).map(Message::More),

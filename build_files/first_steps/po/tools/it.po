@@ -572,3 +572,72 @@ msgstr "Seleziona quelli che vuoi, deseleziona quelli da rimuovere."
 
 msgid "Tick the ones you want, untick the ones to remove. Your games and saves stay."
 msgstr "Seleziona quelli che vuoi, deseleziona quelli da rimuovere. I tuoi giochi e salvataggi restano."
+
+msgid "Overview"
+msgstr "Panoramica"
+
+msgid "All is well"
+msgstr "Tutto a posto"
+
+msgid "One thing needs your attention"
+msgstr "Una cosa richiede la tua attenzione"
+
+msgid "{} things need your attention"
+msgstr "{} cose richiedono la tua attenzione"
+
+msgid "cosmic-blue looks after itself. Here is where things stand."
+msgstr "cosmic-blue si prende cura di sé. Ecco a che punto sono le cose."
+
+msgid "System up to date"
+msgstr "Sistema aggiornato"
+
+msgid "Version {}. The next one installs by itself in the background."
+msgstr "Versione {}. La prossima si installa da sola in background."
+
+msgid "Update ready"
+msgstr "Aggiornamento pronto"
+
+msgid "Version {} starts at the next restart."
+msgstr "La versione {} parte al prossimo riavvio."
+
+msgid "Backups"
+msgstr "Backup"
+
+msgid "Not set up yet. A USB drive is enough: Déjà Dup keeps a copy of your home folder."
+msgstr "Non ancora configurato. Basta una chiavetta USB: Déjà Dup conserva una copia della tua cartella home."
+
+msgid "Set up"
+msgstr "Configura"
+
+msgid "Last backup today."
+msgstr "Ultimo backup oggi."
+
+msgid "Last backup {} days ago."
+msgstr "Ultimo backup {} giorni fa."
+
+msgid "Almost full: {} free."
+msgstr "Quasi pieno: {} liberi."
+
+msgid "Nothing new from the makers."
+msgstr "Niente di nuovo dai produttori."
+
+msgid "One device has an update."
+msgstr "Un dispositivo ha un aggiornamento."
+
+msgid "{} devices have an update."
+msgstr "{} dispositivi hanno un aggiornamento."
+
+msgid "Search a setting"
+msgstr "Cerca un'impostazione"
+
+msgid "Nothing found."
+msgstr "Nessun risultato."
+
+msgid "Light theme"
+msgstr "Tema chiaro"
+
+msgid "Undo"
+msgstr "Annulla"
+
+msgid "The dock hides when a window covers it."
+msgstr "Il dock si nasconde quando una finestra lo copre."

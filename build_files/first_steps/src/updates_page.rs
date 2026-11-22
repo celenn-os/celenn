@@ -207,6 +207,25 @@ impl Status {
     }
 }
 
+/// What the Overview page tells about the system (overview.rs)
+#[derive(Clone, Debug)]
+pub struct Summary {
+    pub version: String,
+    /// The downloaded update, which starts at the next restart
+    pub staged: Option<String>,
+    /// On a version of its own, without updates
+    pub paused: bool,
+}
+
+pub fn summary() -> Result<Summary, String> {
+    let status = read_status()?;
+    Ok(Summary {
+        paused: status.channel() == Some(Channel::Pinned),
+        staged: status.staged.map(|d| d.version),
+        version: status.booted.version,
+    })
+}
+
 /// The deployments from `rpm-ostree status --json` (readable without root),
 /// or from the file named by COSMIC_BLUE_UPDATES_STATUS_JSON (previews)
 fn read_status() -> Result<Status, String> {

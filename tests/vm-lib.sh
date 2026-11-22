@@ -420,10 +420,11 @@ desktop_tour() {
 
     # Files (folder icons), Settings (accent, theme), COSMIC Store (our
     # rebuild, which no other step starts: a crash fails vm_check_crashes),
-    # cosmic-blue Tools (Updates, Maintenance and Help pages) and Keyboard
+    # cosmic-blue Tools (each page) and Keyboard
     # shortcuts (cosmic-blue's own apps; images before them skip them)
     local entry name cmd
     for entry in "05-files|cosmic-files" "06-settings|cosmic-settings appearance" "06-store|cosmic-store" \
+        "06-tools-overview|/usr/libexec/cosmic-blue-tools" \
         "06-updates|/usr/libexec/cosmic-blue-updates" \
         "06-tools-maintenance|/usr/libexec/cosmic-blue-tools --maintenance" \
         "06-tools-computer|/usr/libexec/cosmic-blue-tools --computer" \

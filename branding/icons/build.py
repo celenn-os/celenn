@@ -450,6 +450,12 @@ def tools_symbolic(body, defs=""):
 
 
 TOOLS_SYMBOLIC = {
+    # Four tiles, as on a dashboard, one translucent
+    "overview": tools_symbolic(
+        '<rect x="16" y="16" width="14" height="14" rx="3.5" fill="#fff"/>'
+        '<rect x="34" y="16" width="14" height="14" rx="3.5" fill="#fff" opacity=".45"/>'
+        '<rect x="16" y="34" width="14" height="14" rx="3.5" fill="#fff"/>'
+        '<rect x="34" y="34" width="14" height="14" rx="3.5" fill="#fff"/>'),
     # Two circling arrows (UPDATE)
     "updates": tools_symbolic(circle_arrow(13.5, 165, 40, width=4.6, head=6.6)
                               + circle_arrow(13.5, 345, 220, ".45", width=4.6, head=6.6)),

@@ -570,3 +570,72 @@ msgstr ""
 
 msgid "Tick the ones you want, untick the ones to remove. Your games and saves stay."
 msgstr ""
+
+msgid "Overview"
+msgstr ""
+
+msgid "All is well"
+msgstr ""
+
+msgid "One thing needs your attention"
+msgstr ""
+
+msgid "{} things need your attention"
+msgstr ""
+
+msgid "cosmic-blue looks after itself. Here is where things stand."
+msgstr ""
+
+msgid "System up to date"
+msgstr ""
+
+msgid "Version {}. The next one installs by itself in the background."
+msgstr ""
+
+msgid "Update ready"
+msgstr ""
+
+msgid "Version {} starts at the next restart."
+msgstr ""
+
+msgid "Backups"
+msgstr ""
+
+msgid "Not set up yet. A USB drive is enough: Déjà Dup keeps a copy of your home folder."
+msgstr ""
+
+msgid "Set up"
+msgstr ""
+
+msgid "Last backup today."
+msgstr ""
+
+msgid "Last backup {} days ago."
+msgstr ""
+
+msgid "Almost full: {} free."
+msgstr ""
+
+msgid "Nothing new from the makers."
+msgstr ""
+
+msgid "One device has an update."
+msgstr ""
+
+msgid "{} devices have an update."
+msgstr ""
+
+msgid "Search a setting"
+msgstr ""
+
+msgid "Nothing found."
+msgstr ""
+
+msgid "Light theme"
+msgstr ""
+
+msgid "Undo"
+msgstr ""
+
+msgid "The dock hides when a window covers it."
+msgstr ""
