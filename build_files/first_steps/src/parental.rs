@@ -1490,9 +1490,12 @@ impl App {
                     .width(Length::Fill),
             )
             .push(
-                widget::row::with_children(vec![choice("+60 min", 60), choice("No limit today", 0)])
-                    .spacing(space_s)
-                    .width(Length::Fill),
+                widget::row::with_children(vec![
+                    choice("+60 min", 60),
+                    choice("No limit today", 0),
+                ])
+                .spacing(space_s)
+                .width(Length::Fill),
             )
             .push(
                 widget::row::with_capacity(3)
