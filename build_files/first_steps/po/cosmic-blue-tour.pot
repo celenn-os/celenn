@@ -135,7 +135,40 @@ msgstr ""
 msgid "Your picture"
 msgstr ""
 
-msgid "Dock always visible"
+msgid "Send without a cable"
+msgstr ""
+
+msgid "With LocalSend, already on this computer. The files go straight through your Wi-Fi, encrypted, not through the internet."
+msgstr ""
+
+msgid "On the phone, scan this code and install LocalSend (Play Store or App Store)."
+msgstr ""
+
+msgid "Open LocalSend here and on the phone, on the same Wi-Fi."
+msgstr ""
+
+msgid "On the phone, pick the photos, then this computer. They arrive in Downloads. It works the other way too."
+msgstr ""
+
+msgid "Open LocalSend"
+msgstr ""
+
+msgid "Without a cable, with LocalSend. Or plug it in and allow file transfer on the phone: it shows up in Files."
+msgstr ""
+
+msgid "Without a cable"
+msgstr ""
+
+msgid "Layout"
+msgstr ""
+
+msgid "Top bar and dock: like the Mac. One bar at the bottom: like Windows."
+msgstr ""
+
+msgid "Top bar and dock"
+msgstr ""
+
+msgid "Bar at the bottom"
 msgstr ""
 
 msgid "This did not work."
@@ -412,9 +445,6 @@ msgid "Open Files"
 msgstr ""
 
 msgid "Photos from a phone"
-msgstr ""
-
-msgid "Plug it in with its cable and allow file transfer on the phone: it shows up in Files."
 msgstr ""
 
 msgid "Bookmarks and passwords"

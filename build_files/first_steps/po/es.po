@@ -134,8 +134,41 @@ msgstr "Fondo de pantalla"
 msgid "Your picture"
 msgstr "Tu imagen"
 
-msgid "Dock always visible"
-msgstr "Dock siempre visible"
+msgid "Send without a cable"
+msgstr "Enviar sin cable"
+
+msgid "With LocalSend, already on this computer. The files go straight through your Wi-Fi, encrypted, not through the internet."
+msgstr "Con LocalSend, ya en este ordenador. Los archivos van directamente por tu wifi, cifrados, sin pasar por internet."
+
+msgid "On the phone, scan this code and install LocalSend (Play Store or App Store)."
+msgstr "En el móvil, escanea este código e instala LocalSend (Play Store o App Store)."
+
+msgid "Open LocalSend here and on the phone, on the same Wi-Fi."
+msgstr "Abre LocalSend aquí y en el móvil, en la misma wifi."
+
+msgid "On the phone, pick the photos, then this computer. They arrive in Downloads. It works the other way too."
+msgstr "En el móvil, elige las fotos y luego este ordenador. Llegan a Descargas. También funciona al revés."
+
+msgid "Open LocalSend"
+msgstr "Abrir LocalSend"
+
+msgid "Without a cable, with LocalSend. Or plug it in and allow file transfer on the phone: it shows up in Files."
+msgstr "Sin cable, con LocalSend. O conéctalo y permite la transferencia de archivos en el móvil: aparece en Archivos."
+
+msgid "Without a cable"
+msgstr "Sin cable"
+
+msgid "Layout"
+msgstr "Disposición"
+
+msgid "Top bar and dock: like the Mac. One bar at the bottom: like Windows."
+msgstr "Barra arriba y dock: como en Mac. Una barra abajo: como en Windows."
+
+msgid "Top bar and dock"
+msgstr "Barra arriba y dock"
+
+msgid "Bar at the bottom"
+msgstr "Barra abajo"
 
 msgid "This did not work."
 msgstr "No ha funcionado."
@@ -412,9 +445,6 @@ msgstr "Abrir Archivos"
 
 msgid "Photos from a phone"
 msgstr "Fotos de un móvil"
-
-msgid "Plug it in with its cable and allow file transfer on the phone: it shows up in Files."
-msgstr "Conéctalo con su cable y permite la transferencia de archivos en el móvil: aparece en Archivos."
 
 msgid "Bookmarks and passwords"
 msgstr "Marcadores y contraseñas"

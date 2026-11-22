@@ -88,6 +88,12 @@ IsRuntime=false
 Branch=stable
 IsRuntime=false
 
+# Files between phones and computers, without a cable (the tour's "Send
+# without a cable"; its port is opened in the firewall)
+[Flatpak Preinstall org.localsend.localsend_app]
+Branch=stable
+IsRuntime=false
+
 [Flatpak Preinstall io.gitlab.adhami3310.Impression]
 Branch=stable
 IsRuntime=false

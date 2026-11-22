@@ -362,6 +362,27 @@ msgstr ""
 msgid "Light text on dark backgrounds. Off: the light theme."
 msgstr ""
 
+msgid "Dock always visible"
+msgstr ""
+
+msgid "Off: it hides when a window covers it."
+msgstr ""
+
+msgid "This did not work."
+msgstr ""
+
+msgid "Layout"
+msgstr ""
+
+msgid "Top bar and dock: like the Mac. One bar at the bottom: like Windows."
+msgstr ""
+
+msgid "Top bar and dock"
+msgstr ""
+
+msgid "Bar at the bottom"
+msgstr ""
+
 msgid "Log out and back in to finish."
 msgstr ""
 

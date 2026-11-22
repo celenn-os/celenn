@@ -364,6 +364,27 @@ msgstr "Instaladas. Reinicie os aplicativos abertos para vê-las."
 msgid "Light text on dark backgrounds. Off: the light theme."
 msgstr "Texto claro sobre fundo escuro. Desligado: o tema claro."
 
+msgid "Dock always visible"
+msgstr "Dock sempre visível"
+
+msgid "Off: it hides when a window covers it."
+msgstr "Desligado: ele se esconde quando uma janela o cobre."
+
+msgid "This did not work."
+msgstr "Isso não funcionou."
+
+msgid "Layout"
+msgstr "Disposição"
+
+msgid "Top bar and dock: like the Mac. One bar at the bottom: like Windows."
+msgstr "Barra em cima e dock: como no Mac. Uma barra embaixo: como no Windows."
+
+msgid "Top bar and dock"
+msgstr "Barra em cima e dock"
+
+msgid "Bar at the bottom"
+msgstr "Barra embaixo"
+
 msgid "Log out and back in to finish."
 msgstr "Saia e entre de novo para concluir."
 
