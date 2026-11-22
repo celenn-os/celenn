@@ -41,10 +41,12 @@ mod devtools;
 mod failure;
 mod i18n;
 mod layout;
+mod style;
 mod system;
 use devtools::{DEV_TOOLS, DevTool, ToolKind, brew_install, brew_installed, dev_tools};
 use failure::{Card, CardAction, CardMessage, Failure, Outcome};
 use i18n::{language, tr};
+use style::dim_caption;
 use system::{Computer, Package};
 
 const SITE: &str = "https://cosmic-blue-os.github.io/cosmic-blue/";
@@ -1668,6 +1670,16 @@ impl<T: Tour> Application for App<T> {
 
 /// A file name short enough for a title: long ones keep their start and
 /// their end ("google-chrome-st…amd64.deb")
+/// A picture's name from its file, for screen readers:
+/// "cosmic-blue-shooting-star.jpg" -> "shooting star"
+fn image_name(path: &Path) -> String {
+    path.file_stem()
+        .map(|stem| stem.to_string_lossy())
+        .unwrap_or_default()
+        .trim_start_matches("cosmic-blue-")
+        .replace(['-', '_'], " ")
+}
+
 fn short_name(file: &Path) -> String {
     let name = file.file_name().unwrap_or_default().to_string_lossy();
     let chars: Vec<char> = name.chars().collect();
@@ -1887,7 +1899,7 @@ impl<T: Tour> App<T> {
             );
         let dock = settings::item_row(vec![
             two_lines(
-                text::body(tr("Layout")).into(),
+                text::heading(tr("Layout")).into(),
                 tr("Top bar and dock: like the Mac. One bar at the bottom: like Windows."),
             ),
             layout_buttons.into(),
@@ -1908,6 +1920,8 @@ impl<T: Tour> App<T> {
                 .enumerate()
                 .map(|(i, (path, handle))| {
                     widget::button::image(handle.clone())
+                        // For screen readers: "Wallpaper: arcs"
+                        .name(format!("{}: {}", tr("Wallpaper"), image_name(path)))
                         .width(92)
                         .height(52)
                         .selected(self.wallpaper.as_deref() == Some(path.as_path()))
@@ -1926,8 +1940,9 @@ impl<T: Tour> App<T> {
                 .avatars
                 .iter()
                 .enumerate()
-                .map(|(i, (_, handle))| {
+                .map(|(i, (path, handle))| {
                     widget::button::image(handle.clone())
+                        .name(format!("{}: {}", tr("Your picture"), image_name(path)))
                         .width(40)
                         .height(40)
                         .selected(self.avatar == Some(i))
@@ -2709,20 +2724,6 @@ fn key_combo<'a>(keys: &[&'a str]) -> Element<'a, Message> {
         previous = Some(key);
     }
     row.into()
-}
-
-/// A row's description: smaller and dimmer than its title
-fn dim_caption<'a>(
-    caption: impl Into<std::borrow::Cow<'a, str>> + 'a,
-) -> widget::Text<'a, cosmic::Theme> {
-    text::caption(caption).class(theme::Text::Custom(|theme| {
-        let mut color = theme.cosmic().on_bg_color();
-        color.alpha = 0.72;
-        cosmic::iced::widget::text::Style {
-            color: Some(color.into()),
-            ..Default::default()
-        }
-    }))
 }
 
 /// A row's title; "A → B" shows A, an arrow and B, and keys as keys

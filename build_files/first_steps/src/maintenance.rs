@@ -15,7 +15,7 @@
 //     installed them.
 //   - Firmware updates: opens GNOME Firmware.
 
-use crate::common::{fill, label, spawn, state_icon, two_lines};
+use crate::common::{fill, label, row_title, spawn, state_icon, two_lines};
 use crate::failure::{self, Card, CardAction, CardMessage, Outcome};
 use crate::housekeeping;
 use crate::i18n::tr;
@@ -540,7 +540,7 @@ impl Page {
                 settings::item_row(vec![
                     state_icon("application-x-firmware-symbolic", false),
                     two_lines(
-                        text::body(tr("Firmware updates")).into(),
+                        row_title(tr("Firmware updates")).into(),
                         tr("New versions of the BIOS, SSD, dock… from their makers.").to_owned(),
                     ),
                     widget::button::standard(tr("Open"))

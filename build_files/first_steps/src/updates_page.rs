@@ -33,7 +33,7 @@
 //
 // The look is the tours' (main.rs): same banner, title, rows and buttons.
 
-use crate::common::{fill, header, state_icon, two_lines};
+use crate::common::{fill, header, row_title, state_icon, two_lines};
 use crate::failure::{self, Card, CardAction, CardMessage, Outcome};
 use crate::i18n::tr;
 use crate::update_progress::{self, Progress};
@@ -558,10 +558,9 @@ impl Page {
         match &self.status {
             None => {}
             Some(Err(error)) => {
-                eprintln!("{error}");
                 content = content.push(
                     settings::section().add(settings::item_row(vec![two_lines(
-                        text::body(tr(
+                        row_title(tr(
                             "The system version could not be read: is this computer installed with cosmic-blue?",
                         ))
                         .into(),
@@ -633,7 +632,7 @@ impl Page {
             settings::item_row(vec![
                 state_icon("emblem-ok-symbolic", true),
                 two_lines(
-                    text::body(fill(tr("Current version: {}"), &status.booted.version)).into(),
+                    row_title(fill(tr("Current version: {}"), &status.booted.version)).into(),
                     channel_text.to_owned(),
                 ),
                 check,
@@ -669,7 +668,7 @@ impl Page {
                     settings::item_row(vec![
                         state_icon("system-reboot-symbolic", false),
                         two_lines(
-                            text::body(fill(tr("Back to {} at the next restart"), &previous.version))
+                            row_title(fill(tr("Back to {} at the next restart"), &previous.version))
                                 .into(),
                             tr("Your files and settings stay as they are. The version you leave will not be installed again: updates start again with the next one.").to_owned(),
                         ),
@@ -688,7 +687,7 @@ impl Page {
                 settings::item_row(vec![
                     state_icon("software-update-available-symbolic", false),
                     two_lines(
-                        text::body(fill(tr("Ready for the next restart: {}"), &staged.version))
+                        row_title(fill(tr("Ready for the next restart: {}"), &staged.version))
                             .into(),
                         tr("Downloaded and checked. It takes effect at the next restart.")
                             .to_owned(),
@@ -706,7 +705,7 @@ impl Page {
                 settings::item_row(vec![
                     state_icon("media-playback-pause-symbolic", false),
                     two_lines(
-                        text::body(fill(tr("Version {} is set aside"), held)).into(),
+                        row_title(fill(tr("Version {} is set aside"), held)).into(),
                         tr("You went back from it, so it will not be installed again. Updates start again with the next version.").to_owned(),
                     ),
                 ])
@@ -726,7 +725,7 @@ impl Page {
                 settings::item_row(vec![
                     state_icon("edit-undo-symbolic", false),
                     two_lines(
-                        text::body(fill(tr("Previous version: {}"), &previous.version)).into(),
+                        row_title(fill(tr("Previous version: {}"), &previous.version)).into(),
                         tr("Something wrong since the last update? Go back to this version. Your files and settings stay as they are.").to_owned(),
                     ),
                     button,
@@ -763,7 +762,7 @@ impl Page {
                         settings::item_row(vec![
                             state_icon("media-playback-pause-symbolic", false),
                             two_lines(
-                                text::body(tr("Updates are paused")).into(),
+                                row_title(tr("Updates are paused")).into(),
                                 tr("This system stays on this version. Resume them to get one tested update a week again.").to_owned(),
                             ),
                             button,
@@ -798,7 +797,7 @@ impl Page {
                 .add(
                     settings::item_row(vec![
                         two_lines(
-                            text::body(tr("Get new features early")).into(),
+                            row_title(tr("Get new features early")).into(),
                             caption.to_owned(),
                         ),
                         toggler.into(),
@@ -825,7 +824,7 @@ impl Page {
         let mut section = settings::section().add(
             settings::item_row(vec![
                 two_lines(
-                    text::body(tr("An older version")).into(),
+                    row_title(tr("An older version")).into(),
                     tr("Choose the stable version of a past week. The system then stays on it, without updates, until you resume them.").to_owned(),
                 ),
                 widget::button::standard(tr(if self.older.is_some() { "Hide" } else { "Choose…" }))
