@@ -5,6 +5,8 @@ set -euox pipefail
 systemctl enable \
     brew-setup.service \
     cosmic-blue-flatpark-off.service \
+    cosmic-blue-login-pictures.path \
+    cosmic-blue-login-pictures.service \
     cosmic-blue-migrate-defaults.service \
     cosmic-blue-parental-controls.service \
     cosmic-blue-user-defaults.service \

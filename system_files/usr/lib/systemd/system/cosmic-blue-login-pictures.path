@@ -1,0 +1,11 @@
+[Unit]
+Description=Show a newly chosen cosmic-blue avatar on the login screen
+
+[Path]
+# AccountsService writes each account's settings in a new file renamed into
+# this folder
+PathChanged=/var/lib/AccountsService/users
+Unit=cosmic-blue-login-pictures.service
+
+[Install]
+WantedBy=multi-user.target

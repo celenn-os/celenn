@@ -637,6 +637,10 @@ parental_checks() {
             | /usr/libexec/cosmic-blue-parental-helper add-child ${PARENTAL_CHILD} 'Léa' /usr/share/pixmaps/faces/rocket.png" \
         || { problem "cosmic-blue-parental-helper could not create a child account"; return 1; }
     vm "id -nG ${PARENTAL_CHILD} | grep -qw wheel" && problem "the child account is an administrator"
+    # Its avatar, one of the system's own, is copied where the login screen
+    # reads it (cosmic-blue-login-pictures.path)
+    wait_for 15 "cmp -s /usr/share/pixmaps/faces/rocket.png /var/lib/AccountsService/icons/${PARENTAL_CHILD}" \
+        || problem "the child's avatar is not where the login screen reads it"
     wait_for 30 'systemctl is-active cosmic-blue-parental-controls.service' \
         || problem "cosmic-blue-parental-controls.service did not start"
     # A week of screen time for the chart

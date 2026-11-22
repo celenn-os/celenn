@@ -461,6 +461,10 @@ grep -qx 'balanced=balanced-battery' /etc/tuned/ppd.conf
 test -f /usr/lib/tuned/profiles/balanced-battery/tuned.conf ||
     test -f /usr/lib/tuned/balanced-battery/tuned.conf
 
+# The avatar a user picks shows on the login screen too
+test -x /usr/libexec/cosmic-blue-login-pictures
+systemctl is-enabled cosmic-blue-login-pictures.path cosmic-blue-login-pictures.service
+
 # Installer keyboard layout and clock format copied to COSMIC user settings
 test -x /usr/libexec/cosmic-blue-user-defaults
 systemctl is-enabled cosmic-blue-user-defaults.service
