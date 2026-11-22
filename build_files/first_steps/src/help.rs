@@ -129,7 +129,7 @@ impl Page {
 
         let mut report = settings::section().add(
             settings::item_row(vec![
-                state_icon("dialog-warning-symbolic", false),
+                state_icon("mail-message-new-symbolic", false),
                 label(
                     tr("Report a problem"),
                     tr("Opens the bug report form with the details of this computer filled in. They hold no personal data. A GitHub account is needed.").to_owned(),
@@ -174,13 +174,6 @@ impl Page {
             .spacing(space_s)
             .align_x(Alignment::Center)
             .push(
-                text::body(tr(
-                    "Find answers, ask a question, or tell us what goes wrong.",
-                ))
-                .align_x(Alignment::Center)
-                .width(Length::Fill),
-            )
-            .push(
                 settings::section()
                     .add(row(
                         "help-contents-symbolic",
@@ -196,6 +189,11 @@ impl Page {
                     )),
             )
             .push(report);
-        crate::common::header(ICON, tr("Help"), content.into())
+        crate::common::header(
+            ICON,
+            tr("Help"),
+            tr("Find answers, ask a question, or tell us what goes wrong."),
+            content.into(),
+        )
     }
 }

@@ -17,6 +17,9 @@ msgstr "Schließen"
 msgid "Later"
 msgstr "Später"
 
+msgid "Step {} of {}"
+msgstr "Schritt {} von {}"
+
 msgid "Welcome to cosmic-blue"
 msgstr "Willkommen bei cosmic-blue"
 

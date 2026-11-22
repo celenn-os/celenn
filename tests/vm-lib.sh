@@ -420,30 +420,40 @@ desktop_tour() {
 
     # Files (folder icons), Settings (accent, theme), COSMIC Store (our
     # rebuild, which no other step starts: a crash fails vm_check_crashes),
-    # cosmic-blue Tools (Updates, Maintenance and Help pages) and Keyboard
-    # shortcuts (cosmic-blue's own apps; images before them skip them)
-    local entry name cmd
+    # cosmic-blue Tools (each page, a failure card, the developer tools list)
+    # and Keyboard shortcuts (cosmic-blue's own apps; images before them skip
+    # them). A command may start with VARIABLE=value settings.
+    local entry name cmd program settings
     for entry in "05-files|cosmic-files" "06-settings|cosmic-settings appearance" "06-store|cosmic-store" \
+        "06-tools-overview|/usr/libexec/cosmic-blue-tools" \
         "06-updates|/usr/libexec/cosmic-blue-updates" \
         "06-tools-maintenance|/usr/libexec/cosmic-blue-tools --maintenance" \
         "06-tools-computer|/usr/libexec/cosmic-blue-tools --computer" \
         "06-tools-software|/usr/libexec/cosmic-blue-tools --software" \
         "06-tools-appearance|/usr/libexec/cosmic-blue-tools --appearance" \
         "06-tools-help|/usr/libexec/cosmic-blue-tools --help-page" \
+        "06-tools-failure|COSMIC_BLUE_TOOLS_PREVIEW=failure /usr/libexec/cosmic-blue-tools --maintenance" \
+        "06-tools-developer|COSMIC_BLUE_TOOLS_PREVIEW=developer-tools /usr/libexec/cosmic-blue-tools --software" \
         "06-shortcuts|/usr/libexec/cosmic-blue-tour --shortcuts"; do
         name="${entry%%|*}"
         cmd="${entry#*|}"
-        if [[ "${cmd}" == /* ]] && ! vm "test -x ${cmd%% *}"; then
+        settings=""
+        while [[ "${cmd%% *}" == *=* ]]; do
+            settings+=" ${cmd%% *}"
+            cmd="${cmd#* }"
+        done
+        program="${cmd%% *}"
+        if [[ "${program}" == /* ]] && ! vm "test -x ${program}"; then
             continue
         fi
-        if ! vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
+        if ! vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV}${settings} \
                 setsid -f ${cmd} >/dev/null 2>&1 </dev/null"; then
             warn "could not start ${cmd}"
             continue
         fi
         sleep 12
         screenshot "${SHOTS}/${name}"
-        vm "pkill -u ${DEMO_USER} -f '^(/usr/bin/)?${cmd%% *}'" || true
+        vm "pkill -u ${DEMO_USER} -f '^(/usr/bin/)?${program}'" || true
         sleep 3
     done
 
@@ -463,6 +473,23 @@ desktop_tour() {
         vm "runuser -u ${DEMO_USER} -- sh -c 'printf true > ${mode_dir}/is_dark'" \
             || warn "could not switch back to the dark theme"
         sleep 5
+    fi
+
+    # Updates while a new version downloads: its progress bar, from a
+    # progress file like the one bootc's download writes (update_progress.rs)
+    local progress=/run/cosmic-blue/update-progress.jsonl
+    if vm "test -x /usr/libexec/cosmic-blue-updates" \
+        && vm "mkdir -p /run/cosmic-blue && printf '%s\\n' \
+            '{\"type\":\"ProgressBytes\",\"task\":\"pulling\",\"bytes\":1288490188,\"bytesTotal\":2147483648}' \
+            > ${progress}"; then
+        if vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
+                setsid -f /usr/libexec/cosmic-blue-updates >/dev/null 2>&1 </dev/null"; then
+            sleep 12
+            screenshot "${SHOTS}/06-updates-progress"
+            vm "pkill -u ${DEMO_USER} -f '^/usr/libexec/cosmic-blue-updates'" || true
+            sleep 3
+        fi
+        vm "rm -f ${progress}" || true
     fi
 
     # Firefox, a first-boot flatpak in the dock, with the cosmic-blue

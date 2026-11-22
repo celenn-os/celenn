@@ -201,6 +201,9 @@ msgstr "Wie bei Windows und Mac. Neuere lassen sich weiterhin wiederherstellen."
 msgid "Warn when the disk is almost full"
 msgstr "Warnen, wenn der Speicher fast voll ist"
 
+msgid "A notification when less than 10 % is free (20 GB at most)."
+msgstr "Eine Benachrichtigung, wenn weniger als 10 % frei sind (höchstens 20 GB)."
+
 msgid "The disk is almost full"
 msgstr "Der Speicher ist fast voll"
 
@@ -569,3 +572,72 @@ msgstr "Haken Sie die gewünschten an, entfernen Sie den Haken bei denen, die we
 
 msgid "Tick the ones you want, untick the ones to remove. Your games and saves stay."
 msgstr "Haken Sie die gewünschten an, entfernen Sie den Haken bei denen, die weg sollen. Ihre Spiele und Spielstände bleiben."
+
+msgid "Overview"
+msgstr "Übersicht"
+
+msgid "All is well"
+msgstr "Alles in Ordnung"
+
+msgid "One thing needs your attention"
+msgstr "Eine Sache braucht Ihre Aufmerksamkeit"
+
+msgid "{} things need your attention"
+msgstr "{} Dinge brauchen Ihre Aufmerksamkeit"
+
+msgid "cosmic-blue looks after itself. Here is where things stand."
+msgstr "cosmic-blue kümmert sich selbst um alles. Hier ist der aktuelle Stand."
+
+msgid "System up to date"
+msgstr "System aktuell"
+
+msgid "Version {}. The next one installs by itself in the background."
+msgstr "Version {}. Die nächste installiert sich von selbst im Hintergrund."
+
+msgid "Update ready"
+msgstr "Update bereit"
+
+msgid "Version {} starts at the next restart."
+msgstr "Version {} startet beim nächsten Neustart."
+
+msgid "Backups"
+msgstr "Datensicherung"
+
+msgid "Not set up yet. A USB drive is enough: Déjà Dup keeps a copy of your home folder."
+msgstr "Noch nicht eingerichtet. Ein USB-Laufwerk genügt: Déjà Dup bewahrt eine Kopie Ihres persönlichen Ordners auf."
+
+msgid "Set up"
+msgstr "Einrichten"
+
+msgid "Last backup today."
+msgstr "Letzte Sicherung heute."
+
+msgid "Last backup {} days ago."
+msgstr "Letzte Sicherung vor {} Tagen."
+
+msgid "Almost full: {} free."
+msgstr "Fast voll: {} frei."
+
+msgid "Nothing new from the makers."
+msgstr "Nichts Neues von den Herstellern."
+
+msgid "One device has an update."
+msgstr "Für ein Gerät gibt es ein Update."
+
+msgid "{} devices have an update."
+msgstr "Für {} Geräte gibt es ein Update."
+
+msgid "Search a setting"
+msgstr "Einstellung suchen"
+
+msgid "Nothing found."
+msgstr "Nichts gefunden."
+
+msgid "Light theme"
+msgstr "Helles Thema"
+
+msgid "Undo"
+msgstr "Rückgängig"
+
+msgid "The dock hides when a window covers it."
+msgstr "Das Dock verschwindet, wenn ein Fenster es verdeckt."

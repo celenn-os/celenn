@@ -15,7 +15,7 @@
 //     installed them.
 //   - Firmware updates: opens GNOME Firmware.
 
-use crate::common::{fill, label, row_title, spawn, state_icon, two_lines};
+use crate::common::{dim_caption, fill, label, row_title, spawn, state_icon, two_lines};
 use crate::failure::{self, Card, CardAction, CardMessage, Outcome};
 use crate::housekeeping;
 use crate::i18n::tr;
@@ -59,6 +59,7 @@ pub const TEXTS: &[&str] = &[
     "Delete files that stayed in the trash for more than 30 days",
     "Like on Windows and the Mac. Newer ones can still be put back.",
     "Warn when the disk is almost full",
+    "A notification when less than 10 % is free (20 GB at most).",
     "Apps that come with cosmic-blue",
     "All of them are installed.",
     "One of them was removed. Put it back?",
@@ -253,7 +254,17 @@ impl Page {
             state: None,
             busy: None,
             free_before: None,
-            card: None,
+            // A failure as the screenshot test shows it
+            card: crate::common::preview("failure").then(|| {
+                Card::new(
+                    tr("Clean up"),
+                    failure::Failure {
+                        cause: failure::Cause::Offline,
+                        details: "error: Could not resolve hostname\nExit status: 1".to_owned(),
+                    },
+                    Busy::Cleaning,
+                )
+            }),
             toasts: Toasts::new(Message::CloseToast),
         };
         (page, refresh())
@@ -375,19 +386,17 @@ impl Page {
         let idle = self.busy.is_none();
         let mut content = widget::column::with_capacity(6)
             .spacing(space_s)
-            .align_x(Alignment::Center)
-            .push(
-                text::body(tr(
-                    "Keep the computer tidy and in shape, without typing commands.",
-                ))
-                .align_x(Alignment::Center)
-                .width(Length::Fill),
-            );
+            .align_x(Alignment::Center);
         if let Some(card) = &self.card {
             content = content.push(card.view(Message::Card));
         }
         let Some(state) = &self.state else {
-            return crate::common::header(ICON, tr("Maintenance"), content.into());
+            return crate::common::header(
+                ICON,
+                tr("Maintenance"),
+                tr("Keep the computer tidy and in shape, without typing commands."),
+                content.into(),
+            );
         };
 
         // Disk space
@@ -405,13 +414,13 @@ impl Page {
                 state_icon("drive-harddisk-symbolic", share >= 0.9),
                 widget::column::with_capacity(3)
                     .spacing(space_xxs)
-                    .push(text::body(used))
+                    .push(row_title(used))
                     .push(
                         widget::progress_bar::determinate_linear(share)
                             .width(Length::Fill)
                             .girth(6),
                     )
-                    .push(text::caption(fill(tr("{} free"), &size(info.free))))
+                    .push(dim_caption(fill(tr("{} free"), &size(info.free))))
                     .width(Length::Fill)
                     .into(),
             ];
@@ -494,10 +503,19 @@ impl Page {
                     ])
                     .spacing(space_s),
                 )
-                .add(settings::item(
-                    tr("Warn when the disk is almost full"),
-                    widget::toggler(state.disk_warning).on_toggle(Message::DiskWarning),
-                )),
+                .add(
+                    settings::item_row(vec![
+                        label(
+                            tr("Warn when the disk is almost full"),
+                            tr("A notification when less than 10 % is free (20 GB at most).")
+                                .to_owned(),
+                        ),
+                        widget::toggler(state.disk_warning)
+                            .on_toggle(Message::DiskWarning)
+                            .into(),
+                    ])
+                    .spacing(space_s),
+                ),
         );
 
         // Apps that come with cosmic-blue
@@ -552,7 +570,12 @@ impl Page {
         }
         content = content.push(system);
 
-        let page = crate::common::header(ICON, tr("Maintenance"), content.into());
+        let page = crate::common::header(
+            ICON,
+            tr("Maintenance"),
+            tr("Keep the computer tidy and in shape, without typing commands."),
+            content.into(),
+        );
         widget::toaster(&self.toasts, page)
     }
 }

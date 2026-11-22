@@ -107,12 +107,15 @@ pub const TEXTS: &[&str] = &[
     // Appearance
     "Dark theme",
     "Light text on dark backgrounds. Off: the light theme.",
+    "Light theme",
+    "Undo",
     "Layout",
     "Top bar and dock: like the Mac. One bar at the bottom: like Windows.",
     "Top bar and dock",
     "Bar at the bottom",
     "Dock always visible",
     "Off: it hides when a window covers it.",
+    "The dock hides when a window covers it.",
     "This did not work.",
     "More in Settings",
     "Accent color, wallpaper, panel, dock, fonts…",
@@ -404,6 +407,8 @@ pub enum Message {
     ListDone(List, Outcome),
     Card(CardMessage),
     CloseToast(widget::ToastId),
+    /// A toast's Undo: closes it, then takes the change back
+    Undo(widget::ToastId, Box<Message>),
 }
 
 /// What a card's "Try again" runs again
@@ -419,6 +424,8 @@ pub struct Page {
     asking: Option<Job>,
     /// The lists shown, the apps ticked in them, the list being applied
     open: [bool; 3],
+    /// A list to open once the state is read (screenshot test)
+    preview_list: Option<List>,
     chosen: [BTreeSet<usize>; 3],
     applying: Option<List>,
     /// What did not work, until closed or done again
@@ -577,8 +584,20 @@ impl Page {
             applying: None,
             card: None,
             toasts: Toasts::new(Message::CloseToast),
+            preview_list: crate::common::preview("developer-tools").then_some(List::Dev),
         };
         (page, refresh())
+    }
+
+    /// A change of the desktop's look, said with a button to take it back
+    fn undo_toast(&mut self, message: &'static str, undo: Message) -> Task<Message> {
+        self.toasts
+            .push(
+                widget::toaster::Toast::new(tr(message)).action(tr("Undo").to_owned(), move |id| {
+                    Message::Undo(id, Box::new(undo.clone()))
+                }),
+            )
+            .map(cosmic::Action::App)
     }
 
     fn toast(&mut self, message: &'static str) -> Task<Message> {
@@ -589,7 +608,12 @@ impl Page {
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
-            Message::State(state) => self.state = Some(state),
+            Message::State(state) => {
+                self.state = Some(state);
+                if let Some(list) = self.preview_list.take() {
+                    return self.update(Message::ListOpen(list));
+                }
+            }
             Message::Ask(job) => {
                 if job.question().is_some() {
                     self.asking = Some(job);
@@ -620,9 +644,13 @@ impl Page {
                         self.card = Some(Card::new(tr(job.title()), failure, Retry::Job(job)));
                         Task::none()
                     }
-                    Some(Ok(())) => match job.done() {
-                        Some(text) => self.toast(text),
-                        None => Task::none(),
+                    Some(Ok(())) => match (job, job.done()) {
+                        (Job::Dark(on), _) => self.undo_toast(
+                            if on { "Dark theme" } else { "Light theme" },
+                            Message::Run(Job::Dark(!on)),
+                        ),
+                        (_, Some(text)) => self.toast(text),
+                        (_, None) => Task::none(),
                     },
                 };
                 return Task::batch([toast, refresh()]);
@@ -635,6 +663,14 @@ impl Page {
                 if let Some(state) = &mut self.state {
                     state.bottom_bar = bottom;
                 }
+                return self.undo_toast(
+                    if bottom {
+                        "Bar at the bottom"
+                    } else {
+                        "Top bar and dock"
+                    },
+                    Message::Layout(!bottom),
+                );
             }
             Message::DockVisible(visible) => {
                 if !crate::layout::set_dock_always_visible(visible) {
@@ -643,6 +679,18 @@ impl Page {
                 if let Some(state) = &mut self.state {
                     state.dock_visible = visible;
                 }
+                return self.undo_toast(
+                    if visible {
+                        "Dock always visible"
+                    } else {
+                        "The dock hides when a window covers it."
+                    },
+                    Message::DockVisible(!visible),
+                );
+            }
+            Message::Undo(id, message) => {
+                self.toasts.remove(id);
+                return self.update(*message);
             }
             Message::FontsLicense => spawn("xdg-open", &[FONTS_LICENSE]),
             Message::ListOpen(list) => {
@@ -833,12 +881,7 @@ impl Page {
         };
         let mut content = widget::column::with_capacity(3)
             .spacing(space_s)
-            .align_x(Alignment::Center)
-            .push(
-                text::body(tr(intro))
-                    .align_x(Alignment::Center)
-                    .width(Length::Fill),
-            );
+            .align_x(Alignment::Center);
         let card_kind = self.card.as_ref().map(|card| match card.job {
             Retry::Job(job) => job.kind(),
             Retry::List(_) => Kind::Software,
@@ -853,7 +896,7 @@ impl Page {
                 Kind::Appearance => self.appearance(state),
             });
         }
-        let page = crate::common::header(icon, tr(title), content.into());
+        let page = crate::common::header(icon, tr(title), tr(intro), content.into());
         widget::toaster(&self.toasts, page)
     }
 
@@ -1146,7 +1189,7 @@ impl Page {
                 None,
             ))
             .add(self.row(
-                "view-refresh-symbolic",
+                "document-revert-symbolic",
                 "All COSMIC settings",
                 "Back to the cosmic-blue defaults, for every setting. A copy of the current ones is kept.",
                 self.button(Job::ResetConfig, "Reset", false),

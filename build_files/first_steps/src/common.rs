@@ -1,72 +1,48 @@
-// What the pages of cosmic-blue Tools share (tools.rs): the page frame (the
-// tours' banner with the page's icon, its title), the rows' text and
-// symbols, and running a command in the background.
+// What the pages of cosmic-blue Tools share (tools.rs): the page frame (a
+// compact header with the page's icon, its title and purpose), the rows'
+// text and symbols, and running a command in the background.
 
 use crate::i18n::tr;
+use cosmic::iced::Length;
 use cosmic::iced::core::text::Wrapping;
-use cosmic::iced::{Alignment, Length};
-use cosmic::widget::{self, text};
+use cosmic::widget;
 use cosmic::{Apply, Element, cosmic_theme, theme};
-use std::path::Path;
 use std::sync::OnceLock;
 
-/// Banner of the tours (branding/tour/build.py), behind the page's icon
-const BANNER: &str = "/usr/share/cosmic-blue/tour-banner.svg";
-
-fn banner() -> Option<widget::svg::Handle> {
-    static BANNER_HANDLE: OnceLock<Option<widget::svg::Handle>> = OnceLock::new();
-    BANNER_HANDLE
-        .get_or_init(|| {
-            Path::new(BANNER)
-                .exists()
-                .then(|| widget::svg::Handle::from_path(BANNER))
-        })
-        .clone()
-}
-
-/// A page: the banner with its icon, its title, then its content, centered
-/// and scrolling when the window is too small
+/// A page: its header as in COSMIC Settings (the page's icon, its title and
+/// what it is for, on the left), then its content; it scrolls only when the
+/// window is made smaller than its default size
 pub fn header<'a, M: 'static>(
     icon: &'static str,
     title: &'static str,
+    lead: &'static str,
     content: Element<'a, M>,
 ) -> Element<'a, M> {
     let cosmic_theme::Spacing {
-        space_xxs, space_s, ..
+        space_xxs, space_m, ..
     } = theme::spacing();
-    let icon = widget::icon::from_name(icon).size(64);
-    let top: Element<'a, M> = match banner() {
-        Some(banner) => cosmic::iced::widget::stack![
-            widget::svg(banner).width(600).height(100),
-            widget::container(icon).center(Length::Fill),
-        ]
-        .width(600)
-        .height(100)
-        .apply(widget::container)
-        .center_x(Length::Fill)
-        .into(),
-        None => widget::container(icon).center_x(Length::Fill).into(),
+    // A child or a standard account: the changes that need root ask for
+    // someone else's password, said once under the page's purpose
+    let lead = if is_admin() {
+        lead.to_owned()
+    } else {
+        format!(
+            "{lead}\n{}",
+            tr("Some changes ask for the password of a parent or an administrator.")
+        )
     };
-    widget::column::with_capacity(6)
-        .push(top)
+    widget::column::with_capacity(5)
         .push(widget::space::vertical().height(space_xxs))
-        .push(text::title2(title).center().width(Length::Fill))
-        .push(widget::space::vertical().height(space_s))
-        .push_maybe((!is_admin()).then(|| {
-            // A child or a standard account: the changes that need root ask
-            // for someone else's password, said once at the top
-            dim_caption(tr(
-                "Some changes ask for the password of a parent or an administrator.",
-            ))
-            .center()
-            .width(Length::Fill)
-        }))
-        .push_maybe((!is_admin()).then(|| widget::space::vertical().height(space_xxs)))
+        .push(crate::style::page_header(
+            widget::icon::from_name(icon).size(44).into(),
+            title,
+            Some(lead),
+        ))
+        .push(widget::space::vertical().height(space_m))
         .push(content)
-        .push(widget::space::vertical().height(space_s))
+        .push(widget::space::vertical().height(space_m))
         .max_width(640.0)
         .width(640.0)
-        .align_x(Alignment::Center)
         .apply(widget::container)
         .center_x(Length::Fill)
         .apply(widget::scrollable)
@@ -130,6 +106,13 @@ pub fn two_lines<'a, M: 'static>(first: Element<'a, M>, caption: String) -> Elem
 /// A row with its title and caption only (no first-line widget)
 pub fn label<'a, M: 'static>(title: &'static str, caption: String) -> Element<'a, M> {
     two_lines(row_title(title).into(), caption)
+}
+
+/// What the image's screenshot test asks a page to show at once, from
+/// COSMIC_BLUE_TOOLS_PREVIEW (tests/vm-lib.sh): "failure" (a failure card on
+/// Maintenance) or "developer-tools" (the list open on Extra software)
+pub fn preview(what: &str) -> bool {
+    std::env::var("COSMIC_BLUE_TOOLS_PREVIEW").is_ok_and(|value| value == what)
 }
 
 /// Starts a program without waiting for it (a browser, another app)

@@ -207,6 +207,25 @@ impl Status {
     }
 }
 
+/// What the Overview page tells about the system (overview.rs)
+#[derive(Clone, Debug)]
+pub struct Summary {
+    pub version: String,
+    /// The downloaded update, which starts at the next restart
+    pub staged: Option<String>,
+    /// On a version of its own, without updates
+    pub paused: bool,
+}
+
+pub fn summary() -> Result<Summary, String> {
+    let status = read_status()?;
+    Ok(Summary {
+        paused: status.channel() == Some(Channel::Pinned),
+        staged: status.staged.map(|d| d.version),
+        version: status.booted.version,
+    })
+}
+
 /// The deployments from `rpm-ostree status --json` (readable without root),
 /// or from the file named by COSMIC_BLUE_UPDATES_STATUS_JSON (previews)
 fn read_status() -> Result<Status, String> {
@@ -544,14 +563,7 @@ impl Page {
 
         let mut content = widget::column::with_capacity(8)
             .spacing(space_s)
-            .align_x(Alignment::Center)
-            .push(
-                text::body(tr(
-                    "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you. If something goes wrong, you can go back to the previous version.",
-                ))
-                .align_x(Alignment::Center)
-                .width(Length::Fill),
-            );
+            .align_x(Alignment::Center);
         if let Some(card) = &self.card {
             content = content.push(card.view(Message::Card));
         }
@@ -596,7 +608,14 @@ impl Page {
                 .center_x(Length::Fill),
         );
 
-        let page = header(ICON, tr("Updates"), content.into());
+        let page = header(
+            ICON,
+            tr("Updates"),
+            tr(
+                "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you. If something goes wrong, you can go back to the previous version.",
+            ),
+            content.into(),
+        );
         widget::toaster(&self.toasts, page)
     }
 }
