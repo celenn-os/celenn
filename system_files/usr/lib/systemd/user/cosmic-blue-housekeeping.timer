@@ -1,0 +1,11 @@
+[Unit]
+Description=Empty the old trash and check the disk space a few times a day
+
+[Timer]
+# A while after login (not while the desktop starts), then every 6 hours
+OnStartupSec=10min
+OnUnitActiveSec=6h
+RandomizedDelaySec=5min
+
+[Install]
+WantedBy=timers.target

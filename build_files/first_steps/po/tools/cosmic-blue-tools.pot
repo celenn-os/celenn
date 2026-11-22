@@ -35,9 +35,6 @@ msgstr ""
 msgid "You are up to date."
 msgstr ""
 
-msgid "The check did not work. Are you online?"
-msgstr ""
-
 msgid "Ready for the next restart: {}"
 msgstr ""
 
@@ -92,9 +89,6 @@ msgid "MB"
 msgstr ""
 
 msgid "GB"
-msgstr ""
-
-msgid "Something went wrong, nothing was changed."
 msgstr ""
 
 msgid "The system version could not be read: is this computer installed with cosmic-blue?"
@@ -176,6 +170,39 @@ msgid "{} freed"
 msgstr ""
 
 msgid "Everything was already tidy."
+msgstr ""
+
+msgid "Trash"
+msgstr ""
+
+msgid "{} in the trash"
+msgstr ""
+
+msgid "The trash is empty."
+msgstr ""
+
+msgid "Empty"
+msgstr ""
+
+msgid "Emptying…"
+msgstr ""
+
+msgid "Automatically"
+msgstr ""
+
+msgid "Delete files that stayed in the trash for more than 30 days"
+msgstr ""
+
+msgid "Like on Windows and the Mac. Newer ones can still be put back."
+msgstr ""
+
+msgid "Warn when the disk is almost full"
+msgstr ""
+
+msgid "The disk is almost full"
+msgstr ""
+
+msgid "{} left. Updates and new apps need room."
 msgstr ""
 
 msgid "Apps that come with cosmic-blue"

@@ -54,6 +54,10 @@ systemctl --global enable speech-dispatcher.socket
 # system and flatpaks (and stop when `ujust toggle-updates` turns uupd off)
 systemctl --global enable cosmic-blue-appimage-update.timer
 
+# Files trashed more than 30 days ago go, and a notification warns when the
+# disk is almost full (cosmic-blue Tools turns both off)
+systemctl --global enable cosmic-blue-housekeeping.timer
+
 # Keep systemd-gpt-auto-generator from stacking an automount of the EFI
 # system partition on /boot. GRUB tells systemd which disk it booted from
 # (LoaderDevicePartUUID), so on installs where /boot is a directory of the

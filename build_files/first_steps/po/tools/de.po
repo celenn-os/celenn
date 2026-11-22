@@ -35,9 +35,6 @@ msgstr "Wird geprüft…"
 msgid "You are up to date."
 msgstr "Das System ist aktuell."
 
-msgid "The check did not work. Are you online?"
-msgstr "Die Prüfung hat nicht geklappt. Sind Sie online?"
-
 msgid "Ready for the next restart: {}"
 msgstr "Bereit für den nächsten Neustart: {}"
 
@@ -95,9 +92,6 @@ msgstr "MB"
 
 msgid "GB"
 msgstr "GB"
-
-msgid "Something went wrong, nothing was changed."
-msgstr "Etwas ist schiefgelaufen, nichts wurde geändert."
 
 msgid "The system version could not be read: is this computer installed with cosmic-blue?"
 msgstr "Die Systemversion konnte nicht gelesen werden: Ist dieser Computer mit cosmic-blue installiert?"
@@ -179,6 +173,39 @@ msgstr "{} freigegeben"
 
 msgid "Everything was already tidy."
 msgstr "Es war schon alles aufgeräumt."
+
+msgid "Trash"
+msgstr "Papierkorb"
+
+msgid "{} in the trash"
+msgstr "{} im Papierkorb"
+
+msgid "The trash is empty."
+msgstr "Der Papierkorb ist leer."
+
+msgid "Empty"
+msgstr "Leeren"
+
+msgid "Emptying…"
+msgstr "Wird geleert…"
+
+msgid "Automatically"
+msgstr "Automatisch"
+
+msgid "Delete files that stayed in the trash for more than 30 days"
+msgstr "Dateien löschen, die länger als 30 Tage im Papierkorb liegen"
+
+msgid "Like on Windows and the Mac. Newer ones can still be put back."
+msgstr "Wie bei Windows und Mac. Neuere lassen sich weiterhin wiederherstellen."
+
+msgid "Warn when the disk is almost full"
+msgstr "Warnen, wenn der Speicher fast voll ist"
+
+msgid "The disk is almost full"
+msgstr "Der Speicher ist fast voll"
+
+msgid "{} left. Updates and new apps need room."
+msgstr "Noch {} frei. Updates und neue Apps brauchen Platz."
 
 msgid "Apps that come with cosmic-blue"
 msgstr "Apps, die cosmic-blue mitbringt"

@@ -114,56 +114,78 @@ pub fn brew_installed() -> BTreeSet<usize> {
         .collect()
 }
 
-/// Installs developer tools with Homebrew, as the user (like `ujust
-/// install-dev-tools`, with the devcontainer CLI it always adds)
-pub async fn brew_install(formulas: Vec<&'static str>, casks: Vec<String>) -> bool {
-    let brew = |args: Vec<String>| async move {
-        tokio::process::Command::new(BREW)
-            .args(&args)
-            .env("HOMEBREW_NO_ENV_HINTS", "1")
-            .stdin(std::process::Stdio::null())
-            .status()
-            .await
-            .is_ok_and(|status| status.success())
-    };
-    let mut ok = true;
-    if casks.iter().any(|cask| cask.starts_with("ublue-os/tap/")) {
-        brew(vec!["tap".into(), "ublue-os/tap".into()]).await;
+/// Runs brew as the user. Err: what it wrote on its error output.
+async fn brew(args: Vec<String>) -> Result<(), String> {
+    let output = tokio::process::Command::new(BREW)
+        .args(&args)
+        .env("HOMEBREW_NO_ENV_HINTS", "1")
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::piped())
+        .output()
+        .await
+        .map_err(|error| format!("brew: {error}"))?;
+    if output.status.success() {
+        return Ok(());
     }
+    let error = String::from_utf8_lossy(&output.stderr);
+    eprintln!("brew {args:?}: {}\n{error}", output.status);
+    Err(format!(
+        "{error}\nbrew {}: {}",
+        args.join(" "),
+        output.status
+    ))
+}
+
+/// Several brew commands: all of them run, the errors add up
+async fn brew_all(commands: Vec<Vec<String>>) -> Result<(), String> {
+    let mut errors = Vec::new();
+    for args in commands {
+        if let Err(error) = brew(args).await {
+            errors.push(error);
+        }
+    }
+    if errors.is_empty() {
+        Ok(())
+    } else {
+        Err(errors.join("\n"))
+    }
+}
+
+/// Installs developer tools with Homebrew, as the user (like `ujust
+/// install-dev-tools`, with the devcontainer CLI it always adds).
+/// Err: brew's error output.
+pub async fn brew_install(formulas: Vec<&'static str>, casks: Vec<String>) -> Result<(), String> {
+    if casks.iter().any(|cask| cask.starts_with("ublue-os/tap/")) {
+        // Already tapped, or the installs below say what is wrong
+        let _ = brew(vec!["tap".into(), "ublue-os/tap".into()]).await;
+    }
+    let mut commands = Vec::new();
     if !formulas.is_empty() {
         let mut args = vec!["install".to_owned(), "devcontainer".to_owned()];
         args.extend(formulas.iter().map(|name| (*name).to_owned()));
-        ok &= brew(args).await;
+        commands.push(args);
     }
     for cask in casks {
-        ok &= brew(vec!["install".into(), "--cask".into(), cask]).await;
+        commands.push(vec!["install".into(), "--cask".into(), cask]);
     }
-    ok
+    brew_all(commands).await
 }
 
 /// Removes developer tools installed with Homebrew (their formulas or cask;
 /// the devcontainer CLI stays, other tools may need it)
 #[allow(dead_code)] // The tour only installs
-pub async fn brew_remove(formulas: Vec<&'static str>, casks: Vec<String>) -> bool {
-    let brew = |args: Vec<String>| async move {
-        tokio::process::Command::new(BREW)
-            .args(&args)
-            .env("HOMEBREW_NO_ENV_HINTS", "1")
-            .stdin(std::process::Stdio::null())
-            .status()
-            .await
-            .is_ok_and(|status| status.success())
-    };
-    let mut ok = true;
+pub async fn brew_remove(formulas: Vec<&'static str>, casks: Vec<String>) -> Result<(), String> {
+    let mut commands = Vec::new();
     if !formulas.is_empty() {
         let mut args = vec!["uninstall".to_owned(), "--formula".to_owned()];
         args.extend(formulas.iter().map(|name| (*name).to_owned()));
-        ok &= brew(args).await;
+        commands.push(args);
     }
     for cask in casks {
-        ok &= brew(vec!["uninstall".into(), "--cask".into(), cask]).await;
+        commands.push(vec!["uninstall".into(), "--cask".into(), cask]);
     }
-    ok
+    brew_all(commands).await
 }
 
 /// The Homebrew name of a cask (in the ublue-os tap or Homebrew's own)
