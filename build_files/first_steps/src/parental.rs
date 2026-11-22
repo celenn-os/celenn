@@ -8,7 +8,7 @@
 //   - in a child's session, a small agent (autostart) that warns 10, 5 and
 //     1 minutes before the session closes, with an "Ask for more time"
 //     button;
-//   - that button's window: a parent gives 15 minutes, 30 minutes or an hour
+//   - that button's window: a parent gives 15, 30 or 60 minutes
 //     with their password, there and then.
 //
 // The rules are applied by a service (parental_daemon.rs: screen time,
@@ -238,7 +238,7 @@ const TEXTS: &[&str] = &[
     "A parent confirms with their password.",
     "+15 min",
     "+30 min",
-    "+1 h",
+    "+60 min",
     "No limit today",
     "Give",
     "{} minutes left",
@@ -275,7 +275,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
     };
     let size = match mode {
-        Mode::MoreTime => cosmic::iced::Size::new(480.0, 380.0),
+        // Tall enough for every row: at 380 px the last rows were squeezed
+        // ("No limit today" looked thinner) and Cancel/Give were cut off
+        Mode::MoreTime => cosmic::iced::Size::new(480.0, 500.0),
         Mode::Parent(_) => cosmic::iced::Size::new(760.0, 820.0),
     };
     let settings = Settings::default()
@@ -1480,15 +1482,18 @@ impl App {
                     .align_x(Alignment::Center)
                     .width(Length::Fill),
             )
+            // Two rows of two buttons that fill the width, so that all four
+            // choices have the same size
             .push(
-                widget::row::with_children(vec![
-                    choice("+15 min", 15),
-                    choice("+30 min", 30),
-                    choice("+1 h", 60),
-                ])
-                .spacing(space_s),
+                widget::row::with_children(vec![choice("+15 min", 15), choice("+30 min", 30)])
+                    .spacing(space_s)
+                    .width(Length::Fill),
             )
-            .push(choice("No limit today", 0))
+            .push(
+                widget::row::with_children(vec![choice("+60 min", 60), choice("No limit today", 0)])
+                    .spacing(space_s)
+                    .width(Length::Fill),
+            )
             .push(
                 widget::row::with_capacity(3)
                     .spacing(space_s)
