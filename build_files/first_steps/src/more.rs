@@ -21,8 +21,8 @@
 // work shows a card at the top of its page (failure.rs).
 
 use crate::common::{label, spawn, state_icon};
-use crate::failure::{self, Card, CardAction, CardMessage, Outcome};
 use crate::devtools::{self, DEV_TOOLS, DevTool, ToolKind};
+use crate::failure::{self, Card, CardAction, CardMessage, Outcome};
 use crate::i18n::tr;
 use cosmic::app::Task;
 use cosmic::iced::{Alignment, Length};
@@ -430,7 +430,9 @@ fn nvidia() -> Option<bool> {
 /// enrolled (mokutil reads the firmware's lists, no root needed)
 fn driver_key() -> Option<DriverKey> {
     const KEY: &str = "/etc/pki/akmods/certs/akmods-ublue.der";
-    if !Path::new(KEY).exists() || !output("mokutil", &["--sb-state"]).contains("SecureBoot enabled") {
+    if !Path::new(KEY).exists()
+        || !output("mokutil", &["--sb-state"]).contains("SecureBoot enabled")
+    {
         return None;
     }
     if output("mokutil", &["--test-key", KEY]).contains("already enrolled") {
@@ -444,7 +446,11 @@ fn driver_key() -> Option<DriverKey> {
         .stderr(Stdio::null())
         .status()
         .is_ok_and(|status| status.success());
-    Some(if queued { DriverKey::Queued } else { DriverKey::Missing })
+    Some(if queued {
+        DriverKey::Queued
+    } else {
+        DriverKey::Missing
+    })
 }
 
 /// The COSMIC dark theme setting: the person's, else the system default
@@ -479,7 +485,11 @@ pub fn read_state() -> State {
     State {
         battery_limit,
         nvidia,
-        driver_key: if nvidia == Some(true) { driver_key() } else { None },
+        driver_key: if nvidia == Some(true) {
+            driver_key()
+        } else {
+            None
+        },
         efi: Path::new("/sys/firmware/efi").exists(),
         fonts: data.join("fonts/microsoft-core-fonts").is_dir(),
         vms: has(VMS),
@@ -1093,11 +1103,7 @@ impl Page {
 /// steps tour installs developer tools (devtools.rs): Homebrew for the user,
 /// Flathub for everyone. None: the password prompt was dismissed; the
 /// last failure otherwise
-async fn apply_list(
-    list: List,
-    installed: BTreeSet<usize>,
-    chosen: BTreeSet<usize>,
-) -> Outcome {
+async fn apply_list(list: List, installed: BTreeSet<usize>, chosen: BTreeSet<usize>) -> Outcome {
     let (mut formulas, mut casks, mut apps) = (Vec::new(), Vec::new(), Vec::new());
     let (mut old_formulas, mut old_casks, mut old_apps) = (Vec::new(), Vec::new(), Vec::new());
     for (i, tool) in list.tools().enumerate() {
@@ -1116,15 +1122,15 @@ async fn apply_list(
         }
     }
     let mut result = Ok(());
-    if !formulas.is_empty() || !casks.is_empty() {
-        if let Err(error) = devtools::brew_install(formulas, casks).await {
-            result = Err(failure::failure(&error));
-        }
+    if (!formulas.is_empty() || !casks.is_empty())
+        && let Err(error) = devtools::brew_install(formulas, casks).await
+    {
+        result = Err(failure::failure(&error));
     }
-    if !old_formulas.is_empty() || !old_casks.is_empty() {
-        if let Err(error) = devtools::brew_remove(old_formulas, old_casks).await {
-            result = Err(failure::failure(&error));
-        }
+    if (!old_formulas.is_empty() || !old_casks.is_empty())
+        && let Err(error) = devtools::brew_remove(old_formulas, old_casks).await
+    {
+        result = Err(failure::failure(&error));
     }
     for (verb, apps) in [("install", apps), ("uninstall", old_apps)] {
         if apps.is_empty() {

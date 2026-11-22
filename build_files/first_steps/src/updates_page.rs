@@ -539,11 +539,7 @@ impl Page {
 
     pub fn view(&self) -> Element<'_, Message> {
         let cosmic_theme::Spacing {
-            space_xxs,
-            space_s,
-            space_m: _,
-            space_l: _,
-            ..
+            space_xxs, space_s, ..
         } = theme::spacing();
 
         let mut content = widget::column::with_capacity(8)

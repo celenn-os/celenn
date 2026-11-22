@@ -1,6 +1,7 @@
 name: Lint
 # Static checks of pull requests, in about a minute: shellcheck on every shell
-# script (tests/lint.sh) and actionlint on the workflows, so a script mistake
+# script and rustfmt on the Rust programs (tests/lint.sh), and actionlint on
+# the workflows, so a script mistake
 # shows before the image build and its boot test end. A change to the Renovate
 # config is also checked: a mistake there makes Renovate stop quietly.
 on:
@@ -9,6 +10,7 @@ on:
       - main
     paths:
       - '**.sh'
+      - 'build_files/**.rs'
       - 'system_files/**'
       - 'tests/**'
       - '.github/workflows/**'
@@ -33,10 +35,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: shellcheck
+      - name: shellcheck and rustfmt
         run: |
           command -v shellcheck >/dev/null || { sudo apt-get update -q && sudo apt-get install -y -q shellcheck; }
+          command -v rustfmt >/dev/null || rustup component add rustfmt
           shellcheck --version
+          rustfmt --version
           tests/lint.sh
 
       # The image comes with its own shellcheck, which also checks the run:
