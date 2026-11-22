@@ -174,7 +174,7 @@ const PROFILES: &[Profile] = &[
 /// A password manager of the "Your passwords" page, from Flathub for
 /// everyone like the profiles. cosmic-blue Tools offers the same ones, and
 /// KeePassXC (more.rs)
-struct PasswordManager {
+struct VaultApp {
     app: &'static str,
     run: &'static [&'static str],
     /// Where the passwords are kept
@@ -184,15 +184,15 @@ struct PasswordManager {
     done: &'static str,
 }
 
-const PASSWORD_MANAGERS: &[PasswordManager] = &[
-    PasswordManager {
+const VAULT_APPS: &[VaultApp] = &[
+    VaultApp {
         app: BITWARDEN,
         run: &["flatpak", "run", "com.bitwarden.desktop"],
         title: "Synced with my phone",
         caption: "Bitwarden: on this computer, your phone and in Firefox. Free account, everything is encrypted before it leaves the computer.",
         done: "Installed. Open it to create your account, then install Bitwarden on your phone.",
     },
-    PasswordManager {
+    VaultApp {
         app: "org.gnome.World.Secrets",
         run: &["flatpak", "run", "org.gnome.World.Secrets"],
         title: "Only on this computer",
@@ -308,7 +308,7 @@ enum Body {
     /// Buttons that do the real thing
     Try,
     /// The password managers, each with its Install button
-    Passwords,
+    Vaults,
     /// What was done, backups and help
     Ready,
     /// A large icon of the icon theme, as an illustration
@@ -543,7 +543,7 @@ fn pages(mode: &Mode, origin: Option<Origin>) -> Vec<Page> {
                     ]),
                 )
             };
-            let passwords = Page {
+            let vaults = Page {
                 icon: Some("cosmic-blue-tour-passwords"),
                 note: Some(
                     "Not now? Go on: Firefox already remembers the passwords of websites, and cosmic-blue Tools offers these apps too.",
@@ -553,7 +553,7 @@ fn pages(mode: &Mode, origin: Option<Origin>) -> Vec<Page> {
                     Some(
                         "A password manager remembers them for you and makes up strong ones. Where do you want to keep them?",
                     ),
-                    Body::Passwords,
+                    Body::Vaults,
                 )
             };
             let good_to_know = Page {
@@ -597,7 +597,7 @@ fn pages(mode: &Mode, origin: Option<Origin>) -> Vec<Page> {
                     bearings(origin),
                     try_it,
                     belongings,
-                    passwords,
+                    vaults,
                     good_to_know,
                     ready,
                 ],
@@ -608,7 +608,7 @@ fn pages(mode: &Mode, origin: Option<Origin>) -> Vec<Page> {
                     computer,
                     try_it,
                     belongings,
-                    passwords,
+                    vaults,
                     good_to_know,
                     ready,
                 ],
@@ -833,7 +833,7 @@ fn all_texts() -> Vec<&'static str> {
     for profile in PROFILES {
         texts.extend([profile.title, profile.caption]);
     }
-    for manager in PASSWORD_MANAGERS {
+    for manager in VAULT_APPS {
         texts.extend([manager.title, manager.caption, manager.done]);
     }
     for thing in Try::ALL {
@@ -977,9 +977,9 @@ enum Message {
     BatteryDone(bool, bool),
     Try(Try),
     /// Install a password manager (its app)
-    PasswordInstall(&'static str),
-    PasswordDone(&'static str, Outcome),
-    PasswordCard(CardMessage),
+    VaultInstall(&'static str),
+    VaultDone(&'static str, Outcome),
+    VaultCard(CardMessage),
     /// A change that did not work
     Failed,
     OpenWith(&'static [&'static str]),
@@ -1045,8 +1045,8 @@ struct App<T: Tour> {
     install_card: Option<Card<(Vec<String>, Vec<usize>)>>,
     /// The password manager installing, and the card of one that did not
     /// install (its app, to try again)
-    password_installing: Option<&'static str>,
-    password_card: Option<Card<&'static str>>,
+    vault_installing: Option<&'static str>,
+    vault_card: Option<Card<&'static str>>,
     // Computer
     computer: Option<Computer>,
     nvidia: Nvidia,
@@ -1271,8 +1271,8 @@ impl<T: Tour> Application for App<T> {
             dev_open: false,
             install: Install::Idle,
             install_card: None,
-            password_installing: None,
-            password_card: None,
+            vault_installing: None,
+            vault_card: None,
             computer: None,
             nvidia: Nvidia::Idle,
             tried: BTreeSet::new(),
@@ -1459,9 +1459,9 @@ impl<T: Tour> Application for App<T> {
                     }
                 }
             }
-            Message::PasswordInstall(app) => {
-                self.password_installing = Some(app);
-                self.password_card = None;
+            Message::VaultInstall(app) => {
+                self.vault_installing = Some(app);
+                self.vault_card = None;
                 let args = [
                     "install",
                     "--system",
@@ -1473,31 +1473,31 @@ impl<T: Tour> Application for App<T> {
                 .map(str::to_owned)
                 .to_vec();
                 return Task::perform(failure::run("flatpak", args, None), move |outcome| {
-                    cosmic::Action::App(Message::PasswordDone(app, outcome))
+                    cosmic::Action::App(Message::VaultDone(app, outcome))
                 });
             }
-            Message::PasswordDone(app, outcome) => {
-                self.password_installing = None;
+            Message::VaultDone(app, outcome) => {
+                self.vault_installing = None;
                 if matches!(outcome, Some(Ok(()))) && app == BITWARDEN {
                     run(&Action::Launch(BITWARDEN_EXTENSION));
                 }
                 if let Some(Err(failure)) = outcome {
-                    let title = PASSWORD_MANAGERS
+                    let title = VAULT_APPS
                         .iter()
                         .find(|manager| manager.app == app)
                         .map_or("", |manager| manager.title);
-                    self.password_card = Some(Card::new(tr(title), failure, app));
+                    self.vault_card = Some(Card::new(tr(title), failure, app));
                 }
                 return check_apps();
             }
-            Message::PasswordCard(message) => {
-                let Some(card) = &mut self.password_card else {
+            Message::VaultCard(message) => {
+                let Some(card) = &mut self.vault_card else {
                     return Task::none();
                 };
                 match card.update(message) {
                     CardAction::None => {}
-                    CardAction::Close => self.password_card = None,
-                    CardAction::Retry(app) => return self.update(Message::PasswordInstall(app)),
+                    CardAction::Close => self.vault_card = None,
+                    CardAction::Retry(app) => return self.update(Message::VaultInstall(app)),
                 }
             }
             Message::Tick => {
@@ -1903,7 +1903,7 @@ impl<T: Tour> App<T> {
                 })
                 .collect(),
             Body::Ready => return self.ready_view(space_s),
-            Body::Passwords => return self.passwords_view(space_s),
+            Body::Vaults => return self.vaults_view(space_s),
             Body::Icon(name) => {
                 return widget::container(widget::icon::from_name(*name).size(128))
                     .padding([space_s, 0])
@@ -1934,13 +1934,12 @@ impl<T: Tour> App<T> {
         section(rows)
     }
 
-    fn passwords_view<'a>(&'a self, space_s: u16) -> Element<'a, Message> {
-        let rows = PASSWORD_MANAGERS
+    fn vaults_view<'a>(&'a self, space_s: u16) -> Element<'a, Message> {
+        let rows = VAULT_APPS
             .iter()
             .map(|manager| {
                 let installed = self.installed.contains(manager.app);
-                let control: Element<'a, Message> = if self.password_installing == Some(manager.app)
-                {
+                let control: Element<'a, Message> = if self.vault_installing == Some(manager.app) {
                     widget::row::with_capacity(2)
                         .spacing(theme::spacing().space_xxs)
                         .align_y(Alignment::Center)
@@ -1954,9 +1953,9 @@ impl<T: Tour> App<T> {
                 } else {
                     widget::button::standard(tr("Install"))
                         .on_press_maybe(
-                            self.password_installing
+                            self.vault_installing
                                 .is_none()
-                                .then_some(Message::PasswordInstall(manager.app)),
+                                .then_some(Message::VaultInstall(manager.app)),
                         )
                         .into()
                 };
@@ -1987,8 +1986,8 @@ impl<T: Tour> App<T> {
         let mut column = widget::column::with_capacity(2)
             .spacing(space_s)
             .push(section(rows));
-        if let Some(card) = &self.password_card {
-            column = column.push(card.view(Message::PasswordCard));
+        if let Some(card) = &self.vault_card {
+            column = column.push(card.view(Message::VaultCard));
         }
         column.into()
     }

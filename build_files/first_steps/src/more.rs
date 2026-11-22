@@ -183,7 +183,7 @@ const GAMES: &[(&str, &[DevTool])] = &[
 
 /// The password managers, from Flathub: the ones of the first steps tour's
 /// "Your passwords" page (main.rs), and KeePassXC
-const PASSWORDS: &[(&str, &[DevTool])] = &[
+const VAULT_APPS: &[(&str, &[DevTool])] = &[
     (
         "Synced",
         &[DevTool {
@@ -211,7 +211,7 @@ const PASSWORDS: &[(&str, &[DevTool])] = &[
 pub enum List {
     Dev = 0,
     Games = 1,
-    Passwords = 2,
+    Vault = 2,
 }
 
 impl List {
@@ -219,7 +219,7 @@ impl List {
         match self {
             List::Dev => DEV_TOOLS,
             List::Games => GAMES,
-            List::Passwords => PASSWORDS,
+            List::Vault => VAULT_APPS,
         }
     }
 
@@ -231,7 +231,7 @@ impl List {
         match self {
             List::Dev => "Developer tools",
             List::Games => "Games",
-            List::Passwords => "Passwords",
+            List::Vault => "Passwords",
         }
     }
 
@@ -239,7 +239,7 @@ impl List {
         match self {
             List::Dev => "The developer tools are ready.",
             List::Games => "Your game apps are ready.",
-            List::Passwords => "Your password manager is ready.",
+            List::Vault => "Your password manager is ready.",
         }
     }
 }
@@ -534,10 +534,10 @@ pub fn read_state() -> State {
         dark: dark(),
         bottom_bar: crate::layout::bottom_bar(),
         dock_visible: crate::layout::dock_always_visible(),
-        installed: [List::Dev, List::Games, List::Passwords].map(|list| {
+        installed: [List::Dev, List::Games, List::Vault].map(|list| {
             let mut installed = match list {
                 List::Dev => devtools::brew_installed(),
-                List::Games | List::Passwords => BTreeSet::new(),
+                List::Games | List::Vault => BTreeSet::new(),
             };
             installed.extend(
                 list.tools()
@@ -687,7 +687,7 @@ impl Page {
                         self.open[n] = false;
                         // Bitwarden just installed: its Firefox extension
                         // too (devtools.rs)
-                        if list == List::Passwords
+                        if list == List::Vault
                             && let Some(state) = &self.state
                         {
                             let bitwarden = list.tools().position(|tool| {
@@ -934,7 +934,7 @@ impl Page {
         section = self.list(
             state,
             section,
-            List::Passwords,
+            List::Vault,
             "dialog-password-symbolic",
             "Passwords",
             "Bitwarden to sync them with your phone, Secrets or KeePassXC to keep them on this computer. Tick the ones you want, untick the ones to remove.",
