@@ -72,34 +72,36 @@ pub const TEXTS: &[&str] = &[
     "Restart now",
     // Extra software
     "Microsoft fonts",
-    "Arial, Times New Roman, Verdana… for documents made on Windows. cosmic-blue already has look-alikes with the same sizes.",
+    "Arial, Times New Roman, Verdana… for documents made on Windows.",
     "Installed. Restart open apps to see them.",
     "Microsoft's license applies to these fonts.",
     "Read it",
     "Accept and install",
     "Games",
-    "Steam, Heroic, Lutris… Tick the ones you want, untick the ones to remove. Your games and saves stay.",
+    "Steam, Heroic, Lutris, Discord…",
     "Stores",
     "Windows games",
     "And also",
     "Your game apps are ready.",
     "Passwords",
-    "Bitwarden to sync them with your phone, Secrets or KeePassXC to keep them on this computer. Tick the ones you want, untick the ones to remove.",
+    "Bitwarden (synced with your phone), Secrets, KeePassXC.",
     "Synced",
     "On this computer",
     "Your password manager is ready.",
     "Virtual machines",
     "virt-manager, to run Windows or another Linux in a window.",
     "FlatPark",
-    "A second app source for COSMIC Store, with apps that are not on Flathub. Less checked than Flathub.",
+    "More apps in COSMIC Store, from outside Flathub. Less checked.",
     "Developer tools",
-    "Docker, VS Code, Neovim… Tick the ones you want, untick the ones to remove.",
+    "Docker, VS Code, Neovim…",
     "Choose…",
     "Hide",
     "Containers",
     "Code editors",
     "In the terminal",
     "Apply",
+    "Tick the ones you want, untick the ones to remove.",
+    "Tick the ones you want, untick the ones to remove. Your games and saves stay.",
     "Homebrew is not set up yet: only Podman Desktop can be installed now.",
     "The developer tools are ready.",
     // Appearance
@@ -915,21 +917,20 @@ impl Page {
     }
 
     fn software<'a>(&'a self, state: &'a State) -> Element<'a, Message> {
-        let mut section = settings::section()
-            .add(self.row(
-                "font-x-generic-symbolic",
-                "Microsoft fonts",
-                "Arial, Times New Roman, Verdana… for documents made on Windows. cosmic-blue already has look-alikes with the same sizes.",
-                self.install(state.fonts, Job::Fonts),
-                Some(Job::Fonts(true)),
-            ));
+        let mut section = settings::section().add(self.row(
+            "font-x-generic-symbolic",
+            "Microsoft fonts",
+            "Arial, Times New Roman, Verdana… for documents made on Windows.",
+            self.install(state.fonts, Job::Fonts),
+            Some(Job::Fonts(true)),
+        ));
         section = self.list(
             state,
             section,
             List::Games,
             "input-gaming-symbolic",
             "Games",
-            "Steam, Heroic, Lutris… Tick the ones you want, untick the ones to remove. Your games and saves stay.",
+            "Steam, Heroic, Lutris, Discord…",
         );
         section = self.list(
             state,
@@ -937,7 +938,7 @@ impl Page {
             List::Vault,
             "dialog-password-symbolic",
             "Passwords",
-            "Bitwarden to sync them with your phone, Secrets or KeePassXC to keep them on this computer. Tick the ones you want, untick the ones to remove.",
+            "Bitwarden (synced with your phone), Secrets, KeePassXC.",
         );
         section = section
             .add(self.row(
@@ -950,7 +951,7 @@ impl Page {
             .add(self.row(
                 "system-software-install-symbolic",
                 "FlatPark",
-                "A second app source for COSMIC Store, with apps that are not on Flathub. Less checked than Flathub.",
+                "More apps in COSMIC Store, from outside Flathub. Less checked.",
                 self.toggler(state.flatpark, Job::FlatPark),
                 None,
             ));
@@ -960,7 +961,7 @@ impl Page {
             List::Dev,
             "utilities-terminal-symbolic",
             "Developer tools",
-            "Docker, VS Code, Neovim… Tick the ones you want, untick the ones to remove.",
+            "Docker, VS Code, Neovim…",
         );
         section.into()
     }
@@ -1060,15 +1061,16 @@ impl Page {
                 )
                 .into()
         };
-        let note: Element<'a, Message> = if state.brew || list != List::Dev {
-            widget::space::horizontal().width(Length::Fill).into()
+        // How the list works, said here rather than in the row's caption so
+        // that the page stays short when the lists are closed
+        let note = if list == List::Dev && !state.brew {
+            tr("Homebrew is not set up yet: only Podman Desktop can be installed now.")
+        } else if list == List::Games {
+            tr("Tick the ones you want, untick the ones to remove. Your games and saves stay.")
         } else {
-            text::caption(tr(
-                "Homebrew is not set up yet: only Podman Desktop can be installed now.",
-            ))
-            .width(Length::Fill)
-            .into()
+            tr("Tick the ones you want, untick the ones to remove.")
         };
+        let note: Element<'a, Message> = text::caption(note).width(Length::Fill).into();
         section.add(
             widget::row::with_capacity(2)
                 .spacing(space_s)
