@@ -33,7 +33,6 @@ use std::time::{Duration, Instant};
 
 #[allow(dead_code)] // (the translation check is the app's)
 mod i18n;
-#[allow(dead_code)] // (the app list's labels are the app's)
 mod parental_apps;
 mod parental_rules;
 use i18n::tr;
@@ -75,7 +74,10 @@ fn main() {
         Some("refusal") => {
             // The login screen's message when the check gives no reason
             system_language();
-            println!("{}", tr("Parental controls do not allow logging in now. Ask a parent."));
+            println!(
+                "{}",
+                tr("Parental controls do not allow logging in now. Ask a parent.")
+            );
         }
         _ => {
             eprintln!("Usage: cosmic-blue-parental-daemon run | login-check | refusal | status");
@@ -109,7 +111,16 @@ fn sessions(user: &str) -> Vec<Session> {
         .split_whitespace()
         .filter_map(|id| {
             let props = Command::new("loginctl")
-                .args(["show-session", id, "-p", "State", "-p", "LockedHint", "-p", "Class"])
+                .args([
+                    "show-session",
+                    id,
+                    "-p",
+                    "State",
+                    "-p",
+                    "LockedHint",
+                    "-p",
+                    "Class",
+                ])
                 .output()
                 .ok()?;
             let props = String::from_utf8_lossy(&props.stdout).into_owned();
@@ -149,9 +160,32 @@ fn run_quiet(program: &str, args: &[&str]) -> bool {
         .is_ok_and(|status| status.success())
 }
 
+/// Public resolvers that answer DNS over HTTPS (port 443): a browser set to
+/// use one of them would skip the family filter. CleanBrowsing, the filter
+/// itself, is not in the list.
+const DOH_V4: &str = "1.1.1.1, 1.0.0.1, 1.1.1.2, 1.0.0.2, 1.1.1.3, 1.0.0.3, \
+    8.8.8.8, 8.8.4.4, 9.9.9.9, 149.112.112.112, 9.9.9.10, 149.112.112.10, \
+    9.9.9.11, 149.112.112.11, 94.140.14.14, 94.140.15.15, 94.140.14.140, \
+    94.140.14.141, 208.67.222.222, 208.67.220.220, 208.67.222.123, \
+    208.67.220.123, 45.90.28.0/24, 45.90.30.0/24, 76.76.2.0/24, 76.76.10.0/24, \
+    194.242.2.0/24, 101.101.101.101, 223.5.5.5, 223.6.6.6";
+const DOH_V6: &str = "2606:4700:4700::1111, 2606:4700:4700::1001, \
+    2606:4700:4700::1112, 2606:4700:4700::1002, 2606:4700:4700::1113, \
+    2606:4700:4700::1003, 2001:4860:4860::8888, 2001:4860:4860::8844, \
+    2620:fe::fe, 2620:fe::9, 2620:fe::10, 2620:fe::fe:10, 2620:fe::11, \
+    2620:fe::fe:11, 2a10:50c0::ad1:ff, 2a10:50c0::ad2:ff, 2620:119:35::35, \
+    2620:119:53::53, 2a07:a8c0::/32, 2a07:e340::/32";
+/// Ports of the usual VPN protocols (WireGuard, OpenVPN, IPsec, L2TP,
+/// PPTP), refused to the filtered accounts' own programs. Connections made
+/// by NetworkManager run as root: polkit keeps children from adding them
+/// (50-cosmic-blue-parental.rules).
+const VPN_UDP: &str = "51820, 1194, 500, 4500, 1701";
+const VPN_TCP: &str = "1194, 1723";
+
 /// The nftables rules for the accounts with the web filter on: their DNS
 /// queries to systemd-resolved's stub go to the filter, and DNS straight to
-/// other servers (or DNS over TLS) is refused
+/// other servers, DNS over TLS, DNS over HTTPS to the public resolvers and
+/// the usual VPN ports are refused
 fn filter_rules(uids: &BTreeSet<u32>) -> String {
     let set = uids
         .iter()
@@ -170,6 +204,10 @@ table inet {TABLE} {{
         type filter hook output priority filter; policy accept;
         meta skuid {{ {set} }} ip daddr != 127.0.0.0/8 meta l4proto {{ tcp, udp }} th dport {{ 53, 853 }} reject
         meta skuid {{ {set} }} ip6 daddr != ::1 meta l4proto {{ tcp, udp }} th dport {{ 53, 853 }} reject
+        meta skuid {{ {set} }} ip daddr {{ {DOH_V4} }} meta l4proto {{ tcp, udp }} th dport 443 reject
+        meta skuid {{ {set} }} ip6 daddr {{ {DOH_V6} }} meta l4proto {{ tcp, udp }} th dport 443 reject
+        meta skuid {{ {set} }} udp dport {{ {VPN_UDP} }} reject
+        meta skuid {{ {set} }} tcp dport {{ {VPN_TCP} }} reject
     }}
 }}
 "
@@ -234,8 +272,9 @@ fn run() {
     loop {
         let elapsed = last.elapsed().as_secs().min(60);
         last = Instant::now();
-        if let Some(now) = Now::read() {
-            tick(&now, elapsed, &mut applied);
+        match Now::read() {
+            Some(now) => tick(&now, elapsed, &mut applied),
+            None => eprintln!("Could not read the time: no rules applied"),
         }
         std::thread::sleep(TICK);
     }
@@ -259,7 +298,11 @@ fn tick(now: &Now, elapsed: u64, applied: &mut Applied) {
             println!(
                 "{user}: {} session(s), {}",
                 mine.len(),
-                if on_screen { "on screen: counting" } else { "not on screen" }
+                if on_screen {
+                    "on screen: counting"
+                } else {
+                    "not on screen"
+                }
             );
             applied.on_screen.insert(user.clone(), on_screen);
         }
@@ -270,31 +313,74 @@ fn tick(now: &Now, elapsed: u64, applied: &mut Applied) {
             usage.today.seconds += elapsed;
             changed = true;
         }
-        if changed {
-            if let Err(error) = write_file(&parental_rules::usage_path(&user), &usage.to_json()) {
-                eprintln!("{user}: could not save the time used: {error}");
-            }
+        if changed
+            && let Err(error) = write_file(&parental_rules::usage_path(&user), &usage.to_json())
+        {
+            eprintln!("{user}: could not save the time used: {error}");
         }
 
         let extra = parental_rules::load_extra(&user);
         let verdict = parental_rules::verdict(&rules, usage.today.seconds, &extra, now);
-        if let Some(block) = verdict.blocked {
-            if !mine.is_empty() {
-                println!(
-                    "{user}: {}, closing the sessions {}",
-                    match block {
-                        Block::Limit => "screen time used up",
-                        Block::Bedtime => "bedtime",
-                    },
-                    mine.iter().map(|s| s.id.as_str()).collect::<Vec<_>>().join(" ")
-                );
-                if !run_quiet("loginctl", &["terminate-user", &user]) {
-                    eprintln!("{user}: could not close the sessions");
-                }
+        if let Some(block) = verdict.blocked
+            && !mine.is_empty()
+        {
+            println!(
+                "{user}: {}, closing the sessions {}",
+                match block {
+                    Block::Limit => "screen time used up",
+                    Block::Bedtime => "bedtime",
+                },
+                mine.iter()
+                    .map(|s| s.id.as_str())
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            );
+            if !run_quiet("loginctl", &["terminate-user", &user]) {
+                eprintln!("{user}: could not close the sessions");
             }
         }
     }
     applied.web_filter(filtered);
+    sync_group(&parental_rules::children());
+}
+
+/// The group of the child accounts, which polkit and D-Bus rules use: no
+/// network connections of their own (VPN), no time zone change, no direct
+/// systemd-resolved lookups. Its members are the accounts with rules (the
+/// helper adds a new child at once; this also removes former ones).
+const GROUP: &str = "cosmic-blue-children";
+
+fn sync_group(children: &[String]) {
+    let Ok(output) = Command::new("getent").args(["group", GROUP]).output() else {
+        return;
+    };
+    if !output.status.success() {
+        eprintln!("No {GROUP} group (systemd-sysusers)");
+        return;
+    }
+    let line = String::from_utf8_lossy(&output.stdout).trim().to_owned();
+    let members: BTreeSet<&str> = line
+        .rsplit(':')
+        .next()
+        .unwrap_or_default()
+        .split(',')
+        .filter(|member| !member.is_empty())
+        .collect();
+    for child in children {
+        if !members.contains(child.as_str())
+            && uid(child).is_some()
+            && run_quiet("gpasswd", &["-a", child, GROUP])
+        {
+            println!("{child}: added to {GROUP}");
+        }
+    }
+    for member in members {
+        if !children.iter().any(|child| child == member)
+            && run_quiet("gpasswd", &["-d", member, GROUP])
+        {
+            println!("{member}: removed from {GROUP}");
+        }
+    }
 }
 
 /// The language of the system (/etc/locale.conf), for the login check: PAM
@@ -339,7 +425,11 @@ fn refusal(user: &str) -> Option<String> {
         Block::Limit => format!(
             "{}\n{}",
             tr("Screen time is over for today."),
-            tr("You can log in again tomorrow at {}.").replacen("{}", &parental_rules::clock(back), 1)
+            tr("You can log in again tomorrow at {}.").replacen(
+                "{}",
+                &parental_rules::clock(back),
+                1
+            )
         ),
     })
 }
@@ -383,7 +473,9 @@ fn status() {
             verdict
                 .allowed_today
                 .map_or("unlimited".to_owned(), |s| format!("{s}s")),
-            verdict.remaining.map_or("unlimited".to_owned(), |s| format!("{s}s")),
+            verdict
+                .remaining
+                .map_or("unlimited".to_owned(), |s| format!("{s}s")),
             match verdict.blocked {
                 Some(Block::Limit) => "limit",
                 Some(Block::Bedtime) => "bedtime",
@@ -392,7 +484,10 @@ fn status() {
             if rules.web_filter { "on" } else { "off" },
         );
         if rules.apps_enabled {
-            println!("{user}: applications validated by a parent: {}", rules.allowed_apps.len());
+            println!(
+                "{user}: applications validated by a parent: {}",
+                rules.allowed_apps.len()
+            );
         }
     }
 }
@@ -407,7 +502,8 @@ fn watch_apps() {
     let lang = std::env::var("LANG").unwrap_or_default();
     let mut apps: Option<(Instant, Vec<parental_apps::App>)> = None;
     // Last message per child and reason, not to repeat it every 2 s
-    let mut told: std::collections::BTreeMap<(u32, parental_apps::Stop), Instant> = Default::default();
+    let mut told: std::collections::BTreeMap<(u32, parental_apps::Stop), Instant> =
+        Default::default();
     loop {
         std::thread::sleep(EVERY);
         let children: Vec<(String, u32, Rules)> = parental_rules::children()
@@ -420,7 +516,10 @@ fn watch_apps() {
         if children.is_empty() {
             continue;
         }
-        if apps.as_ref().is_none_or(|(read, _)| read.elapsed() > APPS_AGAIN) {
+        if apps
+            .as_ref()
+            .is_none_or(|(read, _)| read.elapsed() > APPS_AGAIN)
+        {
             apps = Some((Instant::now(), parental_apps::installed(&lang)));
         }
         let Some((_, list)) = &apps else {
@@ -433,14 +532,21 @@ fn watch_apps() {
                     continue;
                 };
                 // At once, without letting it save: it should not run at all
-                let _ = Command::new("kill").args(["-KILL", &pid.to_string()]).status();
+                let _ = Command::new("kill")
+                    .args(["-KILL", &pid.to_string()])
+                    .status();
                 let key = (uid, stop.clone());
-                if told.get(&key).is_some_and(|at| at.elapsed() < Duration::from_secs(10)) {
+                if told
+                    .get(&key)
+                    .is_some_and(|at| at.elapsed() < Duration::from_secs(10))
+                {
                     continue;
                 }
                 println!(
                     "{user}: stopped {} ({stop:?})",
-                    exe.as_deref().map(|e| e.display().to_string()).unwrap_or_default()
+                    exe.as_deref()
+                        .map(|e| e.display().to_string())
+                        .unwrap_or_default()
                 );
                 tell_child(&user, uid, &stop);
                 told.insert(key, Instant::now());
@@ -459,12 +565,22 @@ fn tell_child(user: &str, uid: u32, stop: &parental_apps::Stop) {
         ),
         parental_apps::Stop::Downloaded(name) => (
             tr("Program blocked").to_owned(),
-            tr("«{}» cannot run on this account: downloaded programs are not allowed.").replacen("{}", name, 1),
+            tr("«{}» cannot run on this account: downloaded programs are not allowed.")
+                .replacen("{}", name, 1),
         ),
     };
     let bus = format!("DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/{uid}/bus");
     let _ = Command::new("runuser")
-        .args(["-u", user, "--", "env", &bus, "notify-send", "--app-name", &tr("Parental controls")])
+        .args([
+            "-u",
+            user,
+            "--",
+            "env",
+            &bus,
+            "notify-send",
+            "--app-name",
+            tr("Parental controls"),
+        ])
         .args(["--icon", "cosmic-blue-parental-controls", &title, &body])
         .stdout(Stdio::null())
         .stderr(Stdio::null())

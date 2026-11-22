@@ -40,6 +40,7 @@ use std::time::Duration;
 mod devtools;
 mod failure;
 mod i18n;
+mod layout;
 mod system;
 use devtools::{DEV_TOOLS, DevTool, ToolKind, brew_install, brew_installed, dev_tools};
 use failure::{Card, CardAction, CardMessage, Failure, Outcome};
@@ -60,6 +61,12 @@ const INSTALLERS: [&str; 2] = [
     "/usr/share/applications/anaconda.desktop",
 ];
 const UPDATES_APP: &str = "/usr/libexec/cosmic-blue-updates";
+/// This program, for the windows it opens (--phone)
+const TOUR: &str = "/usr/libexec/cosmic-blue-tour";
+/// LocalSend (first-boot app): files between phones and computers
+const LOCALSEND: &[&str] = &["flatpak", "run", "org.localsend.localsend_app"];
+/// A QR code of LocalSend's download page, for the phone
+const LOCALSEND_QR: &str = "/usr/share/cosmic-blue/localsend-qr.svg";
 
 /// One shortcut per line (the Settings button next to it opens the rest)
 const ACCESSIBILITY: &str = "Screen reader: Super + Alt + S\nZoom: Super + = and Super + -";
@@ -307,6 +314,8 @@ enum Mode {
     Live,
     Open(PathBuf),
     Shortcuts,
+    /// "Send without a cable": files between the phone and the computer
+    Phone,
 }
 
 /// The cosmic-blue site in the session language
@@ -476,9 +485,11 @@ fn pages(mode: &Mode, origin: Option<Origin>) -> Vec<Page> {
                             "Open Files",
                             Action::Launch(&["cosmic-files"]),
                         ),
-                        row(
+                        row_button(
                             "Photos from a phone",
-                            "Plug it in with its cable and allow file transfer on the phone: it shows up in Files.",
+                            "Without a cable, with LocalSend. Or plug it in and allow file transfer on the phone: it shows up in Files.",
+                            "Without a cable",
+                            Action::Launch(&[TOUR, "--phone"]),
                         ),
                         row_button(
                             "Bookmarks and passwords",
@@ -592,7 +603,7 @@ fn pages(mode: &Mode, origin: Option<Origin>) -> Vec<Page> {
                 Body::Icon("cosmic-blue-installer"),
             ),
         ],
-        Mode::Open(_) | Mode::Shortcuts => Vec::new(),
+        Mode::Open(_) | Mode::Shortcuts | Mode::Phone => Vec::new(),
     }
 }
 
@@ -677,8 +688,18 @@ const TEXTS: &[&str] = &[
     "Light",
     "Wallpaper",
     "Your picture",
-    "Dock always visible",
+    "Layout",
+    "Top bar and dock: like the Mac. One bar at the bottom: like Windows.",
+    "Top bar and dock",
+    "Bar at the bottom",
     "This did not work.",
+    // Send without a cable (--phone)
+    "Send without a cable",
+    "With LocalSend, already on this computer. The files go straight through your Wi-Fi, encrypted, not through the internet.",
+    "On the phone, scan this code and install LocalSend (Play Store or App Store).",
+    "Open LocalSend here and on the phone, on the same Wi-Fi.",
+    "On the phone, pick the photos, then this computer. They arrive in Downloads. It works the other way too.",
+    "Open LocalSend",
     // Profiles
     "Installed",
     "Development",
@@ -822,6 +843,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .resizable(None);
             cosmic::app::run::<App<OpenDialog>>(settings, Mode::Open(file))?;
         }
+        Some("--phone") => {
+            let settings = Settings::default()
+                .size(cosmic::iced::Size::new(640.0, 440.0))
+                .resizable(None);
+            cosmic::app::run::<App<PhoneDialog>>(settings, Mode::Phone)?;
+        }
         Some("--shortcuts") => {
             let settings = Settings::default()
                 .size(cosmic::iced::Size::new(760.0, 720.0))
@@ -870,7 +897,8 @@ enum Message {
     Dark(bool),
     Wallpaper(usize),
     Avatar(usize),
-    Dock(bool),
+    /// One bar at the bottom (true), or the top bar and the dock
+    Layout(bool),
     Profile(usize, bool),
     /// Show the developer tools (true) or the profiles again
     DevOpen(bool),
@@ -912,6 +940,10 @@ struct OpenDialog;
 impl Tour for OpenDialog {
     const APP_ID: &'static str = "io.github.cosmic_blue_os.OpenPackage";
 }
+struct PhoneDialog;
+impl Tour for PhoneDialog {
+    const APP_ID: &'static str = "io.github.cosmic_blue_os.PhoneTransfer";
+}
 struct ShortcutsApp;
 impl Tour for ShortcutsApp {
     const APP_ID: &'static str = "io.github.cosmic_blue_os.Shortcuts";
@@ -935,7 +967,7 @@ struct App<T: Tour> {
     wallpaper: Option<PathBuf>,
     avatars: Vec<(PathBuf, widget::image::Handle)>,
     avatar: Option<usize>,
-    dock_visible: bool,
+    bottom_bar: bool,
     look_changed: bool,
     // Apps
     installed: BTreeSet<String>,
@@ -1158,7 +1190,7 @@ impl<T: Tour> Application for App<T> {
             wallpaper: system::current_wallpaper(),
             avatars,
             avatar: None,
-            dock_visible: system::dock_always_visible(),
+            bottom_bar: layout::bottom_bar(),
             look_changed: false,
             installed: BTreeSet::new(),
             preinstall: if first_steps {
@@ -1182,6 +1214,7 @@ impl<T: Tour> Application for App<T> {
             Mode::Live => tr("Welcome to cosmic-blue").to_owned(),
             Mode::FirstSteps => tr("First steps").to_owned(),
             Mode::Shortcuts => tr("Keyboard shortcuts").to_owned(),
+            Mode::Phone => tr("Send without a cable").to_owned(),
             Mode::Open(file) => fill(tr("“{}” does not install here"), &short_name(file)),
         };
         let mut tasks = vec![match app.core.main_window_id() {
@@ -1192,7 +1225,7 @@ impl<T: Tour> Application for App<T> {
             tasks.push(check_apps());
             tasks.push(blocking(system::computer, Message::Computer));
         }
-        if matches!(mode, Mode::Open(_)) {
+        if matches!(mode, Mode::Open(_) | Mode::Phone) {
             tasks.push(check_apps());
         }
         (app, Task::batch(tasks))
@@ -1212,7 +1245,9 @@ impl<T: Tour> Application for App<T> {
             }
             Message::Run(action) => run(&action),
             Message::OpenWith(command) => {
-                if let Mode::Open(file) = &self.mode {
+                if self.mode == Mode::Phone {
+                    spawn(command[0], &command[1..]);
+                } else if let Mode::Open(file) = &self.mode {
                     let mut args: Vec<&str> = command[1..].to_vec();
                     let file = file.to_string_lossy().into_owned();
                     args.push(&file);
@@ -1257,9 +1292,9 @@ impl<T: Tour> Application for App<T> {
                     );
                 }
             }
-            Message::Dock(visible) => {
-                if system::set_dock_always_visible(visible) {
-                    self.dock_visible = visible;
+            Message::Layout(bottom) => {
+                if layout::set_bottom_bar(bottom) {
+                    self.bottom_bar = bottom;
                     self.look_changed = true;
                 } else {
                     return self.toast("This did not work.");
@@ -1466,6 +1501,7 @@ impl<T: Tour> Application for App<T> {
         match &self.mode {
             Mode::Open(file) => return self.open_view(file),
             Mode::Shortcuts => return self.shortcuts_view(),
+            Mode::Phone => return self.phone_view(),
             _ => {}
         }
         let cosmic_theme::Spacing {
@@ -1835,14 +1871,26 @@ impl<T: Tour> App<T> {
                 row.push(button.on_press(Message::Dark(dark)))
             },
         );
-        // (otherwise it hides when a window covers it)
+        // Top bar and dock (cosmic-blue's own) or one bar at the bottom
+        let layout_buttons = [(false, "Top bar and dock"), (true, "Bar at the bottom")]
+            .into_iter()
+            .fold(
+                widget::row::with_capacity(2).spacing(space_s),
+                |row, (bottom, label)| {
+                    let button = if self.bottom_bar == bottom {
+                        widget::button::suggested(tr(label))
+                    } else {
+                        widget::button::standard(tr(label))
+                    };
+                    row.push(button.on_press(Message::Layout(bottom)))
+                },
+            );
         let dock = settings::item_row(vec![
-            text::body(tr("Dock always visible"))
-                .width(Length::Fill)
-                .into(),
-            widget::toggler(self.dock_visible)
-                .on_toggle(Message::Dock)
-                .into(),
+            two_lines(
+                text::body(tr("Layout")).into(),
+                tr("Top bar and dock: like the Mac. One bar at the bottom: like Windows."),
+            ),
+            layout_buttons.into(),
         ])
         .spacing(space_s);
         let mut column = widget::column::with_capacity(5).spacing(space_s).push(
@@ -2338,6 +2386,73 @@ impl<T: Tour> App<T> {
             }))
             .push(widget::space::vertical())
             .push(buttons)
+            .padding(space_l)
+            .apply(widget::container)
+            .into()
+    }
+
+    /// "Send without a cable": how to get photos and files from a phone
+    /// with LocalSend (from the "Bring your things" page)
+    fn phone_view(&self) -> Element<'_, Message> {
+        let cosmic_theme::Spacing {
+            space_xxs,
+            space_s,
+            space_m,
+            space_l,
+            ..
+        } = theme::spacing();
+        let steps = [
+            "On the phone, scan this code and install LocalSend (Play Store or App Store).",
+            "Open LocalSend here and on the phone, on the same Wi-Fi.",
+            "On the phone, pick the photos, then this computer. They arrive in Downloads. It works the other way too.",
+        ]
+        .into_iter()
+        .enumerate()
+        .fold(
+            widget::column::with_capacity(3).spacing(space_s),
+            |column, (i, step)| {
+                column.push(
+                    widget::row::with_capacity(2)
+                        .spacing(space_s)
+                        .align_y(Alignment::Start)
+                        .push(text::heading(format!("{}.", i + 1)))
+                        .push(text::body(tr(step)).wrapping(Wrapping::Word).width(Length::Fill)),
+                )
+            },
+        );
+        let mut middle = widget::row::with_capacity(2)
+            .spacing(space_m)
+            .align_y(Alignment::Center);
+        if Path::new(LOCALSEND_QR).exists() {
+            middle = middle.push(
+                widget::svg(widget::svg::Handle::from_path(LOCALSEND_QR))
+                    .width(140)
+                    .height(140),
+            );
+        }
+        middle = middle.push(steps);
+        let open = widget::button::suggested(tr("Open LocalSend"));
+        let open = if self.installed.contains("org.localsend.localsend_app") {
+            open.on_press(Message::OpenWith(LOCALSEND))
+        } else {
+            open
+        };
+        widget::column::with_capacity(5)
+            .spacing(space_m)
+            .push(text::title3(tr("Send without a cable")))
+            .push(
+                text::caption(tr("With LocalSend, already on this computer. The files go straight through your Wi-Fi, encrypted, not through the internet."))
+                    .wrapping(Wrapping::Word),
+            )
+            .push(middle)
+            .push(widget::space::vertical())
+            .push(
+                widget::row::with_capacity(3)
+                    .spacing(space_xxs.max(space_s))
+                    .push(widget::space::horizontal())
+                    .push(widget::button::standard(tr("Close")).on_press(Message::Exit))
+                    .push(open),
+            )
             .padding(space_l)
             .apply(widget::container)
             .into()

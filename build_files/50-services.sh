@@ -58,6 +58,16 @@ systemctl --global enable cosmic-blue-appimage-update.timer
 # disk is almost full (cosmic-blue Tools turns both off)
 systemctl --global enable cosmic-blue-housekeeping.timer
 
+# LocalSend (a first-boot app; the tour's "Send without a cable") finds
+# phones on the same network and receives their files on port 53317, which
+# the default zone (public) closes. The port only answers while LocalSend is
+# open, and LocalSend asks before it accepts files. Our service definition,
+# unless firewalld ships its own.
+if [[ ! -e /usr/lib/firewalld/services/localsend.xml ]]; then
+    install -m 0644 /usr/share/cosmic-blue/firewalld/localsend.xml /usr/lib/firewalld/services/localsend.xml
+fi
+firewall-offline-cmd --zone=public --add-service=localsend
+
 # Keep systemd-gpt-auto-generator from stacking an automount of the EFI
 # system partition on /boot. GRUB tells systemd which disk it booted from
 # (LoaderDevicePartUUID), so on installs where /boot is a directory of the

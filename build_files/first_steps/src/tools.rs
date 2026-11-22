@@ -44,6 +44,7 @@ mod failure;
 mod help;
 mod housekeeping;
 mod i18n;
+mod layout;
 mod maintenance;
 mod more;
 mod update_progress;

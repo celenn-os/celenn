@@ -8,8 +8,8 @@ msgstr ""
 msgid "Updates"
 msgstr "Actualizaciones"
 
-msgid "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you."
-msgstr "cosmic-blue se actualiza solo en segundo plano. Una nueva versión arranca en el próximo reinicio, sin interrumpirle."
+msgid "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you. If something goes wrong, you can go back to the previous version."
+msgstr "cosmic-blue se actualiza solo en segundo plano. Una nueva versión arranca en el próximo reinicio, sin interrumpirle. Si algo va mal, puede volver a la versión anterior."
 
 msgid "Current version: {}"
 msgstr "Versión actual: {}"
@@ -363,6 +363,27 @@ msgstr "Instaladas. Reinicie las aplicaciones abiertas para verlas."
 
 msgid "Light text on dark backgrounds. Off: the light theme."
 msgstr "Texto claro sobre fondo oscuro. Desactivado: el tema claro."
+
+msgid "Dock always visible"
+msgstr "Dock siempre visible"
+
+msgid "Off: it hides when a window covers it."
+msgstr "Desactivado: se oculta cuando una ventana lo tapa."
+
+msgid "This did not work."
+msgstr "No ha funcionado."
+
+msgid "Layout"
+msgstr "Disposición"
+
+msgid "Top bar and dock: like the Mac. One bar at the bottom: like Windows."
+msgstr "Barra arriba y dock: como en Mac. Una barra abajo: como en Windows."
+
+msgid "Top bar and dock"
+msgstr "Barra arriba y dock"
+
+msgid "Bar at the bottom"
+msgstr "Barra abajo"
 
 msgid "Log out and back in to finish."
 msgstr "Cierre la sesión y vuelva a entrar para terminar."

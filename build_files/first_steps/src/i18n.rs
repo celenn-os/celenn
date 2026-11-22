@@ -31,10 +31,10 @@ pub fn parse_po(po: &str) -> Vec<(String, String)> {
     let mut entries = Vec::new();
     let (mut msgid, mut msgstr) = (None::<String>, None::<String>);
     let mut flush = |msgid: &mut Option<String>, msgstr: &mut Option<String>| {
-        if let (Some(id), Some(text)) = (msgid.take(), msgstr.take()) {
-            if !id.is_empty() {
-                entries.push((id, text));
-            }
+        if let (Some(id), Some(text)) = (msgid.take(), msgstr.take())
+            && !id.is_empty()
+        {
+            entries.push((id, text));
         }
     };
     for line in po.lines().map(str::trim) {

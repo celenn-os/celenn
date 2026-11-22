@@ -88,13 +88,22 @@ impl Rules {
             weekdays: minutes(&value["limit"]["weekdays"], 24 * 60, default.weekdays),
             weekend: minutes(&value["limit"]["weekend"], 24 * 60, default.weekend),
             bedtime_enabled: value["bedtime"]["enabled"].as_bool().unwrap_or(false),
-            bedtime_start: minutes(&value["bedtime"]["start"], 24 * 60 - 1, default.bedtime_start),
+            bedtime_start: minutes(
+                &value["bedtime"]["start"],
+                24 * 60 - 1,
+                default.bedtime_start,
+            ),
             bedtime_end: minutes(&value["bedtime"]["end"], 24 * 60 - 1, default.bedtime_end),
             web_filter: value["web_filter"].as_bool().unwrap_or(false),
             apps_enabled: value["apps"]["enabled"].as_bool().unwrap_or(false),
             allowed_apps: value["apps"]["allowed"]
                 .as_array()
-                .map(|ids| ids.iter().filter_map(|id| id.as_str()).map(str::to_owned).collect())
+                .map(|ids| {
+                    ids.iter()
+                        .filter_map(|id| id.as_str())
+                        .map(str::to_owned)
+                        .collect()
+                })
                 .unwrap_or_default(),
         })
     }
@@ -115,13 +124,22 @@ impl Rules {
             return None;
         }
         let text = std::fs::read_to_string(config_path(user)).ok()?;
-        Rules::from_json(&text)
+        // A rules file that cannot be read (only root writes it, checked)
+        // gets the default rules rather than none: a damaged file must not
+        // lift every limit
+        Some(Rules::from_json(&text).unwrap_or_else(|| {
+            eprintln!("A rules file was not understood: default rules applied");
+            Rules::default()
+        }))
     }
 
     /// Minutes allowed on a day (1 = Monday ... 7 = Sunday)
     pub fn daily_limit(&self, weekday: u32) -> Option<u32> {
-        self.limit_enabled
-            .then_some(if weekday >= 6 { self.weekend } else { self.weekdays })
+        self.limit_enabled.then_some(if weekday >= 6 {
+            self.weekend
+        } else {
+            self.weekdays
+        })
     }
 
     /// True when `minute` (after midnight) is in the bedtime hours
@@ -140,7 +158,9 @@ impl Rules {
 /// Account names this feature accepts (what useradd makes by default)
 pub fn valid_user(user: &str) -> bool {
     let mut chars = user.chars();
-    chars.next().is_some_and(|c| c.is_ascii_lowercase() || c == '_')
+    chars
+        .next()
+        .is_some_and(|c| c.is_ascii_lowercase() || c == '_')
         && chars.all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-' || c == '_')
         && user.len() <= 32
 }
@@ -265,7 +285,7 @@ impl Usage {
 
     /// Starts a new day when the date changed; true when it did
     pub fn roll(&mut self, now: &Now) -> bool {
-        if self.today.date == now.date {
+        if self.today.date == now.date || self.clock_went_back(now) {
             return false;
         }
         if !self.today.date.is_empty() {
@@ -284,14 +304,41 @@ impl Usage {
         true
     }
 
+    /// The date is one day before the day being counted: the time zone (or
+    /// the clock) moved back over midnight. That day goes on, so that
+    /// changing the time zone does not start a new day with nothing used.
+    /// (Further back: a clock that was wrong, the days start again.)
+    fn clock_went_back(&self, now: &Now) -> bool {
+        match (day_number(&self.today.date), day_number(&now.date)) {
+            (Some(counted), Some(today)) => counted - today == 1,
+            _ => false,
+        }
+    }
+
     /// Seconds used today (0 when the file is from another day)
     pub fn used_today(&self, now: &Now) -> u64 {
-        if self.today.date == now.date {
+        if self.today.date == now.date || self.clock_went_back(now) {
             self.today.seconds
         } else {
             0
         }
     }
+}
+
+/// Days since 1970-01-01 of a "2026-11-21" date
+fn day_number(date: &str) -> Option<i64> {
+    let mut parts = date.splitn(3, '-').map(|part| part.parse::<i64>().ok());
+    let (y, m, d) = (parts.next()??, parts.next()??, parts.next()??);
+    if !(1..=12).contains(&m) || !(1..=31).contains(&d) {
+        return None;
+    }
+    // Howard Hinnant's days_from_civil
+    let y = if m <= 2 { y - 1 } else { y };
+    let era = y.div_euclid(400);
+    let yoe = y - era * 400;
+    let doy = (153 * (m + if m > 2 { -3 } else { 9 }) + 2) / 5 + d - 1;
+    let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    Some(era * 146_097 + doe - 719_468)
 }
 
 /// More time granted by a parent: (unix time of the grant, minutes)
@@ -354,13 +401,21 @@ pub fn verdict(rules: &Rules, used: u64, extra: &[(i64, u32)], now: &Now) -> Ver
     };
     let override_until = extra
         .iter()
-        .map(|(at, minutes)| if *minutes == 0 { until_morning(*at) } else { at + i64::from(*minutes) * 60 })
+        .map(|(at, minutes)| {
+            if *minutes == 0 {
+                until_morning(*at)
+            } else {
+                at + i64::from(*minutes) * 60
+            }
+        })
         .max()
         .filter(|until| *until > now.unix);
 
     // 0 minutes granted: no screen time limit for the rest of the day (the
     // bedtime hours still apply)
-    let unlimited_today = extra.iter().any(|(at, minutes)| *at >= day_start && *minutes == 0);
+    let unlimited_today = extra
+        .iter()
+        .any(|(at, minutes)| *at >= day_start && *minutes == 0);
     let allowed_today = rules
         .daily_limit(now.weekday)
         .filter(|_| !unlimited_today)
@@ -404,7 +459,11 @@ pub fn verdict(rules: &Rules, used: u64, extra: &[(i64, u32)], now: &Now) -> Ver
     });
     Verdict {
         blocked,
-        remaining: if blocked.is_some() { Some(0) } else { remaining },
+        remaining: if blocked.is_some() {
+            Some(0)
+        } else {
+            remaining
+        },
         allowed_today,
         back_at,
     }
@@ -456,7 +515,10 @@ mod tests {
         assert_eq!(v.remaining, Some(15 * 60));
         // No limit today, but not tomorrow
         let v = verdict(&rules, 300 * 60, &[(n.unix - 60, 0)], &n);
-        assert_eq!((v.blocked, v.remaining, v.allowed_today), (None, None, None));
+        assert_eq!(
+            (v.blocked, v.remaining, v.allowed_today),
+            (None, None, None)
+        );
         let v = verdict(&rules, 300 * 60, &[(n.unix - 86400, 0)], &n);
         assert_eq!(v.blocked, Some(Block::Limit));
     }
@@ -520,12 +582,38 @@ mod tests {
     }
 
     #[test]
+    fn time_zone_moved_back() {
+        let day = |date: &str| Now {
+            date: date.into(),
+            minute: 0,
+            weekday: 6,
+            unix: 0,
+        };
+        let mut usage = Usage::default();
+        usage.roll(&day("2026-11-21"));
+        usage.today.seconds = 3600;
+        // Back over midnight (another time zone): the same day goes on
+        assert!(!usage.roll(&day("2026-11-20")));
+        assert_eq!(usage.used_today(&day("2026-11-20")), 3600);
+        // The next day starts as usual
+        assert!(usage.roll(&day("2026-11-22")));
+        assert_eq!(usage.used_today(&day("2026-11-22")), 0);
+        // Far back (a clock that was wrong): the days start again
+        assert!(usage.roll(&day("2026-11-01")));
+        assert_eq!(usage.today.seconds, 0);
+    }
+
+    #[test]
     fn json() {
         let rules = Rules::default();
         assert_eq!(Rules::from_json(&rules.to_json()), Some(rules.clone()));
         let mut apps = rules;
         apps.apps_enabled = true;
-        apps.allowed_apps = ["org.mozilla.firefox".to_owned(), "com.system76.CosmicFiles".to_owned()].into();
+        apps.allowed_apps = [
+            "org.mozilla.firefox".to_owned(),
+            "com.system76.CosmicFiles".to_owned(),
+        ]
+        .into();
         assert_eq!(Rules::from_json(&apps.to_json()), Some(apps));
         let mut usage = Usage::default();
         for day in 1..=9 {
@@ -541,6 +629,17 @@ mod tests {
         assert_eq!(usage.history.len(), HISTORY_DAYS - 1);
         assert_eq!(Usage::from_json(&usage.to_json()), usage);
         assert!(valid_user("lea"));
+        assert_eq!(day_number("1970-01-01"), Some(0));
+        assert_eq!(
+            day_number("2026-03-01"),
+            day_number("2026-02-28").map(|d| d + 1)
+        );
+        assert_eq!(
+            day_number("2024-03-01"),
+            day_number("2024-02-28").map(|d| d + 2)
+        );
+        assert_eq!(day_number("2026-11-21"), Some(20_778));
+        assert_eq!(day_number("nonsense"), None);
         assert!(!valid_user("../etc"));
         assert!(!valid_user("Lea"));
     }

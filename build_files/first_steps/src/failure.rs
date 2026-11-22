@@ -65,7 +65,11 @@ pub async fn run(program: &str, args: Vec<String>, input: Option<String>) -> Out
     use tokio::io::AsyncWriteExt;
     let child = tokio::process::Command::new(program)
         .args(&args)
-        .stdin(if input.is_some() { Stdio::piped() } else { Stdio::null() })
+        .stdin(if input.is_some() {
+            Stdio::piped()
+        } else {
+            Stdio::null()
+        })
         .stdout(Stdio::null())
         .stderr(Stdio::piped())
         .spawn();
@@ -86,7 +90,10 @@ pub async fn run(program: &str, args: Vec<String>, input: Option<String>) -> Out
         Ok(output) => {
             let error = String::from_utf8_lossy(&output.stderr);
             eprintln!("{program} {args:?}: {}\n{error}", output.status);
-            Some(Err(failure(&format!("{error}\n{program}: {}", output.status))))
+            Some(Err(failure(&format!(
+                "{error}\n{program}: {}",
+                output.status
+            ))))
         }
         Err(error) => {
             eprintln!("{program}: {error}");
@@ -97,7 +104,10 @@ pub async fn run(program: &str, args: Vec<String>, input: Option<String>) -> Out
 
 /// The last lines of an error output, and why it most likely failed
 pub fn failure(error: &str) -> Failure {
-    let lines: Vec<&str> = error.lines().filter(|line| !line.trim().is_empty()).collect();
+    let lines: Vec<&str> = error
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .collect();
     let details = lines[lines.len().saturating_sub(DETAIL_LINES)..].join("\n");
     let cause = cause(error, online(), free_space());
     Failure { cause, details }
@@ -227,7 +237,11 @@ impl<J: Clone> Card<J> {
             CardMessage::ReportOpen => {
                 self.reporting = false;
                 let error = format!("{}\n{}", self.title, self.failure.details);
-                spawn(REPORT, &["open"], Some(("COSMIC_BLUE_REPORT_ERROR", &error)));
+                spawn(
+                    REPORT,
+                    &["open"],
+                    Some(("COSMIC_BLUE_REPORT_ERROR", &error)),
+                );
             }
             CardMessage::Details => self.details = !self.details,
             CardMessage::Close => return CardAction::Close,
@@ -281,7 +295,8 @@ impl<J: Clone> Card<J> {
             .push(widget::button::suggested(tr("Try again")).on_press(map(CardMessage::Retry)));
         if self.failure.cause == Cause::Offline {
             buttons = buttons.push(
-                widget::button::standard(tr("Network settings")).on_press(map(CardMessage::Network)),
+                widget::button::standard(tr("Network settings"))
+                    .on_press(map(CardMessage::Network)),
             );
         }
         // A full disk or no network is not a bug
@@ -349,9 +364,7 @@ impl<J: Clone> Card<J> {
                 let cosmic = theme.cosmic();
                 let warning: cosmic::iced::Color = cosmic.warning_color().into();
                 cosmic::iced::widget::container::Style {
-                    background: Some(
-                        cosmic::iced::Color { a: 0.12, ..warning }.into(),
-                    ),
+                    background: Some(cosmic::iced::Color { a: 0.12, ..warning }.into()),
                     border: cosmic::iced::Border {
                         color: cosmic::iced::Color { a: 0.5, ..warning },
                         width: 1.0,
@@ -381,13 +394,26 @@ mod tests {
 
     #[test]
     fn causes() {
-        let flathub = "error: Unable to load summary from remote flathub: Could not resolve hostname";
+        let flathub =
+            "error: Unable to load summary from remote flathub: Could not resolve hostname";
         assert_eq!(cause(flathub, None, None), Cause::Offline);
         assert_eq!(cause("anything", Some(false), None), Cause::Offline);
-        assert_eq!(cause("write: No space left on device", Some(true), None), Cause::DiskFull);
-        assert_eq!(cause("anything", Some(true), Some(100_000_000)), Cause::DiskFull);
-        assert_eq!(cause("HTTP 503 Service Unavailable", Some(true), None), Cause::Server);
-        assert_eq!(cause("exit status: 1", Some(true), Some(50_000_000_000)), Cause::Other);
+        assert_eq!(
+            cause("write: No space left on device", Some(true), None),
+            Cause::DiskFull
+        );
+        assert_eq!(
+            cause("anything", Some(true), Some(100_000_000)),
+            Cause::DiskFull
+        );
+        assert_eq!(
+            cause("HTTP 503 Service Unavailable", Some(true), None),
+            Cause::Server
+        );
+        assert_eq!(
+            cause("exit status: 1", Some(true), Some(50_000_000_000)),
+            Cause::Other
+        );
     }
 
     #[test]

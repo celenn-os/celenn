@@ -149,7 +149,7 @@ msgstr ""
 msgid "+30 min"
 msgstr ""
 
-msgid "+1 h"
+msgid "+60 min"
 msgstr ""
 
 msgid "Give"

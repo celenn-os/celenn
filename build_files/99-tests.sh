@@ -368,6 +368,10 @@ systemctl --global is-enabled cosmic-blue-housekeeping.timer
 # Its warning and the Maintenance page's "Empty" (gio trash --empty)
 command -v notify-send >/dev/null
 command -v gio >/dev/null
+# LocalSend: first-boot app, its port open, the tour's QR code
+grep -q '^\[Flatpak Preinstall org.localsend.localsend_app\]' /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall
+firewall-offline-cmd --zone=public --query-service=localsend >/dev/null
+test -s /usr/share/cosmic-blue/localsend-qr.svg
 # No Bluefin GNOME dconf settings (the folder itself may come from Fedora)
 if compgen -G '/etc/dconf/db/distro.d/*bluefin*' >/dev/null; then
     echo "Bluefin (GNOME) dconf settings present"; exit 1
@@ -497,6 +501,8 @@ grep -qx 'Exec=/usr/libexec/cosmic-blue-tour --shortcuts' \
     /usr/share/applications/io.github.cosmic_blue_os.Shortcuts.desktop
 grep -qx 'Exec=/usr/libexec/cosmic-blue-tour --open %f' \
     /usr/share/applications/io.github.cosmic_blue_os.OpenPackage.desktop
+grep -qx 'Exec=/usr/libexec/cosmic-blue-tour --phone' \
+    /usr/share/applications/io.github.cosmic_blue_os.PhoneTransfer.desktop
 for type in application/x-ms-dos-executable application/x-msi application/vnd.debian.binary-package \
     application/x-rpm; do
     grep -qx "${type}=io.github.cosmic_blue_os.OpenPackage.desktop" /etc/xdg/mimeapps.list \
@@ -602,11 +608,17 @@ if /usr/libexec/cosmic-blue-parental-extend root 600 2>/dev/null; then
     echo "cosmic-blue-parental-extend accepted 600 minutes"; exit 1
 fi
 test ! -e /etc/cosmic-blue/parental-controls
+# The child accounts' group and what it restricts: polkit (no VPN of their
+# own, no time zone change) and D-Bus (no lookups around the filter)
+grep -qx 'g cosmic-blue-children -' /usr/lib/sysusers.d/cosmic-blue-parental.conf
+grep -q 'isInGroup("cosmic-blue-children")' /usr/share/polkit-1/rules.d/10-cosmic-blue-parental.rules
+python3 -c "import xml.dom.minidom, sys; xml.dom.minidom.parse(sys.argv[1])" \
+    /usr/share/dbus-1/system.d/cosmic-blue-parental.conf
 # Applications validated by a parent: Flatpak checks malcontent's filter,
 # which accountsservice keeps
 ldd /usr/bin/flatpak /usr/libexec/flatpak-system-helper | grep -q libmalcontent \
     || { echo "Flatpak is built without malcontent: its app filter would not apply"; exit 1; }
-ls /usr/share/accountsservice/interfaces/ | grep -q 'com.endlessm.ParentalControls.AppFilter' \
+test -e /usr/share/accountsservice/interfaces/com.endlessm.ParentalControls.AppFilter.xml \
     || { echo "accountsservice does not know malcontent's AppFilter"; exit 1; }
 
 # Login and lock screens: our rebuild, with the cosmic-blue wallpaper as the

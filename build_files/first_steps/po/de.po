@@ -134,8 +134,41 @@ msgstr "Hintergrundbild"
 msgid "Your picture"
 msgstr "Ihr Bild"
 
-msgid "Dock always visible"
-msgstr "Dock immer sichtbar"
+msgid "Send without a cable"
+msgstr "Ohne Kabel senden"
+
+msgid "With LocalSend, already on this computer. The files go straight through your Wi-Fi, encrypted, not through the internet."
+msgstr "Mit LocalSend, schon auf diesem Computer. Die Dateien gehen verschlüsselt direkt über Ihr WLAN, nicht über das Internet."
+
+msgid "On the phone, scan this code and install LocalSend (Play Store or App Store)."
+msgstr "Scannen Sie diesen Code mit dem Handy und installieren Sie LocalSend (Play Store oder App Store)."
+
+msgid "Open LocalSend here and on the phone, on the same Wi-Fi."
+msgstr "Öffnen Sie LocalSend hier und auf dem Handy, im selben WLAN."
+
+msgid "On the phone, pick the photos, then this computer. They arrive in Downloads. It works the other way too."
+msgstr "Wählen Sie auf dem Handy die Fotos und dann diesen Computer. Sie landen in Downloads. Es geht auch andersherum."
+
+msgid "Open LocalSend"
+msgstr "LocalSend öffnen"
+
+msgid "Without a cable, with LocalSend. Or plug it in and allow file transfer on the phone: it shows up in Files."
+msgstr "Ohne Kabel, mit LocalSend. Oder schließen Sie es an und erlauben Sie die Dateiübertragung auf dem Handy: Es erscheint in Dateien."
+
+msgid "Without a cable"
+msgstr "Ohne Kabel"
+
+msgid "Layout"
+msgstr "Anordnung"
+
+msgid "Top bar and dock: like the Mac. One bar at the bottom: like Windows."
+msgstr "Leiste oben und Dock: wie beim Mac. Eine Leiste unten: wie bei Windows."
+
+msgid "Top bar and dock"
+msgstr "Leiste oben und Dock"
+
+msgid "Bar at the bottom"
+msgstr "Leiste unten"
 
 msgid "This did not work."
 msgstr "Das hat nicht funktioniert."
@@ -412,9 +445,6 @@ msgstr "Dateien öffnen"
 
 msgid "Photos from a phone"
 msgstr "Fotos von einem Handy"
-
-msgid "Plug it in with its cable and allow file transfer on the phone: it shows up in Files."
-msgstr "Schließen Sie es per Kabel an und erlauben Sie auf dem Handy die Dateiübertragung: Es erscheint in Dateien."
 
 msgid "Bookmarks and passwords"
 msgstr "Lesezeichen und Passwörter"

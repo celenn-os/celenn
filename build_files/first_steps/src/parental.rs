@@ -8,7 +8,7 @@
 //   - in a child's session, a small agent (autostart) that warns 10, 5 and
 //     1 minutes before the session closes, with an "Ask for more time"
 //     button;
-//   - that button's window: a parent gives 15 minutes, 30 minutes or an hour
+//   - that button's window: a parent gives 15, 30 or 60 minutes
 //     with their password, there and then.
 //
 // The rules are applied by a service (parental_daemon.rs: screen time,
@@ -41,8 +41,8 @@ mod failure;
 mod i18n;
 mod parental_apps;
 mod parental_rules;
-use i18n::tr;
 use failure::{Card, CardAction, CardMessage, Outcome};
+use i18n::tr;
 use parental_rules::{Now, Rules, Usage};
 
 pub(crate) const LANGUAGES: &[(&str, &str)] = &[
@@ -121,7 +121,11 @@ impl Field {
             value.div_ceil(STEP) * STEP - STEP.min(value.div_ceil(STEP) * STEP)
         };
         if self.is_clock() {
-            if !up && value == 0 { 24 * 60 - STEP } else { next % (24 * 60) }
+            if !up && value == 0 {
+                24 * 60 - STEP
+            } else {
+                next % (24 * 60)
+            }
         } else {
             next.clamp(LIMIT_MIN, LIMIT_MAX)
         }
@@ -136,7 +140,13 @@ impl Field {
         for c in typed.chars() {
             let kind = |c: char| (c.is_ascii_digit(), c.is_alphabetic());
             match tokens.last_mut() {
-                Some(last) if !c.is_whitespace() && last.chars().next().map(kind) == Some(kind(c)) && (c.is_ascii_digit() || c.is_alphabetic()) => last.push(c),
+                Some(last)
+                    if !c.is_whitespace()
+                        && last.chars().next().map(kind) == Some(kind(c))
+                        && (c.is_ascii_digit() || c.is_alphabetic()) =>
+                {
+                    last.push(c)
+                }
                 _ if c.is_whitespace() => {}
                 _ => tokens.push(c.to_string()),
             }
@@ -154,7 +164,10 @@ impl Field {
                 return None;
             }
         }
-        let values: Vec<u32> = numbers.iter().map(|n| n.parse().ok()).collect::<Option<_>>()?;
+        let values: Vec<u32> = numbers
+            .iter()
+            .map(|n| n.parse().ok())
+            .collect::<Option<_>>()?;
         if self.is_clock() {
             let (h, m) = match values.as_slice() {
                 [n] if numbers[0].len() >= 3 => (n / 100, n % 100),
@@ -226,7 +239,7 @@ const TEXTS: &[&str] = &[
     "A parent confirms with their password.",
     "+15 min",
     "+30 min",
-    "+1 h",
+    "+60 min",
     "No limit today",
     "Give",
     "{} minutes left",
@@ -279,7 +292,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
     };
     let size = match mode {
-        Mode::MoreTime => cosmic::iced::Size::new(480.0, 380.0),
+        // Tall enough for every row: at 380 px the last rows were squeezed
+        // ("No limit today" looked thinner) and Cancel/Give were cut off
+        Mode::MoreTime => cosmic::iced::Size::new(480.0, 500.0),
         Mode::Parent(_) => cosmic::iced::Size::new(760.0, 820.0),
     };
     let settings = Settings::default()
@@ -334,7 +349,8 @@ fn agent() {
     }
     let mut warned: BTreeSet<u64> = BTreeSet::new();
     let mut launcher = None;
-    let applications = Path::new(&std::env::var_os("HOME").unwrap_or_default()).join(".local/share/applications");
+    let applications =
+        Path::new(&std::env::var_os("HOME").unwrap_or_default()).join(".local/share/applications");
     let lang = std::env::var("LANG").unwrap_or_default();
     let mut hidden: Option<Option<BTreeSet<String>>> = None;
     let mut rounds: u32 = 0;
@@ -343,9 +359,16 @@ fn agent() {
         let rules = Rules::load(&user);
         // The applications not allowed, hidden (again every minute: some
         // may have been installed)
-        let allowed = rules.as_ref().filter(|r| r.apps_enabled).map(|r| r.allowed_apps.clone());
-        if hidden.as_ref() != Some(&allowed) || (allowed.is_some() && rounds % 6 == 0) {
-            parental_apps::hide(&applications, &parental_apps::installed(&lang), allowed.as_ref());
+        let allowed = rules
+            .as_ref()
+            .filter(|r| r.apps_enabled)
+            .map(|r| r.allowed_apps.clone());
+        if hidden.as_ref() != Some(&allowed) || (allowed.is_some() && rounds.is_multiple_of(6)) {
+            parental_apps::hide(
+                &applications,
+                &parental_apps::installed(&lang),
+                allowed.as_ref(),
+            );
             hidden = Some(allowed);
         }
         rounds = rounds.wrapping_add(1);
@@ -424,7 +447,9 @@ fn notify(remaining: u64, end: &str) {
         *shown
     };
     if let Some(pid) = waiting {
-        let _ = std::process::Command::new("kill").arg(pid.to_string()).status();
+        let _ = std::process::Command::new("kill")
+            .arg(pid.to_string())
+            .status();
     }
     let replace = id.map(|id| id.to_string());
     std::thread::spawn(move || {
@@ -463,7 +488,10 @@ fn notify(remaining: u64, end: &str) {
         let pid = child.id();
         // First line: the notification's id; then the action clicked
         let mut lines = std::io::BufReader::new(child.stdout.take().expect("piped")).lines();
-        let id = lines.next().and_then(Result::ok).and_then(|line| line.trim().parse().ok());
+        let id = lines
+            .next()
+            .and_then(Result::ok)
+            .and_then(|line| line.trim().parse().ok());
         *SHOWN.lock().unwrap_or_else(|e| e.into_inner()) = (id, Some(pid));
         let clicked = lines.next().and_then(Result::ok).unwrap_or_default();
         let _ = child.wait();
@@ -473,8 +501,8 @@ fn notify(remaining: u64, end: &str) {
                 shown.1 = None;
             }
         }
-        if clicked.trim() == "more" {
-            if let Err(error) = std::process::Command::new("/proc/self/exe")
+        if clicked.trim() == "more"
+            && let Err(error) = std::process::Command::new("/proc/self/exe")
                 .arg("--more-time")
                 .spawn()
                 .or_else(|_| {
@@ -482,9 +510,8 @@ fn notify(remaining: u64, end: &str) {
                         .arg("--more-time")
                         .spawn()
                 })
-            {
-                eprintln!("Could not open the more time window: {error}");
-            }
+        {
+            eprintln!("Could not open the more time window: {error}");
         }
     });
 }
@@ -531,25 +558,39 @@ fn accounts() -> Vec<Account> {
         .lines()
         .filter_map(|line| {
             let fields: Vec<&str> = line.split(':').collect();
-            let (user, uid, gecos, shell) = (fields.first()?, fields.get(2)?, fields.get(4)?, fields.get(6)?);
+            let (user, uid, gecos, shell) = (
+                fields.first()?,
+                fields.get(2)?,
+                fields.get(4)?,
+                fields.get(6)?,
+            );
             let uid: u32 = uid.parse().ok()?;
-            if !(1000..60000).contains(&uid) || shell.ends_with("nologin") || shell.ends_with("false") {
+            if !(1000..60000).contains(&uid)
+                || shell.ends_with("nologin")
+                || shell.ends_with("false")
+            {
                 return None;
             }
             let name = gecos.split(',').next().unwrap_or_default().trim();
             let avatar = Path::new(AVATARS).join(user);
             Some(Account {
                 user: (*user).to_owned(),
-                name: if name.is_empty() { (*user).to_owned() } else { name.to_owned() },
+                name: if name.is_empty() {
+                    (*user).to_owned()
+                } else {
+                    name.to_owned()
+                },
                 admin: wheel.contains(*user),
                 rules: Rules::load(user),
                 usage: Usage::load(user),
                 extra: parental_rules::load_extra(user),
-                avatar: avatar.exists().then(|| widget::image::Handle::from_path(avatar)),
+                avatar: avatar
+                    .exists()
+                    .then(|| widget::image::Handle::from_path(avatar)),
             })
         })
         .collect();
-    accounts.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    accounts.sort_by_key(|a| a.name.to_lowercase());
     accounts
 }
 
@@ -582,10 +623,11 @@ fn user_from_name(name: &str, taken: &[String]) -> String {
     let base = base.trim_end_matches('-').to_owned();
     let mut user = base.clone();
     let mut n = 2;
-    while taken.contains(&user) || std::process::Command::new("getent")
-        .args(["passwd", &user])
-        .status()
-        .is_ok_and(|status| status.success())
+    while taken.contains(&user)
+        || std::process::Command::new("getent")
+            .args(["passwd", &user])
+            .status()
+            .is_ok_and(|status| status.success())
     {
         user = format!("{base}{n}");
         n += 1;
@@ -733,7 +775,12 @@ impl App {
     /// The rules of the child account shown
     fn shown_rules(&self) -> Option<Rules> {
         let user = self.shown_user()?;
-        Some(self.account(user)?.rules.clone().unwrap_or_else(Rules::none))
+        Some(
+            self.account(user)?
+                .rules
+                .clone()
+                .unwrap_or_else(Rules::none),
+        )
     }
 
     fn account(&self, user: &str) -> Option<&Account> {
@@ -863,7 +910,12 @@ impl Application for App {
                 let taken: Vec<String> = self.accounts.iter().map(|a| a.user.clone()).collect();
                 let user = user_from_name(&name, &taken);
                 self.busy = true;
-                let args = vec![HELPER.to_owned(), "add-child".to_owned(), user.clone(), name];
+                let args = vec![
+                    HELPER.to_owned(),
+                    "add-child".to_owned(),
+                    user.clone(),
+                    name,
+                ];
                 let input = format!("{}\n{}", self.password, Rules::default().to_json());
                 self.card = None;
                 return Task::perform(failure::run("pkexec", args, Some(input)), move |result| {
@@ -889,7 +941,11 @@ impl Application for App {
             Message::Give => {
                 self.busy = true;
                 // 0: no limit for the rest of the day
-                let amount = if self.minutes == 0 { "day".to_owned() } else { self.minutes.to_string() };
+                let amount = if self.minutes == 0 {
+                    "day".to_owned()
+                } else {
+                    self.minutes.to_string()
+                };
                 let args = vec![EXTEND.to_owned(), user_name(), amount];
                 self.card = None;
                 return Task::perform(failure::run("pkexec", args, None), |result| {
@@ -1138,7 +1194,11 @@ fn today(account: &Account) -> (String, Option<f32>) {
             tr("Today: {} of {}")
                 .replacen("{}", &duration(used), 1)
                 .replacen("{}", &duration(allowed), 1),
-            Some(if allowed == 0 { 1.0 } else { (used as f32 / allowed as f32).min(1.0) }),
+            Some(if allowed == 0 {
+                1.0
+            } else {
+                (used as f32 / allowed as f32).min(1.0)
+            }),
         ),
         None if rules.bedtime_enabled || rules.web_filter => {
             (fill(tr("Today: {}"), &duration(used)), None)
@@ -1155,9 +1215,11 @@ impl App {
             .spacing(space_m)
             .align_x(Alignment::Center)
             .push(
-                text::body(tr("Choose how long and when your children can use this computer."))
-                    .align_x(Alignment::Center)
-                    .width(Length::Fill),
+                text::body(tr(
+                    "Choose how long and when your children can use this computer.",
+                ))
+                .align_x(Alignment::Center)
+                .width(Length::Fill),
             );
 
         let children: Vec<&Account> = self.accounts.iter().filter(|a| !a.admin).collect();
@@ -1171,9 +1233,11 @@ impl App {
                     .push(text::caption(caption))
                     .width(Length::Fill);
                 if let Some(gauge) = gauge {
-                    lines = lines
-                        .push(widget::space::vertical().height(4))
-                        .push(widget::progress_bar::determinate_linear(gauge).width(Length::Fill).girth(6));
+                    lines = lines.push(widget::space::vertical().height(4)).push(
+                        widget::progress_bar::determinate_linear(gauge)
+                            .width(Length::Fill)
+                            .girth(6),
+                    );
                 }
                 section = section.add(
                     widget::button::custom(
@@ -1198,7 +1262,8 @@ impl App {
                 settings::item_row(vec![
                     two_lines(
                         tr("Add a child account"),
-                        tr("An account without administrator rights, ready in one click").to_owned(),
+                        tr("An account without administrator rights, ready in one click")
+                            .to_owned(),
                     ),
                     widget::button::suggested(tr("Add…"))
                         .on_press(Message::ShowAdd)
@@ -1215,7 +1280,10 @@ impl App {
                 section = section.add(
                     settings::item_row(vec![
                         avatar(account, 40),
-                        two_lines(account.name.clone(), tr("Administrator · no limits").to_owned()),
+                        two_lines(
+                            account.name.clone(),
+                            tr("Administrator · no limits").to_owned(),
+                        ),
                     ])
                     .spacing(space_s),
                 );
@@ -1223,18 +1291,30 @@ impl App {
             content = content.push(section);
         }
         content = content.push(
-            text::caption(tr("Only a parent (an administrator account) can change these settings."))
-                .align_x(Alignment::Center)
-                .width(Length::Fill),
+            text::caption(tr(
+                "Only a parent (an administrator account) can change these settings.",
+            ))
+            .align_x(Alignment::Center)
+            .width(Length::Fill),
         );
-        frame(self.banner.as_ref(), tr("Parental controls").to_owned(), false, content.into())
+        frame(
+            self.banner.as_ref(),
+            tr("Parental controls").to_owned(),
+            false,
+            content.into(),
+        )
     }
 
     fn child(&self, user: &str) -> Element<'_, Message> {
         let space_s = theme::spacing().space_s;
         let space_m = theme::spacing().space_m;
         let Some(account) = self.account(user) else {
-            return frame(self.banner.as_ref(), user.to_owned(), true, widget::column::with_capacity(0).into());
+            return frame(
+                self.banner.as_ref(),
+                user.to_owned(),
+                true,
+                widget::column::with_capacity(0).into(),
+            );
         };
         let rules = account.rules.clone().unwrap_or_else(Rules::none);
         let toggle = |on: bool, change: fn(&mut Rules, bool)| {
@@ -1252,7 +1332,10 @@ impl App {
                 _ => field.show(field.get(&rules)),
             };
             widget::row::with_capacity(3)
-                .push(widget::button::icon(widget::icon::from_name("list-remove-symbolic")).on_press(Message::Step(field, false)))
+                .push(
+                    widget::button::icon(widget::icon::from_name("list-remove-symbolic"))
+                        .on_press(Message::Step(field, false)),
+                )
                 .push(
                     // A visible field, so that it shows it can be typed in
                     widget::text_input("", shown)
@@ -1262,7 +1345,10 @@ impl App {
                         .on_unfocus(Message::Commit)
                         .width(Length::Fixed(96.0)),
                 )
-                .push(widget::button::icon(widget::icon::from_name("list-add-symbolic")).on_press(Message::Step(field, true)))
+                .push(
+                    widget::button::icon(widget::icon::from_name("list-add-symbolic"))
+                        .on_press(Message::Step(field, true)),
+                )
                 .align_y(Alignment::Center)
                 .into()
         };
@@ -1293,7 +1379,8 @@ impl App {
             settings::item_row(vec![
                 two_lines(
                     tr("No computer at night"),
-                    tr("The session closes and logging in is refused during these hours.").to_owned(),
+                    tr("The session closes and logging in is refused during these hours.")
+                        .to_owned(),
                 ),
                 toggle(rules.bedtime_enabled, |r, v| r.bedtime_enabled = v).into(),
             ])
@@ -1305,10 +1392,7 @@ impl App {
                     tr("From"),
                     minutes_button(Field::BedtimeStart),
                 ))
-                .add(settings::item(
-                    tr("To"),
-                    minutes_button(Field::BedtimeEnd),
-                ));
+                .add(settings::item(tr("To"), minutes_button(Field::BedtimeEnd)));
         }
 
         let internet = settings::section().title(tr("Internet")).add(
@@ -1328,7 +1412,7 @@ impl App {
                                         let cosmic = theme.cosmic();
                                         cosmic::iced::widget::container::Style {
                                             background: Some(cosmic::iced::Color::from(cosmic.accent_color()).into()),
-                                            text_color: Some(cosmic::iced::Color::from(cosmic.accent.on).into()),
+                                            text_color: Some(cosmic::iced::Color::from(cosmic.accent.on)),
                                             border: cosmic::iced::Border {
                                                 radius: 10.0.into(),
                                                 ..Default::default()
@@ -1356,7 +1440,12 @@ impl App {
             .push(internet)
             .push(self.apps_section(account, &rules))
             .push(self.week(account, &rules));
-        frame(self.banner.as_ref(), account.name.clone(), true, content.into())
+        frame(
+            self.banner.as_ref(),
+            account.name.clone(),
+            true,
+            content.into(),
+        )
     }
 
     /// The "Applications" section of a child's page
@@ -1382,7 +1471,11 @@ impl App {
                 Some(apps) => tr("{} of {}")
                     .replacen(
                         "{}",
-                        &apps.iter().filter(|a| rules.allowed_apps.contains(&a.id)).count().to_string(),
+                        &apps
+                            .iter()
+                            .filter(|a| rules.allowed_apps.contains(&a.id))
+                            .count()
+                            .to_string(),
                         1,
                     )
                     .replacen("{}", &apps.len().to_string(), 1),
@@ -1413,7 +1506,12 @@ impl App {
         let space_s = theme::spacing().space_s;
         let space_m = theme::spacing().space_m;
         let Some(account) = self.account(user) else {
-            return frame(self.banner.as_ref(), user.to_owned(), true, widget::column::with_capacity(0).into());
+            return frame(
+                self.banner.as_ref(),
+                user.to_owned(),
+                true,
+                widget::column::with_capacity(0).into(),
+            );
         };
         let rules = account.rules.clone().unwrap_or_else(Rules::none);
         let title = fill(tr("Applications of {}"), &account.name);
@@ -1463,9 +1561,11 @@ impl App {
             }
         }
         content = content.push(
-            text::caption(tr("Applications installed later are blocked until you tick them."))
-                .align_x(Alignment::Center)
-                .width(Length::Fill),
+            text::caption(tr(
+                "Applications installed later are blocked until you tick them.",
+            ))
+            .align_x(Alignment::Center)
+            .width(Length::Fill),
         );
         frame(self.banner.as_ref(), title, true, content.into())
     }
@@ -1524,7 +1624,10 @@ impl App {
                     .spacing(space_s)
                     .align_x(Alignment::Center)
                     .push(row)
-                    .push(text::caption(fill(tr("Average: {} a day"), &duration(average))))
+                    .push(text::caption(fill(
+                        tr("Average: {} a day"),
+                        &duration(average),
+                    )))
                     .padding([space_s, 0]),
             )
             .into()
@@ -1576,7 +1679,12 @@ impl App {
                     .push(widget::button::standard(tr("Cancel")).on_press(Message::Back))
                     .push(create),
             );
-        frame(self.banner.as_ref(), tr("Add a child account").to_owned(), true, content.into())
+        frame(
+            self.banner.as_ref(),
+            tr("Add a child account").to_owned(),
+            true,
+            content.into(),
+        )
     }
 
     /// The child's window: a parent gives more time with their password
@@ -1602,28 +1710,40 @@ impl App {
         let give: Element<'_, Message> = if self.busy {
             widget::progress_bar::indeterminate_circular().into()
         } else {
-            widget::button::suggested(tr("Give")).on_press(Message::Give).into()
+            widget::button::suggested(tr("Give"))
+                .on_press(Message::Give)
+                .into()
         };
         widget::column::with_capacity(7)
             .spacing(space_m)
             .padding(space_m)
             .align_x(Alignment::Center)
             .push(widget::icon::from_name(ICON).size(56))
-            .push(text::title3(fill(tr("More time for {}"), &name)).center().width(Length::Fill))
+            .push(
+                text::title3(fill(tr("More time for {}"), &name))
+                    .center()
+                    .width(Length::Fill),
+            )
             .push(
                 text::body(tr("A parent confirms with their password."))
                     .align_x(Alignment::Center)
                     .width(Length::Fill),
             )
+            // Two rows of two buttons that fill the width, so that all four
+            // choices have the same size
+            .push(
+                widget::row::with_children(vec![choice("+15 min", 15), choice("+30 min", 30)])
+                    .spacing(space_s)
+                    .width(Length::Fill),
+            )
             .push(
                 widget::row::with_children(vec![
-                    choice("+15 min", 15),
-                    choice("+30 min", 30),
-                    choice("+1 h", 60),
+                    choice("+60 min", 60),
+                    choice("No limit today", 0),
                 ])
-                .spacing(space_s),
+                .spacing(space_s)
+                .width(Length::Fill),
             )
-            .push(choice("No limit today", 0))
             .push(
                 widget::row::with_capacity(3)
                     .spacing(space_s)
@@ -1644,7 +1764,17 @@ mod tests {
 
     #[test]
     fn typed_durations() {
-        for (typed, minutes) in [("45", 45), ("45 min", 45), ("1 h", 60), ("1h20", 80), ("1 h 20 min", 80), ("1:20", 80), ("2 Std", 120), ("2", 5), ("30h", 720)] {
+        for (typed, minutes) in [
+            ("45", 45),
+            ("45 min", 45),
+            ("1 h", 60),
+            ("1h20", 80),
+            ("1 h 20 min", 80),
+            ("1:20", 80),
+            ("2 Std", 120),
+            ("2", 5),
+            ("30h", 720),
+        ] {
             assert_eq!(Field::Weekdays.parse(typed), Some(minutes), "{typed}");
         }
         for typed in ["", "0", "abc", "1:75", "-5", "1 x"] {
@@ -1654,7 +1784,16 @@ mod tests {
 
     #[test]
     fn typed_times() {
-        for (typed, minute) in [("20:45", 1245), ("20h45", 1245), ("20.45", 1245), ("2045", 1245), ("20", 1200), ("7", 420), ("0:00", 0), ("24:00", 0)] {
+        for (typed, minute) in [
+            ("20:45", 1245),
+            ("20h45", 1245),
+            ("20.45", 1245),
+            ("2045", 1245),
+            ("20", 1200),
+            ("7", 420),
+            ("0:00", 0),
+            ("24:00", 0),
+        ] {
             assert_eq!(Field::BedtimeStart.parse(typed), Some(minute), "{typed}");
         }
         for typed in ["25:00", "20:60", "abc", "2475"] {

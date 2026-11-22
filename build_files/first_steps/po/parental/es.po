@@ -149,8 +149,8 @@ msgstr "+15 min"
 msgid "+30 min"
 msgstr "+30 min"
 
-msgid "+1 h"
-msgstr "+1 h"
+msgid "+60 min"
+msgstr "+60 min"
 
 msgid "Give"
 msgstr "Conceder"

@@ -17,6 +17,9 @@ other fonts leave free, so terminals always fall back to this font for them:
   U+10CB05 upper half  U+10CB06 lower half (the fastfetch logo's pixels)
 
 Needs fontTools. Usage: python3 build.py OUTPUT.ttf
+       python3 build.py --check FONT.ttf  (fails when FONT.ttf's outlines or
+       metrics differ from this script's, e.g. a change here that was not
+       followed by a rebuild of the committed font)
 """
 import math
 import sys
@@ -25,12 +28,22 @@ from fontTools.fontBuilder import FontBuilder
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 
 UPM, ADVANCE, ASCENT, DESCENT = 1000, 600, 1069, 293
-LINE = 1.4 * UPM
-# Cell edges around the baseline: the text is centered in the line (top), or
-# hangs from its top (bottom), whichever reaches further; plus 15 units so no
-# seam shows when the line height is rounded to whole pixels
-CELL_TOP = ASCENT + (LINE - ASCENT - DESCENT) / 2 + 15
-CELL_BOTTOM = ASCENT - LINE - 15
+# Where COSMIC Terminal puts a line's edges, at its default size of 14 px:
+# lines are ceil(1.4 * size) pixels high (cosmic-term config.rs), the text is
+# centered in them by its ascent and descent, and cosmic-text truncates the
+# baseline to a whole pixel (layout.rs, "hinting in Y axis"). So at 14 px the
+# line is 20 px, with the baseline 15 px below its top. Other sizes put the
+# edges up to about half a pixel away; the default size is the one that
+# matters most.
+SIZE = 14
+LINE_PX = math.ceil(1.4 * SIZE)
+BASELINE_PX = math.floor((LINE_PX - (ASCENT + DESCENT) * SIZE / UPM) / 2
+                         + ASCENT * SIZE / UPM)
+# Cell edges around the baseline, a few units further out so antialiasing
+# leaves no seam between lines, but too few to tint the lines around
+OVERSHOOT = 4
+CELL_TOP = BASELINE_PX * UPM / SIZE + OVERSHOOT
+CELL_BOTTOM = -(LINE_PX - BASELINE_PX) * UPM / SIZE - OVERSHOOT
 ICON_Y = 360  # vertical center of the icons: the middle of capital letters
 
 
@@ -98,10 +111,10 @@ ARROW_BACK = -150
 # The slanted sides start at the cell edge, exactly where the segment's
 # background ends: starting them at the back edge would leave a small step at
 # the segment's corners. They start a little before the cell edge, so they
-# cross the line's real top and bottom (the cell edges above are 15 units
+# cross the line's real top and bottom (the cell edges above are OVERSHOOT units
 # further out) right on it
 ARROW_MID = round((CELL_TOP + CELL_BOTTOM) / 2)
-ARROW_START = round(-ARROW_TIP * 15 / (CELL_TOP - ARROW_MID - 15))
+ARROW_START = round(-ARROW_TIP * OVERSHOOT / (CELL_TOP - ARROW_MID - OVERSHOOT))
 
 
 def arrow(pen):
@@ -136,17 +149,20 @@ def lock(pen):
 # Half cells for the fastfetch logo (branding/fastfetch/build.py): block
 # elements from other fonts stop short of the cell bottom in COSMIC Terminal,
 # these span exactly the upper or lower half of the whole line, plus a few
-# units to the sides so no seam shows between cells
+# units to the sides so no seam shows between cells. The two halves also
+# overlap by a few units at the middle: it rarely falls on a pixel edge, and
+# two antialiased edges there would leave a faint dark line inside the logo
 MIDDLE = round((CELL_TOP + CELL_BOTTOM) / 2)
+OVERLAP = 8
 
 
 def upper_half(pen):
     polygon(pen, [(-8, round(CELL_TOP)), (ADVANCE + 8, round(CELL_TOP)),
-                  (ADVANCE + 8, MIDDLE), (-8, MIDDLE)])
+                  (ADVANCE + 8, MIDDLE - OVERLAP), (-8, MIDDLE - OVERLAP)])
 
 
 def lower_half(pen):
-    polygon(pen, [(-8, MIDDLE), (ADVANCE + 8, MIDDLE),
+    polygon(pen, [(-8, MIDDLE + OVERLAP), (ADVANCE + 8, MIDDLE + OVERLAP),
                   (ADVANCE + 8, round(CELL_BOTTOM)), (-8, round(CELL_BOTTOM))])
 
 
@@ -163,7 +179,7 @@ GLYPHS = {
 }
 
 
-def main(out):
+def build():
     fb = FontBuilder(UPM, isTTF=True)
     order = list(GLYPHS)
     fb.setupGlyphOrder(order)
@@ -191,8 +207,40 @@ def main(out):
                 xAvgCharWidth=ADVANCE)
     fb.font["OS/2"].panose.bProportion = 9  # monospaced
     fb.setupPost(isFixedPitch=1)
-    fb.save(out)
+    return fb.font
+
+
+def outlines(font):
+    """What the terminal draws: each glyph's points, advance and code point."""
+    cmap = {name: cp for cp, name in font.getBestCmap().items()}
+    glyf, hmtx = font["glyf"], font["hmtx"]
+    return {name: (cmap.get(name), hmtx[name],
+                   list(glyf[name].getCoordinates(glyf)[0]),
+                   list(glyf[name].getCoordinates(glyf)[1]))
+            for name in font.getGlyphOrder()}
+
+
+def check(path):
+    from fontTools.ttLib import TTFont
+    font, built = TTFont(path), build()
+    expected = outlines(built)
+    actual = outlines(font)
+    different = sorted(name for name in expected.keys() | actual.keys()
+                       if expected.get(name) != actual.get(name))
+    metrics = [(table, attr) for table, attr in
+               (("hhea", "ascent"), ("hhea", "descent"), ("head", "unitsPerEm"))
+               if getattr(font[table], attr) != getattr(built[table], attr)]
+    if different or metrics:
+        print(f"{path} is not what {sys.argv[0]} builds (glyphs: "
+              f"{', '.join(different) or 'none'}; metrics: "
+              f"{', '.join(f'{t}.{a}' for t, a in metrics) or 'none'}). "
+              f"Rebuild it: python3 {sys.argv[0]} {path}", file=sys.stderr)
+        sys.exit(1)
+    print(f"{path} matches {sys.argv[0]}")
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    if sys.argv[1] == "--check":
+        check(sys.argv[2])
+    else:
+        build().save(sys.argv[1])

@@ -26,7 +26,13 @@ const CHECK: &str = "/usr/libexec/cosmic-blue-parental-daemon";
 unsafe extern "C" {
     fn pam_get_user(pamh: *mut c_void, user: *mut *const c_char, prompt: *const c_char) -> c_int;
     // (pam_error() is a macro over it)
-    fn pam_prompt(pamh: *mut c_void, style: c_int, response: *mut *mut c_char, fmt: *const c_char, ...) -> c_int;
+    fn pam_prompt(
+        pamh: *mut c_void,
+        style: c_int,
+        response: *mut *mut c_char,
+        fmt: *const c_char,
+        ...
+    ) -> c_int;
     fn pam_syslog(pamh: *mut c_void, priority: c_int, fmt: *const c_char, ...);
 }
 
@@ -53,7 +59,11 @@ fn refusal(user: &str) -> Option<String> {
         return Some(message);
     }
     // No reason given: the general message
-    let output = Command::new(CHECK).arg("refusal").env_clear().output().ok()?;
+    let output = Command::new(CHECK)
+        .arg("refusal")
+        .env_clear()
+        .output()
+        .ok()?;
     Some(String::from_utf8_lossy(&output.stdout).trim().to_owned())
 }
 
@@ -72,7 +82,9 @@ pub unsafe extern "C" fn pam_sm_acct_mgmt(
         return PAM_IGNORE;
     }
     // SAFETY: a NUL-terminated string from libpam
-    let user = unsafe { CStr::from_ptr(user) }.to_string_lossy().into_owned();
+    let user = unsafe { CStr::from_ptr(user) }
+        .to_string_lossy()
+        .into_owned();
     let Ok(refused) = std::panic::catch_unwind(|| refusal(&user)) else {
         return PAM_IGNORE;
     };
@@ -80,12 +92,19 @@ pub unsafe extern "C" fn pam_sm_acct_mgmt(
         return PAM_SUCCESS;
     };
     let message = CString::new(message.replace('\0', "")).unwrap_or_default();
-    let log = CString::new(format!("login refused for {user}").replace('\0', "")).unwrap_or_default();
+    let log =
+        CString::new(format!("login refused for {user}").replace('\0', "")).unwrap_or_default();
     // SAFETY: "%s" with one NUL-terminated string
     unsafe {
         pam_syslog(pamh, LOG_NOTICE, c"%s".as_ptr(), log.as_ptr());
         if !message.as_bytes().is_empty() {
-            pam_prompt(pamh, PAM_ERROR_MSG, std::ptr::null_mut(), c"%s".as_ptr(), message.as_ptr());
+            pam_prompt(
+                pamh,
+                PAM_ERROR_MSG,
+                std::ptr::null_mut(),
+                c"%s".as_ptr(),
+                message.as_ptr(),
+            );
         }
     }
     PAM_PERM_DENIED

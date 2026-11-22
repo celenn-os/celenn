@@ -191,20 +191,6 @@ pub fn set_avatar(path: &Path) -> bool {
     .is_some()
 }
 
-/// Dock always visible, or hidden when a window covers it (cosmic-blue's
-/// default, as COSMIC Settings' "Automatically hide dock")
-pub fn dock_always_visible() -> bool {
-    cosmic_read("com.system76.CosmicPanel.Dock", "autohide").as_deref() == Some("Never")
-}
-
-pub fn set_dock_always_visible(visible: bool) -> bool {
-    cosmic_write(
-        "com.system76.CosmicPanel.Dock",
-        "autohide",
-        if visible { "Never" } else { "OnOverlap" },
-    )
-}
-
 /// Windows side by side (tiling) on every workspace, as the panel's tiling
 /// button and Super + Y do
 pub fn tiling() -> bool {

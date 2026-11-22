@@ -662,7 +662,7 @@ except socket.gaierror as error:
         problem "a downloaded program still runs on the child's account"
         vm "pkill -u ${PARENTAL_CHILD} -x game" || true
     fi
-    vm "journalctl -b --no-pager -u cosmic-blue-parental-controls.service -g 'stopped /home/${PARENTAL_CHILD}/game'" >/dev/null \
+    vm "journalctl -b --no-pager -u cosmic-blue-parental-controls.service -g 'stopped .*home/${PARENTAL_CHILD}/game'" >/dev/null \
         || echo "::warning::Parental controls: the service did not log the downloaded program it stopped"
     state="$(vm "uid=\$(id -u ${PARENTAL_CHILD}); busctl get-property org.freedesktop.Accounts /org/freedesktop/Accounts/User\${uid} \
         com.endlessm.ParentalControls.AppFilter AllowUserInstallation AppFilter" 2>&1)" || true
@@ -673,6 +673,37 @@ except socket.gaierror as error:
         state="$(vm "runuser -u ${PARENTAL_CHILD} -- flatpak run --command=true org.gnome.FileRoller 2>&1; echo exit \$?" 2>&1)" || true
         echo "A Flatpak not ticked, for the child: ${state}"
         [[ "${state}" != *"exit 0" ]] || problem "a Flatpak not ticked starts on the child's account"
+    fi
+
+    # What would go around the filter is refused to the child: DNS to another
+    # server, DNS over HTTPS to a public resolver, a VPN port, and
+    # systemd-resolved's D-Bus lookups. A refusal answers at once (nftables
+    # reject), unlike a network that is down.
+    local probe target host port
+    for target in "8.8.8.8 53 DNS to another server" "1.1.1.1 443 DNS over HTTPS" "9.9.9.9 1194 OpenVPN"; do
+        read -r host port _ <<<"${target}"
+        probe="$(vm "runuser -u ${PARENTAL_CHILD} -- python3 -c 'import socket
+s = socket.socket()
+s.settimeout(10)
+try:
+    s.connect((\"${host}\", ${port}))
+    print(\"open\")
+except ConnectionRefusedError:
+    print(\"refused\")
+except OSError as error:
+    print(error)'" 2>&1)" || true
+        echo "${target#* * } for the child: ${probe}"
+        [[ "${probe}" == refused ]] || problem "${target#* * } is not refused to the child (${probe})"
+    done
+    vm "id -nG ${PARENTAL_CHILD}" | grep -qw cosmic-blue-children \
+        || problem "the child account is not in the cosmic-blue-children group"
+    probe="$(vm "runuser -u ${PARENTAL_CHILD} -- busctl call org.freedesktop.resolve1 /org/freedesktop/resolve1 \
+        org.freedesktop.resolve1.Manager ResolveHostname isit 0 example.com 0 0" 2>&1)" && probe="answered: ${probe}"
+    echo "systemd-resolved over D-Bus for the child: ${probe}"
+    grep -qi 'access denied' <<<"${probe}" \
+        || problem "systemd-resolved answers the child over D-Bus (${probe})"
+    if vm "journalctl -b --no-pager -u polkit -g 'cosmic-blue-parental'" | grep -qi error; then
+        problem "polkit could not load 10-cosmic-blue-parental.rules"
     fi
 
     # Unlock the test user's session (locked by the tour)
