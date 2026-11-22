@@ -291,8 +291,8 @@ msgstr "GB"
 msgid "TB"
 msgstr "TB"
 
-msgid "A second app source for COSMIC Store, with apps that are not on Flathub. Less checked than Flathub."
-msgstr "Una seconda fonte di app per COSMIC Store, con app che non sono su Flathub. Meno controllata di Flathub."
+msgid "More apps in COSMIC Store, from outside Flathub. Less checked."
+msgstr "Più app in COSMIC Store, fuori da Flathub. Meno controllate."
 
 msgid "A text file in your home folder, to keep or to compare."
 msgstr "Un file di testo nella tua cartella home, da conservare o confrontare."
@@ -309,8 +309,8 @@ msgstr "Tutte le impostazioni di COSMIC"
 msgid "Appearance"
 msgstr "Aspetto e impostazioni"
 
-msgid "Arial, Times New Roman, Verdana… for documents made on Windows. cosmic-blue already has look-alikes with the same sizes."
-msgstr "Arial, Times New Roman, Verdana… per i documenti creati su Windows. cosmic-blue ha già caratteri simili con le stesse misure."
+msgid "Arial, Times New Roman, Verdana… for documents made on Windows."
+msgstr "Arial, Times New Roman, Verdana… per i documenti creati su Windows."
 
 msgid "Back to the cosmic-blue colors, dark theme, icons, fonts and wallpaper. Panel, dock, keyboard and shortcuts stay."
 msgstr "Torna ai colori, al tema scuro, alle icone, ai caratteri e allo sfondo di cosmic-blue. Pannello, dock, tastiera e scorciatoie restano."
@@ -477,8 +477,8 @@ msgstr "Container"
 msgid "In the terminal"
 msgstr "Nel terminale"
 
-msgid "Docker, VS Code, Neovim… Tick the ones you want, untick the ones to remove."
-msgstr "Docker, VS Code, Neovim… Seleziona quelli che vuoi, deseleziona quelli da rimuovere."
+msgid "Docker, VS Code, Neovim…"
+msgstr "Docker, VS Code, Neovim…"
 
 msgid "Homebrew is not set up yet: only Podman Desktop can be installed now."
 msgstr "Homebrew non è ancora pronto: per ora si può installare solo Podman Desktop."
@@ -495,8 +495,8 @@ msgstr "Giochi Windows"
 msgid "And also"
 msgstr "E inoltre"
 
-msgid "Steam, Heroic, Lutris… Tick the ones you want, untick the ones to remove. Your games and saves stay."
-msgstr "Steam, Heroic, Lutris… Seleziona quelli che vuoi, deseleziona quelli da rimuovere. I tuoi giochi e salvataggi restano."
+msgid "Steam, Heroic, Lutris, Discord…"
+msgstr "Steam, Heroic, Lutris, Discord…"
 
 msgid "Your game apps are ready."
 msgstr "Le tue app per i giochi sono pronte."
@@ -552,8 +552,8 @@ msgstr "Alcune modifiche chiedono la password di un genitore o di un amministrat
 msgid "Passwords"
 msgstr "Password"
 
-msgid "Bitwarden to sync them with your phone, Secrets or KeePassXC to keep them on this computer. Tick the ones you want, untick the ones to remove."
-msgstr "Bitwarden per sincronizzarle con il telefono, Secrets o KeePassXC per tenerle su questo computer. Seleziona quelli che vuoi, deseleziona quelli da rimuovere."
+msgid "Bitwarden (synced with your phone), Secrets, KeePassXC."
+msgstr "Bitwarden (sincronizzato con il telefono), Secrets, KeePassXC."
 
 msgid "Synced"
 msgstr "Sincronizzate"
@@ -563,3 +563,9 @@ msgstr "Su questo computer"
 
 msgid "Your password manager is ready."
 msgstr "Il tuo gestore di password è pronto."
+
+msgid "Tick the ones you want, untick the ones to remove."
+msgstr "Seleziona quelli che vuoi, deseleziona quelli da rimuovere."
+
+msgid "Tick the ones you want, untick the ones to remove. Your games and saves stay."
+msgstr "Seleziona quelli che vuoi, deseleziona quelli da rimuovere. I tuoi giochi e salvataggi restano."

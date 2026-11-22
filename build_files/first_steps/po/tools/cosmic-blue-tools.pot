@@ -289,7 +289,7 @@ msgstr ""
 msgid "TB"
 msgstr ""
 
-msgid "A second app source for COSMIC Store, with apps that are not on Flathub. Less checked than Flathub."
+msgid "More apps in COSMIC Store, from outside Flathub. Less checked."
 msgstr ""
 
 msgid "A text file in your home folder, to keep or to compare."
@@ -307,7 +307,7 @@ msgstr ""
 msgid "Appearance"
 msgstr ""
 
-msgid "Arial, Times New Roman, Verdana… for documents made on Windows. cosmic-blue already has look-alikes with the same sizes."
+msgid "Arial, Times New Roman, Verdana… for documents made on Windows."
 msgstr ""
 
 msgid "Back to the cosmic-blue colors, dark theme, icons, fonts and wallpaper. Panel, dock, keyboard and shortcuts stay."
@@ -475,7 +475,7 @@ msgstr ""
 msgid "In the terminal"
 msgstr ""
 
-msgid "Docker, VS Code, Neovim… Tick the ones you want, untick the ones to remove."
+msgid "Docker, VS Code, Neovim…"
 msgstr ""
 
 msgid "Homebrew is not set up yet: only Podman Desktop can be installed now."
@@ -493,7 +493,7 @@ msgstr ""
 msgid "And also"
 msgstr ""
 
-msgid "Steam, Heroic, Lutris… Tick the ones you want, untick the ones to remove. Your games and saves stay."
+msgid "Steam, Heroic, Lutris, Discord…"
 msgstr ""
 
 msgid "Your game apps are ready."
@@ -550,7 +550,7 @@ msgstr ""
 msgid "Passwords"
 msgstr ""
 
-msgid "Bitwarden to sync them with your phone, Secrets or KeePassXC to keep them on this computer. Tick the ones you want, untick the ones to remove."
+msgid "Bitwarden (synced with your phone), Secrets, KeePassXC."
 msgstr ""
 
 msgid "Synced"
@@ -560,4 +560,10 @@ msgid "On this computer"
 msgstr ""
 
 msgid "Your password manager is ready."
+msgstr ""
+
+msgid "Tick the ones you want, untick the ones to remove."
+msgstr ""
+
+msgid "Tick the ones you want, untick the ones to remove. Your games and saves stay."
 msgstr ""
