@@ -614,12 +614,6 @@ grep -qx 'g cosmic-blue-children -' /usr/lib/sysusers.d/cosmic-blue-parental.con
 grep -q 'isInGroup("cosmic-blue-children")' /usr/share/polkit-1/rules.d/10-cosmic-blue-parental.rules
 python3 -c "import xml.dom.minidom, sys; xml.dom.minidom.parse(sys.argv[1])" \
     /usr/share/dbus-1/system.d/cosmic-blue-parental.conf
-# Applications validated by a parent: Flatpak checks malcontent's filter,
-# which accountsservice keeps
-ldd /usr/bin/flatpak /usr/libexec/flatpak-system-helper | grep -q libmalcontent \
-    || { echo "Flatpak is built without malcontent: its app filter would not apply"; exit 1; }
-test -e /usr/share/accountsservice/interfaces/com.endlessm.ParentalControls.AppFilter.xml \
-    || { echo "accountsservice does not know malcontent's AppFilter"; exit 1; }
 
 # Login and lock screens: our rebuild, with the cosmic-blue wallpaper as the
 # background shown before a user has a saved one

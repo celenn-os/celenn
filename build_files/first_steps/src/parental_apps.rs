@@ -130,8 +130,15 @@ fn program(exec: &str) -> Option<PathBuf> {
 
 /// The applications a parent can allow or block, by name
 pub fn installed(lang: &str) -> Vec<App> {
+    let dirs: Vec<PathBuf> = APP_DIRS.iter().map(PathBuf::from).collect();
+    installed_in(&dirs, lang)
+}
+
+/// The applications of these launcher folders, by name (the first folder
+/// with an id wins)
+pub fn installed_in(dirs: &[PathBuf], lang: &str) -> Vec<App> {
     let mut apps: BTreeMap<String, App> = BTreeMap::new();
-    for dir in APP_DIRS {
+    for dir in dirs {
         let Ok(files) = std::fs::read_dir(dir) else {
             continue;
         };

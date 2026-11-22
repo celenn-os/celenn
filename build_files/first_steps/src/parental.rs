@@ -35,7 +35,7 @@ use cosmic::iced::{Alignment, Length, Limits};
 use cosmic::widget::{self, settings, text, toaster::Toasts};
 use cosmic::{Application, ApplicationExt, Apply, Element, cosmic_theme, executor, theme};
 use std::collections::BTreeSet;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 mod failure;
 mod i18n;
@@ -349,8 +349,8 @@ fn agent() {
     }
     let mut warned: BTreeSet<u64> = BTreeSet::new();
     let mut launcher = None;
-    let applications =
-        Path::new(&std::env::var_os("HOME").unwrap_or_default()).join(".local/share/applications");
+    let home = PathBuf::from(std::env::var_os("HOME").unwrap_or_default());
+    let applications = home.join(".local/share/applications");
     let lang = std::env::var("LANG").unwrap_or_default();
     let mut hidden: Option<Option<BTreeSet<String>>> = None;
     let mut rounds: u32 = 0;
@@ -364,9 +364,17 @@ fn agent() {
             .filter(|r| r.apps_enabled)
             .map(|r| r.allowed_apps.clone());
         if hidden.as_ref() != Some(&allowed) || (allowed.is_some() && rounds.is_multiple_of(6)) {
+            // With the Flatpaks installed for the child alone (never
+            // allowed: the parent's list only has the system's)
+            let mut dirs: Vec<PathBuf> =
+                parental_apps::APP_DIRS.iter().map(PathBuf::from).collect();
+            dirs.insert(
+                0,
+                home.join(".local/share/flatpak/exports/share/applications"),
+            );
             parental_apps::hide(
                 &applications,
-                &parental_apps::installed(&lang),
+                &parental_apps::installed_in(&dirs, &lang),
                 allowed.as_ref(),
             );
             hidden = Some(allowed);

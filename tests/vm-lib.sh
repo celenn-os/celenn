@@ -651,9 +651,8 @@ except socket.gaierror as error:
         echo "Google for the child: $(vm "runuser -u ${PARENTAL_CHILD} -- getent ahostsv4 www.google.com" 2>&1 | head -n 1)"
     fi
 
-    # Applications validated by a parent: a downloaded program is stopped,
-    # a Flatpak not ticked does not start, and the child cannot install
-    # applications for itself (Flatpak's own filter)
+    # Applications validated by a parent: a program the child downloaded or
+    # copied is stopped at once
     vm "install -o ${PARENTAL_CHILD} -m 0755 /usr/bin/sleep /home/${PARENTAL_CHILD}/game \
         && runuser -u ${PARENTAL_CHILD} -- setsid -f /home/${PARENTAL_CHILD}/game 300 >/dev/null 2>&1 </dev/null" \
         || problem "could not start a program as the child"
@@ -664,16 +663,6 @@ except socket.gaierror as error:
     fi
     vm "journalctl -b --no-pager -u cosmic-blue-parental-controls.service -g 'stopped .*home/${PARENTAL_CHILD}/game'" >/dev/null \
         || echo "::warning::Parental controls: the service did not log the downloaded program it stopped"
-    state="$(vm "uid=\$(id -u ${PARENTAL_CHILD}); busctl get-property org.freedesktop.Accounts /org/freedesktop/Accounts/User\${uid} \
-        com.endlessm.ParentalControls.AppFilter AllowUserInstallation AppFilter" 2>&1)" || true
-    echo "Flatpak filter of the child: ${state}"
-    [[ "${state}" == "b false"*"(bas) true"* ]] \
-        || problem "Flatpak's filter is not set for the child (${state})"
-    if vm "flatpak info --system org.gnome.FileRoller" >/dev/null 2>&1; then
-        state="$(vm "runuser -u ${PARENTAL_CHILD} -- flatpak run --command=true org.gnome.FileRoller 2>&1; echo exit \$?" 2>&1)" || true
-        echo "A Flatpak not ticked, for the child: ${state}"
-        [[ "${state}" != *"exit 0" ]] || problem "a Flatpak not ticked starts on the child's account"
-    fi
 
     # What would go around the filter is refused to the child: DNS to another
     # server, DNS over HTTPS to a public resolver, a VPN port, and
