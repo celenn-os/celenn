@@ -1501,7 +1501,7 @@ impl App {
                     .spacing(space_s),
                 )
                 .add(settings::item_row(vec![
-                    text::caption(tr("Downloaded programs (AppImages, executable files) do not run on this account."))
+                    style::dim_caption(tr("Downloaded programs (AppImages, executable files) do not run on this account."))
                         .wrapping(Wrapping::Word)
                         .width(Length::Fill)
                         .into(),
