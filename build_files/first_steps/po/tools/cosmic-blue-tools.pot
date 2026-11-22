@@ -8,7 +8,7 @@ msgstr ""
 msgid "Updates"
 msgstr ""
 
-msgid "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you."
+msgid "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you. If something goes wrong, you can go back to the previous version."
 msgstr ""
 
 msgid "Current version: {}"
