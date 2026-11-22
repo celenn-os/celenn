@@ -289,3 +289,39 @@ msgstr ""
 
 msgid "«{}» cannot run on this account: downloaded programs are not allowed."
 msgstr ""
+
+msgid "Allow all"
+msgstr ""
+
+msgid "Block all"
+msgstr ""
+
+msgid "Undo"
+msgstr ""
+
+msgid "{allowed} allowed out of {total}"
+msgstr ""
+
+msgid "One application found"
+msgstr ""
+
+msgid "{} applications found"
+msgstr ""
+
+msgid "One application allowed"
+msgstr ""
+
+msgid "One application blocked"
+msgstr ""
+
+msgid "{} applications allowed"
+msgstr ""
+
+msgid "{} applications blocked"
+msgstr ""
+
+msgid "Today"
+msgstr ""
+
+msgid "Most used applications"
+msgstr ""

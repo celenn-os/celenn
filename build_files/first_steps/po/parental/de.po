@@ -289,3 +289,39 @@ msgstr "Programm gesperrt"
 
 msgid "«{}» cannot run on this account: downloaded programs are not allowed."
 msgstr "„{}“ kann auf diesem Konto nicht starten: Heruntergeladene Programme sind nicht erlaubt."
+
+msgid "Allow all"
+msgstr "Alle erlauben"
+
+msgid "Block all"
+msgstr "Alle sperren"
+
+msgid "Undo"
+msgstr "Rückgängig"
+
+msgid "{allowed} allowed out of {total}"
+msgstr "{allowed} von {total} erlaubt"
+
+msgid "One application found"
+msgstr "Eine Anwendung gefunden"
+
+msgid "{} applications found"
+msgstr "{} Anwendungen gefunden"
+
+msgid "One application allowed"
+msgstr "Eine Anwendung erlaubt"
+
+msgid "One application blocked"
+msgstr "Eine Anwendung gesperrt"
+
+msgid "{} applications allowed"
+msgstr "{} Anwendungen erlaubt"
+
+msgid "{} applications blocked"
+msgstr "{} Anwendungen gesperrt"
+
+msgid "Today"
+msgstr "Heute"
+
+msgid "Most used applications"
+msgstr "Meistgenutzte Anwendungen"

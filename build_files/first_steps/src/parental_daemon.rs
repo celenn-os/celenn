@@ -4,7 +4,8 @@
 //   cosmic-blue-parental-daemon run
 //       the service (cosmic-blue-parental-controls.service), every 15 s:
 //         - counts the screen time of each child account: the time one of
-//           its sessions is the one on screen, not locked;
+//           its sessions is the one on screen, not locked; and the same
+//           time by application in front, as the session's agent says;
 //         - closes the sessions of an account when its time is up or at
 //           bedtime (the session agent warns 10, 5 and 1 minutes before,
 //           see `cosmic-blue-parental-controls --agent`);
@@ -90,6 +91,57 @@ fn main() {
 fn uid(user: &str) -> Option<u32> {
     let output = Command::new("id").args(["-u", user]).output().ok()?;
     String::from_utf8_lossy(&output.stdout).trim().parse().ok()
+}
+
+/// The home folder of an account
+fn home(user: &str) -> Option<std::path::PathBuf> {
+    let output = Command::new("getent")
+        .args(["passwd", user])
+        .output()
+        .ok()?;
+    let line = String::from_utf8_lossy(&output.stdout).into_owned();
+    let home = line.trim_end().split(':').nth(5)?;
+    home.starts_with('/').then(|| home.into())
+}
+
+/// The application in front in a child's session: the app id its agent
+/// wrote less than half a minute ago (parental_rules::FOCUS). The file is
+/// the child's: opened without following links, without waiting (not a
+/// pipe), a few bytes at most, and only an app id is kept from it.
+fn focused_app(user: &str) -> Option<String> {
+    use std::io::Read;
+    use std::os::unix::fs::OpenOptionsExt;
+    let path = home(user)?.join(parental_rules::FOCUS);
+    let file = std::fs::OpenOptions::new()
+        .read(true)
+        .custom_flags(libc_flags())
+        .open(path)
+        .ok()?;
+    let metadata = file.metadata().ok()?;
+    if !metadata.is_file()
+        || metadata
+            .modified()
+            .ok()?
+            .elapsed()
+            .unwrap_or_default()
+            .as_secs()
+            > parental_rules::FOCUS_FRESH
+    {
+        return None;
+    }
+    let mut text = String::new();
+    file.take(256).read_to_string(&mut text).ok()?;
+    parental_rules::clean_app_id(&text)
+}
+
+/// O_NOFOLLOW | O_NONBLOCK (Linux's values; no libc crate here)
+fn libc_flags() -> i32 {
+    const O_NOFOLLOW: i32 = if cfg!(any(target_arch = "aarch64", target_arch = "arm")) {
+        0o100_000
+    } else {
+        0o400_000
+    };
+    O_NOFOLLOW | 0o4000
 }
 
 /// One login session (loginctl)
@@ -311,6 +363,11 @@ fn tick(now: &Now, elapsed: u64, applied: &mut Applied) {
         let mut changed = usage.roll(now);
         if on_screen && elapsed > 0 {
             usage.today.seconds += elapsed;
+            // The same time for the application in front, as the child's
+            // session says (only its name comes from the child)
+            if let Some(app) = focused_app(&user) {
+                *usage.today.apps.entry(app).or_default() += elapsed;
+            }
             changed = true;
         }
         if changed
