@@ -583,11 +583,14 @@ fn pages(mode: &Mode, origin: Option<Origin>) -> Vec<Page> {
                     ]),
                 )
             };
-            let ready = Page::new(
-                "You are ready",
-                Some("One more thing worth doing: backups."),
-                Body::Ready,
-            );
+            let ready = Page {
+                icon: Some("cosmic-blue-welcome"),
+                ..Page::new(
+                    "You are ready",
+                    Some("One more thing worth doing: backups."),
+                    Body::Ready,
+                )
+            };
             match origin {
                 Some(origin) => vec![
                     welcome,
@@ -723,6 +726,7 @@ const TEXTS: &[&str] = &[
     "Next",
     "Close",
     "Later",
+    "Step {} of {}",
     "First steps",
     "Open",
     "Get started",
@@ -948,6 +952,8 @@ enum Message {
     PageOpen(usize),
     /// Next (1) or previous (-1) page
     Turn(isize),
+    /// Enter: what the suggested button at the bottom does
+    Enter,
     Run(Action),
     CloseToast(widget::ToastId),
     Exit,
@@ -1089,6 +1095,27 @@ impl<T: Tour> App<T> {
     /// Something to install is chosen
     fn anything_chosen(&self) -> bool {
         !self.chosen.is_empty() || !self.dev_chosen.is_empty()
+    }
+
+    /// What the suggested button at the bottom of a tour page does (also
+    /// Enter): the next page, installing the apps chosen on the apps page;
+    /// on the last page, "Get started" closes the first steps tour
+    fn next_message(&self) -> Option<Message> {
+        if !matches!(self.mode, Mode::FirstSteps | Mode::Live) {
+            return None;
+        }
+        let page = self.pages.get(self.page_i)?;
+        if self.page_i + 1 < self.pages.len() {
+            Some(
+                if matches!(page.body, Body::Profiles) && self.anything_chosen() {
+                    Message::InstallAndNext
+                } else {
+                    Message::PageOpen(self.page_i + 1)
+                },
+            )
+        } else {
+            (self.mode == Mode::FirstSteps).then_some(Message::Exit)
+        }
     }
 
     /// Progress of the chosen apps and tools: (installed, all)
@@ -1309,6 +1336,11 @@ impl<T: Tour> Application for App<T> {
             Message::Turn(delta) => {
                 if let Some(page_i) = self.page_i.checked_add_signed(delta) {
                     return self.update(Message::PageOpen(page_i));
+                }
+            }
+            Message::Enter => {
+                if let Some(message) = self.next_message() {
+                    return self.update(message);
                 }
             }
             Message::Run(action) => run(&action),
@@ -1580,8 +1612,10 @@ impl<T: Tour> Application for App<T> {
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        // Alt+Left and Alt+Right turn the pages (also used by the CI boot test)
-        let keys = event::listen_with(|event, _status, _window| match event {
+        // Alt+Left and Alt+Right turn the pages (also used by the CI boot
+        // test); Enter does what the suggested button does, unless a
+        // widget (a focused button, a text field) took it
+        let keys = event::listen_with(|event, status, _window| match event {
             Event::Keyboard(keyboard::Event::KeyPressed {
                 key: Key::Named(named),
                 modifiers,
@@ -1591,6 +1625,11 @@ impl<T: Tour> Application for App<T> {
                 Named::ArrowLeft => Some(Message::Turn(-1)),
                 _ => None,
             },
+            Event::Keyboard(keyboard::Event::KeyPressed {
+                key: Key::Named(Named::Enter),
+                modifiers,
+                ..
+            }) if modifiers.is_empty() && status == event::Status::Ignored => Some(Message::Enter),
             _ => None,
         });
         // While apps install, look again every few seconds
@@ -1631,10 +1670,15 @@ impl<T: Tour> Application for App<T> {
         } else {
             "Close"
         };
-        // On the first page of the first steps tour, a clearly visible
-        // "Later" button: the tour stays in the app library
-        let close_button = if self.mode == Mode::FirstSteps && self.page_i == 0 {
-            Element::from(widget::button::standard(tr("Later")).on_press(Message::Exit))
+        // In the first steps tour, a clearly visible "Later" button on every
+        // page but the last (where "Get started" closes it): the tour stays
+        // in the app library
+        let close_button = if self.mode == Mode::FirstSteps {
+            if last {
+                Element::from(widget::space::horizontal().width(Length::Shrink))
+            } else {
+                Element::from(widget::button::standard(tr("Later")).on_press(Message::Exit))
+            }
         } else {
             Element::from(widget::button::link(tr(close_label)).on_press(Message::Exit))
         };
@@ -1649,12 +1693,12 @@ impl<T: Tour> Application for App<T> {
         button_row = button_row.push(if !last {
             // On the apps page, Next installs what is chosen (in the
             // background: the tour goes on meanwhile)
-            if matches!(page.body, Body::Profiles) && self.anything_chosen() {
-                widget::button::suggested(tr("Install and continue"))
-                    .on_press(Message::InstallAndNext)
+            let label = if matches!(page.body, Body::Profiles) && self.anything_chosen() {
+                "Install and continue"
             } else {
-                widget::button::suggested(tr("Next")).on_press(Message::PageOpen(self.page_i + 1))
-            }
+                "Next"
+            };
+            widget::button::suggested(tr(label)).on_press_maybe(self.next_message())
         } else if self.mode == Mode::Live {
             let install = widget::button::suggested(tr("Install cosmic-blue"));
             if installer().is_some() {
@@ -1717,6 +1761,14 @@ impl<T: Tour> Application for App<T> {
                     )
                 },
             )
+            // Where we are, in words too (read by the screen reader)
+            .push(widget::space::horizontal().width(Length::Fixed(space_xxs.into())))
+            .push(dim_caption(
+                tr("Step {} of {}")
+                    .replacen("{}", &(self.page_i + 1).to_string(), 1)
+                    .replacen("{}", &self.pages.len().to_string(), 1),
+            ))
+            .align_y(Alignment::Center)
             .apply(widget::container)
             .center_x(Length::Fill);
 
@@ -1828,24 +1880,35 @@ fn row_icon<'a>(name: &'static str) -> Element<'a, Message> {
 }
 
 fn state_icon<'a>(done: bool) -> Element<'a, Message> {
-    let icon = widget::icon::from_name(if done {
-        "object-select-symbolic"
-    } else {
-        "dialog-information-symbolic"
-    })
-    .size(20)
-    .apply(widget::container);
-    if done {
-        icon.class(theme::Container::custom(|theme| {
+    if !done {
+        // To do: an empty circle, which the check mark replaces
+        return widget::container(widget::space::horizontal().width(Length::Fixed(0.0)))
+            .width(20)
+            .height(20)
+            .class(theme::Container::custom(|theme| {
+                let mut color = theme.cosmic().on_bg_color();
+                color.alpha = 0.5;
+                cosmic::iced::widget::container::Style {
+                    border: cosmic::iced::Border {
+                        radius: 10.0.into(),
+                        width: 2.0,
+                        color: color.into(),
+                    },
+                    ..Default::default()
+                }
+            }))
+            .into();
+    }
+    widget::icon::from_name("object-select-symbolic")
+        .size(20)
+        .apply(widget::container)
+        .class(theme::Container::custom(|theme| {
             cosmic::iced::widget::container::Style {
                 icon_color: Some(theme.cosmic().accent_color().into()),
                 ..Default::default()
             }
         }))
         .into()
-    } else {
-        icon.into()
-    }
 }
 
 fn heading<'a>(label: &'static str) -> Element<'a, Message> {

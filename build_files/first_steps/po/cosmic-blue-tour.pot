@@ -18,6 +18,9 @@ msgstr ""
 msgid "Later"
 msgstr ""
 
+msgid "Step {} of {}"
+msgstr ""
+
 msgid "Welcome to cosmic-blue"
 msgstr ""
 
