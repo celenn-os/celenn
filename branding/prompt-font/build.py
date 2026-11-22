@@ -28,12 +28,22 @@ from fontTools.fontBuilder import FontBuilder
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 
 UPM, ADVANCE, ASCENT, DESCENT = 1000, 600, 1069, 293
-LINE = 1.4 * UPM
-# Cell edges around the baseline: the text is centered in the line (top), or
-# hangs from its top (bottom), whichever reaches further; plus 15 units so no
-# seam shows when the line height is rounded to whole pixels
-CELL_TOP = ASCENT + (LINE - ASCENT - DESCENT) / 2 + 15
-CELL_BOTTOM = ASCENT - LINE - 15
+# Where COSMIC Terminal puts a line's edges, at its default size of 14 px:
+# lines are ceil(1.4 * size) pixels high (cosmic-term config.rs), the text is
+# centered in them by its ascent and descent, and cosmic-text truncates the
+# baseline to a whole pixel (layout.rs, "hinting in Y axis"). So at 14 px the
+# line is 20 px, with the baseline 15 px below its top. Other sizes put the
+# edges up to about half a pixel away; the default size is the one that
+# matters most.
+SIZE = 14
+LINE_PX = math.ceil(1.4 * SIZE)
+BASELINE_PX = math.floor((LINE_PX - (ASCENT + DESCENT) * SIZE / UPM) / 2
+                         + ASCENT * SIZE / UPM)
+# Cell edges around the baseline, a few units further out so antialiasing
+# leaves no seam between lines, but too few to tint the lines around
+OVERSHOOT = 4
+CELL_TOP = BASELINE_PX * UPM / SIZE + OVERSHOOT
+CELL_BOTTOM = -(LINE_PX - BASELINE_PX) * UPM / SIZE - OVERSHOOT
 ICON_Y = 360  # vertical center of the icons: the middle of capital letters
 
 
@@ -101,10 +111,10 @@ ARROW_BACK = -150
 # The slanted sides start at the cell edge, exactly where the segment's
 # background ends: starting them at the back edge would leave a small step at
 # the segment's corners. They start a little before the cell edge, so they
-# cross the line's real top and bottom (the cell edges above are 15 units
+# cross the line's real top and bottom (the cell edges above are OVERSHOOT units
 # further out) right on it
 ARROW_MID = round((CELL_TOP + CELL_BOTTOM) / 2)
-ARROW_START = round(-ARROW_TIP * 15 / (CELL_TOP - ARROW_MID - 15))
+ARROW_START = round(-ARROW_TIP * OVERSHOOT / (CELL_TOP - ARROW_MID - OVERSHOOT))
 
 
 def arrow(pen):
