@@ -36,11 +36,20 @@ The texts cosmic-blue adds to the system are in English, French, German,
 Spanish, Italian and Brazilian Portuguese. Any change to one of them goes in
 every language. To add a language:
 
-- Tours (first steps and live ISO welcome): copy
-  `build_files/first_steps/po/cosmic-blue-tour.pot` to `po/<language>.po`
-  (for example `nl.po`, or `pt_BR.po` for a regional variant), translate
-  every `msgstr`, and add the file to `LANGUAGES` in
-  `build_files/first_steps/src/main.rs`.
+- Apps (`build_files/first_steps`), one template per program: copy it to
+  `<language>.po` in the same folder (for example `nl.po`, or `pt_BR.po` for
+  a regional variant), translate every `msgstr`, and add the file to
+  `LANGUAGES` in the program's source:
+  - tours, first steps and live ISO welcome: `po/cosmic-blue-tour.pot`,
+    `src/main.rs`;
+  - cosmic-blue Tools (with Updates): `po/tools/cosmic-blue-tools.pot`,
+    `src/tools.rs`;
+  - Parental controls (the app and the login screen's message):
+    `po/parental/cosmic-blue-parental-controls.pot`, `src/parental.rs` and
+    `src/parental_daemon.rs`.
+- Password prompts of the apps: add a `<description xml:lang="…">` and a
+  `<message xml:lang="…">` to each action of
+  `system_files/usr/share/polkit-1/actions/io.github.cosmic_blue_os.*.policy`.
 - Terminal tips: copy `system_files/usr/share/cosmic-blue/tips/en.txt` to
   `<language>.txt`, one tip per line, in the same order.
 - Launchers: add `Name[<language>]` and `Comment[<language>]` (and
@@ -54,7 +63,10 @@ every language. To add a language:
   `hreflang` links of every page. Add its copy button labels to
   `website/site.js`.
 
-The image build fails if a tour text or tip is missing in a language. The
+A new text in an app goes through `tr("…")` and into its program's
+template and every `.po` file. The pull request lint fails if a `tr("…")`
+text is missing from its template (`tests/check-translations.py`), and the
+image build fails if an app text or a tip is missing in a language. The
 website build fails if a translated page lacks a section, a command, a
 screenshot or a language link of the English one.
 

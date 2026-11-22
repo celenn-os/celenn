@@ -1,8 +1,9 @@
 #!/usr/bin/bash
 # Static checks, run on pull requests (.github/workflows/lint.yml) and by
 # `just lint`: shellcheck on every shell script of the repository and the
-# image (warnings and errors only), rustfmt on the Rust programs, actionlint
-# on the workflows when it is installed (the workflow runs it separately).
+# image (warnings and errors only), rustfmt on the Rust programs, the apps'
+# translatable texts (tests/check-translations.py), actionlint on the
+# workflows when it is installed (the workflow runs it separately).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -32,6 +33,9 @@ done
 mapfile -t roots < <(printf '%s\n' "${roots[@]}" | sort -u)
 echo "rustfmt: ${#roots[@]} crate roots"
 rustfmt --edition 2024 --check "${roots[@]}"
+
+# Every tr("...") of the apps is in its program's translation template
+tests/check-translations.py
 
 if command -v actionlint >/dev/null; then
     SHELLCHECK_OPTS="--severity=warning" actionlint
