@@ -15,7 +15,9 @@ RestartSec=5
 # (/etc/group stays writable), but nothing more
 NoNewPrivileges=yes
 ProtectSystem=true
-ProtectHome=yes
+# (Read-only, not hidden: the notifications to a child whose program it
+# stopped go through its session bus, /run/user/<uid>/bus)
+ProtectHome=read-only
 PrivateTmp=yes
 ProtectClock=yes
 ProtectHostname=yes

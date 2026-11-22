@@ -605,7 +605,7 @@ PARENTAL_CHILD=lea
 parental_checks() {
     local parental_failed=0 rules state day json
     problem() { echo "::error::Parental controls: $*"; parental_failed=1; }
-    rules='{"limit":{"enabled":true,"weekdays":120,"weekend":180},"bedtime":{"enabled":true,"start":1230,"end":420},"web_filter":true}'
+    rules='{"limit":{"enabled":true,"weekdays":120,"weekend":180},"bedtime":{"enabled":true,"start":1230,"end":420},"web_filter":true,"apps":{"enabled":true,"allowed":["org.mozilla.firefox","org.mozilla.thunderbird"]}}'
     vm "printf '%s\n%s\n' ${DEMO_PASSWORD} '${rules}' \
             | /usr/libexec/cosmic-blue-parental-helper add-child ${PARENTAL_CHILD} 'Léa'" \
         || { problem "cosmic-blue-parental-helper could not create a child account"; return 1; }
@@ -650,6 +650,19 @@ except socket.gaierror as error:
             || problem "the web filter does not change what the child account resolves"
         echo "Google for the child: $(vm "runuser -u ${PARENTAL_CHILD} -- getent ahostsv4 www.google.com" 2>&1 | head -n 1)"
     fi
+
+    # Applications validated by a parent: a program the child downloaded or
+    # copied is stopped at once
+    vm "install -o ${PARENTAL_CHILD} -m 0755 /usr/bin/sleep /home/${PARENTAL_CHILD}/game \
+        && runuser -u ${PARENTAL_CHILD} -- setsid -f /home/${PARENTAL_CHILD}/game 300 >/dev/null 2>&1 </dev/null" \
+        || problem "could not start a program as the child"
+    sleep 6
+    if vm "pgrep -u ${PARENTAL_CHILD} -x game" >/dev/null; then
+        problem "a downloaded program still runs on the child's account"
+        vm "pkill -u ${PARENTAL_CHILD} -x game" || true
+    fi
+    vm "journalctl -b --no-pager -u cosmic-blue-parental-controls.service -g 'stopped .*home/${PARENTAL_CHILD}/game'" >/dev/null \
+        || echo "::warning::Parental controls: the service did not log the downloaded program it stopped"
 
     # What would go around the filter is refused to the child: DNS to another
     # server, DNS over HTTPS to a public resolver, a VPN port, and

@@ -232,3 +232,51 @@ msgstr "Abrir o relatório"
 
 msgid "Close"
 msgstr "Fechar"
+
+msgid "Applications"
+msgstr "Aplicativos"
+
+msgid "Applications validated by a parent"
+msgstr "Aplicativos aprovados por um responsável"
+
+msgid "{} only uses the applications you ticked. Installing an application needs a parent's password."
+msgstr "{} usa apenas os aplicativos que você marcou. Instalar um aplicativo exige a senha de um responsável."
+
+msgid "Allowed applications"
+msgstr "Aplicativos permitidos"
+
+msgid "{} of {}"
+msgstr "{} de {}"
+
+msgid "Choose…"
+msgstr "Escolher…"
+
+msgid "Downloaded programs (AppImages, executable files) do not run on this account."
+msgstr "Programas baixados (AppImages, arquivos executáveis) não abrem nesta conta."
+
+msgid "Applications of {}"
+msgstr "Aplicativos de {}"
+
+msgid "Search for an application"
+msgstr "Pesquisar um aplicativo"
+
+msgid "Allowed"
+msgstr "Permitidos"
+
+msgid "Blocked"
+msgstr "Bloqueados"
+
+msgid "Applications installed later are blocked until you tick them."
+msgstr "Aplicativos instalados depois ficam bloqueados até você marcá-los."
+
+msgid "{} is not allowed"
+msgstr "O aplicativo {} não é permitido"
+
+msgid "A parent must allow it first in Parental controls."
+msgstr "Um responsável precisa permiti-lo primeiro no Controle parental."
+
+msgid "Program blocked"
+msgstr "Programa bloqueado"
+
+msgid "«{}» cannot run on this account: downloaded programs are not allowed."
+msgstr "“{}” não pode abrir nesta conta: programas baixados não são permitidos."

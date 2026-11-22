@@ -49,7 +49,12 @@ write_rules() {
         {
           limit: {enabled: (.limit.enabled | flag), weekdays: (.limit.weekdays | minutes(1440)), weekend: (.limit.weekend | minutes(1440))},
           bedtime: {enabled: (.bedtime.enabled | flag), start: (.bedtime.start | minutes(1439)), end: (.bedtime.end | minutes(1439))},
-          web_filter: (.web_filter | flag)
+          web_filter: (.web_filter | flag),
+          apps: {
+            enabled: ((.apps.enabled // false) | flag),
+            allowed: ((.apps.allowed // []) | if type == "array" then . else error("not a list") end
+                | map(select(type == "string" and test("^[A-Za-z0-9._+-]{1,255}$"))) | unique)
+          }
         }' <<<"${json}")" || { echo "Rules not understood: ${json}" >&2; exit 1; }
     install -d -m 0755 "${CONFIG_DIR}"
     printf '%s\n' "${rules}" > "${CONFIG_DIR}/${user}.json.tmp"
