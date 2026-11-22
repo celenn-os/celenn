@@ -3,7 +3,9 @@ name: Lint
 # script and rustfmt on the Rust programs (tests/lint.sh), and actionlint on
 # the workflows, so a script mistake
 # shows before the image build and its boot test end. A change to the Renovate
-# config is also checked: a mistake there makes Renovate stop quietly.
+# config is also checked: a mistake there makes Renovate stop quietly. So is a
+# change to the prompt font: the committed font must be the one its script
+# builds.
 on:
   pull_request:
     branches:
@@ -17,6 +19,7 @@ on:
       - '.github/actions/**'
       - '.github/actionlint.yaml'
       - '.github/renovate.json5'
+      - 'branding/prompt-font/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -95,3 +98,39 @@ jobs:
       - name: renovate-config-validator
         if: steps.changed.outputs.changed == 'true'
         run: npx --yes --package "renovate@${RENOVATE_VERSION}" -- renovate-config-validator --strict
+
+  prompt-font:
+    name: Prompt font
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      # Only when the pull request changes the font or its script; the job is
+      # skipped quickly otherwise
+      - name: Check whether the prompt font changed
+        id: changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if gh pr diff "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --name-only | grep -qE '^(branding/prompt-font/|system_files/usr/share/fonts/cosmic-blue/)'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Prompt font unchanged, nothing to check"
+          fi
+
+      - name: Checkout
+        if: steps.changed.outputs.changed == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      # A change to build.py that was not followed by a rebuild of the font
+      # never reaches the image: the build copies the committed font
+      - name: Committed font matches its script
+        if: steps.changed.outputs.changed == 'true'
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q python3-fonttools
+          python3 branding/prompt-font/build.py --check system_files/usr/share/fonts/cosmic-blue/cosmic-blue-prompt.ttf
