@@ -2172,8 +2172,10 @@ impl<T: Tour> App<T> {
                 .map(|(i, (path, handle))| {
                     widget::button::image(handle.clone())
                         .name(format!("{}: {}", tr("Your picture"), image_name(path)))
-                        .width(40)
-                        .height(40)
+                        // 11 per row, as wide as the 6 wallpapers above
+                        // (6 x 92 + 5 gaps = 11 x 43 + 10 gaps, to a pixel)
+                        .width(43)
+                        .height(43)
                         .selected(self.avatar == Some(i))
                         .on_press(Message::Avatar(i))
                         .into()
