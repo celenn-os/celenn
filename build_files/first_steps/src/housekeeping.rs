@@ -51,7 +51,9 @@ fn xdg(variable: &str, default: &str) -> PathBuf {
 }
 
 fn config(name: &str) -> PathBuf {
-    xdg("XDG_CONFIG_HOME", ".config").join("cosmic-blue").join(name)
+    xdg("XDG_CONFIG_HOME", ".config")
+        .join("cosmic-blue")
+        .join(name)
 }
 
 fn warned_file() -> PathBuf {
@@ -131,7 +133,11 @@ pub fn purge_trash(days: u64) -> usize {
     let limit = Duration::from_secs(days * 24 * 3600);
     let now = SystemTime::now();
     let mut deleted = 0;
-    for entry in fs::read_dir(trash.join("info")).into_iter().flatten().flatten() {
+    for entry in fs::read_dir(trash.join("info"))
+        .into_iter()
+        .flatten()
+        .flatten()
+    {
         let info = entry.path();
         if info.extension().and_then(|e| e.to_str()) != Some("trashinfo") {
             continue;
@@ -181,7 +187,9 @@ fn should_warn(level: u8, last: Option<(u8, SystemTime)>, now: SystemTime) -> bo
         None => true,
         Some((last_level, when)) => {
             level > last_level
-                || now.duration_since(when).is_ok_and(|elapsed| elapsed >= AGAIN)
+                || now
+                    .duration_since(when)
+                    .is_ok_and(|elapsed| elapsed >= AGAIN)
         }
     }
 }
@@ -195,8 +203,11 @@ fn last_warning() -> Option<(u8, SystemTime)> {
 
 /// A child of Parental controls: the parent gets the warnings
 fn is_child() -> bool {
-    std::env::var("USER")
-        .is_ok_and(|user| Path::new(PARENTAL_RULES).join(format!("{user}.json")).exists())
+    std::env::var("USER").is_ok_and(|user| {
+        Path::new(PARENTAL_RULES)
+            .join(format!("{user}.json"))
+            .exists()
+    })
 }
 
 /// One notification, with a button that opens the Maintenance page. Waits
@@ -213,7 +224,10 @@ fn notify(free: u64) {
             &action,
             "--wait",
             tr("The disk is almost full"),
-            &fill(tr("{} left. Updates and new apps need room."), &crate::maintenance::size(free)),
+            &fill(
+                tr("{} left. Updates and new apps need room."),
+                &crate::maintenance::size(free),
+            ),
         ])
         .stdin(std::process::Stdio::null())
         .output();
