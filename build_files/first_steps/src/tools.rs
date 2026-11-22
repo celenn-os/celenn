@@ -175,26 +175,34 @@ impl Application for App {
         core.nav_bar_set_toggled(true);
         let mut nav = nav_bar::Model::default();
         for (id, name, icon) in [
-            // (circling arrows, like the page's own icon: the usual
-            // update symbol looks like the Settings gear in the icon theme)
-            (PageId::Updates, "Updates", "view-refresh-symbolic"),
+            // The glyph of each page's icon (branding/icons/build.py,
+            // TOOLS_SYMBOLIC), so that the sidebar matches the pages
+            (
+                PageId::Updates,
+                "Updates",
+                "cosmic-blue-tools-updates-symbolic",
+            ),
             (
                 PageId::Maintenance,
                 "Maintenance",
-                "applications-utilities-symbolic",
+                "cosmic-blue-tools-maintenance-symbolic",
             ),
-            (PageId::Computer, "Computer", "computer-symbolic"),
+            (
+                PageId::Computer,
+                "Computer",
+                "cosmic-blue-tools-computer-symbolic",
+            ),
             (
                 PageId::Software,
                 "Extra software",
-                "system-software-install-symbolic",
+                "cosmic-blue-tools-software-symbolic",
             ),
             (
                 PageId::Appearance,
                 "Appearance",
-                "preferences-desktop-appearance-symbolic",
+                "cosmic-blue-tools-appearance-symbolic",
             ),
-            (PageId::Help, "Help", "help-browser-symbolic"),
+            (PageId::Help, "Help", "cosmic-blue-tools-help-symbolic"),
         ] {
             let entity = nav
                 .insert()

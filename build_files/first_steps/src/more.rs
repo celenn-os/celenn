@@ -817,7 +817,8 @@ impl Page {
             Kind::Computer => (
                 "Computer",
                 "Battery, graphics card and firmware settings.",
-                "computer",
+                // The tour's screen, in the style of the other pages' icons
+                "cosmic-blue-tour-computer",
             ),
             Kind::Software => (
                 "Extra software",
@@ -827,7 +828,7 @@ impl Page {
             Kind::Appearance => (
                 "Appearance",
                 "The look of the desktop and your COSMIC settings.",
-                "preferences-desktop-theme",
+                "cosmic-blue-tools-appearance",
             ),
         };
         let mut content = widget::column::with_capacity(3)
