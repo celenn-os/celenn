@@ -607,7 +607,7 @@ parental_checks() {
     problem() { echo "::error::Parental controls: $*"; parental_failed=1; }
     rules='{"limit":{"enabled":true,"weekdays":120,"weekend":180},"bedtime":{"enabled":true,"start":1230,"end":420},"web_filter":true,"apps":{"enabled":true,"allowed":["org.mozilla.firefox","org.mozilla.thunderbird"]}}'
     vm "printf '%s\n%s\n' ${DEMO_PASSWORD} '${rules}' \
-            | /usr/libexec/cosmic-blue-parental-helper add-child ${PARENTAL_CHILD} 'Léa'" \
+            | /usr/libexec/cosmic-blue-parental-helper add-child ${PARENTAL_CHILD} 'Léa' /usr/share/pixmaps/faces/rocket.png" \
         || { problem "cosmic-blue-parental-helper could not create a child account"; return 1; }
     vm "id -nG ${PARENTAL_CHILD} | grep -qw wheel" && problem "the child account is an administrator"
     wait_for 30 'systemctl is-active cosmic-blue-parental-controls.service' \
