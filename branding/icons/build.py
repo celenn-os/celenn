@@ -23,6 +23,7 @@ Usage: python3 build.py  (rewrites build_files/icon_theme/layer/)
 """
 import math
 import os
+import re
 import shutil
 from pathlib import Path
 
@@ -217,6 +218,9 @@ def disk(color, r=27):
 
 STORE_COLOR = "#2ec4c4"
 SETTINGS_COLOR = "#5f6b86"
+
+# Tela's symbolic gray (the apps recolor symbolic icons)
+SYMBOLIC_COLOR = "#565656"
 
 
 def tela_app(body, color="#4f8dff"):
@@ -417,6 +421,66 @@ TOUR_ICONS = {
     "cosmic-blue-tour-tips": TOUR_TIPS,
 }
 
+# cosmic-blue Tools' Appearance page: a palette with its paint wells
+PALETTE = ('M32 14C21.5 14 14 21.6 14 31.5S21.8 50 31 50c3.3 0 4.6-1.9 4.6-4.1 0-1.4-.6-2.4-.6-3.6'
+           ' 0-1.9 1.5-3.3 3.4-3.3H44c3.6 0 6-2.6 6-6.6C50 22.4 42.3 14 32 14z')
+PALETTE_WELLS = [(23.5, 33.5), (24.5, 24.5), (32.5, 20.5), (40.5, 24.5)]
+TOOLS_APPEARANCE = tela_app(
+    f'<path d="{PALETTE}" fill="#fff"/>'
+    + "".join(f'<circle cx="{x}" cy="{y}" r="3.2" fill="#4f8dff"{" opacity=\".55\"" if i == 3 else ""}/>'
+              for i, (x, y) in enumerate(PALETTE_WELLS))
+)
+
+
+# The symbolic icons of cosmic-blue Tools' sidebar: the glyph of each page's
+# icon, alone, in one color (the app tints them), the translucent parts kept
+# translucent. Drawn in the 64px space of the app icons, shown through a
+# 40px window around the glyph. The accent details become holes (masks).
+def mask(name, holes):
+    return (f'<mask id="{name}"><rect width="64" height="64" fill="#fff"/>{holes}</mask>')
+
+
+def tools_symbolic(body, defs=""):
+    return ('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="12 12 40 40">'
+            + (f"<defs>{defs}</defs>" if defs else "")
+            # (a mask stays white: gray would make it translucent)
+            + "".join(part if part.startswith("<mask") else part.replace("#fff", SYMBOLIC_COLOR)
+                      for part in re.split(r"(<mask.*?</mask>)", body))
+            + "</svg>\n")
+
+
+TOOLS_SYMBOLIC = {
+    # Two circling arrows (UPDATE)
+    "updates": tools_symbolic(circle_arrow(13.5, 165, 40, width=4.6, head=6.6)
+                              + circle_arrow(13.5, 345, 220, ".45", width=4.6, head=6.6)),
+    # The wrench and screwdriver (TOOLS)
+    "maintenance": tools_symbolic(TOOLS.split('url(#disk-fill)"/>', 1)[1].rsplit("</svg>", 1)[0]),
+    # A screen on its stand (TOUR_COMPUTER), the screen hollow
+    "computer": tools_symbolic(
+        '<path fill-rule="evenodd" d="M17.5 16h29a3.5 3.5 0 0 1 3.5 3.5v20a3.5 3.5 0 0 1-3.5 3.5h-29'
+        'a3.5 3.5 0 0 1-3.5-3.5v-20a3.5 3.5 0 0 1 3.5-3.5zM18.5 20.5v18h27v-18z" fill="#fff"/>'
+        '<path d="M27.5 43h9l1.5 5h-12z" fill="#fff" opacity=".45"/>'
+        '<rect x="21" y="47" width="22" height="3.6" rx="1.8" fill="#fff"/>'),
+    # The store's bag with its "c" (TOUR_STORE), the handle translucent
+    "software": tools_symbolic(
+        '<path d="M25 24v-3a7 7 0 0 1 14 0v3" fill="none" stroke="#fff" stroke-width="3.6" '
+        'stroke-linecap="round" opacity=".45"/>'
+        '<path mask="url(#bag-c)" d="M18.5 24h27a1.5 1.5 0 0 1 1.5 1.6l-1.4 19.6a3 3 0 0 1-3 2.8H21.4'
+        'a3 3 0 0 1-3-2.8L17 25.6a1.5 1.5 0 0 1 1.5-1.6z" fill="#fff"/>',
+        mask("bag-c", '<path d="M37.2 31.5A6.5 6.5 0 1 0 37.2 40.5" fill="none" stroke="#000" stroke-width="3" '
+                      'stroke-linecap="round"/><circle cx="32" cy="36" r="2.6" fill="#000"/>')),
+    # The palette (TOOLS_APPEARANCE), its wells hollow
+    "appearance": tools_symbolic(
+        f'<path mask="url(#wells)" d="{PALETTE}" fill="#fff"/>',
+        mask("wells", "".join(f'<circle cx="{x}" cy="{y}" r="3.2" fill="#000"/>' for x, y in PALETTE_WELLS))),
+    # The open book with the logo's "c" (DOCS), the left page translucent
+    "help": tools_symbolic(
+        '<path d="M32 22c-4.5-3.5-10-4.5-15-4.5v24c5 0 10.5 1 15 4.5z" fill="#fff" opacity=".45"/>'
+        '<path mask="url(#book-c)" d="M32 22c4.5-3.5 10-4.5 15-4.5v24c-5 0-10.5 1-15 4.5z" fill="#fff"/>',
+        mask("book-c", '<path d="M42.6 27.2A5 5 0 1 0 42.6 34.8" fill="none" stroke="#000" stroke-width="2.8" '
+                       'stroke-linecap="round"/><circle cx="39" cy="31" r="2" fill="#000"/>')),
+}
+
 
 # Icon -> names (the desktop entries of the dock buttons and of the apps
 # they open). The first name gets the file, the others are links to it.
@@ -450,7 +514,6 @@ DOCK = {
 # drawn with strokes, then outlined into plain fills: GTK recolors symbolic
 # icons by forcing their fill, which would fill an unoutlined stroke.
 # (names, path); the first name gets the file, the others are links to it.
-SYMBOLIC_COLOR = "#565656"
 ACTIONS = [
     # A crescent moon
     (["system-suspend-symbolic"],
@@ -503,6 +566,9 @@ def main():
     UPDATE_ICON.write_text(UPDATE)
     TOOLS_ICON.write_text(TOOLS)
     TOUR_STORE_ICON.write_text(TOUR_STORE)
+    (HICOLOR_APPS / "cosmic-blue-tools-appearance.svg").write_text(TOOLS_APPEARANCE)
+    for name, icon in TOOLS_SYMBOLIC.items():
+        (HICOLOR_APPS / f"cosmic-blue-tools-{name}-symbolic.svg").write_text(icon)
     # Bring your things: COSMIC Files' folder
     for name, icon in {**TOUR_ICONS, "cosmic-blue-tour-files": FILES}.items():
         (HICOLOR_APPS / f"{name}.svg").write_text(icon)
