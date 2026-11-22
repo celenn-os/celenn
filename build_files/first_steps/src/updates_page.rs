@@ -544,14 +544,7 @@ impl Page {
 
         let mut content = widget::column::with_capacity(8)
             .spacing(space_s)
-            .align_x(Alignment::Center)
-            .push(
-                text::body(tr(
-                    "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you. If something goes wrong, you can go back to the previous version.",
-                ))
-                .align_x(Alignment::Center)
-                .width(Length::Fill),
-            );
+            .align_x(Alignment::Center);
         if let Some(card) = &self.card {
             content = content.push(card.view(Message::Card));
         }
@@ -596,7 +589,14 @@ impl Page {
                 .center_x(Length::Fill),
         );
 
-        let page = header(ICON, tr("Updates"), content.into());
+        let page = header(
+            ICON,
+            tr("Updates"),
+            tr(
+                "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you. If something goes wrong, you can go back to the previous version.",
+            ),
+            content.into(),
+        );
         widget::toaster(&self.toasts, page)
     }
 }

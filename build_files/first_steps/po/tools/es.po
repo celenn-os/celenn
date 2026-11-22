@@ -201,6 +201,9 @@ msgstr "Como en Windows y Mac. Los más recientes se pueden seguir recuperando."
 msgid "Warn when the disk is almost full"
 msgstr "Avisar cuando el disco esté casi lleno"
 
+msgid "A notification when less than 10 % is free (20 GB at most)."
+msgstr "Un aviso cuando queda menos del 10 % libre (20 GB como máximo)."
+
 msgid "The disk is almost full"
 msgstr "El disco está casi lleno"
 

@@ -833,12 +833,7 @@ impl Page {
         };
         let mut content = widget::column::with_capacity(3)
             .spacing(space_s)
-            .align_x(Alignment::Center)
-            .push(
-                text::body(tr(intro))
-                    .align_x(Alignment::Center)
-                    .width(Length::Fill),
-            );
+            .align_x(Alignment::Center);
         let card_kind = self.card.as_ref().map(|card| match card.job {
             Retry::Job(job) => job.kind(),
             Retry::List(_) => Kind::Software,
@@ -853,7 +848,7 @@ impl Page {
                 Kind::Appearance => self.appearance(state),
             });
         }
-        let page = crate::common::header(icon, tr(title), content.into());
+        let page = crate::common::header(icon, tr(title), tr(intro), content.into());
         widget::toaster(&self.toasts, page)
     }
 
@@ -1146,7 +1141,7 @@ impl Page {
                 None,
             ))
             .add(self.row(
-                "view-refresh-symbolic",
+                "document-revert-symbolic",
                 "All COSMIC settings",
                 "Back to the cosmic-blue defaults, for every setting. A copy of the current ones is kept.",
                 self.button(Job::ResetConfig, "Reset", false),
