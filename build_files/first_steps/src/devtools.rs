@@ -5,6 +5,18 @@
 use std::collections::BTreeSet;
 use std::path::Path;
 
+/// Bitwarden's Flathub app, offered by the tour's "Your passwords" page and
+/// by Tools' Passwords list. Once it is installed, both open Firefox on the
+/// Bitwarden extension's page: one click on "Add to Firefox", for this
+/// account only (a Firefox policy would add it for every account)
+pub const BITWARDEN: &str = "com.bitwarden.desktop";
+pub const BITWARDEN_EXTENSION: &[&str] = &[
+    "flatpak",
+    "run",
+    "org.mozilla.firefox",
+    "https://addons.mozilla.org/firefox/addon/bitwarden-password-manager/",
+];
+
 pub const BREW: &str = "/home/linuxbrew/.linuxbrew/bin/brew";
 const BREW_PREFIX: &str = "/home/linuxbrew/.linuxbrew";
 

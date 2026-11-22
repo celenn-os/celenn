@@ -548,3 +548,18 @@ msgstr "«{}» no ha funcionado"
 
 msgid "Some changes ask for the password of a parent or an administrator."
 msgstr "Algunos cambios piden la contraseña de un padre o una madre, o de un administrador."
+
+msgid "Passwords"
+msgstr "Contraseñas"
+
+msgid "Bitwarden to sync them with your phone, Secrets or KeePassXC to keep them on this computer. Tick the ones you want, untick the ones to remove."
+msgstr "Bitwarden para sincronizarlas con su móvil, Secrets o KeePassXC para guardarlas en este ordenador. Marque los que quiera y desmarque los que quiera quitar."
+
+msgid "Synced"
+msgstr "Sincronizadas"
+
+msgid "On this computer"
+msgstr "En este ordenador"
+
+msgid "Your password manager is ready."
+msgstr "Su gestor de contraseñas está listo."

@@ -546,3 +546,18 @@ msgstr ""
 
 msgid "Some changes ask for the password of a parent or an administrator."
 msgstr ""
+
+msgid "Passwords"
+msgstr ""
+
+msgid "Bitwarden to sync them with your phone, Secrets or KeePassXC to keep them on this computer. Tick the ones you want, untick the ones to remove."
+msgstr ""
+
+msgid "Synced"
+msgstr ""
+
+msgid "On this computer"
+msgstr ""
+
+msgid "Your password manager is ready."
+msgstr ""

@@ -494,7 +494,7 @@ test -f /usr/share/icons/hicolor/scalable/apps/cosmic-blue-welcome.svg
 # in the cosmic-blue icon theme (its layer, Tela) or hicolor
 for icon in cosmic-blue-welcome cosmic-blue-tour-store cosmic-blue-tour-computer \
     cosmic-blue-tour-keyboard cosmic-blue-tour-bearings cosmic-blue-tour-try cosmic-blue-tour-tips \
-    cosmic-blue-tour-files cosmic-blue-tour-accessibility org.gnome.DejaDup; do
+    cosmic-blue-tour-files cosmic-blue-tour-accessibility cosmic-blue-tour-passwords org.gnome.DejaDup; do
     [[ -n "$(find /usr/share/icons/cosmic-blue /usr/share/icons/Tela-circle-4f8dff \
         /usr/share/icons/hicolor -name "${icon}.svg" -print -quit)" ]] \
         || { echo "Tour icon ${icon} not found" >&2; exit 1; }

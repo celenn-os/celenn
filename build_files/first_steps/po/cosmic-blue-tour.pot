@@ -680,3 +680,36 @@ msgstr ""
 
 msgid "Cancel"
 msgstr ""
+
+msgid "Install"
+msgstr ""
+
+msgid "Working…"
+msgstr ""
+
+msgid "Synced with my phone"
+msgstr ""
+
+msgid "Bitwarden: on this computer, your phone and in Firefox. Free account, everything is encrypted before it leaves the computer."
+msgstr ""
+
+msgid "Installed. Open it to create your account, then install Bitwarden on your phone."
+msgstr ""
+
+msgid "Only on this computer"
+msgstr ""
+
+msgid "Secrets: an encrypted file in your home folder, no account and no internet. KeePassXC opens it too."
+msgstr ""
+
+msgid "Installed. Open it to create your password file, and keep a copy of it on a USB drive."
+msgstr ""
+
+msgid "Your passwords"
+msgstr ""
+
+msgid "A password manager remembers them for you and makes up strong ones. Where do you want to keep them?"
+msgstr ""
+
+msgid "Not now? Go on: Firefox already remembers the passwords of websites, and cosmic-blue Tools offers these apps too."
+msgstr ""
