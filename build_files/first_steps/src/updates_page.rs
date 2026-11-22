@@ -52,7 +52,7 @@ const ICON: &str = "cosmic-blue-update";
 /// Every text, for the translation check
 pub const TEXTS: &[&str] = &[
     "Updates",
-    "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you.",
+    "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you. If something goes wrong, you can go back to the previous version.",
     "Current version: {}",
     "Weekly updates, tested before they come out",
     "Daily updates, sooner but less tested",
@@ -547,7 +547,7 @@ impl Page {
             .align_x(Alignment::Center)
             .push(
                 text::body(tr(
-                    "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you.",
+                    "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you. If something goes wrong, you can go back to the previous version.",
                 ))
                 .align_x(Alignment::Center)
                 .width(Length::Fill),
