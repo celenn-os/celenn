@@ -20,6 +20,15 @@ msgstr "Autres comptes"
 msgid "Administrator · no limits"
 msgstr "Administrateur · aucune limite"
 
+msgid "Standard account · no limits"
+msgstr "Compte standard · aucune limite"
+
+msgid "This is a child"
+msgstr "C'est un enfant"
+
+msgid "Picture"
+msgstr "Image"
+
 msgid "No limits"
 msgstr "Aucune limite"
 
