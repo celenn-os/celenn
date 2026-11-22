@@ -15,14 +15,18 @@
 // Each button runs the same program as the matching `ujust` command, so the
 // terminal and the window do the same thing. Changes that need root go
 // through small helpers run with pkexec (an administrator password).
-// No notifications: the system looks after itself, this is for when people
-// want to look or act.
+// No notifications about updates: the system looks after itself, this is
+// for when people want to look or act. The one notification is a disk almost
+// full (housekeeping.rs), which people have to act on.
 //
 //   cosmic-blue-tools               the window, on its first page
 //   cosmic-blue-tools --updates     the window, on Updates (also when run as
 //                                   /usr/libexec/cosmic-blue-updates)
 //   cosmic-blue-tools --maintenance / --computer / --software /
 //                     --appearance / --help-page   the window, on that page
+//   cosmic-blue-tools --housekeeping  empties the old trash, warns when the
+//                                   disk is almost full (no window; run by
+//                                   cosmic-blue-housekeeping.timer)
 //   cosmic-blue-tools --status / --older   see updates_page.rs (tests)
 //   cosmic-blue-tools --check       image build test: every text has its
 //                                   translations (no window)
@@ -38,6 +42,7 @@ mod common;
 mod devtools;
 mod failure;
 mod help;
+mod housekeeping;
 mod i18n;
 mod maintenance;
 mod more;
@@ -80,6 +85,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             maintenance::TEXTS,
             more::TEXTS,
             help::TEXTS,
+            housekeeping::TEXTS,
             failure::TEXTS,
         ]
         .concat();
@@ -87,6 +93,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         sorted.sort_unstable();
         sorted.dedup();
         std::process::exit(if i18n::check(&sorted) { 0 } else { 1 });
+    }
+    if options.iter().any(|arg| arg == "--housekeeping") {
+        std::process::exit(housekeeping::run());
     }
     if let Some(code) = updates_page::command_line(options) {
         std::process::exit(code);

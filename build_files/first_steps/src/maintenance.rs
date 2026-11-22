@@ -7,6 +7,9 @@
 //     unused container images, old Homebrew downloads, then (administrator
 //     password) the same for everyone's apps and the system's caches. The
 //     space it freed shows when it ends.
+//   - The trash: how much it holds, "Empty". Files in it for more than 30
+//     days go by themselves, and a notification warns when the disk is
+//     almost full (housekeeping.rs); two switches turn these off.
 //   - The apps that come with cosmic-blue (/usr/share/flatpak/preinstall.d):
 //     when some were removed, "Reinstall" puts them back, as the first boot
 //     installed them.
@@ -14,6 +17,7 @@
 
 use crate::common::{fill, label, spawn, state_icon, two_lines};
 use crate::failure::{self, Card, CardAction, CardMessage, Outcome};
+use crate::housekeeping;
 use crate::i18n::tr;
 use cosmic::app::Task;
 use cosmic::iced::{Alignment, Length};
@@ -46,6 +50,15 @@ pub const TEXTS: &[&str] = &[
     "GB",
     "TB",
     "Everything was already tidy.",
+    "Trash",
+    "{} in the trash",
+    "The trash is empty.",
+    "Empty",
+    "Emptying…",
+    "Automatically",
+    "Delete files that stayed in the trash for more than 30 days",
+    "Like on Windows and the Mac. Newer ones can still be put back.",
+    "Warn when the disk is almost full",
     "Apps that come with cosmic-blue",
     "All of them are installed.",
     "One of them was removed. Put it back?",
@@ -70,6 +83,10 @@ pub struct State {
     pub disk: Option<Disk>,
     /// Apps of the first boot that are not installed (ids)
     pub missing: Vec<String>,
+    /// Bytes in the trash
+    pub trash: u64,
+    pub trash_auto: bool,
+    pub disk_warning: bool,
     pub disk_usage_app: bool,
     pub firmware_app: bool,
 }
@@ -78,6 +95,7 @@ pub struct State {
 pub enum Busy {
     Cleaning,
     Reinstalling,
+    Emptying,
 }
 
 #[derive(Clone, Debug)]
@@ -85,6 +103,9 @@ pub enum Message {
     State(State),
     CleanUp,
     Reinstall,
+    EmptyTrash,
+    TrashAuto(bool),
+    DiskWarning(bool),
     /// End of a background command (None: the password prompt was
     /// dismissed)
     Done(Busy, Outcome),
@@ -175,6 +196,9 @@ pub fn read_state() -> State {
             .into_iter()
             .filter(|id| !installed.contains(id))
             .collect(),
+        trash: housekeeping::trash_size(),
+        trash_auto: housekeeping::trash_auto(),
+        disk_warning: housekeeping::disk_warning(),
         disk_usage_app: installed.contains(DISK_USAGE),
         firmware_app: installed.contains(FIRMWARE),
     }
@@ -212,6 +236,9 @@ fn refresh() -> Task<Message> {
                 .unwrap_or_else(|_| State {
                     disk: None,
                     missing: Vec::new(),
+                    trash: 0,
+                    trash_auto: true,
+                    disk_warning: true,
                     disk_usage_app: false,
                     firmware_app: false,
                 })
@@ -264,6 +291,26 @@ impl Page {
                     cosmic::Action::App(Message::Done(Busy::Reinstalling, result))
                 });
             }
+            Message::EmptyTrash => {
+                self.card = None;
+                self.busy = Some(Busy::Emptying);
+                let args = vec!["trash".to_owned(), "--empty".to_owned()];
+                return Task::perform(failure::run("gio", args, None), |result| {
+                    cosmic::Action::App(Message::Done(Busy::Emptying, result))
+                });
+            }
+            Message::TrashAuto(on) => {
+                housekeeping::set_trash_auto(on);
+                if let Some(state) = &mut self.state {
+                    state.trash_auto = housekeeping::trash_auto();
+                }
+            }
+            Message::DiskWarning(on) => {
+                housekeeping::set_disk_warning(on);
+                if let Some(state) = &mut self.state {
+                    state.disk_warning = housekeeping::disk_warning();
+                }
+            }
             Message::Done(busy, result) => {
                 self.busy = None;
                 let toast = match (busy, result) {
@@ -272,6 +319,7 @@ impl Page {
                         let title = match busy {
                             Busy::Cleaning => tr("Clean up"),
                             Busy::Reinstalling => tr("Reinstall"),
+                            Busy::Emptying => tr("Empty"),
                         };
                         self.card = Some(Card::new(title, failure, busy));
                         Task::none()
@@ -291,6 +339,9 @@ impl Page {
                     (Busy::Reinstalling, Some(Ok(()))) => {
                         self.toast(tr("The apps are back.").to_owned())
                     }
+                    (Busy::Emptying, Some(Ok(()))) => {
+                        self.toast(tr("The trash is empty.").to_owned())
+                    }
                 };
                 return Task::batch([toast, refresh()]);
             }
@@ -306,6 +357,7 @@ impl Page {
                         return self.update(match busy {
                             Busy::Cleaning => Message::CleanUp,
                             Busy::Reinstalling => Message::Reinstall,
+                            Busy::Emptying => Message::EmptyTrash,
                         });
                     }
                 }
@@ -395,7 +447,58 @@ impl Page {
             ])
             .spacing(space_s),
         );
+
+        // Trash
+        let trash_caption = if state.trash == 0 {
+            tr("The trash is empty.").to_owned()
+        } else {
+            fill(tr("{} in the trash"), &size(state.trash))
+        };
+        let mut trash_row = vec![
+            state_icon("user-trash-symbolic", false),
+            label(tr("Trash"), trash_caption),
+        ];
+        if self.busy == Some(Busy::Emptying) {
+            trash_row.push(
+                widget::row::with_capacity(2)
+                    .spacing(space_xxs)
+                    .align_y(Alignment::Center)
+                    .push(widget::progress_bar::indeterminate_circular().size(20.0))
+                    .push(text::body(tr("Emptying…")))
+                    .into(),
+            );
+        } else if state.trash > 0 {
+            trash_row.push(
+                widget::button::standard(tr("Empty"))
+                    .on_press_maybe(idle.then_some(Message::EmptyTrash))
+                    .into(),
+            );
+        }
+        disk = disk.add(settings::item_row(trash_row).spacing(space_s));
         content = content.push(disk);
+
+        // What happens by itself (housekeeping.rs)
+        content = content.push(
+            settings::section()
+                .title(tr("Automatically"))
+                .add(
+                    settings::item_row(vec![
+                        label(
+                            tr("Delete files that stayed in the trash for more than 30 days"),
+                            tr("Like on Windows and the Mac. Newer ones can still be put back.")
+                                .to_owned(),
+                        ),
+                        widget::toggler(state.trash_auto)
+                            .on_toggle(Message::TrashAuto)
+                            .into(),
+                    ])
+                    .spacing(space_s),
+                )
+                .add(settings::item(
+                    tr("Warn when the disk is almost full"),
+                    widget::toggler(state.disk_warning).on_toggle(Message::DiskWarning),
+                )),
+        );
 
         // Apps that come with cosmic-blue
         let caption = if state.missing.is_empty() {
