@@ -144,7 +144,9 @@ mark and the icons of the Starship prompt
 (`system_files/usr/share/cosmic-blue/starship.toml`), in plane 16 private use
 code points. The arrows span COSMIC Terminal's whole line (1.4 times the font
 size, with its default font Noto Sans Mono); Nerd Font arrows only reach the
-font's own height there.
+font's own height there. Rebuild the font after any change to the script:
+the image copies the committed font, and the Lint workflow fails when it is
+not the one the script builds (`python3 prompt-font/build.py --check <font>`).
 
 ## Icons
 
