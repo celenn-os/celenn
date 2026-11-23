@@ -73,6 +73,8 @@ const AVATARS: &str = "/var/lib/AccountsService/icons";
 /// cosmic-blue's profile pictures (branding/avatars), one to pick for a new
 /// child account
 const FACES: &str = "/usr/share/pixmaps/faces";
+/// COSMIC's picture for accounts without one (a link to our planet)
+const DEFAULT_FACE: &str = "pop-robot.png";
 /// Warnings before the session closes, in seconds
 const WARNINGS: [u64; 3] = [600, 300, 60];
 /// Steps of the - and + buttons, in minutes (any value can be typed)
@@ -656,7 +658,10 @@ fn accounts() -> Vec<Account> {
                 rules: Rules::load(user),
                 usage: Usage::load(user),
                 extra: parental_rules::load_extra(user),
-                avatar: style::round_picture(&avatar, 128),
+                // No picture of their own: COSMIC's default one (our
+                // planet), as on the login screen
+                avatar: style::rounded_picture(&avatar, 128)
+                    .or_else(|| style::rounded_picture(&Path::new(FACES).join(DEFAULT_FACE), 128)),
             })
         })
         .collect();
@@ -1312,7 +1317,7 @@ fn app_icon<'a>() -> Element<'a, Message> {
 }
 
 /// cosmic-blue's profile pictures, to pick one for a new child account, cut
-/// as disks (the links, such as COSMIC's default picture, are not listed
+/// as rounded squares (the links, such as COSMIC's default picture, are not listed
 /// twice)
 fn faces() -> Vec<(PathBuf, widget::image::Handle)> {
     let mut faces: Vec<PathBuf> = std::fs::read_dir(FACES)
@@ -1327,7 +1332,7 @@ fn faces() -> Vec<(PathBuf, widget::image::Handle)> {
     faces
         .into_iter()
         .filter_map(|face| {
-            let handle = style::round_picture(&face, 96)?;
+            let handle = style::rounded_picture(&face, 72)?;
             Some((face, handle))
         })
         .collect()
@@ -1998,13 +2003,13 @@ impl App {
                 .into()
         };
         // The pictures, in two rows, the one picked outlined
-        let mut pictures = widget::column::with_capacity(2).spacing(6);
+        let mut pictures = widget::column::with_capacity(2).spacing(8);
         for chunk in self.faces.chunks(self.faces.len().div_ceil(2).max(1)) {
-            let mut row = widget::row::with_capacity(chunk.len()).spacing(6);
+            let mut row = widget::row::with_capacity(chunk.len()).spacing(8);
             for (face, handle) in chunk {
                 row = row.push(style::picture_button(
                     handle.clone(),
-                    32,
+                    36,
                     self.face.as_ref() == Some(face),
                     Message::Face(face.clone()),
                 ));
