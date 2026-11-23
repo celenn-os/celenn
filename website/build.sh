@@ -39,6 +39,23 @@ fi
 shots_dir="${SCREENSHOTS_DIR:-}"
 shots=""
 zoom_shots="parental-controls-child parental-more-time first-steps-2 first-steps-3 tools-overview tools-software updates"
+# The home page shows these app windows alone, at their real size: cut out
+# along the window's light blue border
+win_shots="tools-overview first-steps-2 updates parental-controls-child parental-more-time tools-software"
+# Prints the window's box (WxH+X+Y) in the screenshot: the pixels of the
+# border color, kept only where they form lines at least 200 px long (the top
+# bar, 40 px, is left out)
+window_box() {
+  convert "$1" -crop 1920x960+0+40 +repage \
+    \( -clone 0 -channel B -separate +channel -threshold 88% \) \
+    \( -clone 0 -channel R -separate +channel -threshold 27% \) \
+    \( -clone 0 -channel R -separate +channel -negate -threshold 33% \) \
+    \( -clone 0 -channel G -separate +channel -threshold 47% \) \
+    -delete 0 -evaluate-sequence min \
+    \( -clone 0 -morphology Open rectangle:1x200 \) \
+    \( -clone 0 -morphology Open rectangle:200x1 \) \
+    -delete 0 -evaluate-sequence max -format '%@' info:
+}
 if [[ -n "${shots_dir}" && -f "${shots_dir}/info.env" ]]; then
   mkdir -p "${out}/img/screenshots"
   for file in "${shots_dir}"/*.png "${shots_dir}"/*.ppm; do
@@ -54,6 +71,16 @@ if [[ -n "${shots_dir}" && -f "${shots_dir}/info.env" ]]; then
       convert "${file}" -gravity center -crop 1200x760+0-40 +repage -strip -quality 85 \
         -define webp:method=6 "${out}/img/screenshots/${name}-zoom.webp"
     fi
+    if [[ " ${win_shots} " == *" ${name} "* ]]; then
+      box="$(window_box "${file}")"
+      if [[ ! "${box}" =~ ^([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+)$ ]] \
+          || (( BASH_REMATCH[1] < 300 || BASH_REMATCH[2] < 300 )); then
+        echo "::error file=website/build.sh::no app window found in screenshot ${name} (box: ${box})"
+        exit 1
+      fi
+      convert "${file}" -crop "${BASH_REMATCH[1]}x${BASH_REMATCH[2]}+${BASH_REMATCH[3]}+$(( BASH_REMATCH[4] + 40 ))" \
+        +repage -strip -quality 88 -define webp:method=6 "${out}/img/screenshots/${name}-win.webp"
+    fi
     shots+=" ${name}"
   done
   # shellcheck source=/dev/null
@@ -65,13 +92,13 @@ elif [[ -n "${shots_dir}" ]]; then
 fi
 # The "Why cosmic-blue" page needs its screenshots: fail when the boot test
 # no longer takes one (renamed or removed) rather than drop it silently
-for name in ${zoom_shots}; do
+for name in ${zoom_shots} ${win_shots}; do
   if ! grep -qE "[0-9]{2}-${name%-[0-9]}" "${root}/tests/vm-lib.sh"; then
-    echo "::error file=website/build.sh::screenshot ${name} (zoom_shots) is not taken by tests/vm-lib.sh"
+    echo "::error file=website/build.sh::screenshot ${name} (zoom_shots or win_shots) is not taken by tests/vm-lib.sh"
     exit 1
   fi
   if [[ -n "${shots}" && " ${shots} " != *" ${name} "* ]]; then
-    echo "::error file=website/build.sh::screenshot ${name} (zoom_shots) is missing from the latest boot test"
+    echo "::error file=website/build.sh::screenshot ${name} (zoom_shots or win_shots) is missing from the latest boot test"
     exit 1
   fi
 done
