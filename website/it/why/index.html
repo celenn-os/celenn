@@ -5,12 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Perché cosmic-blue? · cosmic-blue</title>
   <meta name="description" content="Cosa aggiunge cosmic-blue a Fedora COSMIC Atomic: una visita guidata, il controllo parentale, strumenti senza terminale, programmi pronti all'uso e aggiornamenti sicuri.">
-  <meta name="theme-color" content="#060b1c">
+  <meta name="theme-color" content="#050a1a">
+  <link rel="canonical" href="https://cosmic-blue-os.github.io/cosmic-blue/it/why/">
   <meta property="og:title" content="Perché cosmic-blue? · cosmic-blue">
   <meta property="og:description" content="Cosa aggiunge cosmic-blue a Fedora COSMIC Atomic: una visita guidata, il controllo parentale, strumenti senza terminale, programmi pronti all'uso e aggiornamenti sicuri.">
-  <!-- shot:desktop --><meta property="og:image" content="https://cosmic-blue-os.github.io/cosmic-blue/img/screenshots/desktop-960.webp"><!-- /shot -->
+  <meta property="og:image" content="https://cosmic-blue-os.github.io/cosmic-blue/img/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://cosmic-blue-os.github.io/cosmic-blue/it/why/">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="it_IT">
+  <meta property="og:site_name" content="cosmic-blue">
+  <meta name="twitter:card" content="summary_large_image">
+  <!-- shot:desktop --><meta property="og:image" content="https://cosmic-blue-os.github.io/cosmic-blue/img/screenshots/desktop-960.webp"><!-- /shot -->
   <link rel="alternate" hreflang="de" href="https://cosmic-blue-os.github.io/cosmic-blue/de/why/">
   <link rel="alternate" hreflang="en" href="https://cosmic-blue-os.github.io/cosmic-blue/why/">
   <link rel="alternate" hreflang="es" href="https://cosmic-blue-os.github.io/cosmic-blue/es/why/">
@@ -19,16 +26,21 @@
   <link rel="alternate" hreflang="pt-BR" href="https://cosmic-blue-os.github.io/cosmic-blue/pt-br/why/">
   <link rel="alternate" hreflang="x-default" href="https://cosmic-blue-os.github.io/cosmic-blue/why/">
   <link rel="icon" href="../../img/cosmic-blue-logo.svg" type="image/svg+xml">
+  <link rel="preload" href="../../fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../../style.css">
 </head>
 <body>
-  <header class="page-head">
+  <a class="skip" href="#main">Vai al contenuto</a>
+  <header class="site-header">
     <nav class="top">
-      <a class="brand" href="../"><img src="../../img/cosmic-blue-logo.svg" alt="" width="28" height="28">cosmic-blue</a>
+      <a class="brand" href="../"><img src="../../img/cosmic-blue-logo.svg" alt="" width="28" height="28"><span>cosmic-blue</span></a>
       <span class="links">
-        <a class="text" href="./" aria-current="page">Perché</a>
+        <a class="text" href="../why/" aria-current="page">Perché</a>
+        <a class="text" href="../install/">Installare</a>
         <a class="text" href="../docs/">Docs</a>
         <a class="text" href="../screenshots/">Screenshot</a>
+      </span>
+      <span class="tools">
         <details class="lang">
           <summary class="icon" title="Lingua" aria-label="Lingua: Italiano"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><ellipse cx="12" cy="12" rx="4" ry="9.5"/><path d="M2.5 12h19M4.2 7h15.6M4.2 17h15.6"/></svg><span aria-hidden="true">IT</span></summary>
           <ul>
@@ -40,12 +52,22 @@
             <li><a href="../../pt-br/why/" hreflang="pt-BR" lang="pt-BR">Português</a></li>
           </ul>
         </details>
-        <a class="icon" href="https://github.com/cosmic-blue-os/cosmic-blue" title="GitHub" aria-label="GitHub"><svg viewBox="0 0 16 16" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+        <a class="icon github" href="https://github.com/cosmic-blue-os/cosmic-blue" title="GitHub" aria-label="GitHub"><svg viewBox="0 0 16 16" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+        <a class="button primary small" href="../#download">Scarica</a>
+        <details class="menu">
+          <summary class="icon" title="Menu" aria-label="Menu"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></summary>
+          <ul>
+            <li><a class="item" href="../why/" aria-current="page">Perché</a></li>
+            <li><a class="item" href="../install/">Installare</a></li>
+            <li><a class="item" href="../docs/">Docs</a></li>
+            <li><a class="item" href="../screenshots/">Screenshot</a></li>
+          </ul>
+        </details>
       </span>
     </nav>
   </header>
 
-  <main class="docs why">
+  <main id="main" class="docs why">
     <section class="block">
       <h1>Perché cosmic-blue?</h1>
       <p class="lead">cosmic-blue parte dalle stesse basi di Fedora COSMIC Atomic: Fedora, il desktop COSMIC dai pacchetti ufficiali di Fedora e un sistema atomico. Aggiunge strumenti pensati per le famiglie e per chi scopre Linux, tutti utilizzabili senza terminale.</p>
@@ -172,10 +194,38 @@
     </section>
   </main>
 
-  <footer>
-    <p>cosmic-blue è costruito su <a href="https://universal-blue.org/">Universal Blue</a>, <a href="https://projectbluefin.io/">Bluefin</a>, <a href="https://fedoraproject.org/">Fedora</a> e <a href="https://system76.com/cosmic">COSMIC</a>. cosmic-blue è un progetto indipendente, non affiliato a questi progetti né approvato da essi.</p>
-    <p><a href="https://github.com/cosmic-blue-os/cosmic-blue">Codice sorgente</a> ·
-    <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues">Segnala un problema</a></p>
+  <footer class="site-footer">
+    <div class="footer-cols">
+      <div>
+        <a class="brand" href="../"><img src="../../img/cosmic-blue-logo.svg" alt="" width="26" height="26"><span>cosmic-blue</span></a>
+        <p>Il desktop COSMIC su Fedora Atomic.</p>
+      </div>
+      <nav aria-labelledby="footer-discover">
+        <h2 id="footer-discover">Scopri</h2>
+        <ul>
+          <li><a href="../why/">Perché cosmic-blue?</a></li>
+          <li><a href="../screenshots/">Screenshot</a></li>
+          <li><a href="../#download">Scarica</a></li>
+        </ul>
+      </nav>
+      <nav aria-labelledby="footer-help">
+        <h2 id="footer-help">Aiuto</h2>
+        <ul>
+          <li><a href="../install/">Guida all'installazione</a></li>
+          <li><a href="../docs/">Documentazione</a></li>
+          <li><a href="../docs/troubleshooting/">Risoluzione dei problemi</a></li>
+        </ul>
+      </nav>
+      <nav aria-labelledby="footer-project">
+        <h2 id="footer-project">Progetto</h2>
+        <ul>
+          <li><a href="https://github.com/cosmic-blue-os/cosmic-blue">Codice sorgente</a></li>
+          <li><a href="https://github.com/cosmic-blue-os/cosmic-blue/issues">Segnala un problema</a></li>
+          <li><a href="https://github.com/cosmic-blue-os/cosmic-blue/discussions">Discussioni</a></li>
+        </ul>
+      </nav>
+    </div>
+    <p class="legal">Costruito su <a href="https://universal-blue.org/">Universal Blue</a>, <a href="https://projectbluefin.io/">Bluefin</a>, <a href="https://fedoraproject.org/">Fedora</a> e <a href="https://system76.com/cosmic">COSMIC</a>. cosmic-blue è un progetto indipendente, non affiliato a questi progetti né approvato da essi.</p>
   </footer>
 
   <script src="../../site.js"></script>
