@@ -445,13 +445,15 @@ kbd {
 .download .button { width: 100%; }
 
 .download .note-nvidia {
-  margin: 12px 0 0;
+  margin: 14px 0 0;
+  text-align: center;
   color: var(--muted);
   font-size: .84rem;
   line-height: 1.45;
 }
 
-.fine {
+.fine,
+.download .fine {
   margin: 12px 0 0;
   color: var(--muted);
   font-size: .8rem;
