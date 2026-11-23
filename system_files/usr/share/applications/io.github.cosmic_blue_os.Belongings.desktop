@@ -1,0 +1,18 @@
+[Desktop Entry]
+Type=Application
+Name=Bring your things
+Name[fr]=Retrouver vos affaires
+Name[de]=Ihre Sachen mitbringen
+Name[es]=Trae tus cosas
+Name[it]=Porta le tue cose
+Name[pt_BR]=Traga suas coisas
+Comment=Files, photos, bookmarks and email from your old computer
+Comment[fr]=Fichiers, photos, favoris et e-mails de votre ancien ordinateur
+Comment[de]=Dateien, Fotos, Lesezeichen und E-Mails vom alten Computer
+Comment[es]=Archivos, fotos, marcadores y correo de tu ordenador anterior
+Comment[it]=File, foto, segnalibri ed e-mail dal vecchio computer
+Comment[pt_BR]=Arquivos, fotos, favoritos e e-mail do seu computador antigo
+Icon=cosmic-blue-tour-files
+Exec=/usr/libexec/cosmic-blue-tour --belongings
+Terminal=false
+NoDisplay=true

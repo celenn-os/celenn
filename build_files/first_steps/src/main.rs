@@ -13,13 +13,16 @@
 //                                a search for the app in COSMIC Store
 //   cosmic-blue-tour --shortcuts The "Keyboard shortcuts" app: COSMIC's main
 //                                shortcuts on one page
+//   cosmic-blue-tour --belongings "Bring your things": files, photos,
+//                                bookmarks and email from the old computer
 //   cosmic-blue-tour --check     Image build test: every text has its
 //                                translations (no window)
 //
 // The first steps tour adapts to the person. Its first page asks where they
-// come from: Windows and macOS get their bearings, Linux gets the short
-// version (the commands). Every change applies at once (look, apps, the
-// computer's settings) and nothing is installed or changed without a click.
+// come from (Windows, macOS or Linux: the bearings page), and those coming
+// from Linux how well they know it: five short pages, or three for the
+// experienced. Every change applies at once (look, apps, the computer's
+// settings) and nothing is installed or changed without a click.
 // No notifications: the tour stays in the app library.
 //
 // Text is in English, translated to the session language from the PO files
@@ -53,7 +56,6 @@ use style::dim_caption;
 use system::{Computer, Package};
 
 const SITE: &str = "https://cosmic-blue-os.github.io/cosmic-blue/";
-const ISSUES: &str = "https://github.com/cosmic-blue-os/cosmic-blue/issues";
 const LOGO: &str = "/usr/share/icons/hicolor/scalable/apps/cosmic-blue-logo.svg";
 /// Welcome page illustration of the live tour: the default wallpaper in
 /// miniature
@@ -135,6 +137,17 @@ impl Origin {
     }
 }
 
+/// tour-level's value for the short tour
+const EXPERIENCED: &str = "experienced";
+
+/// What the apps page shows: its list, or one of its "Choose…" rows open
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Sub {
+    List,
+    Dev,
+    Vaults,
+}
+
 /// Usage profiles: apps from Flathub, installed for everyone like the
 /// first-boot apps (flatpak's polkit rules let administrators do it without
 /// a password)
@@ -176,6 +189,8 @@ const PROFILES: &[Profile] = &[
 /// KeePassXC (more.rs)
 struct VaultApp {
     app: &'static str,
+    /// The app's name (not translated)
+    name: &'static str,
     run: &'static [&'static str],
     /// Where the passwords are kept
     title: &'static str,
@@ -187,6 +202,7 @@ struct VaultApp {
 const VAULT_APPS: &[VaultApp] = &[
     VaultApp {
         app: BITWARDEN,
+        name: "Bitwarden",
         run: &["flatpak", "run", "com.bitwarden.desktop"],
         title: "Synced with my phone",
         caption: "Bitwarden: on this computer, your phone and in Firefox. Free account, everything is encrypted before it leaves the computer.",
@@ -194,6 +210,7 @@ const VAULT_APPS: &[VaultApp] = &[
     },
     VaultApp {
         app: "org.gnome.World.Secrets",
+        name: "Secrets",
         run: &["flatpak", "run", "org.gnome.World.Secrets"],
         title: "Only on this computer",
         caption: "Secrets: an encrypted file in your home folder, no account and no internet. KeePassXC opens it too.",
@@ -261,6 +278,8 @@ enum Action {
     Launch(&'static [&'static str]),
     OpenUri(String),
     Install,
+    /// A "Try it" button in a row: does the real thing (Message::Try)
+    Try(Try),
 }
 
 /// A row: title, caption and maybe a button
@@ -301,15 +320,14 @@ enum Body {
     Origin,
     /// Theme, wallpaper, avatar, dock: applied at once
     Look,
-    /// Usage profiles
+    /// Usage profiles, developer tools and password managers
     Profiles,
-    /// What the tour finds about the computer
-    Computer,
+    /// The experienced tour's page: what is different here (rows), then
+    /// developer tools and password managers
+    Essentials(Vec<Row>),
     /// Buttons that do the real thing
     Try,
-    /// The password managers, each with its Install button
-    Vaults,
-    /// What was done, backups and help
+    /// What was done, what the computer needs, backups and help
     Ready,
     /// A large icon of the icon theme, as an illustration
     Icon(&'static str),
@@ -353,6 +371,8 @@ enum Mode {
     Shortcuts,
     /// "Send without a cable": files between the phone and the computer
     Phone,
+    /// "Bring your things": files, photos, bookmarks and email from before
+    Belongings,
 }
 
 /// The cosmic-blue site in the session language
@@ -374,87 +394,117 @@ const FIREFOX: &[&str] = &["flatpak", "run", "org.mozilla.firefox"];
 const THUNDERBIRD: &[&str] = &["flatpak", "run", "org.mozilla.thunderbird"];
 const FIRMWARE: &[&str] = &["flatpak", "run", "org.gnome.Firmware"];
 
+/// What is different on cosmic-blue for someone who knows Linux: the
+/// Linux bearings, and the first rows of the experienced tour
+fn linux_rows() -> Vec<Row> {
+    vec![
+        row_button(
+            "The system is an image",
+            "Signed and read-only, it updates as a whole: no dnf on the system, and the previous version is one click away.",
+            "Updates",
+            Action::Launch(&[UPDATES_APP]),
+        ),
+        row_button(
+            "Apps → COSMIC Store",
+            "Flatpak apps from Flathub, kept apart from the system",
+            "Open COSMIC Store",
+            Action::Launch(&["cosmic-store"]),
+        ),
+        row_button(
+            "Packages from other distributions → DistroShelf",
+            "Arch, Debian, Ubuntu… in a container that shares your home folder, set up in a few clicks",
+            "Open DistroShelf",
+            Action::Launch(DISTROSHELF),
+        ),
+        row_button(
+            "If you like the terminal",
+            "ujust lists the system's recipes, brew installs command line tools: the documentation has them all.",
+            "Documentation",
+            Action::OpenUri(docs_url()),
+        ),
+    ]
+}
+
+/// Where everything is, for someone new: each row has its "Try" button
+/// when there is something to try (the "Try it" page of the tour when
+/// nobody said where they come from)
 fn bearings(origin: Origin) -> Page {
     let rows = match origin {
-        Origin::Linux => vec![
-            row_button(
-                "The system is an image",
-                "Signed and read-only, it updates as a whole: no dnf on the system, and the previous version is one click away.",
-                "Updates",
-                Action::Launch(&[UPDATES_APP]),
-            ),
-            row_button(
-                "Apps → COSMIC Store",
-                "Flatpak apps from Flathub, kept apart from the system",
-                "Open COSMIC Store",
-                Action::Launch(&["cosmic-store"]),
-            ),
-            row_button(
-                "Packages from other distributions → DistroShelf",
-                "Arch, Debian, Ubuntu… in a container that shares your home folder, set up in a few clicks",
-                "Open DistroShelf",
-                Action::Launch(DISTROSHELF),
-            ),
-            row_button(
-                "If you like the terminal",
-                "ujust lists the system's recipes, brew installs command line tools: the documentation has them all.",
-                "Documentation",
-                Action::OpenUri(docs_url()),
-            ),
-        ],
+        Origin::Linux => linux_rows(),
         Origin::Mac => vec![
             row(
                 "Command key → Ctrl, most of the time",
                 "Copy, paste, save: Ctrl + C, Ctrl + V, Ctrl + S",
             ),
-            row(
+            row_button(
                 "Spotlight → the Super key",
                 "Super opens the launcher: type the name of an app",
+                "Try",
+                Action::Try(Try::Launcher),
             ),
-            row(
+            row_button(
                 "App Store → COSMIC Store",
                 "Apps install and update from there",
+                "Open",
+                Action::Launch(&["cosmic-store"]),
             ),
-            row("Finder → Files", "Super + E opens it"),
-            row(
+            row_button(
+                "Finder → Files",
+                "Super + E opens it",
+                "Try",
+                Action::Launch(&["cosmic-files"]),
+            ),
+            row_button(
                 "Mission Control → Super + W",
                 "Your windows and workspaces at a glance",
+                "Try",
+                Action::Try(Try::Workspaces),
             ),
             row(
                 "System Settings → Settings",
                 "Everything in one place, Settings → Desktop for the look",
             ),
         ],
-        _ => vec![
-            row(
+        Origin::Windows => vec![
+            row_button(
                 "Windows key → the Super key",
                 "It opens the launcher, like the Start menu: type the name of an app",
+                "Try",
+                Action::Try(Try::Launcher),
             ),
-            row(
+            row_button(
+                "Task View → Super + W",
+                "Your windows and workspaces at a glance",
+                "Try",
+                Action::Try(Try::Workspaces),
+            ),
+            row_button(
                 "Microsoft Store → COSMIC Store",
                 "Apps install and update from there",
+                "Open",
+                Action::Launch(&["cosmic-store"]),
             ),
-            row("File Explorer → Files", "Super + E opens it, as on Windows"),
-            row(
-                "Settings and Control Panel → Settings",
-                "Everything in one place",
+            row_button(
+                "File Explorer → Files",
+                "Super + E opens it, as on Windows",
+                "Try",
+                Action::Launch(&["cosmic-files"]),
             ),
             row(
                 "Office → LibreOffice",
                 "It opens and saves Word, Excel and PowerPoint files",
             ),
-            row(
+            row_button(
                 "Same as on Windows",
                 "Alt + Tab, Ctrl + C and Ctrl + V, Super + Shift + S for a screenshot, Ctrl + Shift + Esc for the task manager",
+                "Try",
+                Action::Try(Try::Screenshot),
             ),
         ],
     };
+    // No banner, like the Look page: six rows and a note need the room
     Page {
-        icon: Some(if origin == Origin::Linux {
-            "cosmic-blue-welcome"
-        } else {
-            "cosmic-blue-tour-bearings"
-        }),
+        note: Some(SHORTCUTS_NOTE),
         ..Page::new(
             match origin {
                 Origin::Mac => "Your bearings from the Mac",
@@ -463,14 +513,73 @@ fn bearings(origin: Origin) -> Page {
             },
             Some(match origin {
                 Origin::Linux => "Another Linux, with its own habits, and an app for each of them.",
-                _ => "What changes, and what stays the same.",
+                _ => "What changes, and what stays the same. Try it, it is safe.",
             }),
             Body::Rows(rows),
         )
     }
 }
 
-fn pages(mode: &Mode, origin: Option<Origin>) -> Vec<Page> {
+/// Under the bearings: where the other shortcuts are
+const SHORTCUTS_NOTE: &str = "Every shortcut, tiling included: the Keyboard shortcuts app.";
+
+/// The page of the experienced Linux user's tour: what is different here,
+/// then the developer tools and the password managers (Body::Essentials
+/// adds them)
+fn essentials() -> Page {
+    // No banner: the rows need the room
+    Page {
+        note: Some(
+            "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Extra software.",
+        ),
+        ..Page::new(
+            "The essentials",
+            Some("What is different here, and your tools."),
+            Body::Essentials(linux_rows()),
+        )
+    }
+}
+
+/// The rows of the "Bring your things" window, made once
+static BELONGINGS: std::sync::LazyLock<Vec<Row>> = std::sync::LazyLock::new(belongings_rows);
+
+/// "Bring your things" (--belongings, from the last page of the tour)
+fn belongings_rows() -> Vec<Row> {
+    vec![
+        row_button(
+            "Files from an old disk",
+            "Plug it in: it shows up in Files, on the left. A Windows partition of this computer too.",
+            "Open Files",
+            Action::Launch(&["cosmic-files"]),
+        ),
+        row_button(
+            "Photos from a phone",
+            "Without a cable, with LocalSend. Or plug it in and allow file transfer on the phone: it shows up in Files.",
+            "Without a cable",
+            Action::Launch(&[TOUR, "--phone"]),
+        ),
+        row_button(
+            "Bookmarks and passwords",
+            "Export them from your old browser (an HTML file for bookmarks, a CSV file for passwords), then import them in Firefox.",
+            "Open Firefox",
+            Action::Launch(FIREFOX),
+        ),
+        row_button(
+            "Email",
+            "Thunderbird sets up your account with just your address and password.",
+            "Open Thunderbird",
+            Action::Launch(THUNDERBIRD),
+        ),
+        row_button(
+            "An app cannot see a folder or a USB drive?",
+            "Apps run apart from the system and only see what they need. Flatseal gives them access to more.",
+            "Open Flatseal",
+            Action::Launch(FLATSEAL),
+        ),
+    ]
+}
+
+fn pages(mode: &Mode, origin: Option<Origin>, experienced: bool) -> Vec<Page> {
     match mode {
         Mode::FirstSteps => {
             let welcome = Page::new(
@@ -480,142 +589,44 @@ fn pages(mode: &Mode, origin: Option<Origin>) -> Vec<Page> {
                 ),
                 Body::Origin,
             );
+            let ready = Page::new(
+                "You are ready",
+                Some("What is done, and what is left for when you want."),
+                Body::Ready,
+            );
+            // The short tour, for those who know Linux well (the choice
+            // shows under the Linux card)
+            if experienced && origin == Some(Origin::Linux) {
+                return vec![welcome, essentials(), ready];
+            }
             // No banner nor description: the wallpapers and pictures need
             // the room (each choice applies at once, which says it all)
             let look = Page::new("Make it yours", None, Body::Look);
-            let profiles = Page {
-                icon: Some("cosmic-blue-tour-store"),
+            // No banner: the six rows need the room
+            let apps = Page {
                 note: Some("Thousands of other apps are in COSMIC Store."),
                 ..Page::new(
-                    "What do you use your computer for?",
+                    "Your apps",
                     Some(
                         "Pick what concerns you: nothing installs without a click, and everything can be removed later.",
                     ),
                     Body::Profiles,
                 )
             };
-            let computer = Page {
-                icon: Some("cosmic-blue-tour-computer"),
-                ..Page::new(
-                    "Your computer",
-                    Some("Checked for you: only what concerns this computer shows up."),
-                    Body::Computer,
-                )
+            // Nobody said where they come from: the shortcuts to try
+            let bearings = match origin {
+                Some(origin) => bearings(origin),
+                None => Page {
+                    icon: Some("cosmic-blue-tour-try"),
+                    note: Some(SHORTCUTS_NOTE),
+                    ..Page::new(
+                        "Try it, it is safe",
+                        Some("Each button does the real thing."),
+                        Body::Try,
+                    )
+                },
             };
-            let try_it = Page {
-                icon: Some("cosmic-blue-tour-try"),
-                ..Page::new(
-                    "Try it, it is safe",
-                    Some("Each button does the real thing."),
-                    Body::Try,
-                )
-            };
-            let belongings = Page {
-                icon: Some("cosmic-blue-tour-files"),
-                ..Page::new(
-                    "Bring your things",
-                    Some("Your files, bookmarks and email from before."),
-                    Body::Rows(vec![
-                        row_button(
-                            "Files from an old disk",
-                            "Plug it in: it shows up in Files, on the left. A Windows partition of this computer too.",
-                            "Open Files",
-                            Action::Launch(&["cosmic-files"]),
-                        ),
-                        row_button(
-                            "Photos from a phone",
-                            "Without a cable, with LocalSend. Or plug it in and allow file transfer on the phone: it shows up in Files.",
-                            "Without a cable",
-                            Action::Launch(&[TOUR, "--phone"]),
-                        ),
-                        row_button(
-                            "Bookmarks and passwords",
-                            "Export them from your old browser (an HTML file for bookmarks, a CSV file for passwords), then import them in Firefox.",
-                            "Open Firefox",
-                            Action::Launch(FIREFOX),
-                        ),
-                        row_button(
-                            "Email",
-                            "Thunderbird sets up your account with just your address and password.",
-                            "Open Thunderbird",
-                            Action::Launch(THUNDERBIRD),
-                        ),
-                    ]),
-                )
-            };
-            let vaults = Page {
-                icon: Some("cosmic-blue-tour-passwords"),
-                note: Some(
-                    "Not now? Go on: Firefox already remembers the passwords of websites, and cosmic-blue Tools offers these apps too.",
-                ),
-                ..Page::new(
-                    "Your passwords",
-                    Some(
-                        "A password manager remembers them for you and makes up strong ones. Where do you want to keep them?",
-                    ),
-                    Body::Vaults,
-                )
-            };
-            let good_to_know = Page {
-                icon: Some("cosmic-blue-tour-tips"),
-                ..Page::new(
-                    "Good to know",
-                    Some("Three things that work differently here."),
-                    Body::Rows(vec![
-                        row_button(
-                            "Updates apply at the next restart",
-                            "The system updates itself in the background, without interrupting you. Something wrong after an update? Go back to the previous version in one click.",
-                            "Updates",
-                            Action::Launch(&[UPDATES_APP]),
-                        ),
-                        row_button(
-                            "An app cannot see a folder or a USB drive?",
-                            "Apps run apart from the system and only see what they need. Flatseal gives them access to more.",
-                            "Open Flatseal",
-                            Action::Launch(FLATSEAL),
-                        ),
-                        row_button(
-                            "A downloaded .exe, .deb or .rpm file?",
-                            "They do not install on cosmic-blue: look for the app in COSMIC Store, where it updates by itself.",
-                            "Open COSMIC Store",
-                            Action::Launch(&["cosmic-store"]),
-                        ),
-                    ]),
-                )
-            };
-            let ready = Page {
-                icon: Some("cosmic-blue-welcome"),
-                ..Page::new(
-                    "You are ready",
-                    Some("One more thing worth doing: backups."),
-                    Body::Ready,
-                )
-            };
-            match origin {
-                Some(origin) => vec![
-                    welcome,
-                    look,
-                    profiles,
-                    computer,
-                    bearings(origin),
-                    try_it,
-                    belongings,
-                    vaults,
-                    good_to_know,
-                    ready,
-                ],
-                None => vec![
-                    welcome,
-                    look,
-                    profiles,
-                    computer,
-                    try_it,
-                    belongings,
-                    vaults,
-                    good_to_know,
-                    ready,
-                ],
-            }
+            vec![welcome, look, apps, bearings, ready]
         }
         Mode::Live => vec![
             Page::new(
@@ -658,7 +669,7 @@ fn pages(mode: &Mode, origin: Option<Origin>) -> Vec<Page> {
                 Body::Icon("cosmic-blue-installer"),
             ),
         ],
-        Mode::Open(_) | Mode::Shortcuts | Mode::Phone => Vec::new(),
+        Mode::Open(_) | Mode::Shortcuts | Mode::Phone | Mode::Belongings => Vec::new(),
     }
 }
 
@@ -736,6 +747,10 @@ const TEXTS: &[&str] = &[
     ACCESSIBILITY,
     "Settings",
     // First page
+    "Linux and you",
+    "I am new to it",
+    "I know it well",
+    "I know it well: a shorter tour, in three steps.",
     "Installing your apps: {} of {}",
     "They show up in the app library as they arrive.",
     // Look
@@ -770,21 +785,20 @@ const TEXTS: &[&str] = &[
     "Ticked and grey: already installed. Lima and virtual machines: ujust install-dev-tools and ujust install-vms, in a terminal.",
     "Homebrew is still being set up: the code editors and terminal tools can be chosen in a few minutes.",
     "Back to the list",
-    // Computer
-    "Checking your computer…",
-    "Connected to the internet",
+    "Passwords",
+    "Bitwarden, synced with your phone, or Secrets, only on this computer",
+    "Installed: {}",
+    // What the computer needs (last page)
     "No internet connection",
     "Apps and updates need it.",
     "Network settings",
     "NVIDIA graphics card",
-    "Its driver is installed: this is the NVIDIA edition of cosmic-blue.",
     "The NVIDIA edition of cosmic-blue has its driver: about 4 GB to download, then it starts at the next restart.",
     "Switch",
     "Downloading the NVIDIA edition… This can take a while.",
     "The NVIDIA edition starts at the next restart.",
     "At the restart, a blue screen asks to enroll a key: choose Enroll MOK, Continue, Yes, then type the password cosmicblue (the keyboard is QWERTY there).",
     "Firmware updates are available",
-    "Firmware is up to date",
     "Open Firmware",
     "Take care of the battery",
     "Stop charging at 80 % when the laptop stays plugged in: the battery lasts longer.",
@@ -801,13 +815,16 @@ const TEXTS: &[&str] = &[
     // Ready
     "Your look is set",
     "Your apps are installed",
+    "Everything updates by itself",
+    "In the background, applied at the next restart. The previous version stays one click away.",
+    "Bring your things",
+    "Files, photos from a phone, bookmarks and email from before",
+    "Show me how",
     "Protect your files",
     "Plug in a USB drive and turn on automatic backups: Déjà Dup keeps a copy of your home folder.",
     "Set up backups",
     "Documentation",
     "Updates, software, commands and tips",
-    "Report a problem",
-    "Found a bug or something unclear? Tell us on GitHub",
     "This tour and the Keyboard shortcuts app stay in the app library.",
     // Files that do not install here
     "“{}” does not install here",
@@ -854,12 +871,21 @@ fn all_texts() -> Vec<&'static str> {
         Some(Origin::Mac),
         Some(Origin::Linux),
     ];
-    for (mode, origin) in origins
+    for row in belongings_rows() {
+        texts.extend([row.title, row.caption]);
+        texts.extend(row.button.map(|(label, _)| label));
+    }
+    for (mode, origin, experienced) in origins
         .iter()
-        .map(|origin| (Mode::FirstSteps, *origin))
-        .chain([(Mode::Live, None)])
+        .flat_map(|origin| {
+            [
+                (Mode::FirstSteps, *origin, false),
+                (Mode::FirstSteps, *origin, true),
+            ]
+        })
+        .chain([(Mode::Live, None, false)])
     {
-        for page in pages(&mode, origin) {
+        for page in pages(&mode, origin, experienced) {
             texts.push(page.title);
             texts.extend(page.description);
             texts.extend(page.note);
@@ -871,7 +897,7 @@ fn all_texts() -> Vec<&'static str> {
                             .flat_map(|(title, subtitle)| [title, subtitle]),
                     );
                 }
-                Body::Rows(rows) => {
+                Body::Rows(rows) | Body::Essentials(rows) => {
                     for row in rows {
                         texts.extend([row.title, row.caption]);
                         texts.extend(row.button.map(|(label, _)| label));
@@ -910,6 +936,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .size(cosmic::iced::Size::new(640.0, 440.0))
                 .resizable(None);
             cosmic::app::run::<App<PhoneDialog>>(settings, Mode::Phone)?;
+        }
+        Some("--belongings") => {
+            let settings = Settings::default()
+                .size(cosmic::iced::Size::new(680.0, 560.0))
+                .resizable(None);
+            cosmic::app::run::<App<BelongingsDialog>>(settings, Mode::Belongings)?;
         }
         Some("--shortcuts") => {
             let settings = Settings::default()
@@ -964,8 +996,10 @@ enum Message {
     /// One bar at the bottom (true), or the top bar and the dock
     Layout(bool),
     Profile(usize, bool),
-    /// Show the developer tools (true) or the profiles again
-    DevOpen(bool),
+    /// Show the developer tools, the password managers or the list again
+    Sub(Sub),
+    /// New to this (false) or experienced (true): the long or short tour
+    Level(bool),
     DevTool(usize, bool),
     /// Install what was chosen, then turn the page
     InstallAndNext,
@@ -1012,6 +1046,10 @@ struct PhoneDialog;
 impl Tour for PhoneDialog {
     const APP_ID: &'static str = "io.github.cosmic_blue_os.PhoneTransfer";
 }
+struct BelongingsDialog;
+impl Tour for BelongingsDialog {
+    const APP_ID: &'static str = "io.github.cosmic_blue_os.Belongings";
+}
 struct ShortcutsApp;
 impl Tour for ShortcutsApp {
     const APP_ID: &'static str = "io.github.cosmic_blue_os.Shortcuts";
@@ -1022,6 +1060,8 @@ struct App<T: Tour> {
     core: Core,
     mode: Mode,
     origin: Option<Origin>,
+    /// The short tour (kept in ~/.config/cosmic-blue/tour-level)
+    experienced: bool,
     pages: Vec<Page>,
     page_i: usize,
     toasts: Toasts<Message>,
@@ -1044,7 +1084,8 @@ struct App<T: Tour> {
     chosen: BTreeSet<usize>,
     brew: BTreeSet<usize>,
     dev_chosen: BTreeSet<usize>,
-    dev_open: bool,
+    /// The developer tools or the password managers, in place of the list
+    sub: Sub,
     install: Install,
     /// An install that did not work, with the apps and developer tools to
     /// try again
@@ -1062,7 +1103,7 @@ struct App<T: Tour> {
 
 impl<T: Tour> App<T> {
     fn rebuild_pages(&mut self) {
-        self.pages = pages(&self.mode, self.origin);
+        self.pages = pages(&self.mode, self.origin, self.experienced);
         self.page_i = self.page_i.min(self.pages.len().saturating_sub(1));
     }
 
@@ -1107,7 +1148,9 @@ impl<T: Tour> App<T> {
         let page = self.pages.get(self.page_i)?;
         if self.page_i + 1 < self.pages.len() {
             Some(
-                if matches!(page.body, Body::Profiles) && self.anything_chosen() {
+                if matches!(page.body, Body::Profiles | Body::Essentials(_))
+                    && self.anything_chosen()
+                {
                     Message::InstallAndNext
                 } else {
                     Message::PageOpen(self.page_i + 1)
@@ -1246,6 +1289,7 @@ impl<T: Tour> Application for App<T> {
         let origin = system::tour_read("tour-origin")
             .as_deref()
             .and_then(Origin::from_key);
+        let experienced = system::tour_read("tour-level").as_deref() == Some(EXPERIENCED);
         let (wallpapers, avatars) = if first_steps {
             (
                 system::wallpapers()
@@ -1267,9 +1311,10 @@ impl<T: Tour> Application for App<T> {
         let mut app = App {
             tour: std::marker::PhantomData,
             core,
-            pages: pages(&mode, origin),
+            pages: pages(&mode, origin, experienced),
             mode: mode.clone(),
             origin,
+            experienced,
             page_i: 0,
             toasts: Toasts::new(Message::CloseToast),
             welcome: [HERO, LOGO]
@@ -1296,7 +1341,7 @@ impl<T: Tour> Application for App<T> {
             chosen: BTreeSet::new(),
             brew: BTreeSet::new(),
             dev_chosen: BTreeSet::new(),
-            dev_open: false,
+            sub: Sub::List,
             install: Install::Idle,
             install_card: None,
             vault_installing: None,
@@ -1311,6 +1356,7 @@ impl<T: Tour> Application for App<T> {
             Mode::FirstSteps => tr("First steps").to_owned(),
             Mode::Shortcuts => tr("Keyboard shortcuts").to_owned(),
             Mode::Phone => tr("Send without a cable").to_owned(),
+            Mode::Belongings => tr("Bring your things").to_owned(),
             Mode::Open(file) => fill(tr("“{}” does not install here"), &short_name(file)),
         };
         let mut tasks = vec![match app.core.main_window_id() {
@@ -1344,6 +1390,7 @@ impl<T: Tour> Application for App<T> {
                     return self.update(message);
                 }
             }
+            Message::Run(Action::Try(thing)) => return self.update(Message::Try(thing)),
             Message::Run(action) => run(&action),
             Message::OpenWith(command) => {
                 if self.mode == Mode::Phone {
@@ -1358,6 +1405,11 @@ impl<T: Tour> Application for App<T> {
             }
             Message::CloseToast(id) => self.toasts.remove(id),
             Message::Exit => return cosmic::iced::exit(),
+            Message::Level(experienced) => {
+                self.experienced = experienced;
+                system::tour_write("tour-level", if experienced { EXPERIENCED } else { "" });
+                self.rebuild_pages();
+            }
             Message::Origin(origin) => {
                 // A second click on the chosen card takes the choice back
                 self.origin = (self.origin != Some(origin)).then_some(origin);
@@ -1408,7 +1460,7 @@ impl<T: Tour> Application for App<T> {
                     self.chosen.remove(&i);
                 }
             }
-            Message::DevOpen(open) => self.dev_open = open,
+            Message::Sub(sub) => self.sub = sub,
             Message::DevTool(i, chosen) => {
                 if chosen {
                     self.dev_chosen.insert(i);
@@ -1436,7 +1488,7 @@ impl<T: Tour> Application for App<T> {
                 }
                 self.chosen.clear();
                 self.dev_chosen.clear();
-                self.dev_open = false;
+                self.sub = Sub::List;
                 let mut tasks = vec![self.update(Message::Turn(1))];
                 tasks.extend(self.start_install(apps, tools));
                 return Task::batch(tasks);
@@ -1651,6 +1703,7 @@ impl<T: Tour> Application for App<T> {
             Mode::Open(file) => return self.open_view(file),
             Mode::Shortcuts => return self.shortcuts_view(),
             Mode::Phone => return self.phone_view(),
+            Mode::Belongings => return self.belongings_view(),
             _ => {}
         }
         let cosmic_theme::Spacing {
@@ -1694,7 +1747,9 @@ impl<T: Tour> Application for App<T> {
         button_row = button_row.push(if !last {
             // On the apps page, Next installs what is chosen (in the
             // background: the tour goes on meanwhile)
-            let label = if matches!(page.body, Body::Profiles) && self.anything_chosen() {
+            let label = if matches!(page.body, Body::Profiles | Body::Essentials(_))
+                && self.anything_chosen()
+            {
                 "Install and continue"
             } else {
                 "Next"
@@ -1944,7 +1999,21 @@ impl<T: Tour> App<T> {
                     .spacing(space_s)
                     .into();
             }
-            Body::Computer => self.computer_rows(space_s),
+            Body::Essentials(rows) => {
+                let body = match self.sub_rows(space_s) {
+                    Some(body) => body,
+                    None => {
+                        let mut rows: Vec<Element<'a, Message>> =
+                            rows.iter().map(|row| row_view(row, space_s)).collect();
+                        rows.push(self.dev_row(space_s));
+                        rows.push(self.vaults_row(space_s));
+                        let mut body = vec![section(rows)];
+                        body.extend(self.install_status(space_s));
+                        body
+                    }
+                };
+                return widget::column::with_children(body).spacing(space_s).into();
+            }
             Body::Try => Try::ALL
                 .iter()
                 .map(|thing| {
@@ -1967,7 +2036,6 @@ impl<T: Tour> App<T> {
                 })
                 .collect(),
             Body::Ready => return self.ready_view(space_s),
-            Body::Vaults => return self.vaults_view(space_s),
             Body::Icon(name) => {
                 return widget::container(widget::icon::from_name(*name).size(128))
                     .padding([space_s, 0])
@@ -1984,16 +2052,7 @@ impl<T: Tour> App<T> {
                     .into()
                 })
                 .collect(),
-            Body::Rows(rows) => rows
-                .iter()
-                .map(|row| {
-                    let mut items = vec![two_lines(title_line(tr(row.title)), tr(row.caption))];
-                    if let Some((label, action)) = &row.button {
-                        items.push(action_button(label, action));
-                    }
-                    settings::item_row(items).spacing(space_s).into()
-                })
-                .collect(),
+            Body::Rows(rows) => rows.iter().map(|row| row_view(row, space_s)).collect(),
         };
         section(rows)
     }
@@ -2082,10 +2141,55 @@ impl<T: Tour> App<T> {
                 )
             },
         );
-        let mut column = widget::column::with_capacity(3)
+        // Those who come from Linux: new to it, or the short tour
+        let level = (self.origin == Some(Origin::Linux)).then(|| {
+            let buttons = [(false, "I am new to it"), (true, "I know it well")]
+                .into_iter()
+                .fold(
+                    widget::row::with_capacity(2).spacing(space_s),
+                    |row, (experienced, label)| {
+                        let button = if self.experienced == experienced {
+                            widget::button::suggested(tr(label))
+                        } else {
+                            widget::button::standard(tr(label))
+                        };
+                        row.push(button.on_press(Message::Level(experienced)))
+                    },
+                );
+            settings::section().add(
+                settings::item_row(vec![
+                    two_lines(
+                        text::heading(tr("Linux and you")).into(),
+                        tr("I know it well: a shorter tour, in three steps."),
+                    ),
+                    buttons.into(),
+                ])
+                .spacing(space_s),
+            )
+        });
+        let scale = settings::item_row(vec![
+            widget::icon::from_name("cosmic-blue-tour-computer")
+                .size(40)
+                .into(),
+            two_lines(
+                text::heading(tr("Screen scale")).into(),
+                tr("Text and windows too small or too big? Change the scale of the screen."),
+            ),
+            action_button(
+                "Display settings",
+                &Action::Launch(&["cosmic-settings", "displays"]),
+            ),
+        ])
+        .spacing(space_s);
+        let mut column = widget::column::with_capacity(4)
             .spacing(theme::spacing().space_m)
             .push(cards)
-            .push(settings::section().add(accessibility_row(space_s)));
+            .push_maybe(level)
+            .push(
+                settings::section()
+                    .add(accessibility_row(space_s))
+                    .add(scale),
+            );
         if let Some((done, all)) = self.preinstall_progress() {
             column = column.push(install_progress(
                 fill(
@@ -2194,8 +2298,8 @@ impl<T: Tour> App<T> {
     }
 
     fn profile_rows<'a>(&'a self, space_s: u16) -> Vec<Element<'a, Message>> {
-        if self.dev_open {
-            return self.dev_rows(space_s);
+        if let Some(body) = self.sub_rows(space_s) {
+            return body;
         }
         let running = matches!(self.install, Install::Running { .. });
         let mut rows: Vec<Element<'a, Message>> = PROFILES
@@ -2218,30 +2322,28 @@ impl<T: Tour> App<T> {
                 .into()
             })
             .collect();
-        let chosen = self.dev_chosen.len();
-        let caption = if chosen == 0 {
-            tr("Docker, VS Code, Zed, Neovim…: choose your tools").to_owned()
-        } else {
-            fill(tr("Chosen: {}"), &chosen.to_string())
-        };
-        rows.push(
-            settings::item_row(vec![
-                widget::column::with_capacity(2)
-                    .spacing(2)
-                    .push(text::heading(tr("Development")))
-                    .push(dim_caption(caption).wrapping(Wrapping::Word))
-                    .width(Length::Fill)
-                    .into(),
-                widget::button::standard(tr("Choose…"))
-                    .on_press_maybe((!running).then_some(Message::DevOpen(true)))
-                    .into(),
-            ])
-            .spacing(space_s)
-            .into(),
-        );
+        rows.push(self.dev_row(space_s));
+        rows.push(self.vaults_row(space_s));
         let mut body = vec![section(rows)];
+        body.extend(self.install_status(space_s));
+        body
+    }
+
+    /// The developer tools or the password managers, when one of their
+    /// "Choose…" rows is open
+    fn sub_rows<'a>(&'a self, space_s: u16) -> Option<Vec<Element<'a, Message>>> {
+        match self.sub {
+            Sub::List => None,
+            Sub::Dev => Some(self.dev_rows(space_s)),
+            Sub::Vaults => Some(vec![self.vaults_view(space_s), back_to_list()]),
+        }
+    }
+
+    /// The progress of the chosen apps, or the card of an install that
+    /// did not work
+    fn install_status<'a>(&'a self, space_s: u16) -> Option<Element<'a, Message>> {
         if let Some((done, all)) = self.install_count() {
-            body.push(install_progress(
+            Some(install_progress(
                 fill(
                     &fill(tr("Installing: {} of {}"), &done.to_string()),
                     &all.to_string(),
@@ -2250,11 +2352,60 @@ impl<T: Tour> App<T> {
                 done,
                 all,
                 space_s,
-            ));
-        } else if let Some(card) = &self.install_card {
-            body.push(card.view(Message::InstallCard));
+            ))
+        } else {
+            self.install_card
+                .as_ref()
+                .map(|card| card.view(Message::InstallCard))
         }
-        body
+    }
+
+    /// A "Choose…" row: title, caption, and the button that opens its list
+    fn choose_row<'a>(
+        &'a self,
+        title: &'static str,
+        caption: String,
+        sub: Sub,
+        space_s: u16,
+    ) -> Element<'a, Message> {
+        let running = matches!(self.install, Install::Running { .. });
+        settings::item_row(vec![
+            widget::column::with_capacity(2)
+                .spacing(2)
+                .push(text::heading(tr(title)))
+                .push(dim_caption(caption).wrapping(Wrapping::Word))
+                .width(Length::Fill)
+                .into(),
+            widget::button::standard(tr("Choose…"))
+                .on_press_maybe((!running || sub == Sub::Vaults).then_some(Message::Sub(sub)))
+                .into(),
+        ])
+        .spacing(space_s)
+        .into()
+    }
+
+    fn dev_row<'a>(&'a self, space_s: u16) -> Element<'a, Message> {
+        let chosen = self.dev_chosen.len();
+        let caption = if chosen == 0 {
+            tr("Docker, VS Code, Zed, Neovim…: choose your tools").to_owned()
+        } else {
+            fill(tr("Chosen: {}"), &chosen.to_string())
+        };
+        self.choose_row("Development", caption, Sub::Dev, space_s)
+    }
+
+    fn vaults_row<'a>(&'a self, space_s: u16) -> Element<'a, Message> {
+        let installed: Vec<&str> = VAULT_APPS
+            .iter()
+            .filter(|manager| self.installed.contains(manager.app))
+            .map(|manager| manager.name)
+            .collect();
+        let caption = if installed.is_empty() {
+            tr("Bitwarden, synced with your phone, or Secrets, only on this computer").to_owned()
+        } else {
+            fill(tr("Installed: {}"), &installed.join(", "))
+        };
+        self.choose_row("Passwords", caption, Sub::Vaults, space_s)
     }
 
     /// The developer tools, by group, each with its checkbox
@@ -2333,22 +2484,15 @@ impl<T: Tour> App<T> {
                 .align_x(Alignment::Center)
                 .width(Length::Fill)
                 .into(),
-            widget::button::standard(tr("Back to the list"))
-                .on_press(Message::DevOpen(false))
-                .apply(widget::container)
-                .center_x(Length::Fill)
-                .into(),
+            back_to_list(),
         ]
     }
 
+    /// What this computer needs, found by system::computer(): only what
+    /// asks for an action (cosmic-blue Tools → Computer has the rest)
     fn computer_rows<'a>(&'a self, space_s: u16) -> Vec<Element<'a, Message>> {
         let Some(computer) = &self.computer else {
-            return vec![
-                text::body(tr("Checking your computer…"))
-                    .align_x(Alignment::Center)
-                    .width(Length::Fill)
-                    .into(),
-            ];
+            return Vec::new();
         };
         let item =
             |done: bool, title: String, caption: String, end: Option<Element<'a, Message>>| {
@@ -2364,14 +2508,8 @@ impl<T: Tour> App<T> {
                 Element::from(settings::item_row(items).spacing(space_s))
             };
         let mut rows = Vec::new();
-        match computer.online {
-            Some(true) => rows.push(item(
-                true,
-                tr("Connected to the internet").to_owned(),
-                String::new(),
-                None,
-            )),
-            Some(false) => rows.push(item(
+        if computer.online == Some(false) {
+            rows.push(item(
                 false,
                 tr("No internet connection").to_owned(),
                 tr("Apps and updates need it.").to_owned(),
@@ -2379,17 +2517,9 @@ impl<T: Tour> App<T> {
                     "Network settings",
                     &Action::Launch(&["cosmic-settings", "network"]),
                 )),
-            )),
-            None => {}
+            ));
         }
         match (computer.nvidia, &self.nvidia) {
-            (Some(true), _) => rows.push(item(
-                true,
-                tr("NVIDIA graphics card").to_owned(),
-                tr("Its driver is installed: this is the NVIDIA edition of cosmic-blue.")
-                    .to_owned(),
-                None,
-            )),
             (Some(false), Nvidia::Switched) => {
                 let mut caption = tr("The NVIDIA edition starts at the next restart.").to_owned();
                 if computer.secure_boot {
@@ -2424,22 +2554,17 @@ impl<T: Tour> App<T> {
                     ),
                 ));
             }
-            (None, _) => {}
+            _ => {}
         }
-        match &computer.firmware {
-            Some(devices) if !devices.is_empty() => rows.push(item(
+        if let Some(devices) = &computer.firmware
+            && !devices.is_empty()
+        {
+            rows.push(item(
                 false,
                 tr("Firmware updates are available").to_owned(),
                 devices.join(", "),
                 Some(action_button("Open Firmware", &Action::Launch(FIRMWARE))),
-            )),
-            Some(_) => rows.push(item(
-                true,
-                tr("Firmware is up to date").to_owned(),
-                String::new(),
-                None,
-            )),
-            None => {}
+            ));
         }
         if let Some(on) = computer.battery_limit {
             rows.push(
@@ -2455,22 +2580,7 @@ impl<T: Tour> App<T> {
                 .into(),
             );
         }
-        rows.push(
-            settings::item_row(vec![
-                row_icon("video-display-symbolic"),
-                two_lines(
-                    text::heading(tr("Screen scale")).into(),
-                    tr("Text and windows too small or too big? Change the scale of the screen."),
-                ),
-                action_button(
-                    "Display settings",
-                    &Action::Launch(&["cosmic-settings", "displays"]),
-                ),
-            ])
-            .spacing(space_s)
-            .into(),
-        );
-        vec![section(rows)]
+        rows
     }
 
     fn ready_view<'a>(&'a self, space_s: u16) -> Element<'a, Message> {
@@ -2502,14 +2612,16 @@ impl<T: Tour> App<T> {
             (Install::Done, _) => done.push(check(tr("Your apps are installed").to_owned(), None)),
             _ => {}
         }
-        if self.nvidia == Nvidia::Switched {
-            done.push(check(
-                tr("The NVIDIA edition starts at the next restart.").to_owned(),
-                None,
-            ));
-        }
+        // From the former "Good to know" page: what works differently
+        done.push(check(
+            tr("Everything updates by itself").to_owned(),
+            Some(
+                tr("In the background, applied at the next restart. The previous version stays one click away.")
+                    .to_owned(),
+            ),
+        ));
         let backups = settings::item_row(vec![
-            widget::icon::from_name("org.gnome.DejaDup").size(40).into(),
+            row_icon("org.gnome.DejaDup"),
             two_lines(
                 text::heading(tr("Protect your files")).into(),
                 tr("Plug in a USB drive and turn on automatic backups: Déjà Dup keeps a copy of your home folder."),
@@ -2519,41 +2631,39 @@ impl<T: Tour> App<T> {
                 .into(),
         ])
         .spacing(space_s);
-        let links = [
-            (
-                "Documentation",
-                "Updates, software, commands and tips",
-                docs_url(),
+        let belongings = settings::item_row(vec![
+            row_icon("cosmic-blue-tour-files"),
+            two_lines(
+                text::heading(tr("Bring your things")).into(),
+                tr("Files, photos from a phone, bookmarks and email from before"),
             ),
-            (
-                "Report a problem",
-                "Found a bug or something unclear? Tell us on GitHub",
-                ISSUES.to_owned(),
+            action_button("Show me how", &Action::Launch(&[TOUR, "--belongings"])),
+        ])
+        .spacing(space_s);
+        let help = settings::item_row(vec![
+            row_icon("help-browser"),
+            two_lines(
+                text::heading(tr("Documentation")).into(),
+                tr("Updates, software, commands and tips"),
             ),
-        ]
-        .into_iter()
-        .map(|(title, caption, uri)| {
-            settings::item_row(vec![
-                two_lines(text::heading(tr(title)).into(), tr(caption)),
-                widget::button::standard(tr("Open"))
-                    .trailing_icon(widget::button::link::icon())
-                    .on_press(Message::Run(Action::OpenUri(uri)))
-                    .into(),
-            ])
-            .into()
-        })
-        .collect::<Vec<Element<'a, Message>>>();
-        let mut column = widget::column::with_capacity(5).spacing(theme::spacing().space_m);
+            widget::button::standard(tr("Open"))
+                .trailing_icon(widget::button::link::icon())
+                .on_press(Message::Run(Action::OpenUri(docs_url())))
+                .into(),
+        ])
+        .spacing(space_s);
+        let mut column = widget::column::with_capacity(5).spacing(space_s);
         // An install that did not work, with "Try again"
         if let Some(card) = &self.install_card {
             column = column.push(card.view(Message::InstallCard));
         }
-        if !done.is_empty() {
-            column = column.push(section(done));
+        let computer = self.computer_rows(space_s);
+        column = column.push(section(done));
+        if !computer.is_empty() {
+            column = column.push(section(computer));
         }
         column
-            .push(settings::section().add(backups))
-            .push(section(links))
+            .push(settings::section().add(backups).add(belongings).add(help))
             .push(
                 text::caption(tr(
                     "This tour and the Keyboard shortcuts app stay in the app library.",
@@ -2707,6 +2817,34 @@ impl<T: Tour> App<T> {
             .into()
     }
 
+    /// "Bring your things": files, photos, bookmarks and email from the
+    /// old computer (from the last page of the tour)
+    fn belongings_view(&self) -> Element<'_, Message> {
+        let cosmic_theme::Spacing {
+            space_s,
+            space_m,
+            space_l,
+            ..
+        } = theme::spacing();
+        let rows = BELONGINGS
+            .iter()
+            .map(|row| row_view(row, space_s))
+            .collect();
+        widget::column::with_capacity(4)
+            .spacing(space_m)
+            .push(text::title3(tr("Bring your things")))
+            .push(section(rows))
+            .push(widget::space::vertical())
+            .push(
+                widget::row::with_capacity(2)
+                    .push(widget::space::horizontal())
+                    .push(widget::button::suggested(tr("Close")).on_press(Message::Exit)),
+            )
+            .padding(space_l)
+            .apply(widget::container)
+            .into()
+    }
+
     /// The "Keyboard shortcuts" app
     fn shortcuts_view(&self) -> Element<'_, Message> {
         let cosmic_theme::Spacing {
@@ -2792,6 +2930,25 @@ fn card_style(selected: bool) -> theme::Button {
         hovered: Box::new(move |_, theme| style(selected, theme, true)),
         pressed: Box::new(move |_, theme| style(selected, theme, true)),
     }
+}
+
+/// "Back to the list", under the developer tools and the password managers
+fn back_to_list<'a>() -> Element<'a, Message> {
+    widget::button::standard(tr("Back to the list"))
+        .on_press(Message::Sub(Sub::List))
+        .apply(widget::container)
+        .center_x(Length::Fill)
+        .into()
+}
+
+/// A row of a page: title (keys as keys, "A → B" with an arrow), caption
+/// and maybe a button
+fn row_view<'a>(row: &'a Row, space_s: u16) -> Element<'a, Message> {
+    let mut items = vec![two_lines(title_line(tr(row.title)), tr(row.caption))];
+    if let Some((label, action)) = &row.button {
+        items.push(action_button(label, action));
+    }
+    settings::item_row(items).spacing(space_s).into()
 }
 
 /// Rows in a COSMIC settings section
@@ -3044,6 +3201,7 @@ fn with_keys<'a>(caption: &'a str) -> Element<'a, Message> {
 fn action_button<'a>(label: &'static str, action: &Action) -> Element<'a, Message> {
     let available = match action {
         Action::Launch(command) => in_path(command[0]),
+        Action::Try(thing) => thing.program().is_none_or(in_path),
         _ => true,
     };
     let button = widget::button::standard(tr(label));
@@ -3084,6 +3242,8 @@ fn run(action: &Action) {
                 std::process::exit(0);
             }
         }
+        // Message::Run sends them to Message::Try
+        Action::Try(_) => {}
     }
 }
 

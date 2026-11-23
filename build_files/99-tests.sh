@@ -516,6 +516,8 @@ grep -qx 'Exec=/usr/libexec/cosmic-blue-tour --open %f' \
     /usr/share/applications/io.github.cosmic_blue_os.OpenPackage.desktop
 grep -qx 'Exec=/usr/libexec/cosmic-blue-tour --phone' \
     /usr/share/applications/io.github.cosmic_blue_os.PhoneTransfer.desktop
+grep -qx 'Exec=/usr/libexec/cosmic-blue-tour --belongings' \
+    /usr/share/applications/io.github.cosmic_blue_os.Belongings.desktop
 for type in application/x-ms-dos-executable application/x-msi application/vnd.debian.binary-package \
     application/x-rpm; do
     grep -qx "${type}=io.github.cosmic_blue_os.OpenPackage.desktop" /etc/xdg/mimeapps.list \
