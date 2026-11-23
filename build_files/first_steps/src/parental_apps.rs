@@ -65,6 +65,25 @@ pub struct App {
 }
 
 impl App {
+    /// Whether a window's Wayland app id is this application's: its
+    /// launcher id (org.mozilla.firefox), its Flatpak id, or its program's
+    /// name (steam), whatever the case
+    pub fn matches(&self, app_id: &str) -> bool {
+        let app_id = app_id.to_lowercase();
+        let id = self.id.to_lowercase();
+        id == app_id
+            || id.rsplit('.').next() == Some(app_id.as_str())
+            || self
+                .flatpak
+                .as_deref()
+                .is_some_and(|f| f.eq_ignore_ascii_case(&app_id))
+            || self
+                .program
+                .as_deref()
+                .and_then(|p| p.file_name())
+                .is_some_and(|name| name.to_string_lossy().eq_ignore_ascii_case(&app_id))
+    }
+
     /// Ticked by default when a parent turns the option on
     pub fn ticked_first(&self) -> bool {
         let has = |list: &[&str]| self.categories.iter().any(|c| list.contains(&c.as_str()));

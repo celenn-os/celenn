@@ -1,0 +1,11 @@
+[Unit]
+Description=Show the cosmic-blue avatars chosen by users on the login screen
+After=local-fs.target accounts-daemon.service
+Before=cosmic-greeter.service display-manager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/cosmic-blue-login-pictures
+
+[Install]
+WantedBy=multi-user.target

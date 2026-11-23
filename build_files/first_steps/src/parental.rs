@@ -6,11 +6,13 @@
 //     screen time today, a button that creates one, the other accounts
 //     (a standard account becomes a child's with "This is a child"), and
 //     for each child, in tabs: a daily limit (weekdays, weekend) and
-//     bedtime hours, the applications, the web filter, the screen time of
-//     the week;
+//     bedtime hours, the applications (allowed one by one, or all those a
+//     search finds at once, with Undo), the web filter, the screen time of
+//     the last seven days and the applications most used in front;
 //   - in a child's session, a small agent (autostart) that warns 10, 5 and
 //     1 minutes before the session closes, with an "Ask for more time"
-//     button;
+//     button, and tells the service which application is in front
+//     (parental_focus.rs);
 //   - that button's window: a parent gives 15, 30 or 60 minutes, or no
 //     limit for the day, with their password, there and then.
 //
@@ -44,6 +46,7 @@ use std::path::{Path, PathBuf};
 mod failure;
 mod i18n;
 mod parental_apps;
+mod parental_focus;
 mod parental_rules;
 mod style;
 use failure::{Card, CardAction, CardMessage, Outcome};
@@ -272,6 +275,18 @@ const TEXTS: &[&str] = &[
     "Downloaded programs (AppImages, executable files) do not run on this account.",
     "Applications of {}",
     "Search for an application",
+    "Today",
+    "Most used applications",
+    "Allow all",
+    "Block all",
+    "Undo",
+    "{allowed} allowed out of {total}",
+    "One application found",
+    "{} applications found",
+    "One application allowed",
+    "One application blocked",
+    "{} applications allowed",
+    "{} applications blocked",
     "Allowed",
     "Blocked",
     "Applications installed later are blocked until you tick them.",
@@ -318,6 +333,16 @@ fn user_name() -> String {
     std::env::var("USER").unwrap_or_default()
 }
 
+/// A Wayland app id as a name: its last part, capitalized
+/// (org.kde.krita: Krita)
+fn pretty_id(id: &str) -> String {
+    let last = id.rsplit('.').next().unwrap_or(id);
+    let mut chars = last.chars();
+    chars.next().map_or_else(String::new, |first| {
+        first.to_uppercase().chain(chars).collect()
+    })
+}
+
 /// "1 h 20 min", "2 h", "25 min"
 fn duration(seconds: u64) -> String {
     let minutes = seconds / 60;
@@ -342,6 +367,26 @@ fn fill(text: &str, value: &str) -> String {
 // The agent: warnings in a child's session
 // ---------------------------------------------------------------------------
 
+/// The app id in front, for the service (parental_rules::FOCUS); none: the
+/// file goes (a new file, renamed over the old one, so that the service
+/// never reads half of it)
+fn write_focus(path: &Path, app: Option<&str>) {
+    let Some(app) = app.and_then(parental_rules::clean_app_id) else {
+        let _ = std::fs::remove_file(path);
+        return;
+    };
+    let Some(dir) = path.parent() else {
+        return;
+    };
+    let new = dir.join(".parental-focus.new");
+    let done = std::fs::create_dir_all(dir)
+        .and_then(|()| std::fs::write(&new, app))
+        .and_then(|()| std::fs::rename(&new, path));
+    if let Err(error) = done {
+        eprintln!("Could not write {}: {error}", path.display());
+    }
+}
+
 /// Runs for the whole session of an account with rules: warns 10, 5 and 1
 /// minutes before the session closes (the service closes it). Granting more
 /// time makes the warnings come again before the new end.
@@ -364,7 +409,16 @@ fn agent() {
     let lang = std::env::var("LANG").unwrap_or_default();
     let mut hidden: Option<Option<BTreeSet<String>>> = None;
     let mut rounds: u32 = 0;
+    // The application in front, for the parent's "Most used applications"
+    let focus = parental_focus::Focus::default();
+    {
+        let focus = focus.clone();
+        std::thread::spawn(move || parental_focus::watch(focus));
+    }
+    let focus_file = home.join(parental_rules::FOCUS);
     loop {
+        let active = focus.lock().ok().and_then(|focus| focus.clone());
+        write_focus(&focus_file, active.as_deref());
         // Rules can be added or removed while the session runs
         let rules = Rules::load(&user);
         // The applications not allowed, hidden (again every minute: some
@@ -722,6 +776,10 @@ enum Message {
     AppsEnabled(bool),
     /// An application ticked or unticked
     Allow(String, bool),
+    /// "Allow all" (true) or "Block all": the applications the search finds
+    AllowAll(bool),
+    /// A toast's Undo: the allowed applications as they were
+    Undo(widget::ToastId, BTreeSet<String>),
 }
 
 struct App {
@@ -798,6 +856,20 @@ impl App {
         self.toasts
             .push(widget::toaster::Toast::new(tr(message)))
             .map(cosmic::Action::App)
+    }
+
+    /// The applications the search finds (all of them without a search)
+    fn found_apps(&self) -> Vec<&parental_apps::App> {
+        let search = self.search.trim().to_lowercase();
+        self.apps
+            .iter()
+            .flatten()
+            .filter(|app| {
+                search.is_empty()
+                    || app.name.to_lowercase().contains(&search)
+                    || app.comment.to_lowercase().contains(&search)
+            })
+            .collect()
     }
 
     /// The child account shown
@@ -919,7 +991,13 @@ impl Application for App {
                 self.page = Page::Home;
                 return load();
             }
-            Message::Tab(entity) => self.tabs.activate(entity),
+            Message::Tab(entity) => {
+                self.tabs.activate(entity);
+                // The week's applications are shown by name
+                if self.tabs.active_data::<Tab>() == Some(&Tab::Week) && self.apps.is_none() {
+                    return load_apps();
+                }
+            }
             Message::Face(face) => self.face = Some(face),
             Message::ShowAdd => {
                 self.name.clear();
@@ -1122,6 +1200,52 @@ impl Application for App {
                 } else {
                     rules.allowed_apps.remove(&id);
                 }
+                return self.update(Message::Rules(rules));
+            }
+            Message::AllowAll(on) => {
+                let Some(mut rules) = self.shown_rules() else {
+                    return Task::none();
+                };
+                let before = rules.allowed_apps.clone();
+                let ids: Vec<String> = self
+                    .found_apps()
+                    .into_iter()
+                    .map(|app| app.id.clone())
+                    .collect();
+                for id in ids {
+                    if on {
+                        rules.allowed_apps.insert(id);
+                    } else {
+                        rules.allowed_apps.remove(&id);
+                    }
+                }
+                let changed = before.symmetric_difference(&rules.allowed_apps).count();
+                if changed == 0 {
+                    return Task::none();
+                }
+                let text = match (on, changed) {
+                    (true, 1) => tr("One application allowed").to_owned(),
+                    (false, 1) => tr("One application blocked").to_owned(),
+                    (true, n) => fill(tr("{} applications allowed"), &n.to_string()),
+                    (false, n) => fill(tr("{} applications blocked"), &n.to_string()),
+                };
+                let toast = self
+                    .toasts
+                    .push(
+                        widget::toaster::Toast::new(text)
+                            .action(tr("Undo").to_owned(), move |id| {
+                                Message::Undo(id, before.clone())
+                            }),
+                    )
+                    .map(cosmic::Action::App);
+                return Task::batch([toast, self.update(Message::Rules(rules))]);
+            }
+            Message::Undo(id, allowed) => {
+                self.toasts.remove(id);
+                let Some(mut rules) = self.shown_rules() else {
+                    return Task::none();
+                };
+                rules.allowed_apps = allowed;
                 return self.update(Message::Rules(rules));
             }
             Message::Close => std::process::exit(0),
@@ -1604,22 +1728,47 @@ impl App {
                 .on_clear(Message::Search(String::new()))
                 .width(Length::Fill),
         );
-        let Some(apps) = &self.apps else {
+        if self.apps.is_none() {
             return frame(avatar(account, 52), title, None, content.into());
+        }
+        let found = self.found_apps();
+        // How many are allowed, or found; and both buttons for those
+        let allowed_found = found
+            .iter()
+            .filter(|app| rules.allowed_apps.contains(&app.id))
+            .count();
+        let count = if self.search.trim().is_empty() {
+            tr("{allowed} allowed out of {total}")
+                .replace("{allowed}", &allowed_found.to_string())
+                .replace("{total}", &found.len().to_string())
+        } else if found.len() == 1 {
+            tr("One application found").to_owned()
+        } else {
+            fill(tr("{} applications found"), &found.len().to_string())
         };
-        let search = self.search.trim().to_lowercase();
-        let found = |app: &&parental_apps::App| {
-            search.is_empty()
-                || app.name.to_lowercase().contains(&search)
-                || app.comment.to_lowercase().contains(&search)
-        };
+        content = content.push(
+            widget::row::with_capacity(3)
+                .spacing(space_s)
+                .align_y(Alignment::Center)
+                .push(
+                    style::dim_caption(count)
+                        .wrapping(Wrapping::Word)
+                        .width(Length::Fill),
+                )
+                .push(widget::button::text(tr("Allow all")).on_press_maybe(
+                    (allowed_found < found.len()).then_some(Message::AllowAll(true)),
+                ))
+                .push(
+                    widget::button::text(tr("Block all"))
+                        .on_press_maybe((allowed_found > 0).then_some(Message::AllowAll(false))),
+                ),
+        );
         for (heading, allowed) in [(tr("Allowed"), true), (tr("Blocked"), false)] {
             let mut section = settings::section().title(heading);
             let mut any = false;
-            for app in apps
+            for app in found
                 .iter()
                 .filter(|a| rules.allowed_apps.contains(&a.id) == allowed)
-                .filter(found)
             {
                 any = true;
                 let icon = if app.icon.starts_with('/') {
@@ -1653,67 +1802,182 @@ impl App {
         frame(avatar(account, 52), title, None, content.into())
     }
 
-    /// The screen time of the last seven days, as bars
+    /// The screen time of the last seven days, as bars (always seven: a
+    /// day without use has a flat bar), then the most used applications
     fn week<'a>(&'a self, account: &Account, rules: &Rules) -> Element<'a, Message> {
         const DAYS: [&str; 7] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-        const HEIGHT: f32 = 110.0;
+        const HEIGHT: f32 = 60.0;
+        /// Room above a bar for its value
+        const VALUE: f32 = 16.0;
         let space_s = theme::spacing().space_s;
         let Some(now) = Now::read() else {
             return widget::column::with_capacity(0).into();
         };
-        let mut days = account.usage.history.clone();
-        days.push(if account.usage.today.date == now.date {
-            account.usage.today.clone()
-        } else {
-            parental_rules::Day {
-                date: now.date.clone(),
-                weekday: now.weekday,
-                seconds: 0,
-            }
-        });
-        let skip = days.len().saturating_sub(parental_rules::HISTORY_DAYS);
-        let days = &days[skip..];
-        let highest = days
-            .iter()
-            .map(|d| d.seconds)
-            .chain(rules.daily_limit(now.weekday).map(|m| u64::from(m) * 60))
-            .max()
-            .unwrap_or(0)
-            .max(60);
-        let mut row = widget::row::with_capacity(7)
+        let Some(today) = parental_rules::day_number(&now.date) else {
+            return widget::column::with_capacity(0).into();
+        };
+        let mut known = account.usage.history.clone();
+        if account.usage.today.date == now.date {
+            known.push(account.usage.today.clone());
+        }
+        // The seven days that end today, oldest first
+        let days: Vec<(u32, Option<&parental_rules::Day>)> = (0..7)
+            .rev()
+            .map(|back: i64| {
+                let weekday = ((i64::from(now.weekday) - 1 - back).rem_euclid(7) + 1) as u32;
+                let day = known
+                    .iter()
+                    .find(|d| parental_rules::day_number(&d.date) == Some(today - back));
+                (weekday, day)
+            })
+            .collect();
+        let seconds = |day: &Option<&parental_rules::Day>| day.map_or(0, |d| d.seconds);
+        let most = days.iter().map(|(_, d)| seconds(d)).max().unwrap_or(0);
+        // The limit line, when every day has the same one and a day came
+        // near it (otherwise the bars would be tiny under it)
+        let limit = rules
+            .daily_limit(1)
+            .filter(|_| rules.daily_limit(1) == rules.daily_limit(7))
+            .map(|m| u64::from(m) * 60)
+            .filter(|limit| most * 4 >= limit * 3);
+        let highest = most.max(limit.unwrap_or(0)).max(60);
+        let height_of = |secs: u64| secs as f32 / highest as f32 * HEIGHT;
+        let mut bars = widget::row::with_capacity(7)
             .spacing(space_s)
             .align_y(Alignment::End)
-            .height(Length::Fixed(HEIGHT + 24.0));
-        for day in days {
-            let height = (day.seconds as f32 / highest as f32 * HEIGHT).max(2.0);
-            let label = DAYS
-                .get(day.weekday.saturating_sub(1) as usize)
-                .map_or(String::new(), |d| tr(d).to_owned());
-            row = row.push(
+            .height(Length::Fixed(HEIGHT + VALUE));
+        let mut labels = widget::row::with_capacity(7).spacing(space_s);
+        for (i, (weekday, day)) in days.iter().enumerate() {
+            let used = seconds(day);
+            let is_today = i == days.len() - 1;
+            bars = bars.push(
                 widget::column::with_capacity(2)
-                    .spacing(4)
+                    .spacing(2)
                     .align_x(Alignment::Center)
                     .width(Length::Fill)
-                    .push(bar(Length::Fill, height, day.seconds > 0))
-                    .push(text::caption(label)),
+                    .push_maybe((used >= 60).then(|| text::caption_heading(duration(used))))
+                    .push(bar(Length::Fixed(26.0), height_of(used).max(3.0), used > 0)),
+            );
+            let label = if is_today {
+                tr("Today").to_owned()
+            } else {
+                DAYS.get(weekday.saturating_sub(1) as usize)
+                    .map_or(String::new(), |d| tr(d).to_owned())
+            };
+            labels = labels.push(
+                widget::container(if is_today {
+                    text::caption_heading(label)
+                } else {
+                    text::caption(label)
+                })
+                .center_x(Length::Fill),
             );
         }
-        let used: Vec<u64> = days.iter().map(|d| d.seconds).collect();
-        let average = used.iter().sum::<u64>() / used.len().max(1) as u64;
-        settings::section()
-            .title(tr("This week"))
-            .add(
+        // The limit as a thin line across the bars, with its value
+        let chart: Element<'a, Message> = match limit {
+            Some(limit) => cosmic::iced::widget::stack![
+                bars,
                 widget::column::with_capacity(2)
-                    .spacing(space_s)
-                    .align_x(Alignment::Center)
-                    .push(row)
-                    .push(text::caption(fill(
-                        tr("Average: {} a day"),
-                        &duration(average),
+                    .push(widget::space::vertical().height(Length::Fixed(
+                        (HEIGHT + VALUE - height_of(limit) - 14.0).max(0.0)
                     )))
-                    .padding([space_s, 0]),
-            )
-            .into()
+                    .push(
+                        widget::container(text::caption(duration(limit)))
+                            .align_x(Alignment::End)
+                            .width(Length::Fill)
+                            .height(Length::Fixed(14.0)),
+                    )
+                    .push(
+                        widget::container(widget::space::horizontal())
+                            .width(Length::Fill)
+                            .height(Length::Fixed(1.0))
+                            .class(theme::Container::custom(|theme| {
+                                let mut color = theme.cosmic().on_bg_color();
+                                color.alpha = 0.3;
+                                cosmic::iced::widget::container::Style {
+                                    background: Some(cosmic::iced::Color::from(color).into()),
+                                    ..Default::default()
+                                }
+                            })),
+                    ),
+            ]
+            .into(),
+            None => bars.into(),
+        };
+        // The average of the days the computer was used
+        let used: Vec<u64> = days
+            .iter()
+            .map(|(_, d)| seconds(d))
+            .filter(|s| *s > 0)
+            .collect();
+        let average = used.iter().sum::<u64>() / used.len().max(1) as u64;
+        let mut column = widget::column::with_capacity(2).push(
+            // (the tab says "This week")
+            settings::section().add(
+                widget::column::with_capacity(3)
+                    .spacing(theme::spacing().space_xxs)
+                    .push(chart)
+                    .push(labels)
+                    .push(
+                        widget::container(style::dim_caption(fill(
+                            tr("Average: {} a day"),
+                            &duration(average),
+                        )))
+                        .center_x(Length::Fill),
+                    )
+                    .padding([theme::spacing().space_xxs, space_s]),
+            ),
+        );
+        // The applications in front the longest over the seven days
+        let mut apps: std::collections::BTreeMap<&str, u64> = std::collections::BTreeMap::new();
+        for (_, day) in &days {
+            for (id, secs) in day.iter().flat_map(|d| d.apps.iter()) {
+                *apps.entry(id.as_str()).or_default() += secs;
+            }
+        }
+        let mut apps: Vec<(&str, u64)> = apps.into_iter().filter(|(_, s)| *s >= 60).collect();
+        apps.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(b.0)));
+        apps.truncate(5);
+        if let Some(&(_, most)) = apps.first() {
+            let mut section = settings::section().title(tr("Most used applications"));
+            for (id, secs) in apps {
+                let app = self.apps.iter().flatten().find(|app| app.matches(id));
+                let icon = match app.map(|app| app.icon.as_str()) {
+                    Some(icon) if icon.starts_with('/') => widget::icon::from_path(icon.into()),
+                    Some(icon) => widget::icon::from_name(icon).size(24).handle(),
+                    None => widget::icon::from_name("application-x-executable")
+                        .size(24)
+                        .handle(),
+                };
+                // Not among the applications: the last part of its id
+                // (org.kde.krita: Krita)
+                let name = app.map_or_else(|| pretty_id(id), |app| app.name.clone());
+                section = section.add(
+                    settings::item_row(vec![
+                        widget::icon(icon).size(24).into(),
+                        widget::column::with_capacity(2)
+                            .spacing(6)
+                            .push(style::row_title(name))
+                            .push(
+                                widget::progress_bar::determinate_linear(secs as f32 / most as f32)
+                                    .girth(6)
+                                    .width(Length::Fill),
+                            )
+                            .width(Length::Fill)
+                            .into(),
+                        // The same width for every time, so that the bars
+                        // line up
+                        text::body(duration(secs))
+                            .align_x(Alignment::End)
+                            .width(Length::Fixed(72.0))
+                            .into(),
+                    ])
+                    .spacing(space_s),
+                );
+            }
+            column = column.push(section);
+        }
+        column.spacing(space_s).into()
     }
 
     fn add(&self) -> Element<'_, Message> {

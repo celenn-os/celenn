@@ -22,7 +22,7 @@
 #![allow(dead_code)]
 
 use serde_json::{Value, json};
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 
 pub const CONFIG_DIR: &str = "/etc/cosmic-blue/parental-controls";
@@ -240,6 +240,29 @@ pub struct Day {
     /// 1 = Monday ... 7 = Sunday
     pub weekday: u32,
     pub seconds: u64,
+    /// The same time by application in front (its Wayland app id, see
+    /// FOCUS): what the session's agent said was in front when the time
+    /// was counted
+    pub apps: BTreeMap<String, u64>,
+}
+
+/// In a child's home: the app id of the window in front, written by the
+/// session's agent every few seconds, read by the service (as root: no
+/// links, a few bytes; see focused_app)
+pub const FOCUS: &str = ".local/state/cosmic-blue/parental-focus";
+/// A focus file older than this is no longer true (the agent stopped)
+pub const FOCUS_FRESH: u64 = 30;
+
+/// A Wayland app id as kept: letters, digits, dots, dashes, underscores, at
+/// most 128 of them (anything else from the child's file is ignored)
+pub fn clean_app_id(text: &str) -> Option<String> {
+    let id = text.trim();
+    (!id.is_empty()
+        && id.len() <= 128
+        && id
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '_')))
+    .then(|| id.to_owned())
 }
 
 /// The time an account used: today, and the days before (oldest first)
@@ -256,6 +279,12 @@ impl Usage {
             date: v["date"].as_str().unwrap_or_default().to_owned(),
             weekday: v["weekday"].as_u64().unwrap_or(0) as u32,
             seconds: v["seconds"].as_u64().unwrap_or(0),
+            apps: v["apps"]
+                .as_object()
+                .into_iter()
+                .flatten()
+                .filter_map(|(id, seconds)| Some((clean_app_id(id)?, seconds.as_u64()?)))
+                .collect(),
         };
         Usage {
             today: day(&value["today"]),
@@ -269,7 +298,7 @@ impl Usage {
     }
 
     pub fn to_json(&self) -> String {
-        let day = |d: &Day| json!({"date": d.date, "weekday": d.weekday, "seconds": d.seconds});
+        let day = |d: &Day| json!({"date": d.date, "weekday": d.weekday, "seconds": d.seconds, "apps": d.apps});
         json!({
             "today": day(&self.today),
             "history": self.history.iter().map(day).collect::<Vec<_>>(),
@@ -299,7 +328,7 @@ impl Usage {
         self.today = Day {
             date: now.date.clone(),
             weekday: now.weekday,
-            seconds: 0,
+            ..Default::default()
         };
         true
     }
@@ -326,7 +355,7 @@ impl Usage {
 }
 
 /// Days since 1970-01-01 of a "2026-11-21" date
-fn day_number(date: &str) -> Option<i64> {
+pub fn day_number(date: &str) -> Option<i64> {
     let mut parts = date.splitn(3, '-').map(|part| part.parse::<i64>().ok());
     let (y, m, d) = (parts.next()??, parts.next()??, parts.next()??);
     if !(1..=12).contains(&m) || !(1..=31).contains(&d) {
@@ -484,6 +513,34 @@ pub fn clock(minute: u32) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn app_ids_from_the_child_are_checked() {
+        assert_eq!(
+            clean_app_id(" org.mozilla.firefox\n").as_deref(),
+            Some("org.mozilla.firefox")
+        );
+        assert_eq!(clean_app_id("steam").as_deref(), Some("steam"));
+        assert_eq!(clean_app_id(""), None);
+        assert_eq!(clean_app_id("../../etc"), None);
+        assert_eq!(clean_app_id("a b"), None);
+        assert_eq!(clean_app_id(&"x".repeat(129)), None);
+    }
+
+    #[test]
+    fn application_times_are_kept() {
+        let mut usage = Usage::default();
+        usage.today.date = "2026-11-20".into();
+        usage.today.seconds = 600;
+        usage.today.apps.insert("org.mozilla.firefox".into(), 600);
+        let again = Usage::from_json(&usage.to_json());
+        assert_eq!(again, usage);
+        // A file from before application times
+        let old = Usage::from_json(
+            r#"{"today":{"date":"2026-11-20","weekday":5,"seconds":60},"history":[]}"#,
+        );
+        assert!(old.today.apps.is_empty());
+    }
 
     fn now(minute: u32, weekday: u32) -> Now {
         Now {

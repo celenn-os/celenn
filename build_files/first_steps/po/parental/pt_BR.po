@@ -289,3 +289,39 @@ msgstr "Programa bloqueado"
 
 msgid "«{}» cannot run on this account: downloaded programs are not allowed."
 msgstr "“{}” não pode abrir nesta conta: programas baixados não são permitidos."
+
+msgid "Allow all"
+msgstr "Permitir todos"
+
+msgid "Block all"
+msgstr "Bloquear todos"
+
+msgid "Undo"
+msgstr "Desfazer"
+
+msgid "{allowed} allowed out of {total}"
+msgstr "{allowed} permitidos de {total}"
+
+msgid "One application found"
+msgstr "Um aplicativo encontrado"
+
+msgid "{} applications found"
+msgstr "{} aplicativos encontrados"
+
+msgid "One application allowed"
+msgstr "Um aplicativo permitido"
+
+msgid "One application blocked"
+msgstr "Um aplicativo bloqueado"
+
+msgid "{} applications allowed"
+msgstr "{} aplicativos permitidos"
+
+msgid "{} applications blocked"
+msgstr "{} aplicativos bloqueados"
+
+msgid "Today"
+msgstr "Hoje"
+
+msgid "Most used applications"
+msgstr "Aplicativos mais usados"
