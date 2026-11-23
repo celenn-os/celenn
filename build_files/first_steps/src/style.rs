@@ -50,19 +50,27 @@ pub fn page_header<'a, M: 'static>(
         .into()
 }
 
-/// A person's picture (a PNG or JPEG file) as a disk with a smooth edge, at
-/// `size` pixels a side: the image widget's own rounding has a jagged edge.
-/// None when the file cannot be read.
-pub fn round_picture(path: &std::path::Path, size: u32) -> Option<widget::image::Handle> {
+/// How round the corners of a person's picture are, as a share of its side:
+/// the same shape at every size (9 px at 43 px, like the wallpapers'
+/// thumbnails in the tour)
+const CORNER: f32 = 0.21;
+
+/// The corner radius of a person's picture `size` pixels wide
+fn corner(size: f32) -> f32 {
+    (size * CORNER).round()
+}
+
+/// A person's picture (a PNG or JPEG file) as a square with rounded corners
+/// and a smooth edge, at `size` pixels a side: the image widget's own
+/// rounding has a jagged edge. COSMIC shows these pictures round; the login
+/// screen keeps them round too. None when the file cannot be read.
+pub fn rounded_picture(path: &std::path::Path, size: u32) -> Option<widget::image::Handle> {
     let picture = image::open(path).ok()?;
     let mut picture = picture
         .resize_to_fill(size, size, image::imageops::FilterType::CatmullRom)
         .into_rgba8();
-    let center = size as f32 / 2.0;
     for (x, y, pixel) in picture.enumerate_pixels_mut() {
-        let distance =
-            ((x as f32 + 0.5 - center).powi(2) + (y as f32 + 0.5 - center).powi(2)).sqrt();
-        let coverage = (center - distance + 0.5).clamp(0.0, 1.0);
+        let coverage = rounded_coverage(size as f32, x as f32 + 0.5, y as f32 + 0.5);
         pixel[3] = (f32::from(pixel[3]) * coverage).round() as u8;
     }
     Some(widget::image::Handle::from_rgba(
@@ -72,8 +80,23 @@ pub fn round_picture(path: &std::path::Path, size: u32) -> Option<widget::image:
     ))
 }
 
-/// A round button for a person's picture, `size` pixels wide: a ring in the
-/// accent color around the selected (or focused) one, a fainter one on hover
+/// How much of the pixel centred on (x, y) lies inside a rounded square
+/// `size` pixels wide (0 to 1): its signed distance to the edge, so that
+/// the edge is smooth
+fn rounded_coverage(size: f32, x: f32, y: f32) -> f32 {
+    let half = size / 2.0;
+    let radius = corner(size);
+    let qx = (x - half).abs() - (half - radius);
+    let qy = (y - half).abs() - (half - radius);
+    let outside = qx.max(0.0).hypot(qy.max(0.0));
+    let distance = outside + qx.max(qy).min(0.0) - radius;
+    (0.5 - distance).clamp(0.0, 1.0)
+}
+
+/// A button for a person's picture, `size` pixels wide: the selected (or
+/// focused) one outlined in the accent color, a fainter outline on hover,
+/// drawn over the picture's edge in its rounded shape, as the image buttons
+/// of the wallpapers
 pub fn picture_button<'a, M: Clone + 'a>(
     handle: widget::image::Handle,
     size: u16,
@@ -82,7 +105,7 @@ pub fn picture_button<'a, M: Clone + 'a>(
 ) -> widget::Button<'a, M> {
     let ring = move |width: f32, alpha: f32, theme: &cosmic::Theme| {
         let mut style = widget::button::Style::new();
-        style.border_radius = (f32::from(size) / 2.0 + 4.0).into();
+        style.border_radius = corner(f32::from(size)).into();
         style.border_width = width;
         let mut color: cosmic::iced::Color = theme.cosmic().accent.base.into();
         color.a = alpha;
@@ -98,6 +121,28 @@ pub fn picture_button<'a, M: Clone + 'a>(
             hovered: Box::new(move |_, theme| ring(2.0, if selected { 1.0 } else { 0.5 }, theme)),
             pressed: Box::new(move |_, theme| ring(2.0, 1.0, theme)),
         })
-        .padding(3)
+        .padding(0)
         .on_press(on_press)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::rounded_coverage;
+
+    #[test]
+    fn rounded_square_edges() {
+        // The middle and the middle of each side are covered
+        assert_eq!(rounded_coverage(43.0, 21.5, 21.5), 1.0);
+        assert_eq!(rounded_coverage(43.0, 0.5, 21.5), 1.0);
+        assert_eq!(rounded_coverage(43.0, 21.5, 42.5), 1.0);
+        // The corner pixel is outside, the rounding is symmetric
+        assert_eq!(rounded_coverage(43.0, 0.5, 0.5), 0.0);
+        assert_eq!(
+            rounded_coverage(43.0, 2.5, 4.5),
+            rounded_coverage(43.0, 40.5, 38.5)
+        );
+        // The edge of the rounding is partly covered (smooth)
+        let edge = rounded_coverage(43.0, 1.5, 4.5);
+        assert!(edge > 0.0 && edge < 1.0, "{edge}");
+    }
 }

@@ -14,8 +14,8 @@
 # BASE_TAG is the Fedora release of Containerfile.helpers (`just fedora-version`).
 ARG BASE_TAG="45"
 ARG BASE_IMAGE="ghcr.io/ublue-os/base-main:45"
-ARG COMMON_IMAGE="ghcr.io/projectbluefin/common:latest@sha256:c2799fd6253575b9efb22bf798af335e822d8ad22f798f09c75fcdffcb37c3a8"
-ARG BREW_IMAGE="ghcr.io/ublue-os/brew:latest@sha256:9e0492dbc471258657564c94dae18b58dd96ddb998a06f2b15e8209efb48042b"
+ARG COMMON_IMAGE="ghcr.io/projectbluefin/common:latest@sha256:cea31681327949c5731122cccc5b87154af55c9ba6aa571a463c52d9f4f6a62b"
+ARG BREW_IMAGE="ghcr.io/ublue-os/brew:latest@sha256:9c51c948d48de69b0fadfb3d97dc1a7eaa91a4e5a2af7b2b6626fdd8fca362b1"
 
 # Bluefin shared files (ujust, uupd, setup, signing, udev...) and Homebrew
 FROM ${COMMON_IMAGE} AS common

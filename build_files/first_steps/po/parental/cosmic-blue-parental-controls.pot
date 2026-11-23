@@ -152,18 +152,6 @@ msgstr ""
 msgid "A parent confirms with their password."
 msgstr ""
 
-msgid "+15 min"
-msgstr ""
-
-msgid "+30 min"
-msgstr ""
-
-msgid "+60 min"
-msgstr ""
-
-msgid "Give"
-msgstr ""
-
 msgid "{} minutes left"
 msgstr ""
 
@@ -324,4 +312,43 @@ msgid "Today"
 msgstr ""
 
 msgid "Most used applications"
+msgstr ""
+
+msgid "Extra time"
+msgstr ""
+
+msgid "Bedtime included, until tomorrow morning"
+msgstr ""
+
+msgid "The session closes in {}."
+msgstr ""
+
+msgid "The session will close at {new} instead of {old}."
+msgstr ""
+
+msgid "The session will close at {}."
+msgstr ""
+
+msgid "No limit until tomorrow at {}."
+msgstr ""
+
+msgid "No limit for the rest of the day."
+msgstr ""
+
+msgid "Give {}"
+msgstr ""
+
+msgid "Remove the limit"
+msgstr ""
+
+msgid "At most 4 h. For more, turn on No limit today."
+msgstr ""
+
+msgid "Keep to bedtime"
+msgstr ""
+
+msgid "The session closes at {} all the same."
+msgstr ""
+
+msgid "Bedtime ({}) does not apply to this time."
 msgstr ""

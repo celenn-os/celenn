@@ -142,6 +142,7 @@ GNOME_ONLY+=(
     usr/share/glib-2.0/schemas/io.projectbluefin.chairlift.livery.gschema.xml
     usr/share/glib-2.0/schemas/io.projectbluefin.chairlift.updates.gschema.xml
     usr/share/glib-2.0/schemas/io.projectbluefin.chairlift.firstrun.gschema.xml
+    usr/share/glib-2.0/schemas/io.projectbluefin.chairlift.printers.gschema.xml
 )
 # FlatPark, the second Flatpak remote of projectbluefin/common: how far its
 # apps can be trusted is not established yet, so cosmic-blue offers it but
@@ -204,18 +205,6 @@ python3 -I /ctx/build_files/rename-just-recipes.py "${STAGE}"/usr/share/ublue-os
     "toggle-updates@System|Turn automatic updates on or off" \
     "toggle-tpm2|Turn on or off disk unlocking with the TPM2 chip (no password)" \
     -jetbrains-toolbox -toggle-user-motd -device-info -toggle-vms
-# The menu's "Antigravity" entry (under IDE) installs Google's Antigravity
-# agent app (antigravity-linux), not the Antigravity IDE editor: install the
-# IDE (antigravity-ide-linux, same tap) instead. Fails if upstream changes it.
-python3 -I - "${STAGE}/usr/share/ublue-os/just/system.just" <<'PY'
-import pathlib, sys
-path = pathlib.Path(sys.argv[1])
-text = path.read_text()
-old = "brew install --cask ublue-os/tap/antigravity-linux"
-if text.count(old) != 1:
-    sys.exit(f"{path}: Antigravity install line not found")
-path.write_text(text.replace(old, "brew install --cask ublue-os/tap/antigravity-ide-linux"))
-PY
 
 # `ujust install-cncf-tools` (projectbluefin/common cncf.Brewfile) installs
 # OpenLens, which is end-of-life on Flathub (its open source version was

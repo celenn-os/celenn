@@ -1255,7 +1255,8 @@ impl<T: Tour> Application for App<T> {
                 system::avatars()
                     .into_iter()
                     .filter_map(|path| {
-                        let handle = style::round_picture(&path, 96)?;
+                        // Twice the size shown, for sharp HiDPI screens
+                        let handle = style::rounded_picture(&path, 86)?;
                         Some((path, handle))
                     })
                     .collect(),
@@ -2171,11 +2172,11 @@ impl<T: Tour> App<T> {
                 .enumerate()
                 .map(|(i, (path, handle))| {
                     // 11 per row, as wide as the 6 wallpapers above
-                    // (6 x 92 + 5 gaps = 11 x (37 + 2 x 3) + 10 gaps, to a
-                    // pixel), round as everywhere else
+                    // (6 x 92 + 5 gaps = 11 x 43 + 10 gaps, to a pixel),
+                    // rounded squares outlined like the wallpapers
                     style::picture_button(
                         handle.clone(),
-                        37,
+                        43,
                         self.avatar == Some(i),
                         Message::Avatar(i),
                     )

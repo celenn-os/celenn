@@ -5,7 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dokumentation · cosmic-blue</title>
   <meta name="description" content="So nutzen Sie cosmic-blue: Updates und Zurücksetzen, Software installieren, ujust-Befehle, das Aussehen und Hilfe finden.">
-  <meta name="theme-color" content="#060b1c">
+  <meta name="theme-color" content="#050a1a">
+  <link rel="canonical" href="https://cosmic-blue-os.github.io/cosmic-blue/de/docs/">
+  <meta property="og:title" content="Dokumentation · cosmic-blue">
+  <meta property="og:description" content="So nutzen Sie cosmic-blue: Updates und Zurücksetzen, Software installieren, ujust-Befehle, das Aussehen und Hilfe finden.">
+  <meta property="og:image" content="https://cosmic-blue-os.github.io/cosmic-blue/img/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://cosmic-blue-os.github.io/cosmic-blue/de/docs/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="de_DE">
+  <meta property="og:site_name" content="cosmic-blue">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="alternate" hreflang="de" href="https://cosmic-blue-os.github.io/cosmic-blue/de/docs/">
   <link rel="alternate" hreflang="en" href="https://cosmic-blue-os.github.io/cosmic-blue/docs/">
   <link rel="alternate" hreflang="es" href="https://cosmic-blue-os.github.io/cosmic-blue/es/docs/">
@@ -14,16 +25,21 @@
   <link rel="alternate" hreflang="pt-BR" href="https://cosmic-blue-os.github.io/cosmic-blue/pt-br/docs/">
   <link rel="alternate" hreflang="x-default" href="https://cosmic-blue-os.github.io/cosmic-blue/docs/">
   <link rel="icon" href="../../img/cosmic-blue-logo.svg" type="image/svg+xml">
+  <link rel="preload" href="../../fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../../style.css">
 </head>
 <body>
-  <header class="page-head">
+  <a class="skip" href="#main">Zum Inhalt springen</a>
+  <header class="site-header">
     <nav class="top">
-      <a class="brand" href="../"><img src="../../img/cosmic-blue-logo.svg" alt="" width="28" height="28">cosmic-blue</a>
+      <a class="brand" href="../"><img src="../../img/cosmic-blue-logo.svg" alt="" width="28" height="28"><span>cosmic-blue</span></a>
       <span class="links">
         <a class="text" href="../why/">Warum</a>
-        <a class="text" href="./" aria-current="page">Doku</a>
+        <a class="text" href="../install/">Installieren</a>
+        <a class="text" href="../docs/" aria-current="page">Doku</a>
         <a class="text" href="../screenshots/">Screenshots</a>
+      </span>
+      <span class="tools">
         <details class="lang">
           <summary class="icon" title="Sprache" aria-label="Sprache: Deutsch"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><ellipse cx="12" cy="12" rx="4" ry="9.5"/><path d="M2.5 12h19M4.2 7h15.6M4.2 17h15.6"/></svg><span aria-hidden="true">DE</span></summary>
           <ul>
@@ -35,35 +51,64 @@
             <li><a href="../../pt-br/docs/" hreflang="pt-BR" lang="pt-BR">Português</a></li>
           </ul>
         </details>
-        <a class="icon" href="https://github.com/cosmic-blue-os/cosmic-blue" title="GitHub" aria-label="GitHub"><svg viewBox="0 0 16 16" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+        <a class="icon github" href="https://github.com/cosmic-blue-os/cosmic-blue" title="GitHub" aria-label="GitHub"><svg viewBox="0 0 16 16" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+        <a class="button primary small" href="../#download">Herunterladen</a>
+        <details class="menu">
+          <summary class="icon" title="Menü" aria-label="Menü"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></summary>
+          <ul>
+            <li><a class="item" href="../why/">Warum</a></li>
+            <li><a class="item" href="../install/">Installieren</a></li>
+            <li><a class="item" href="../docs/" aria-current="page">Doku</a></li>
+            <li><a class="item" href="../screenshots/">Screenshots</a></li>
+          </ul>
+        </details>
       </span>
     </nav>
   </header>
 
-  <main class="docs">
+  <main id="main" class="docs doc-layout">
+    <aside class="doc-side">
+      <button type="button" class="search-open" data-search hidden>
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Suchen<kbd>/</kbd>
+      </button>
+      <button type="button" class="doc-toggle" aria-expanded="false" aria-controls="doc-nav"><small>Auf dieser Seite</small><span></span></button>
+      <nav id="doc-nav" class="doc-nav" aria-label="Inhalt">
+        <h2>Erste Schritte</h2>
+        <ul>
+          <li><a href="#updates">Updates und Zurücksetzen</a></li>
+          <li><a href="#apps">Software installieren</a></li>
+          <li><a href="#alternatives">Ihre Windows- und Mac-Programme</a></li>
+          <li><a href="#hardware">Drucker, Firmware, Akku</a></li>
+        </ul>
+        <h2>Ihr System</h2>
+        <ul>
+          <li><a href="#tools">cosmic-blue Werkzeuge</a></li>
+          <li><a href="#parental">Jugendschutz</a></li>
+          <li><a href="#ujust">ujust-Befehle</a></li>
+          <li><a href="#look">Das Aussehen</a></li>
+          <li><a href="#terminal">Terminal</a></li>
+        </ul>
+        <h2>Daten und Sicherheit</h2>
+        <ul>
+          <li><a href="#data">Ihre Daten</a></li>
+          <li><a href="#privacy">Datenschutz</a></li>
+          <li><a href="#verify">Downloads prüfen</a></li>
+        </ul>
+        <h2>Hilfe</h2>
+        <ul>
+          <li><a href="#help">Hilfe finden</a></li>
+          <li><a href="troubleshooting/">Fehlerbehebung</a></li>
+        </ul>
+      </nav>
+    </aside>
+    <div class="doc-body" data-pagefind-body>
     <section class="block">
       <h1>Dokumentation</h1>
       <p>Was Sie für den Alltag mit cosmic-blue wissen müssen. cosmic-blue ist ein unabhängiges atomares Image auf der Basis von Universal Blue: Das System ist schreibgeschützt und wird als Ganzes aktualisiert, Ihre Apps und Dateien liegen getrennt davon.</p>
-      <nav class="toc" aria-label="Inhalt">
-        <a href="#updates">Updates und Zurücksetzen</a>
-        <a href="#apps">Software installieren</a>
-        <a href="#alternatives">Ihre Windows- und Mac-Programme</a>
-        <a href="#hardware">Drucker, Firmware, Akku</a>
-        <a href="#tools">cosmic-blue Werkzeuge</a>
-        <a href="#parental">Jugendschutz</a>
-        <a href="#ujust">ujust-Befehle</a>
-        <a href="#look">Das Aussehen</a>
-        <a href="#terminal">Terminal</a>
-        <a href="#data">Ihre Daten</a>
-        <a href="#privacy">Datenschutz</a>
-        <a href="#verify">Downloads prüfen</a>
-        <a href="#help">Hilfe finden</a>
-        <a href="troubleshooting/">Fehlerbehebung</a>
-      </nav>
     </section>
 
-    <section id="updates" class="block">
-      <h2>Updates und Zurücksetzen</h2>
+    <section class="block">
+      <h2 id="updates">Updates und Zurücksetzen</h2>
       <p>Die App <strong>Updates</strong> zeigt die laufende und die vorherige Version. <em>Zu dieser zurück</em> wechselt beim nächsten Neustart zur vorherigen Version, ohne Ihre Dateien anzutasten, und die verlassene Version wird nicht wieder installiert. Schalten Sie <em>Neuerungen früher erhalten</em> ein, um jeden Tag ein Update statt eines getesteten Updates pro Woche zu bekommen.</p>
       <p>Das System, Flatpak-Apps, Homebrew-Pakete und die mit Gear Lever hinzugefügten AppImages aktualisieren sich selbst im Hintergrund. Ein Systemupdate wird beim nächsten Start aktiv. Um jetzt zu aktualisieren oder die automatischen Updates abzuschalten:</p>
       <div class="code">
@@ -81,8 +126,8 @@ sudo bootc status      # aktuelle und vorherige Version anzeigen</code></pre>
       <p>Der Computer startet nicht mehr, oder die kaputte Version kommt immer wieder? Siehe <a href="troubleshooting/">Fehlerbehebung</a>.</p>
     </section>
 
-    <section id="apps" class="block">
-      <h2>Software installieren</h2>
+    <section class="block">
+      <h2 id="apps">Software installieren</h2>
       <h3>Apps: COSMIC Store</h3>
       <p>Grafische Apps kommen als Flatpaks aus dem <strong>COSMIC Store</strong>, der Flathub und die COSMIC-Apps anzeigt. Sie werden mit dem System aktualisiert und verändern es nicht.</p>
       <h3>AppImages: Gear Lever</h3>
@@ -109,8 +154,8 @@ distrobox enter arch</code></pre>
       </div>
     </section>
 
-    <section id="alternatives" class="block">
-      <h2>Ihre Windows- und Mac-Programme, hier</h2>
+    <section class="block">
+      <h2 id="alternatives">Ihre Windows- und Mac-Programme, hier</h2>
       <p>Windows-Programme (.exe) und Mac-Programme lassen sich hier nicht installieren. Für fast jedes gibt es einen kostenlosen Ersatz, oft schon installiert. Andere finden Sie im <strong>COSMIC Store</strong>: Suchen Sie nach ihrem Namen.</p>
       <div class="table">
         <table>
@@ -137,8 +182,8 @@ distrobox enter arch</code></pre>
       <p>Ein Windows-Programm ohne Ersatz? <strong>Bottles</strong> im COSMIC Store bringt manche zum Laufen. Spiele mit Anti-Cheat und Adobe-Programme laufen meist nicht.</p>
     </section>
 
-    <section id="hardware" class="block">
-      <h2>Drucker, Firmware, Akku</h2>
+    <section class="block">
+      <h2 id="hardware">Drucker, Firmware, Akku</h2>
       <h3>Drucker und Scanner</h3>
       <p>Die meisten Netzwerk- und USB-Drucker funktionieren sofort, ohne Treiber. Um einen von Hand hinzuzufügen, öffnen Sie <strong>Druckeinstellungen</strong>: Treiber für HP, Epson, Brother, Canon und andere sind installiert. <strong>Dokumentenscanner</strong> scannt mit Netzwerk- und USB-Scannern.</p>
       <h3>Firmware-Updates</h3>
@@ -155,20 +200,20 @@ distrobox enter arch</code></pre>
       </div>
     </section>
 
-    <section id="tools" class="block">
-      <h2>cosmic-blue Werkzeuge</h2>
+    <section class="block">
+      <h2 id="tools">cosmic-blue Werkzeuge</h2>
       <p><strong>cosmic-blue Werkzeuge</strong> erledigt per Knopfdruck, wofür sonst ein Befehl nötig wäre: Updates, Speicherplatz freigeben, Ladegrenze des Akkus, NVIDIA-Edition, Microsoft-Schriften, Spiele, Passwort-Manager und Entwicklerwerkzeuge, das ursprüngliche Aussehen und Hilfe. Jeder Knopf führt dasselbe aus wie der passende <code>ujust</code>-Befehl. Änderungen am System verlangen das Passwort eines Administrators.</p>
     </section>
 
-    <section id="parental" class="block">
-      <h2>Jugendschutz</h2>
+    <section class="block">
+      <h2 id="parental">Jugendschutz</h2>
       <p>Die App <strong>Jugendschutz</strong> legt Kinderkonten an und stellt für jedes eine tägliche Bildschirmzeit (Wochentage und Wochenende), Schlafenszeiten und einen Familien-Webfilter ein. Nur die Zeit vor dem Bildschirm zählt. Das Kind wird 10, 5 und 1 Minute vor dem Ende der Sitzung gewarnt und kann um mehr Zeit bitten, die ein Elternteil mit seinem Passwort gewährt.</p>
       <h3>Was er nicht verhindern kann</h3>
       <p>Der Webfilter sperrt Inhalte für Erwachsene, Glücksspiel und schädliche Seiten in jedem Browser des Kinderkontos und erzwingt die sichere Suche. Er verweigert auch die üblichen Umwege: andere DNS-Server, verschlüsseltes DNS zu öffentlichen Resolvern und VPN-Verbindungen, die das Kind hinzufügen würde. Alles sperren kann er nicht: Eine App, die ihren Verkehr wie normales Surfen aussehen lässt, etwa der Tor Browser oder eine VPN-Browsererweiterung, kommt daran vorbei, und wer den Computer in der Hand hat, kann ein anderes System von einem USB-Stick starten. Behalten Sie die Apps im Blick, die ein Kind installiert.</p>
     </section>
 
-    <section id="ujust" class="block">
-      <h2>ujust-Befehle</h2>
+    <section class="block">
+      <h2 id="ujust">ujust-Befehle</h2>
       <p><code>ujust</code> führt die Kurzbefehle aus, die das System mitbringt. Geben Sie <code>ujust</code> ein, um alle aufzulisten, oder <code>ujust --choose</code>, um einen aus einem Menü zu wählen. Zu jedem <code>install-…</code>-Befehl gibt es ein passendes <code>remove-…</code>. Die nützlichsten:</p>
       <dl class="commands">
         <dt><code>ujust update</code></dt>
@@ -206,8 +251,8 @@ distrobox enter arch</code></pre>
       </dl>
     </section>
 
-    <section id="look" class="block">
-      <h2>Das Aussehen</h2>
+    <section class="block">
+      <h2 id="look">Das Aussehen</h2>
       <p>cosmic-blue bringt ein blaues COSMIC-Theme, Milchglas-Leisten sowie eigene Hintergrundbilder, Icons und Cursor mit. Ändern Sie alles in den <strong>Einstellungen</strong>. Wenn Sie das ursprüngliche Aussehen zurückhaben möchten:</p>
       <div class="code">
         <pre><code>ujust reset-cosmic-theme</code></pre>
@@ -215,8 +260,8 @@ distrobox enter arch</code></pre>
       </div>
     </section>
 
-    <section id="terminal" class="block">
-      <h2>Terminal</h2>
+    <section class="block">
+      <h2 id="terminal">Terminal</h2>
       <p>Jedes neue Terminal zeigt eine Willkommensnachricht mit einem Tipp. <code>fastfetch</code> zeigt die Systeminformationen. Um die Willkommensnachricht aus- oder wieder einzuschalten:</p>
       <div class="code">
         <pre><code>uwelcome toggle</code></pre>
@@ -224,8 +269,8 @@ distrobox enter arch</code></pre>
       </div>
     </section>
 
-    <section id="data" class="block">
-      <h2>Ihre Daten</h2>
+    <section class="block">
+      <h2 id="data">Ihre Daten</h2>
       <p>Updates ersetzen nur das System: Ihr persönlicher Ordner, Ihre Apps und deren Einstellungen bleiben erhalten, ebenso Ihre Änderungen an <code>/etc</code>.</p>
       <h3>Festplattenverschlüsselung</h3>
       <p>Die Verschlüsselung wird im Installationsprogramm gewählt: Unter <em>Installation Destination</em> setzen Sie das Häkchen bei <em>Encrypt my data</em> und wählen eine Passphrase. Tun Sie das auf einem Laptop, der verloren gehen oder gestohlen werden kann. Später lässt sie sich nur durch eine Neuinstallation einschalten. Nach der Installation kann der TPM2-Chip die Festplatte beim Start statt der Passphrase entsperren:</p>
@@ -239,8 +284,8 @@ distrobox enter arch</code></pre>
       <p>Sichern Sie zuerst Ihre Dateien (mit Datensicherungen oder als Kopie auf ein externes Laufwerk), installieren Sie cosmic-blue und kopieren Sie sie dann zurück in Ihren persönlichen Ordner. Installieren Sie Ihre Apps erneut aus dem COSMIC Store; Flatpak-Apps speichern ihre Daten in <code>~/.var/app</code>, das Sie von einem anderen System mit denselben Flatpaks übernehmen können.</p>
     </section>
 
-    <section id="privacy" class="block">
-      <h2>Datenschutz</h2>
+    <section class="block">
+      <h2 id="privacy">Datenschutz</h2>
       <p>cosmic-blue sammelt nichts über Sie. Was das System von sich aus kontaktiert:</p>
       <ul>
         <li>Updates, einmal am Tag: die cosmic-blue-Images auf GitHub, Flathub und das COSMIC-App-Repository, und Homebrew, wenn Sie es nutzen (mit abgeschalteten Nutzungsstatistiken von Homebrew).</li>
@@ -257,8 +302,8 @@ sudo systemctl disable --now tailscaled.service</code></pre>
       <p>Die Firewall (firewalld) ist aktiv; die App <strong>Firewall</strong> ändert ihre Einstellungen. <strong>Flatseal</strong> zeigt und ändert, worauf jede Flatpak-App zugreifen darf (Dateien, Geräte, Netzwerk).</p>
     </section>
 
-    <section id="verify" class="block">
-      <h2>Downloads prüfen</h2>
+    <section class="block">
+      <h2 id="verify">Downloads prüfen</h2>
       <p>Die Prüfsumme jeder Live-ISO ist mit dem Projektschlüssel <a href="https://github.com/cosmic-blue-os/cosmic-blue/blob/main/cosign.pub">cosign.pub</a> signiert. Laden Sie die ISO, ihre Datei <code>.sha256</code> und ihre Signatur <code>.sha256.sigstore.json</code> in denselben Ordner herunter und prüfen Sie sie mit <a href="https://github.com/sigstore/cosign">cosign</a> (für die NVIDIA-ISO die Namen <code>cosmic-blue-nvidia-live-amd64</code> verwenden):</p>
       <div class="code">
         <pre><code>cosign verify-blob --key cosign.pub \
@@ -276,8 +321,8 @@ cosign verify-attestation --key cosign.pub --type spdxjson \
       </div>
     </section>
 
-    <section id="help" class="block">
-      <h2>Hilfe finden</h2>
+    <section class="block">
+      <h2 id="help">Hilfe finden</h2>
       <p>Etwas funktioniert nicht? Die Seite <a href="troubleshooting/">Fehlerbehebung</a> behandelt die häufigsten Probleme.</p>
       <p>Eine Frage, oder etwas ist unklar? Fragen Sie in den <a href="https://github.com/cosmic-blue-os/cosmic-blue/discussions">Discussions</a>.</p>
       <p>Einen Fehler gefunden? Führen Sie dies in einem Terminal auf dem betroffenen Computer aus: Es sammelt die Systemdaten (keine persönlichen Daten) und öffnet einen <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues/new/choose">Fehlerbericht</a>, in dem sie schon eingetragen sind. Beschreiben Sie dann, was Sie getan haben und was passiert ist.</p>
@@ -286,13 +331,41 @@ cosign verify-attestation --key cosign.pub --type spdxjson \
         <button type="button" class="copy" data-copy>Kopieren</button>
       </div>
     </section>
+    </div>
   </main>
 
-  <footer>
-    <p>cosmic-blue ist aufgebaut auf <a href="https://universal-blue.org/">Universal Blue</a>, <a href="https://projectbluefin.io/">Bluefin</a>, <a href="https://fedoraproject.org/">Fedora</a> und <a href="https://system76.com/cosmic">COSMIC</a>. cosmic-blue ist ein unabhängiges Projekt, nicht mit diesen Projekten verbunden und nicht von ihnen unterstützt.</p>
-    <p><a href="troubleshooting/">Fehlerbehebung</a> ·
-    <a href="https://github.com/cosmic-blue-os/cosmic-blue">Quellcode</a> ·
-    <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues">Problem melden</a></p>
+  <footer class="site-footer">
+    <div class="footer-cols">
+      <div>
+        <a class="brand" href="../"><img src="../../img/cosmic-blue-logo.svg" alt="" width="26" height="26"><span>cosmic-blue</span></a>
+        <p>Der COSMIC-Desktop auf Fedora Atomic.</p>
+      </div>
+      <nav aria-labelledby="footer-discover">
+        <h2 id="footer-discover">Entdecken</h2>
+        <ul>
+          <li><a href="../why/">Warum cosmic-blue?</a></li>
+          <li><a href="../screenshots/">Screenshots</a></li>
+          <li><a href="../#download">Herunterladen</a></li>
+        </ul>
+      </nav>
+      <nav aria-labelledby="footer-help">
+        <h2 id="footer-help">Hilfe</h2>
+        <ul>
+          <li><a href="../install/">Installationsanleitung</a></li>
+          <li><a href="../docs/">Dokumentation</a></li>
+          <li><a href="../docs/troubleshooting/">Fehlerbehebung</a></li>
+        </ul>
+      </nav>
+      <nav aria-labelledby="footer-project">
+        <h2 id="footer-project">Projekt</h2>
+        <ul>
+          <li><a href="https://github.com/cosmic-blue-os/cosmic-blue">Quellcode</a></li>
+          <li><a href="https://github.com/cosmic-blue-os/cosmic-blue/issues">Problem melden</a></li>
+          <li><a href="https://github.com/cosmic-blue-os/cosmic-blue/discussions">Diskussionen</a></li>
+        </ul>
+      </nav>
+    </div>
+    <p class="legal">Aufgebaut auf <a href="https://universal-blue.org/">Universal Blue</a>, <a href="https://projectbluefin.io/">Bluefin</a>, <a href="https://fedoraproject.org/">Fedora</a> und <a href="https://system76.com/cosmic">COSMIC</a>. cosmic-blue ist ein unabhängiges Projekt, nicht mit diesen Projekten verbunden und nicht von ihnen unterstützt.</p>
   </footer>
 
   <script src="../../site.js"></script>

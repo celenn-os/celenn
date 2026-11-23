@@ -152,18 +152,6 @@ msgstr "Mais tempo para {}"
 msgid "A parent confirms with their password."
 msgstr "Um responsável confirma com a senha dele."
 
-msgid "+15 min"
-msgstr "+15 min"
-
-msgid "+30 min"
-msgstr "+30 min"
-
-msgid "+60 min"
-msgstr "+60 min"
-
-msgid "Give"
-msgstr "Conceder"
-
 msgid "{} minutes left"
 msgstr "Faltam {} minutos"
 
@@ -325,3 +313,42 @@ msgstr "Hoje"
 
 msgid "Most used applications"
 msgstr "Aplicativos mais usados"
+
+msgid "Extra time"
+msgstr "Tempo extra"
+
+msgid "Bedtime included, until tomorrow morning"
+msgstr "Hora de dormir incluída, até amanhã de manhã"
+
+msgid "The session closes in {}."
+msgstr "A sessão fecha em {}."
+
+msgid "The session will close at {new} instead of {old}."
+msgstr "A sessão vai fechar às {new} em vez de às {old}."
+
+msgid "The session will close at {}."
+msgstr "A sessão vai fechar às {}."
+
+msgid "No limit until tomorrow at {}."
+msgstr "Sem limite até amanhã às {}."
+
+msgid "No limit for the rest of the day."
+msgstr "Sem limite pelo resto do dia."
+
+msgid "Give {}"
+msgstr "Dar {}"
+
+msgid "Remove the limit"
+msgstr "Tirar o limite"
+
+msgid "At most 4 h. For more, turn on No limit today."
+msgstr "No máximo 4 h. Para mais, ative Sem limite hoje."
+
+msgid "Keep to bedtime"
+msgstr "Respeitar a hora de dormir"
+
+msgid "The session closes at {} all the same."
+msgstr "A sessão fecha às {} mesmo assim."
+
+msgid "Bedtime ({}) does not apply to this time."
+msgstr "A hora de dormir ({}) não vale para este tempo."
