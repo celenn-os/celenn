@@ -324,8 +324,59 @@ msgstr "Torna alle impostazioni predefinite di cosmic-blue, per tutto. Una copia
 msgid "Battery charge limit"
 msgstr "Limite di carica della batteria"
 
-msgid "Battery, graphics card and firmware settings."
-msgstr "Batteria, scheda grafica e impostazioni del firmware."
+msgid "This computer"
+msgstr "Questo computer"
+
+msgid "Settings"
+msgstr "Impostazioni"
+
+msgid "Model"
+msgstr "Modello"
+
+msgid "Virtual machine ({})"
+msgstr "Macchina virtuale ({})"
+
+msgid "Unknown"
+msgstr "Sconosciuto"
+
+msgid "Processor and memory"
+msgstr "Processore e memoria"
+
+msgid "{} cores"
+msgstr "{} core"
+
+msgid "{} GB of memory"
+msgstr "{} GB di memoria"
+
+msgid "Graphics card"
+msgstr "Scheda grafica"
+
+msgid "{}. The open driver built into Linux works with it: nothing to install."
+msgstr "{}. Il driver libero integrato in Linux la supporta: niente da installare."
+
+msgid "Startup"
+msgstr "Avvio"
+
+msgid "UEFI, Secure Boot on"
+msgstr "UEFI, Secure Boot attivo"
+
+msgid "UEFI, Secure Boot off"
+msgstr "UEFI, Secure Boot disattivato"
+
+msgid "UEFI"
+msgstr "UEFI"
+
+msgid "Legacy BIOS"
+msgstr "BIOS (modalità legacy)"
+
+msgid "No battery on this computer: nothing to set."
+msgstr "Questo computer non ha una batteria: niente da regolare."
+
+msgid "This computer starts in legacy BIOS mode. To open its settings, press the key shown when it powers on, often F2, F10 or Del."
+msgstr "Questo computer si avvia in modalità BIOS legacy. Per aprire le sue impostazioni, premete il tasto indicato all'accensione, spesso F2, F10 o Canc."
+
+msgid "What this computer is made of, and its settings."
+msgstr "Com'è fatto questo computer, e le sue impostazioni."
 
 msgid "Cancel"
 msgstr "Annulla"

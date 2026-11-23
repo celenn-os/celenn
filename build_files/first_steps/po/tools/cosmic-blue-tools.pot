@@ -322,7 +322,58 @@ msgstr ""
 msgid "Battery charge limit"
 msgstr ""
 
-msgid "Battery, graphics card and firmware settings."
+msgid "This computer"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "Model"
+msgstr ""
+
+msgid "Virtual machine ({})"
+msgstr ""
+
+msgid "Unknown"
+msgstr ""
+
+msgid "Processor and memory"
+msgstr ""
+
+msgid "{} cores"
+msgstr ""
+
+msgid "{} GB of memory"
+msgstr ""
+
+msgid "Graphics card"
+msgstr ""
+
+msgid "{}. The open driver built into Linux works with it: nothing to install."
+msgstr ""
+
+msgid "Startup"
+msgstr ""
+
+msgid "UEFI, Secure Boot on"
+msgstr ""
+
+msgid "UEFI, Secure Boot off"
+msgstr ""
+
+msgid "UEFI"
+msgstr ""
+
+msgid "Legacy BIOS"
+msgstr ""
+
+msgid "No battery on this computer: nothing to set."
+msgstr ""
+
+msgid "This computer starts in legacy BIOS mode. To open its settings, press the key shown when it powers on, often F2, F10 or Del."
+msgstr ""
+
+msgid "What this computer is made of, and its settings."
 msgstr ""
 
 msgid "Cancel"

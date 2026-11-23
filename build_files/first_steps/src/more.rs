@@ -3,7 +3,8 @@
 // without a terminal: the recipes then skip their questions), so the
 // terminal and the window do exactly the same thing:
 //
-//   Computer       the battery charge limit (toggle-battery-limit), the
+//   Computer       what the computer is made of (hardware.rs), the
+//                  battery charge limit (toggle-battery-limit), the
 //                  NVIDIA edition for NVIDIA graphics cards (the Updates
 //                  helper, as the first steps tour) and, with Secure Boot,
 //                  its driver key (Tools helper, as `ujust
@@ -21,9 +22,10 @@
 // edition, a license) ask first, in the row itself. A change that does not
 // work shows a card at the top of its page (failure.rs).
 
-use crate::common::{label, spawn, state_icon};
+use crate::common::{fill, label, spawn, state_icon};
 use crate::devtools::{self, DEV_TOOLS, DevTool, ToolKind};
 use crate::failure::{self, Card, CardAction, CardMessage, Outcome};
+use crate::hardware::Boot;
 use crate::i18n::tr;
 use cosmic::app::Task;
 use cosmic::iced::{Alignment, Length};
@@ -42,7 +44,7 @@ const VMS: &str = "org.virt_manager.virt-manager";
 pub const TEXTS: &[&str] = &[
     // Pages
     "Computer",
-    "Battery, graphics card and firmware settings.",
+    "What this computer is made of, and its settings.",
     "Extra software",
     "What cosmic-blue does not install by itself, ready in one click.",
     "Appearance",
@@ -53,6 +55,23 @@ pub const TEXTS: &[&str] = &[
     "Cancel",
     "Working…",
     // Computer
+    "This computer",
+    "Settings",
+    "Model",
+    "Virtual machine ({})",
+    "Unknown",
+    "Processor and memory",
+    "{} cores",
+    "{} GB of memory",
+    "Graphics card",
+    "{}. The open driver built into Linux works with it: nothing to install.",
+    "Startup",
+    "UEFI, Secure Boot on",
+    "UEFI, Secure Boot off",
+    "UEFI",
+    "Legacy BIOS",
+    "No battery on this computer: nothing to set.",
+    "This computer starts in legacy BIOS mode. To open its settings, press the key shown when it powers on, often F2, F10 or Del.",
     "Battery charge limit",
     "Charging stops at 80 %: the battery lasts longer when the laptop stays plugged in.",
     "NVIDIA graphics card",
@@ -441,6 +460,13 @@ fn output(program: &str, args: &[&str]) -> String {
         .output()
         .map(|output| String::from_utf8_lossy(&output.stdout).into_owned())
         .unwrap_or_default()
+}
+
+/// A row that only tells: its symbol, its title, what was found
+fn info_row<'a>(icon: &'static str, title: &'static str, value: String) -> Element<'a, Message> {
+    settings::item_row(vec![state_icon(icon, false), label(tr(title), value)])
+        .spacing(theme::spacing().space_s)
+        .into()
 }
 
 fn home() -> PathBuf {
@@ -864,7 +890,7 @@ impl Page {
         let (title, intro, icon) = match kind {
             Kind::Computer => (
                 "Computer",
-                "Battery, graphics card and firmware settings.",
+                "What this computer is made of, and its settings.",
                 // The tour's screen, in the style of the other pages' icons
                 "cosmic-blue-tour-computer",
             ),
@@ -901,16 +927,80 @@ impl Page {
     }
 
     fn computer(&self, state: &State) -> Element<'_, Message> {
-        let mut section = settings::section();
-        if let Some(on) = state.battery_limit {
-            section = section.add(self.row(
+        let cosmic_theme::Spacing { space_s, .. } = theme::spacing();
+        let hw = crate::hardware::hardware();
+        // What it is made of: always there, so the page is never empty
+        let model = match (&hw.virtual_machine, hw.model.is_empty()) {
+            (Some(hypervisor), _) => fill(tr("Virtual machine ({})"), hypervisor),
+            (None, false) => hw.model.clone(),
+            (None, true) => tr("Unknown").to_owned(),
+        };
+        let mut processor: Vec<String> = Vec::new();
+        if !hw.cpu.is_empty() {
+            processor.push(hw.cpu.clone());
+        }
+        if hw.cores > 0 {
+            processor.push(fill(tr("{} cores"), &hw.cores.to_string()));
+        }
+        if hw.memory_gb > 0 {
+            processor.push(fill(tr("{} GB of memory"), &hw.memory_gb.to_string()));
+        }
+        let processor = if processor.is_empty() {
+            tr("Unknown").to_owned()
+        } else {
+            processor.join(", ")
+        };
+        let graphics = match (hw.gpus.is_empty(), state.nvidia) {
+            (true, _) => tr("Unknown").to_owned(),
+            // NVIDIA: the row under it says which driver
+            (false, Some(_)) => hw.gpus.join(", "),
+            (false, None) => fill(
+                tr("{}. The open driver built into Linux works with it: nothing to install."),
+                &hw.gpus.join(", "),
+            ),
+        };
+        let startup = match hw.boot {
+            Boot::Bios => "Legacy BIOS",
+            Boot::Uefi(Some(true)) => "UEFI, Secure Boot on",
+            Boot::Uefi(Some(false)) => "UEFI, Secure Boot off",
+            Boot::Uefi(None) => "UEFI",
+        };
+        let info = settings::section()
+            .title(tr("This computer"))
+            .add(info_row("computer-symbolic", "Model", model))
+            .add(info_row(
+                "power-profile-performance-symbolic",
+                "Processor and memory",
+                processor,
+            ))
+            .add(info_row(
+                "applications-graphics-symbolic",
+                "Graphics card",
+                graphics,
+            ))
+            .add(info_row(
+                "system-shutdown-symbolic",
+                "Startup",
+                tr(startup).to_owned(),
+            ));
+
+        let mut section = settings::section().title(tr("Settings"));
+        section = section.add(match state.battery_limit {
+            Some(on) => self.row(
                 "battery-good-symbolic",
                 "Battery charge limit",
                 "Charging stops at 80 %: the battery lasts longer when the laptop stays plugged in.",
                 self.toggler(on, Job::BatteryLimit),
                 None,
-            ));
-        }
+            ),
+            None => self.row(
+                "battery-missing-symbolic",
+                "Battery charge limit",
+                "No battery on this computer: nothing to set.",
+                widget::space::horizontal().width(0).into(),
+                None,
+            ),
+        });
         match state.nvidia {
             Some(true) => {
                 section = section.add(match state.driver_key {
@@ -948,16 +1038,28 @@ impl Page {
             }
             None => {}
         }
-        if state.efi {
-            section = section.add(self.row(
+        section = section.add(if state.efi {
+            self.row(
                 "preferences-system-symbolic",
                 "Firmware settings (BIOS/UEFI)",
                 "Restart into the computer's own settings: boot order, virtualization, Secure Boot…",
                 self.button(Job::Firmware, "Restart", false),
                 Some(Job::Firmware),
-            ));
-        }
-        section.into()
+            )
+        } else {
+            self.row(
+                "preferences-system-symbolic",
+                "Firmware settings (BIOS/UEFI)",
+                "This computer starts in legacy BIOS mode. To open its settings, press the key shown when it powers on, often F2, F10 or Del.",
+                widget::space::horizontal().width(0).into(),
+                None,
+            )
+        });
+        widget::column::with_capacity(2)
+            .spacing(space_s)
+            .push(info)
+            .push(section)
+            .into()
     }
 
     fn software<'a>(&'a self, state: &'a State) -> Element<'a, Message> {

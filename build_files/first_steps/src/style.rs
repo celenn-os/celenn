@@ -41,9 +41,11 @@ pub fn page_header<'a, M: 'static>(
         .push(text::title3(title))
         .push_maybe(caption.map(|caption| dim_caption(caption).wrapping(Wrapping::Word)))
         .width(Length::Fill);
+    // Top-aligned: the picture and the title stay at the same place on
+    // every page, however many lines the caption has
     widget::row::with_capacity(2)
         .spacing(theme::spacing().space_s)
-        .align_y(Alignment::Center)
+        .align_y(Alignment::Start)
         .push(picture)
         .push(lines)
         .width(Length::Fill)

@@ -43,6 +43,7 @@ use cosmic::{Application, ApplicationExt, Element, executor};
 mod common;
 mod devtools;
 mod failure;
+mod hardware;
 mod help;
 mod housekeeping;
 mod i18n;
