@@ -627,12 +627,17 @@ jobs:
             ${ROOT_ENV} skopeo copy --preserve-digests \
               "docker://${IMAGE_REGISTRY}/${IMAGE_NAME}@${DIGEST}" \
               "docker://${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}"
-            # Same manifest as the signed one, or the tag would be unsigned
-            pushed="$(${ROOT_ENV} skopeo inspect --raw "docker://${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}" | sha256sum | cut -d' ' -f1)"
-            if [[ "sha256:${pushed}" != "${DIGEST}" ]]; then
-              echo "::error::${tag} points to sha256:${pushed}, not to the signed ${DIGEST}"
-              exit 1
-            fi
+            # Same manifest as the signed one, or the tag would be unsigned.
+            # Right after the copy, ghcr.io can still answer with the tag's
+            # previous manifest for a little while (#222: dev was read back
+            # as the image before): read it again before giving up.
+            for wait in 5 10 20 40 0; do
+              pushed="$(${ROOT_ENV} skopeo inspect --raw "docker://${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}" | sha256sum | cut -d' ' -f1)"
+              [[ "sha256:${pushed}" == "${DIGEST}" ]] && break
+              (( wait > 0 )) || { echo "::error::${tag} points to sha256:${pushed}, not to the signed ${DIGEST}"; exit 1; }
+              echo "::warning::${tag} still reads as sha256:${pushed}, reading it again in ${wait} s"
+              sleep "${wait}"
+            done
           done
 
       # The SBOM as a signed attestation of the image (same key, same old

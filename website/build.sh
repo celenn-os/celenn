@@ -58,6 +58,10 @@ if [[ -n "${shots_dir}" && -f "${shots_dir}/info.env" ]]; then
   done
   # shellcheck source=/dev/null
   source "${shots_dir}/info.env"
+elif [[ -n "${shots_dir}" ]]; then
+  # CI always passes the screenshots of the latest image
+  echo "::error file=website/build.sh::SCREENSHOTS_DIR=${shots_dir} has no screenshots (see website/fetch-screenshots.sh)"
+  exit 1
 fi
 # The "Why cosmic-blue" page needs its screenshots: fail when the boot test
 # no longer takes one (renamed or removed) rather than drop it silently
@@ -71,6 +75,19 @@ for name in ${zoom_shots}; do
     exit 1
   fi
 done
+# With screenshots (CI), every screenshot a page shows must be in the latest
+# boot test: a page never keeps an old one, nor silently drops one
+if [[ -n "${shots}" ]]; then
+  missing=0
+  for name in $(find "${root}/website" -name '*.html' -exec grep -ohE '<!-- shot:[a-z0-9-]+ -->' {} + \
+      | sed -E 's/<!-- shot:([a-z0-9-]+) -->/\1/' | sort -u); do
+    if [[ " ${shots} " != *" ${name} "* ]]; then
+      echo "::error file=website/build.sh::screenshot ${name} is shown on the website but missing from the latest boot test"
+      missing=1
+    fi
+  done
+  (( missing == 0 )) || exit 1
+fi
 [[ -n "${shots}" ]] && shots+=" shots-info" || shots="no-shots"
 
 # The same pages in every language: English at the root (the default), the
@@ -127,6 +144,11 @@ for page in "${all_pages[@]}"; do
     s{<!-- /?(shot(:[\w-]+)?|shots-info|no-shots) -->}{}g;' "${out}/${page}"
   sed -i -e "s|@SHOTS_DATE@|${SHOTS_DATE:-}|g" -e "s|@SHOTS_COMMIT@|${SHOTS_COMMIT:-}|g" \
     -e "s|@SHOTS_RUN@|${SHOTS_RUN:-}|g" "${out}/${page}"
+  # The screenshots keep their names from one build to the next: the commit
+  # in their address makes browsers and link previews load the new ones
+  if [[ -n "${SHOTS_COMMIT:-}" ]]; then
+    sed -i -E "s#(img/screenshots/[a-z0-9-]+\.webp)#\1?v=${SHOTS_COMMIT}#g" "${out}/${page}"
+  fi
 done
 cp "${root}/website/style.css" "${root}/website/site.js" "${out}/"
 cp "${root}/branding/logo/cosmic-blue-logo.svg" \
@@ -141,6 +163,30 @@ for width in 1280 2560; do
   convert "${wallpaper}" -resize "${width}x" -strip -quality 80 \
     -define webp:method=6 "${out}/img/wallpaper-${width}.webp"
 done
+
+# Every image a page links to must be in the site: screenshots, logo,
+# wallpaper (src, srcset, href and og:image addresses)
+broken=0
+for page in "${all_pages[@]}"; do
+  dir="$(dirname "${out}/${page}")"
+  while read -r ref; do
+    ref="${ref%%\?*}"
+    if [[ ! -f "${dir}/${ref}" ]]; then
+      echo "::error file=website/${page}::image ${ref} is not in the site"
+      broken=1
+    fi
+  done < <(grep -oE '(src|srcset|href|content)="[^"]+"' "${out}/${page}" \
+    | sed -E 's/^[a-z]+="//; s/"$//' | tr ',' '\n' | awk '{ print $1 }' \
+    | grep -E '\.(webp|png|jpe?g|svg|gif)(\?|$)' | grep -vE '^(https?:)?//' || true)
+  # Absolute addresses of this site (og:image) are checked too
+  while read -r ref; do
+    ref="${ref%%\?*}"
+    [[ -f "${out}/${ref#https://cosmic-blue-os.github.io/cosmic-blue/}" ]] && continue
+    echo "::error file=website/${page}::image ${ref} is not in the site"
+    broken=1
+  done < <(grep -oE 'https://cosmic-blue-os\.github\.io/cosmic-blue/[^" ]+\.(webp|png|jpe?g|svg|gif)' "${out}/${page}" || true)
+done
+(( broken == 0 )) || exit 1
 
 # Stop GitHub Pages from running Jekyll on the files
 touch "${out}/.nojekyll"

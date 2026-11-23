@@ -1,8 +1,9 @@
 ---
 # Project website on GitHub Pages: https://cosmic-blue-os.github.io/cosmic-blue/
 # Needs Settings > Pages > Source set to "GitHub Actions".
-# Also rebuilt after each published image build, so the screenshots page
-# shows the desktop of the latest image (website/fetch-screenshots.sh).
+# Also rebuilt after each image build of main, so every screenshot on the
+# site comes from the latest published image (website/fetch-screenshots.sh);
+# the site build fails if one is missing or older.
 name: Website
 
 on:
@@ -32,11 +33,14 @@ on:
 jobs:
   build:
     name: Build website
-    # After an image build: only a published one (main, not a pull request)
+    # After every image build of main (not a pull request), even a failed
+    # one: it may have published the image before failing at a later step.
+    # website/fetch-screenshots.sh picks the newest published image.
     if: >-
       github.event_name != 'workflow_run' ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.event != 'pull_request')
+      (github.event.workflow_run.event != 'pull_request' &&
+       github.event.workflow_run.conclusion != 'cancelled' &&
+       github.event.workflow_run.conclusion != 'skipped')
     # Job-level, so a skipped run (image build that published nothing) never
     # cancels or replaces a real one. Pull requests: a new push cancels the
     # running build. Main: runs queue; a pending one may be replaced by a
