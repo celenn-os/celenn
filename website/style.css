@@ -697,3 +697,57 @@ footer p { margin: 6px 0; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+/* Why cosmic-blue: one reason per section, text beside its screenshots */
+.why .lead { font-size: 1.1rem; }
+
+.reason {
+  display: grid;
+  gap: 24px 40px;
+  align-items: start;
+  max-width: 1120px;
+  margin: 0 auto 64px;
+}
+
+@media (min-width: 900px) {
+  .reason:has(.shots) { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); }
+  .reason:nth-of-type(odd) .shots { order: -1; }
+}
+
+.reason:not(:has(.shots)) { max-width: 760px; }
+
+.reason h2 {
+  margin: 0 0 12px;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.reason p, .reason li { color: var(--muted); }
+.reason ul { padding-left: 1.3em; }
+.reason li { margin: 6px 0; }
+
+.reason .shots { display: grid; gap: 20px; }
+.reason figure { margin: 0; }
+
+.reason img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 12px 40px rgb(0 0 0 / .45);
+  transition: border-color .15s;
+}
+
+.reason a:hover img, .reason a:focus-visible img { border-color: var(--accent); }
+
+.reason figcaption {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: .95rem;
+}
+
+.actions-inline { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+
+.why-link { margin: -48px 0 72px; text-align: center; }

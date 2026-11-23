@@ -38,6 +38,7 @@ fi
 # there (blocks between <!-- shot:NAME --> and <!-- /shot -->).
 shots_dir="${SCREENSHOTS_DIR:-}"
 shots=""
+zoom_shots="parental-controls-child parental-more-time first-steps-2 first-steps-3 tools-overview tools-software updates"
 if [[ -n "${shots_dir}" && -f "${shots_dir}/info.env" ]]; then
   mkdir -p "${out}/img/screenshots"
   for file in "${shots_dir}"/*.png "${shots_dir}"/*.ppm; do
@@ -47,17 +48,35 @@ if [[ -n "${shots_dir}" && -f "${shots_dir}/info.env" ]]; then
     [[ " ${shots} " == *" ${name} "* ]] && continue
     convert "${file}" -strip -quality 90 -define webp:method=6 "${out}/img/screenshots/${name}.webp"
     convert "${file}" -resize 960x -strip -quality 85 -define webp:method=6 "${out}/img/screenshots/${name}-960.webp"
+    # The "Why cosmic-blue" page shows app windows closer: the middle of the
+    # screen, where the window opens
+    if [[ " ${zoom_shots} " == *" ${name} "* ]]; then
+      convert "${file}" -gravity center -crop 1200x760+0-40 +repage -strip -quality 85 \
+        -define webp:method=6 "${out}/img/screenshots/${name}-zoom.webp"
+    fi
     shots+=" ${name}"
   done
   # shellcheck source=/dev/null
   source "${shots_dir}/info.env"
 fi
+# The "Why cosmic-blue" page needs its screenshots: fail when the boot test
+# no longer takes one (renamed or removed) rather than drop it silently
+for name in ${zoom_shots}; do
+  if ! grep -qE "[0-9]{2}-${name%-[0-9]}" "${root}/tests/vm-lib.sh"; then
+    echo "::error file=website/build.sh::screenshot ${name} (zoom_shots) is not taken by tests/vm-lib.sh"
+    exit 1
+  fi
+  if [[ -n "${shots}" && " ${shots} " != *" ${name} "* ]]; then
+    echo "::error file=website/build.sh::screenshot ${name} (zoom_shots) is missing from the latest boot test"
+    exit 1
+  fi
+done
 [[ -n "${shots}" ]] && shots+=" shots-info" || shots="no-shots"
 
 # The same pages in every language: English at the root (the default), the
 # others in their own folder (fr/, de/...).
 languages=(en de es fr it pt-br)
-pages=(index.html install/index.html docs/index.html docs/troubleshooting/index.html screenshots/index.html)
+pages=(index.html install/index.html docs/index.html docs/troubleshooting/index.html screenshots/index.html why/index.html)
 all_pages=()
 for lang in "${languages[@]}"; do
   for page in "${pages[@]}"; do
