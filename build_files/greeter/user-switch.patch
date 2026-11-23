@@ -1,8 +1,56 @@
 diff --git a/src/greeter.rs b/src/greeter.rs
-index 852e219..e2dafce 100644
+index 852e219..c8d347e 100644
 --- a/src/greeter.rs
 +++ b/src/greeter.rs
-@@ -972,6 +972,68 @@ impl App {
+@@ -300,7 +300,14 @@ pub fn main() -> Result<(), Box<dyn Error>> {
+     let flags = Flags {
+         user_icons: user_datas
+             .iter_mut()
+-            .map(|d| d.icon_opt.take().map(widget::image::Handle::from_bytes))
++            // cosmic-blue: round pictures, and COSMIC's default one for an
++            // account without a picture
++            .map(|d| {
++                d.icon_opt
++                    .take()
++                    .or_else(|| std::fs::read(DEFAULT_PICTURE).ok())
++                    .map(round_picture)
++            })
+             .collect(),
+         user_datas,
+         sessions,
+@@ -319,6 +326,31 @@ pub fn main() -> Result<(), Box<dyn Error>> {
+     Ok(())
+ }
+ 
++/// cosmic-blue: the picture COSMIC Settings gives a new account
++const DEFAULT_PICTURE: &str = "/usr/share/pixmaps/faces/pop-robot.png";
++
++/// cosmic-blue: an account picture cut as a disk with a smooth edge (the
++/// image widget's own rounding has a jagged one); the picture as it is when
++/// it cannot be read
++fn round_picture(bytes: Vec<u8>) -> widget::image::Handle {
++    let Ok(picture) = image::load_from_memory(&bytes) else {
++        return widget::image::Handle::from_bytes(bytes);
++    };
++    let mut picture = picture.into_rgba8();
++    let (width, height) = picture.dimensions();
++    let center_x = width as f32 / 2.0;
++    let center_y = height as f32 / 2.0;
++    let radius = width.min(height) as f32 / 2.0;
++    for (x, y, pixel) in picture.enumerate_pixels_mut() {
++        let distance = ((x as f32 + 0.5 - center_x).powi(2)
++            + (y as f32 + 0.5 - center_y).powi(2))
++        .sqrt();
++        let coverage = (radius - distance + 0.5).clamp(0.0, 1.0);
++        pixel[3] = (f32::from(pixel[3]) * coverage).round() as u8;
++    }
++    widget::image::Handle::from_rgba(width, height, picture.into_raw())
++}
++
+ #[derive(Clone)]
+ pub struct Flags {
+     user_datas: Vec<UserData>,
+@@ -972,6 +1004,88 @@ impl App {
                  column = column.push(widget::text(""));
              }
  
@@ -30,25 +78,45 @@ index 852e219..e2dafce 100644
 +                            .and_then(|icon| icon.clone());
 +                        let picture: Element<_> = match icon {
 +                            Some(handle) => widget::image(handle)
-+                                .width(Length::Fixed(48.0))
-+                                .height(Length::Fixed(48.0))
++                                .width(Length::Fixed(64.0))
++                                .height(Length::Fixed(64.0))
 +                                .content_fit(iced::ContentFit::Fill)
-+                                .border_radius([24.0; 4])
 +                                .into(),
 +                            None => widget::icon::from_name("avatar-default-symbolic")
-+                                .size(48)
++                                .size(64)
 +                                .into(),
++                        };
++                        // A round ring in the accent color around the selected
++                        // account (and the focused one), a fainter one on hover
++                        let selected = name == &self.selected_username.username;
++                        let ring = move |width: f32, alpha: f32, theme: &cosmic::Theme| {
++                            let mut style = widget::button::Style::new();
++                            style.border_radius = 40.0.into();
++                            style.border_width = width;
++                            let mut color: iced::Color = theme.cosmic().accent.base.into();
++                            color.a = alpha;
++                            style.border_color = color;
++                            style
++                        };
++                        let class = theme::Button::Custom {
++                            active: Box::new(move |focused, theme| {
++                                ring(if selected || focused { 2.0 } else { 0.0 }, 1.0, theme)
++                            }),
++                            disabled: Box::new(move |theme| ring(0.0, 1.0, theme)),
++                            hovered: Box::new(move |_, theme| {
++                                ring(2.0, if selected { 1.0 } else { 0.5 }, theme)
++                            }),
++                            pressed: Box::new(move |_, theme| ring(2.0, 1.0, theme)),
 +                        };
 +                        user_row = user_row.push(
 +                            widget::column::with_capacity(2)
 +                                .spacing(4.0)
-+                                .width(Length::Fixed(76.0))
++                                .width(Length::Fixed(88.0))
 +                                .align_x(Alignment::Center)
 +                                .push(
 +                                    widget::button::custom(picture)
-+                                        .class(theme::Button::Image)
-+                                        .selected(name == &self.selected_username.username)
-+                                        .padding(2.0)
++                                        .class(class)
++                                        .padding(4.0)
 +                                        .on_press(Message::Username(name.clone())),
 +                                )
 +                                .push(
@@ -71,7 +139,7 @@ index 852e219..e2dafce 100644
              id_container(
                  widget::container(column)
                      .align_x(Alignment::Center)
-@@ -1434,6 +1496,9 @@ impl cosmic::Application for App {
+@@ -1434,6 +1548,9 @@ impl cosmic::Application for App {
                  if self.entering_name || username != self.selected_username.username {
                      self.entering_name = false;
                      self.authenticating = false;

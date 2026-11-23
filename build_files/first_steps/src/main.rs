@@ -1254,9 +1254,9 @@ impl<T: Tour> Application for App<T> {
                     .collect(),
                 system::avatars()
                     .into_iter()
-                    .map(|path| {
-                        let handle = widget::image::Handle::from_path(&path);
-                        (path, handle)
+                    .filter_map(|path| {
+                        let handle = style::round_picture(&path, 96)?;
+                        Some((path, handle))
                     })
                     .collect(),
             )
@@ -2170,15 +2170,17 @@ impl<T: Tour> App<T> {
                 .iter()
                 .enumerate()
                 .map(|(i, (path, handle))| {
-                    widget::button::image(handle.clone())
-                        .name(format!("{}: {}", tr("Your picture"), image_name(path)))
-                        // 11 per row, as wide as the 6 wallpapers above
-                        // (6 x 92 + 5 gaps = 11 x 43 + 10 gaps, to a pixel)
-                        .width(43)
-                        .height(43)
-                        .selected(self.avatar == Some(i))
-                        .on_press(Message::Avatar(i))
-                        .into()
+                    // 11 per row, as wide as the 6 wallpapers above
+                    // (6 x 92 + 5 gaps = 11 x (37 + 2 x 3) + 10 gaps, to a
+                    // pixel), round as everywhere else
+                    style::picture_button(
+                        handle.clone(),
+                        37,
+                        self.avatar == Some(i),
+                        Message::Avatar(i),
+                    )
+                    .name(format!("{}: {}", tr("Your picture"), image_name(path)))
+                    .into()
                 })
                 .collect();
             column = column.push(heading("Your picture")).push(

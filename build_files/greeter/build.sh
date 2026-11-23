@@ -12,9 +12,11 @@
 # after it: the upstream COSMIC wallpaper). The
 # lock screen is the same program and uses the same fallback.
 #
-# user-switch.patch also shows the accounts as a row of avatars under the
+# user-switch.patch also shows the accounts as a row of round avatars under the
 # password field when there are 2 to 6 of them (the users menu stays), and
-# clears the error of a refused login when another user is selected. It is
+# clears the error of a refused login when another user is selected. Every
+# account picture is cut as a smooth disk, and an account without one gets
+# COSMIC's default picture (pop-robot.png, our planet). It is
 # applied with no fuzz: when a new cosmic-greeter no longer takes it, this
 # build fails and the COSMIC update pull request waits for the patch to be
 # adapted.

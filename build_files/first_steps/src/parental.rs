@@ -656,9 +656,7 @@ fn accounts() -> Vec<Account> {
                 rules: Rules::load(user),
                 usage: Usage::load(user),
                 extra: parental_rules::load_extra(user),
-                avatar: avatar
-                    .exists()
-                    .then(|| widget::image::Handle::from_path(avatar)),
+                avatar: style::round_picture(&avatar, 128),
             })
         })
         .collect();
@@ -794,7 +792,7 @@ struct App {
     password: String,
     password_hidden: bool,
     /// The pictures to pick from, and the one picked, for a new child
-    faces: Vec<PathBuf>,
+    faces: Vec<(PathBuf, widget::image::Handle)>,
     face: Option<PathBuf>,
     /// The tabs of a child's page
     tabs: segmented_button::SingleSelectModel,
@@ -1007,7 +1005,7 @@ impl Application for App {
                 self.face = self
                     .faces
                     .get(self.accounts.len() * 7 % self.faces.len().max(1))
-                    .cloned();
+                    .map(|(face, _)| face.clone());
                 self.page = Page::Add;
             }
             Message::Rules(rules) => {
@@ -1313,17 +1311,26 @@ fn app_icon<'a>() -> Element<'a, Message> {
     widget::icon::from_name(ICON).size(44).into()
 }
 
-/// cosmic-blue's profile pictures, to pick one for a new child account
-fn faces() -> Vec<PathBuf> {
+/// cosmic-blue's profile pictures, to pick one for a new child account, cut
+/// as disks (the links, such as COSMIC's default picture, are not listed
+/// twice)
+fn faces() -> Vec<(PathBuf, widget::image::Handle)> {
     let mut faces: Vec<PathBuf> = std::fs::read_dir(FACES)
         .into_iter()
         .flatten()
         .flatten()
+        .filter(|entry| entry.file_type().is_ok_and(|kind| kind.is_file()))
         .map(|entry| entry.path())
         .filter(|path| path.extension().is_some_and(|ext| ext == "png"))
         .collect();
     faces.sort();
     faces
+        .into_iter()
+        .filter_map(|face| {
+            let handle = style::round_picture(&face, 96)?;
+            Some((face, handle))
+        })
+        .collect()
 }
 
 /// A row's text: a first line, and a caption under it
@@ -1341,7 +1348,6 @@ fn avatar<'a>(account: &Account, size: u16) -> Element<'a, Message> {
         Some(handle) => widget::image(handle.clone())
             .width(size)
             .height(size)
-            .border_radius([f32::from(size) / 2.0; 4])
             .into(),
         None => widget::icon::from_name("avatar-default-symbolic")
             .size(size)
@@ -1995,19 +2001,13 @@ impl App {
         let mut pictures = widget::column::with_capacity(2).spacing(6);
         for chunk in self.faces.chunks(self.faces.len().div_ceil(2).max(1)) {
             let mut row = widget::row::with_capacity(chunk.len()).spacing(6);
-            for face in chunk {
-                row = row.push(
-                    widget::button::custom(
-                        widget::image(widget::image::Handle::from_path(face))
-                            .width(34)
-                            .height(34)
-                            .border_radius([17.0; 4]),
-                    )
-                    .class(theme::Button::Image)
-                    .selected(self.face.as_ref() == Some(face))
-                    .padding(2)
-                    .on_press(Message::Face(face.clone())),
-                );
+            for (face, handle) in chunk {
+                row = row.push(style::picture_button(
+                    handle.clone(),
+                    32,
+                    self.face.as_ref() == Some(face),
+                    Message::Face(face.clone()),
+                ));
             }
             pictures = pictures.push(row);
         }
@@ -2053,12 +2053,12 @@ impl App {
                     .push(widget::button::standard(tr("Cancel")).on_press(Message::Back))
                     .push(create),
             );
-        let picture: Element<'_, Message> = match &self.face {
-            Some(face) => widget::image(widget::image::Handle::from_path(face))
-                .width(44)
-                .height(44)
-                .border_radius([22.0; 4])
-                .into(),
+        let picked = self
+            .faces
+            .iter()
+            .find(|(face, _)| self.face.as_ref() == Some(face));
+        let picture: Element<'_, Message> = match picked {
+            Some((_, handle)) => widget::image(handle.clone()).width(44).height(44).into(),
             None => app_icon(),
         };
         frame(
