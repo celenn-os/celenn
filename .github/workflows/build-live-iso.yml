@@ -26,7 +26,7 @@ env:
   # releases), moved to the latest main commit by Renovate once a week; the
   # update pull request builds and install-tests the ISO.
   TITANOBOA_REPO: "https://github.com/ublue-os/titanoboa"
-  TITANOBOA_REF: "840217d97bd0bc9a52466508c54d8dda5c5ba2fd"
+  TITANOBOA_REF: "5c457c3d0518bd17e754be0fd98a60d29d26abb4"
 
 # Pull requests: a new push cancels the running build. Main: runs queue up,
 # so a second run (a promotion while one runs, a manual run) never cuts an
