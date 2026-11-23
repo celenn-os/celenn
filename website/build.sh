@@ -142,5 +142,20 @@ for width in 1280 2560; do
     -define webp:method=6 "${out}/img/wallpaper-${width}.webp"
 done
 
+# The site's own font (Inter, SIL Open Font License)
+cp -r "${root}/website/fonts" "${out}/"
+
+# Link preview image (og:image): the wallpaper, the logo and, when the
+# screenshots are there, the desktop with cosmic-blue Tools open
+og_shot=()
+if [[ -f "${out}/img/screenshots/tools-overview.webp" ]]; then
+  og_shot=( '(' "${out}/img/screenshots/tools-overview.webp" -resize 880x -bordercolor '#8fc4ff' -border 2 ')'
+            -gravity north -geometry +0+196 -composite )
+fi
+convert "${wallpaper}" -resize 1200x630^ -gravity center -extent 1200x630 \
+  -fill '#050a1a' -colorize 30% \
+  '(' "${root}/website/og-logo.png" -resize 440x ')' -gravity north -geometry +0+70 -composite \
+  "${og_shot[@]}" -strip -quality 85 "${out}/img/og.jpg"
+
 # Stop GitHub Pages from running Jekyll on the files
 touch "${out}/.nojekyll"

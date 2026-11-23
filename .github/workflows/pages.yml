@@ -70,6 +70,11 @@ jobs:
           ISO_BASE_URL: ${{ vars.ISO_BASE_URL }}
         run: website/build.sh _site
 
+      # Search in the documentation: a static index, loaded by site.js only
+      # when someone searches. The copy buttons are not text to find.
+      - name: Build the search index
+        run: npx --yes pagefind@1.5.2 --site _site --exclude-selectors ".copy"
+
       - name: Upload site
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:

@@ -5,7 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Risoluzione dei problemi · cosmic-blue</title>
   <meta name="description" content="Risolvere i problemi comuni di cosmic-blue: tornare indietro dopo un aggiornamento difettoso, reimpostare il desktop, riparare le app e segnalare un bug.">
-  <meta name="theme-color" content="#060b1c">
+  <meta name="theme-color" content="#050a1a">
+  <link rel="canonical" href="https://cosmic-blue-os.github.io/cosmic-blue/it/docs/troubleshooting/">
+  <meta property="og:title" content="Risoluzione dei problemi · cosmic-blue">
+  <meta property="og:description" content="Risolvere i problemi comuni di cosmic-blue: tornare indietro dopo un aggiornamento difettoso, reimpostare il desktop, riparare le app e segnalare un bug.">
+  <meta property="og:image" content="https://cosmic-blue-os.github.io/cosmic-blue/img/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://cosmic-blue-os.github.io/cosmic-blue/it/docs/troubleshooting/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="it_IT">
+  <meta property="og:site_name" content="cosmic-blue">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="alternate" hreflang="de" href="https://cosmic-blue-os.github.io/cosmic-blue/de/docs/troubleshooting/">
   <link rel="alternate" hreflang="en" href="https://cosmic-blue-os.github.io/cosmic-blue/docs/troubleshooting/">
   <link rel="alternate" hreflang="es" href="https://cosmic-blue-os.github.io/cosmic-blue/es/docs/troubleshooting/">
@@ -14,16 +25,21 @@
   <link rel="alternate" hreflang="pt-BR" href="https://cosmic-blue-os.github.io/cosmic-blue/pt-br/docs/troubleshooting/">
   <link rel="alternate" hreflang="x-default" href="https://cosmic-blue-os.github.io/cosmic-blue/docs/troubleshooting/">
   <link rel="icon" href="../../../img/cosmic-blue-logo.svg" type="image/svg+xml">
+  <link rel="preload" href="../../../fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../../../style.css">
 </head>
 <body>
-  <header class="page-head">
+  <a class="skip" href="#main">Vai al contenuto</a>
+  <header class="site-header">
     <nav class="top">
-      <a class="brand" href="../../"><img src="../../../img/cosmic-blue-logo.svg" alt="" width="28" height="28">cosmic-blue</a>
+      <a class="brand" href="../../"><img src="../../../img/cosmic-blue-logo.svg" alt="" width="28" height="28"><span>cosmic-blue</span></a>
       <span class="links">
         <a class="text" href="../../why/">Perché</a>
-        <a class="text" href="../" aria-current="page">Docs</a>
+        <a class="text" href="../../install/">Installare</a>
+        <a class="text" href="../../docs/" aria-current="page">Docs</a>
         <a class="text" href="../../screenshots/">Screenshot</a>
+      </span>
+      <span class="tools">
         <details class="lang">
           <summary class="icon" title="Lingua" aria-label="Lingua: Italiano"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><ellipse cx="12" cy="12" rx="4" ry="9.5"/><path d="M2.5 12h19M4.2 7h15.6M4.2 17h15.6"/></svg><span aria-hidden="true">IT</span></summary>
           <ul>
@@ -35,29 +51,52 @@
             <li><a href="../../../pt-br/docs/troubleshooting/" hreflang="pt-BR" lang="pt-BR">Português</a></li>
           </ul>
         </details>
-        <a class="icon" href="https://github.com/cosmic-blue-os/cosmic-blue" title="GitHub" aria-label="GitHub"><svg viewBox="0 0 16 16" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+        <a class="icon github" href="https://github.com/cosmic-blue-os/cosmic-blue" title="GitHub" aria-label="GitHub"><svg viewBox="0 0 16 16" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+        <a class="button primary small" href="../../#download">Scarica</a>
+        <details class="menu">
+          <summary class="icon" title="Menu" aria-label="Menu"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></summary>
+          <ul>
+            <li><a class="item" href="../../why/">Perché</a></li>
+            <li><a class="item" href="../../install/">Installare</a></li>
+            <li><a class="item" href="../../docs/" aria-current="page">Docs</a></li>
+            <li><a class="item" href="../../screenshots/">Screenshot</a></li>
+          </ul>
+        </details>
       </span>
     </nav>
   </header>
 
-  <main class="docs">
+  <main id="main" class="docs doc-layout">
+    <aside class="doc-side">
+      <button type="button" class="search-open" data-search hidden>
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Cerca<kbd>/</kbd>
+      </button>
+      <button type="button" class="doc-toggle" aria-expanded="false" aria-controls="doc-nav"><small>In questa pagina</small><span></span></button>
+      <nav id="doc-nav" class="doc-nav" aria-label="Indice">
+        <h2>Risoluzione dei problemi</h2>
+        <ul>
+          <li><a href="#no-boot">Il computer non si avvia</a></li>
+          <li><a href="#bad-update">Un aggiornamento ha rotto qualcosa</a></li>
+          <li><a href="#no-desktop">Il desktop non si avvia</a></li>
+          <li><a href="#settings">Aspetto e impostazioni</a></li>
+          <li><a href="#apps">Un’app non funziona</a></li>
+          <li><a href="#no-updates">Gli aggiornamenti non si installano</a></li>
+          <li><a href="#nvidia">Driver NVIDIA</a></li>
+          <li><a href="#report">Segnalare un problema</a></li>
+        </ul>
+        <ul>
+          <li><a href="../">← Documentazione</a></li>
+        </ul>
+      </nav>
+    </aside>
+    <div class="doc-body" data-pagefind-body>
     <section class="block">
       <h1>Risoluzione dei problemi</h1>
       <p>Qualcosa è andato storto? La maggior parte dei problemi su cosmic-blue si può annullare: la versione precedente del sistema resta installata, e le tue impostazioni di COSMIC si possono riportare a quelle predefinite. I comandi vanno scritti in un terminale. Vedi anche la <a href="../">documentazione</a>.</p>
-      <nav class="toc" aria-label="Indice">
-        <a href="#no-boot">Il computer non si avvia</a>
-        <a href="#bad-update">Un aggiornamento ha rotto qualcosa</a>
-        <a href="#no-desktop">Il desktop non si avvia</a>
-        <a href="#settings">Aspetto e impostazioni</a>
-        <a href="#apps">Un’app non funziona</a>
-        <a href="#no-updates">Gli aggiornamenti non si installano</a>
-        <a href="#nvidia">Driver NVIDIA</a>
-        <a href="#report">Segnalare un problema</a>
-      </nav>
     </section>
 
-    <section id="no-boot" class="block">
-      <h2>Il computer non si avvia dopo un aggiornamento</h2>
+    <section class="block">
+      <h2 id="no-boot">Il computer non si avvia dopo un aggiornamento</h2>
       <ol>
         <li>Accendi il computer e premi <kbd>Esc</kbd> più volte (o tieni premuto <kbd>Maiusc</kbd>) finché non compare il menu di avvio.</li>
         <li>Scegli la seconda voce, indicata con <code>ostree:1</code>: è la versione che avevi prima dell’aggiornamento.</li>
@@ -70,8 +109,8 @@
       <p>Poi segui la sezione successiva, così la versione difettosa non torna.</p>
     </section>
 
-    <section id="bad-update" class="block">
-      <h2>Un aggiornamento ha rotto qualcosa</h2>
+    <section class="block">
+      <h2 id="bad-update">Un aggiornamento ha rotto qualcosa</h2>
       <p>Torna alla versione che avevi prima. Resta installata fino al prossimo aggiornamento, quindi funziona anche offline:</p>
       <div class="code">
         <pre><code>sudo bootc rollback    # usa la versione precedente al prossimo avvio
@@ -93,8 +132,8 @@ sudo bootc switch --enforce-container-sigpolicy ghcr.io/cosmic-blue-os/cosmic-bl
       </div>
     </section>
 
-    <section id="no-desktop" class="block">
-      <h2>Il desktop non si avvia</h2>
+    <section class="block">
+      <h2 id="no-desktop">Il desktop non si avvia</h2>
       <p>Schermo nero, o di nuovo alla schermata di accesso dopo aver digitato la password? La causa potrebbe essere nelle tue impostazioni di COSMIC.</p>
       <ol>
         <li>Premi <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F3</kbd> per aprire una console di testo, e accedi con il tuo nome utente e la password.</li>
@@ -108,8 +147,8 @@ sudo systemctl reboot</code></pre>
       <p>Se è iniziato dopo un aggiornamento, <a href="#bad-update">torna invece alla versione precedente</a> dalla stessa console.</p>
     </section>
 
-    <section id="settings" class="block">
-      <h2>Aspetto e impostazioni</h2>
+    <section class="block">
+      <h2 id="settings">Aspetto e impostazioni</h2>
       <p>Hai perso l’aspetto di cosmic-blue, o un pannello, il dock o una scorciatoia non si comporta più bene? Reimposta solo l’aspetto, o tutte le impostazioni di COSMIC. Dopo, esci e rientra nella sessione.</p>
       <dl class="commands">
         <dt><code>ujust reset-cosmic-theme</code></dt>
@@ -119,8 +158,8 @@ sudo systemctl reboot</code></pre>
       </dl>
     </section>
 
-    <section id="apps" class="block">
-      <h2>Un’app non funziona</h2>
+    <section class="block">
+      <h2 id="apps">Un’app non funziona</h2>
       <p>Le app di COSMIC Store sono Flatpak. Prima aggiornale e ripara i file installati:</p>
       <div class="code">
         <pre><code>flatpak update
@@ -136,8 +175,8 @@ mv ~/.var/app/org.example.App ~/.var/app/org.example.App.old</code></pre>
       <p>Un’app di FlatPark dà problemi? <code>ujust toggle-flatpark off</code> disinstalla le sue app e disattiva FlatPark.</p>
     </section>
 
-    <section id="no-updates" class="block">
-      <h2>Gli aggiornamenti non si installano</h2>
+    <section class="block">
+      <h2 id="no-updates">Gli aggiornamenti non si installano</h2>
       <p>Avvia l’aggiornamento a mano per vedere l’errore, e controlla che gli aggiornamenti automatici siano attivi:</p>
       <div class="code">
         <pre><code>ujust update
@@ -147,8 +186,8 @@ ujust toggle-updates</code></pre>
       <p>Disco pieno? In <strong>Strumenti di cosmic-blue</strong>, <em>Manutenzione</em>, <em>Pulisci</em> rimuove ciò che non serve più: runtime Flatpak, immagini container inutilizzate, vecchi download di Homebrew. I tuoi file, i container e i loro volumi restano. In un terminale: <code>ujust clean-system</code>.</p>
     </section>
 
-    <section id="nvidia" class="block">
-      <h2>Driver NVIDIA</h2>
+    <section class="block">
+      <h2 id="nvidia">Driver NVIDIA</h2>
       <p>Sull’immagine NVIDIA con Secure Boot attivo, il driver si carica solo dopo che la sua chiave è stata registrata. Esegui il comando qui sotto e riavvia: una schermata blu chiede di fare <strong>Enroll MOK</strong>, con la password <code>cosmicblue</code> (digitata con layout QWERTY).</p>
       <div class="code">
         <pre><code>ujust enroll-secure-boot-key</code></pre>
@@ -161,8 +200,8 @@ ujust toggle-updates</code></pre>
       </div>
     </section>
 
-    <section id="report" class="block">
-      <h2>Segnalare un problema</h2>
+    <section class="block">
+      <h2 id="report">Segnalare un problema</h2>
       <p>Esegui il primo comando qui sotto sul computer con il problema: raccoglie i dati di sistema (nessun dato personale) e apre una <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues/new/choose">segnalazione di bug</a> con questi dati già compilati. Racconta cosa hai fatto e cosa è successo. Se il problema si è presentato durante l’avvio precedente, aggiungi gli errori registrati (secondo comando). Le domande vanno nelle <a href="https://github.com/cosmic-blue-os/cosmic-blue/discussions">Discussions</a>.</p>
       <div class="code">
         <pre><code>ujust report-bug
@@ -170,12 +209,41 @@ sudo journalctl -b -1 -p err --no-pager</code></pre>
         <button type="button" class="copy" data-copy>Copia</button>
       </div>
     </section>
+    </div>
   </main>
 
-  <footer>
-    <p>cosmic-blue è costruito su <a href="https://universal-blue.org/">Universal Blue</a>, <a href="https://projectbluefin.io/">Bluefin</a>, <a href="https://fedoraproject.org/">Fedora</a> e <a href="https://system76.com/cosmic">COSMIC</a>. cosmic-blue è un progetto indipendente, non affiliato a questi progetti né approvato da essi.</p>
-    <p><a href="https://github.com/cosmic-blue-os/cosmic-blue">Codice sorgente</a> ·
-    <a href="https://github.com/cosmic-blue-os/cosmic-blue/issues">Segnala un problema</a></p>
+  <footer class="site-footer">
+    <div class="footer-cols">
+      <div>
+        <a class="brand" href="../../"><img src="../../../img/cosmic-blue-logo.svg" alt="" width="26" height="26"><span>cosmic-blue</span></a>
+        <p>Il desktop COSMIC su Fedora Atomic.</p>
+      </div>
+      <nav aria-labelledby="footer-discover">
+        <h2 id="footer-discover">Scopri</h2>
+        <ul>
+          <li><a href="../../why/">Perché cosmic-blue?</a></li>
+          <li><a href="../../screenshots/">Screenshot</a></li>
+          <li><a href="../../#download">Scarica</a></li>
+        </ul>
+      </nav>
+      <nav aria-labelledby="footer-help">
+        <h2 id="footer-help">Aiuto</h2>
+        <ul>
+          <li><a href="../../install/">Guida all'installazione</a></li>
+          <li><a href="../../docs/">Documentazione</a></li>
+          <li><a href="../../docs/troubleshooting/">Risoluzione dei problemi</a></li>
+        </ul>
+      </nav>
+      <nav aria-labelledby="footer-project">
+        <h2 id="footer-project">Progetto</h2>
+        <ul>
+          <li><a href="https://github.com/cosmic-blue-os/cosmic-blue">Codice sorgente</a></li>
+          <li><a href="https://github.com/cosmic-blue-os/cosmic-blue/issues">Segnala un problema</a></li>
+          <li><a href="https://github.com/cosmic-blue-os/cosmic-blue/discussions">Discussioni</a></li>
+        </ul>
+      </nav>
+    </div>
+    <p class="legal">Costruito su <a href="https://universal-blue.org/">Universal Blue</a>, <a href="https://projectbluefin.io/">Bluefin</a>, <a href="https://fedoraproject.org/">Fedora</a> e <a href="https://system76.com/cosmic">COSMIC</a>. cosmic-blue è un progetto indipendente, non affiliato a questi progetti né approvato da essi.</p>
   </footer>
 
   <script src="../../../site.js"></script>
