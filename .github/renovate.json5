@@ -87,10 +87,16 @@
       "schedule": ["* 0-7 * * 1"]
     },
     {
-      "description": "titanoboa, the live ISO builder (no releases: latest main commit), once a week",
+      // Paused: titanoboa's main (5c457c3, "Only use container images")
+      // dropped the Justfile build-live-iso.yml runs, and Bluefin's ISOs stay
+      // on the same commit as ours. The weekly open-PR check reports when
+      // projectbluefin/iso moves; turning this back on is part of migrating
+      // build-live-iso.yml then.
+      "description": "titanoboa, the live ISO builder (no releases: latest main commit), paused until Bluefin's ISO moves to its rewrite",
       "matchDepNames": ["https://github.com/ublue-os/titanoboa"],
       "groupName": "titanoboa",
-      "schedule": ["* 0-7 * * 1"]
+      "schedule": ["* 0-7 * * 1"],
+      "enabled": false
     },
     {
       // Major versions can break the build: open the pull request, a human
