@@ -67,20 +67,107 @@
   </header>
 
 <section class="hero">
-    <picture class="hero-bg">
-      <source media="(max-width: 900px)" srcset="img/wallpaper-1280.webp" type="image/webp">
-      <source srcset="img/wallpaper-2560.webp" type="image/webp">
-      <source media="(max-width: 900px)" srcset="img/wallpaper-1280.jpg">
-      <img src="img/wallpaper-2560.jpg" alt="" fetchpriority="high">
-    </picture>
     <div class="hero-text">
-      <div class="hero-copy">
-        <h1>The COSMIC desktop, <span class="soft">ready from the first boot</span></h1>
-        <p class="lead">An independent image built on the Universal&nbsp;Blue base, with safe updates in the background, parental controls and system tools that need no terminal.</p>
-        <div class="actions">
-          <a class="button" href="install/">Installation guide</a>
-        </div>
+      <h1>The COSMIC desktop, <span class="soft">ready from the first boot</span></h1>
+      <p class="lead">An independent image built on the Universal&nbsp;Blue base, with safe updates in the background, parental controls and system tools that need no terminal.</p>
+      <div class="actions">
+        <a class="button primary" href="#download">Download</a>
+        <a class="button" href="install/">Installation guide</a>
       </div>
+      <p class="hero-note">Free · AMD, Intel and NVIDIA · Try it without installing</p>
+    </div>
+    <!-- shot:tools-overview -->
+    <div class="hero-shot">
+      <a class="stage" href="screenshots/"><img fetchpriority="high" class="win" src="img/screenshots/tools-overview-win.webp" width="1006" height="694" alt="The cosmic-blue desktop with the cosmic-blue Tools window open"></a>
+    </div>
+    <!-- /shot -->
+    <ul class="trust">
+      <li><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>Signed images</li>
+      <li><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>One-click rollback</li>
+      <li><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>Every release tested before it ships</li>
+      <li><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Free and open source</li>
+    </ul>
+  </section>
+
+  <main id="main">
+    <section class="section center" aria-labelledby="features">
+      <p class="eyebrow">Made for everyone</p>
+      <h2 id="features">Everything you need, without a terminal</h2>
+      <p class="intro">Fedora, the COSMIC desktop from the official packages and an atomic system, plus tools made for families and for people new to Linux.</p>
+    </section>
+
+    <section class="chapter" aria-labelledby="ch-tour">
+      <p class="eyebrow">Welcome tour</p>
+      <h2 id="ch-tour">A guided tour at first login</h2>
+      <p class="intro">Layout, wallpaper, software for what you do: a few pages to find your way around.</p>
+      <div class="stage">
+        <!-- shot:first-steps-2 -->
+        <img class="win" src="img/screenshots/first-steps-2-win.webp" width="906" height="726" loading="lazy" alt="">
+        <!-- /shot -->
+      </div>
+    </section>
+
+    <section class="chapter" aria-labelledby="ch-updates">
+      <p class="eyebrow">Updates</p>
+      <h2 id="ch-updates">Safe updates</h2>
+      <p class="intro">Downloaded in the background, applied at the next start. The previous version stays there if something goes wrong.</p>
+      <div class="stage">
+        <!-- shot:updates -->
+        <img class="win" src="img/screenshots/updates-win.webp" width="1006" height="694" loading="lazy" alt="">
+        <!-- /shot -->
+      </div>
+    </section>
+
+    <section class="chapter" aria-labelledby="ch-parental">
+      <p class="eyebrow">Parental controls</p>
+      <h2 id="ch-parental">Complete parental controls</h2>
+      <p class="intro">Screen time, bedtime, a family web filter, and more time when a parent agrees.</p>
+      <div class="stage duo">
+        <!-- shot:parental-controls-child -->
+        <img class="win" src="img/screenshots/parental-controls-child-win.webp" width="766" height="650" loading="lazy" alt="">
+        <!-- /shot -->
+        <!-- shot:parental-more-time -->
+        <img class="win win-over" src="img/screenshots/parental-more-time-win.webp" width="446" height="626" loading="lazy" alt="">
+        <!-- /shot -->
+      </div>
+    </section>
+
+    <section class="chapter" aria-labelledby="ch-tools">
+      <p class="eyebrow">cosmic-blue Tools</p>
+      <h2 id="ch-tools">System tools, without a terminal</h2>
+      <p class="intro">Updates, maintenance, extra software and help, in one app.</p>
+      <div class="stage">
+        <!-- shot:tools-software -->
+        <img class="win" src="img/screenshots/tools-software-win.webp" width="1006" height="694" loading="lazy" alt="">
+        <!-- /shot -->
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="minis">
+        <article>
+          <div class="mini-icon"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 0 0 0 18c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4A4.6 4.6 0 0 0 21 9.8C21 6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10" cy="7" r="1.2"/><circle cx="15" cy="7" r="1.2"/></svg></div>
+          <h3>COSMIC, ready to use</h3>
+          <p>Blue theme, frosted glass panels, matching icons and boot screen, out of the box.</p>
+        </article>
+        <article>
+          <div class="mini-icon"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg></div>
+          <h3>Flathub apps</h3>
+          <p>Firefox, Thunderbird and everyday apps installed, thousands more in the COSMIC Store.</p>
+        </article>
+        <article>
+          <div class="mini-icon"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m7 9 3 3-3 3M12 15h5"/></svg></div>
+          <h3>The Universal Blue base</h3>
+          <p><code>ujust</code> commands and Homebrew, for those who want to go further.</p>
+        </article>
+      </div>
+      <p class="more"><a href="why/">Why cosmic-blue? →</a> <a href="screenshots/">All screenshots →</a></p>
+    </section>
+
+    <section id="install" class="section" aria-labelledby="install-title">
+      <p class="eyebrow">Install</p>
+      <h2 id="install-title">Ready in about half an hour</h2>
+      <p class="intro">Try it from the USB stick first: nothing changes on the computer until you start the installation.</p>
       <div id="download" class="download">
         <h2>Download cosmic-blue</h2>
         <p>Live ISO: try it before installing.</p>
@@ -94,77 +181,6 @@
         <p class="note-nvidia">Older NVIDIA card? Take the AMD or Intel version, which uses the open source driver.</p>
         <p class="fine">x86-64<!-- checksum --> · <a href="@ISO_URL@.sha256" data-nvidia-href="@ISO_NVIDIA_URL@.sha256">SHA-256</a> · <a href="@ISO_URL@.sha256.sigstore.json" data-nvidia-href="@ISO_NVIDIA_URL@.sha256.sigstore.json">signature</a><!-- /checksum --></p>
       </div>
-    </div>
-    <!-- shot:tools-overview -->
-    <div class="hero-shot">
-      <a class="frame" href="screenshots/"><img src="img/screenshots/tools-overview-960.webp" srcset="img/screenshots/tools-overview-960.webp 960w, img/screenshots/tools-overview.webp 1920w" sizes="(min-width: 1100px) 1040px, calc(100vw - 36px)" width="1920" height="1080" alt="The cosmic-blue desktop with the cosmic-blue Tools window open"></a>
-    </div>
-    <!-- /shot -->
-    <ul class="trust">
-      <li><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>Signed images</li>
-      <li><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>One-click rollback</li>
-      <li><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>Every release tested before it ships</li>
-      <li><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Free and open source</li>
-    </ul>
-  </section>
-
-  <main id="main">
-    <section class="section" aria-labelledby="features">
-      <p class="eyebrow">Made for everyone</p>
-      <h2 id="features">Everything you need, without a terminal</h2>
-      <p class="intro">Fedora, the COSMIC desktop from the official packages and an atomic system, plus tools made for families and for people new to Linux.</p>
-      <div class="bento">
-        <article class="card wide">
-          <h3>A guided tour at first login</h3>
-          <p>Layout, wallpaper, software for what you do: a few pages to find your way around.</p>
-          <!-- shot:first-steps-2 -->
-          <div class="crop"><img src="img/screenshots/first-steps-2-zoom.webp" width="1200" height="760" loading="lazy" alt=""></div>
-          <!-- /shot -->
-        </article>
-        <article class="card third">
-          <h3>Safe updates</h3>
-          <p>Downloaded in the background, applied at the next start. The previous version stays there if something goes wrong.</p>
-          <!-- shot:updates -->
-          <div class="crop"><img src="img/screenshots/updates-zoom.webp" width="1200" height="760" loading="lazy" alt=""></div>
-          <!-- /shot -->
-        </article>
-        <article class="card half">
-          <h3>Complete parental controls</h3>
-          <p>Screen time, bedtime, a family web filter, and more time when a parent agrees.</p>
-          <!-- shot:parental-controls-child -->
-          <div class="crop"><img src="img/screenshots/parental-controls-child-zoom.webp" width="1200" height="760" loading="lazy" alt=""></div>
-          <!-- /shot -->
-        </article>
-        <article class="card half">
-          <h3>System tools, without a terminal</h3>
-          <p>Updates, maintenance, extra software and help, in one app.</p>
-          <!-- shot:tools-software -->
-          <div class="crop"><img src="img/screenshots/tools-software-zoom.webp" width="1200" height="760" loading="lazy" alt=""></div>
-          <!-- /shot -->
-        </article>
-        <article class="card text third">
-          <div class="card-icon"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 0 0 0 18c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4A4.6 4.6 0 0 0 21 9.8C21 6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10" cy="7" r="1.2"/><circle cx="15" cy="7" r="1.2"/></svg></div>
-          <h3>COSMIC, ready to use</h3>
-          <p>Blue theme, frosted glass panels, matching icons and boot screen, out of the box.</p>
-        </article>
-        <article class="card text third">
-          <div class="card-icon"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg></div>
-          <h3>Flathub apps</h3>
-          <p>Firefox, Thunderbird and everyday apps installed, thousands more in the COSMIC Store.</p>
-        </article>
-        <article class="card text third">
-          <div class="card-icon"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m7 9 3 3-3 3M12 15h5"/></svg></div>
-          <h3>The Universal Blue base</h3>
-          <p><code>ujust</code> commands and Homebrew, for those who want to go further.</p>
-        </article>
-      </div>
-      <p class="more"><a href="why/">Why cosmic-blue? →</a> <a href="screenshots/">All screenshots →</a></p>
-    </section>
-
-    <section id="install" class="section" aria-labelledby="install-title">
-      <p class="eyebrow">Install</p>
-      <h2 id="install-title">Ready in about half an hour</h2>
-      <p class="intro">Try it from the USB stick first: nothing changes on the computer until you start the installation.</p>
       <ol class="steps3">
         <li>
           <h3>Download the ISO</h3>
@@ -197,14 +213,6 @@
       <p class="more"><a href="install/">Step-by-step guide →</a></p>
     </section>
 
-    <section class="final" aria-labelledby="final-title">
-      <h2 id="final-title">Try cosmic&#8209;blue today</h2>
-      <p>Start it from a USB stick and try it without installing anything.</p>
-      <div class="actions">
-        <a class="button primary" href="@ISO_URL@" data-nvidia-href="@ISO_NVIDIA_URL@">Download the live ISO</a>
-        <a class="button" href="why/">Why cosmic-blue?</a>
-      </div>
-    </section>
   </main>
 
   <footer class="site-footer">

@@ -307,67 +307,43 @@ kbd {
   }
 }
 
-/* Home: hero, the text on the left and the download on the right */
+/* Home: hero, centered text over the app window */
 
-.hero {
-  position: relative;
-  margin-top: calc(-1 * var(--header) - 1px);
-  padding: calc(var(--header) + 80px) 0 0;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.hero-bg img {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 30%;
-  opacity: .38;
-}
-
-/* Keep the text readable over the wallpaper and blend into the page */
-.hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(70% 55% at 50% 22%, rgb(5 10 26 / .1), var(--bg) 88%),
-    linear-gradient(180deg, transparent 45%, var(--bg) 92%);
-}
+.hero { padding: 112px 0 0; }
 
 .hero-text {
-  display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(340px, .8fr);
-  gap: 64px;
-  align-items: center;
-  max-width: 1200px;
+  max-width: 920px;
   margin: 0 auto;
   padding: 0 24px;
+  text-align: center;
 }
 
 .hero h1 {
-  margin: 0 0 20px;
-  font-size: clamp(2.2rem, 4.4vw, 3.3rem);
-  font-weight: 650;
-  line-height: 1.07;
-  letter-spacing: -.034em;
+  margin: 0 0 24px;
+  font-size: clamp(2.5rem, 5.6vw, 4.3rem);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -.036em;
+  text-wrap: balance;
 }
-
-.hero h1 .soft { color: var(--muted); }
 
 .lead {
   max-width: 34em;
   margin: 0;
   color: var(--muted);
-  font-size: clamp(1.02rem, 2vw, 1.14rem);
+  font-size: clamp(1.06rem, 2vw, 1.25rem);
+  line-height: 1.55;
   text-wrap: pretty;
 }
 
-.hero-copy .actions { margin-top: 28px; }
+.hero .lead { margin: 0 auto; }
+.hero .actions { justify-content: center; margin-top: 36px; }
+
+.hero-note {
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: .9rem;
+}
 
 .actions {
   display: flex;
@@ -375,26 +351,188 @@ kbd {
   gap: 12px;
 }
 
-/* Download panel: the two editions as a choice, one button */
+/* An app window at its real size on the wallpaper, like on the desktop */
+.stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 64px 40px;
+  border-radius: 18px;
+  background: #0b1a4a url("img/wallpaper-1280.webp") 50% 50% / cover;
+}
+
+.stage .win {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 28px 64px rgb(0 6 30 / .55), 0 4px 14px rgb(0 6 30 / .35);
+}
+
+/* Two windows: the second one in front, lower right */
+.stage.duo { justify-content: flex-start; padding-left: 9%; }
+
+.stage .win-over {
+  position: absolute;
+  right: 7%;
+  bottom: 9%;
+  width: 34%;
+}
+
+.hero-shot {
+  max-width: 1200px;
+  margin: 64px auto 0;
+  padding: 0 24px;
+}
+
+.hero-shot .stage { padding: 72px 40px; }
+
+/* What the user can count on, under the screenshot */
+.trust {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 40px;
+  margin: 0;
+  padding: 32px 24px 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: .92rem;
+}
+
+.trust li { display: flex; align-items: center; gap: 8px; }
+.trust svg { flex: none; }
+
+/* Home: sections */
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 24px;
+}
+
+.section { padding-top: 120px; }
+
+.eyebrow {
+  margin: 0 0 14px;
+  color: var(--accent);
+  font-size: .9rem;
+  font-weight: 600;
+}
+
+.section > h2,
+.chapter > h2 {
+  max-width: 20em;
+  margin: 0 0 16px;
+  font-size: clamp(1.9rem, 4.2vw, 2.9rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -.03em;
+  text-wrap: balance;
+}
+
+.section > .intro,
+.chapter > .intro {
+  max-width: 36em;
+  margin: 0 0 48px;
+  color: var(--muted);
+  font-size: 1.14rem;
+  text-wrap: pretty;
+}
+
+.section.center,
+.chapter { text-align: center; }
+
+.section.center > h2,
+.section.center > .intro,
+.chapter > h2,
+.chapter > .intro { margin-right: auto; margin-left: auto; }
+
+.section.center > .intro { margin-bottom: 0; }
+
+/* One feature per chapter, with its app window */
+.chapter {
+  margin-top: 120px;
+  padding-top: 120px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.section.center + .chapter { margin-top: 0; border-top: 0; padding-top: 88px; }
+
+/* Smaller features: an icon, a title, a sentence, no frame */
+.minis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 48px;
+  padding-top: 120px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.minis h3 {
+  margin: 0 0 8px;
+  font-size: 1.14rem;
+  line-height: 1.3;
+  letter-spacing: -.01em;
+}
+
+.minis p { margin: 0; color: var(--muted); }
+.minis code { color: var(--text); }
+
+.mini-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 18px;
+  border-radius: 10px;
+  background: rgb(79 141 255 / .14);
+  color: var(--accent-light);
+}
+
+.section > .more { margin-top: 40px; }
+.minis + .more { padding-top: 0; }
+
+.more {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  margin: 24px 0 0;
+  font-weight: 500;
+}
+
+.more a { text-decoration: none; }
+.more a:hover { text-decoration: underline; }
+
+#install {
+  margin-top: 120px;
+  border-top: 1px solid var(--border-soft);
+}
+
+/* Download panel: the two editions side by side, one button */
 .download {
-  padding: 22px;
-  border: 1px solid rgb(255 255 255 / .1);
-  border-radius: 14px;
-  background: rgb(10 19 48 / .82);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  margin: 0 0 64px;
+  padding: 32px;
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  background: var(--card);
 }
 
 .download h2 {
   margin: 0 0 4px;
-  font-size: 1.02rem;
-  font-weight: 600;
+  font-size: 1.3rem;
+  font-weight: 650;
+  letter-spacing: -.015em;
 }
 
-.download > p { margin: 0 0 16px; color: var(--muted); font-size: .88rem; }
+.download > p { margin: 0 0 22px; color: var(--muted); }
 
 .editions {
-  margin: 0 0 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 20px;
   padding: 0;
   border: 0;
 }
@@ -403,11 +541,10 @@ kbd {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 0 0 8px;
-  padding: 12px 14px;
+  gap: 14px;
+  padding: 16px 18px;
   border: 1px solid rgb(255 255 255 / .1);
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   transition: border-color .15s, background-color .15s;
 }
@@ -432,184 +569,35 @@ kbd {
   accent-color: var(--accent-strong);
 }
 
-.edition strong { display: block; font-size: .94rem; font-weight: 600; }
-.edition small { display: block; color: var(--muted); font-size: .82rem; }
+.edition strong { display: block; font-weight: 600; }
+.edition small { display: block; color: var(--muted); font-size: .86rem; }
 
 .edition .size {
   margin-left: auto;
   color: var(--muted);
-  font-size: .84rem;
+  font-size: .86rem;
   white-space: nowrap;
 }
 
-.download .button { width: 100%; }
-
 .download .note-nvidia {
-  margin: 14px 0 0;
-  text-align: center;
+  margin: 16px 0 0;
   color: var(--muted);
-  font-size: .84rem;
+  font-size: .88rem;
   line-height: 1.45;
 }
 
 .fine,
 .download .fine {
-  margin: 12px 0 0;
+  margin: 8px 0 0;
   color: var(--muted);
-  font-size: .8rem;
-  text-align: center;
+  font-size: .82rem;
 }
 
-/* The desktop under the text */
-.hero-shot {
-  max-width: 1100px;
-  margin: 56px auto 0;
-  padding: 0 24px;
-}
-
-.frame {
-  display: block;
-  overflow: hidden;
-  border: 1px solid rgb(255 255 255 / .12);
-  border-radius: 12px;
-  box-shadow: 0 24px 60px rgb(0 0 0 / .5);
-}
-
-.frame img {
-  display: block;
-  width: 100%;
-  height: auto;
-  background: var(--surface);
-}
-
-/* What the user can count on, under the screenshot */
-.trust {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px 36px;
-  margin: 0;
-  padding: 36px 24px 0;
-  list-style: none;
-  color: var(--muted);
-  font-size: .88rem;
-}
-
-.trust li { display: flex; align-items: center; gap: 8px; }
-.trust svg { flex: none; }
-
-@media (max-width: 900px) {
-  .hero-text { grid-template-columns: minmax(0, 1fr); gap: 32px; }
-}
-
-/* Home: sections */
-
-main {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px 24px;
-}
-
-.section { padding-top: 104px; }
-
-.eyebrow {
-  margin: 0 0 10px;
-  color: var(--muted);
-  font-size: .8rem;
-  font-weight: 600;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-}
-
-.section > h2,
-.final h2 {
-  max-width: 20em;
-  margin: 0 0 14px;
-  font-size: clamp(1.8rem, 4vw, 2.55rem);
-  font-weight: 650;
-  line-height: 1.1;
-  letter-spacing: -.028em;
-}
-
-.section > .intro {
-  max-width: 40em;
-  margin: 0 0 40px;
-  color: var(--muted);
-  font-size: 1.08rem;
-}
-
-/* Feature cards: big ones show a piece of the app, small ones an icon */
-.bento {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  padding: 28px 28px 0;
-  border: 1px solid rgb(255 255 255 / .08);
-  border-radius: var(--radius-large);
-  background: var(--card);
-}
-
-.card.text { padding-bottom: 28px; }
-.card.wide { grid-column: span 4; }
-.card.half { grid-column: span 3; }
-.card.third { grid-column: span 2; }
-
-.card h3 {
-  margin: 0 0 6px;
-  font-size: 1.16rem;
-  line-height: 1.3;
-  letter-spacing: -.01em;
-}
-
-.card p { margin: 0 0 24px; color: var(--muted); font-size: .96rem; }
-.card.text p { margin: 0; }
-.card code { color: var(--text); }
-
-.card .crop {
-  max-height: 300px;
-  margin-top: auto;
-  overflow: hidden;
-  border: 1px solid rgb(255 255 255 / .1);
-  border-bottom: 0;
-  border-radius: 10px 10px 0 0;
-}
-
-.card .crop img { display: block; width: 100%; height: auto; }
-
-.card-icon {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  margin-bottom: 18px;
-  border-radius: 9px;
-  background: rgb(255 255 255 / .06);
-  color: var(--text);
-}
-
-.more {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 28px;
-  margin: 24px 0 0;
-  font-weight: 500;
-}
-
-.more a { text-decoration: none; }
-.more a:hover { text-decoration: underline; }
-
-/* Home: installation in three steps */
+/* Home: installation in three steps, separated by lines, no frames */
 .steps3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 48px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -617,36 +605,28 @@ main {
 }
 
 .steps3 li {
-  padding: 26px;
-  border: 1px solid rgb(255 255 255 / .08);
-  border-radius: var(--radius-large);
-  background: var(--card);
+  padding-top: 20px;
+  border-top: 2px solid var(--border-soft);
   counter-increment: step;
 }
 
 .steps3 li::before {
-  content: counter(step);
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  margin-bottom: 16px;
-  border: 1px solid rgb(255 255 255 / .22);
-  border-radius: 50%;
-  color: var(--text);
-  font-size: .85rem;
+  content: "0" counter(step);
+  display: block;
+  margin-bottom: 10px;
+  color: var(--accent);
+  font-size: .9rem;
   font-weight: 600;
 }
 
-.steps3 h3 { margin: 0 0 6px; font-size: 1.08rem; }
-.steps3 p { margin: 0; color: var(--muted); font-size: .95rem; }
+.steps3 h3 { margin: 0 0 6px; font-size: 1.14rem; }
+.steps3 p { margin: 0; color: var(--muted); }
 
 /* Switching from another bootc system: folded, for those who need it */
 .switch {
-  margin: 16px 0 0;
-  border: 1px solid rgb(255 255 255 / .08);
-  border-radius: var(--radius-large);
-  background: var(--card);
+  margin: 48px 0 0;
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
 }
 
 .switch > summary {
@@ -678,20 +658,6 @@ main {
 
 .switch > div { padding: 0 24px 20px; color: var(--muted); }
 .switch p { margin: 0 0 10px; }
-
-/* Home: last call to action */
-.final {
-  margin: 104px 0 0;
-  padding: 64px 24px;
-  border: 1px solid rgb(255 255 255 / .1);
-  border-radius: 16px;
-  background: var(--card);
-  text-align: center;
-}
-
-.final h2 { margin-right: auto; margin-left: auto; }
-.final p { margin: 0 auto 28px; color: var(--muted); }
-.final .actions { justify-content: center; }
 
 /* Content pages */
 
@@ -1355,31 +1321,43 @@ main {
 /* Phones and tablets */
 
 @media (max-width: 880px) {
-  .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .card.wide, .card.half { grid-column: span 2; }
-  .card.third { grid-column: span 1; }
-  .steps3 { grid-template-columns: 1fr; }
+  .minis, .steps3 { grid-template-columns: 1fr; gap: 32px; }
+  .editions { grid-template-columns: 1fr; }
+  /* Phones: the app window shown closer, cut at the edge of the frame,
+     so its text stays readable */
+  .chapter .stage {
+    align-items: flex-start;
+    justify-content: flex-start;
+    height: 300px;
+    padding: 24px 0 0 24px;
+  }
+  .chapter .stage .win { width: 640px; max-width: none; border-radius: 10px 0 0 0; }
+  .chapter .stage .win-over { display: none; }
   .footer-cols { grid-template-columns: repeat(3, 1fr); }
   .footer-cols > div:first-child { grid-column: 1 / -1; }
 }
 
 @media (max-width: 560px) {
   main { padding-right: 16px; padding-left: 16px; }
-  .hero { padding-top: calc(var(--header) + 44px); }
+  .hero { padding-top: 56px; }
   .hero-text { padding: 0 16px; }
-  .hero-shot { margin-top: 32px; padding: 0 12px; }
-  .frame { border-radius: 10px; }
-  .download { padding: 18px; }
+  .hero .actions { margin-top: 28px; }
+  .hero-shot { margin-top: 40px; padding: 0 16px; }
+  .hero-shot .stage { padding: 18px 12px; border-radius: 14px; }
+  .stage .win { border-radius: 8px; }
   .trust { flex-direction: column; align-items: center; gap: 10px; }
   .section { padding-top: 80px; }
-  .bento { grid-template-columns: minmax(0, 1fr); }
-  .card.wide, .card.half, .card.third { grid-column: auto; }
-  .card { padding: 24px 22px 0; }
-  .card.text { padding-bottom: 24px; }
+  .chapter { margin-top: 72px; padding-top: 72px; }
+  .section.center + .chapter { padding-top: 56px; }
+  .section > .intro, .chapter > .intro { margin-bottom: 32px; font-size: 1.04rem; }
+  .chapter .stage { height: 240px; padding: 18px 0 0 18px; border-radius: 14px; }
+  .chapter .stage .win { width: 520px; }
+  .minis { padding-top: 72px; }
+  #install { margin-top: 72px; }
+  .download { padding: 20px; margin-bottom: 48px; }
+  .download .button { width: 100%; }
   .switch > summary { padding: 16px 18px; }
   .switch > div { padding: 0 18px 18px; }
-  .final { margin-top: 80px; padding: 48px 20px; }
-  .final .actions { flex-direction: column; align-items: stretch; }
   .footer-cols { grid-template-columns: 1fr 1fr; padding-top: 40px; }
   .docs { padding-top: 40px; }
   .doc-side { margin-top: -40px; }
