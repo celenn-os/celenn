@@ -26,7 +26,7 @@
   --bg: #050a1a;
   --bg-raised: #08102a;
   --surface: #0d1630;
-  --card: linear-gradient(180deg, rgb(20 36 80 / .62), rgb(10 18 42 / .62));
+  --card: #0a1330;
   --border: #1c2a52;
   --border-soft: rgb(127 170 255 / .14);
   --border-strong: rgb(127 170 255 / .3);
@@ -36,7 +36,7 @@
   --accent-strong: #2f6bff;
   --accent-light: #8fc4ff;
   --radius: 14px;
-  --radius-large: 20px;
+  --radius-large: 14px;
   --header: 64px;
   --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "JetBrains Mono", "Fira Code", Menlo, monospace;
@@ -104,7 +104,7 @@ kbd {
   top: 0;
   z-index: 50;
   border-bottom: 1px solid var(--border-soft);
-  background: rgb(5 10 26 / .62);
+  background: rgb(5 10 26 / .78);
   backdrop-filter: blur(16px) saturate(1.4);
   -webkit-backdrop-filter: blur(16px) saturate(1.4);
 }
@@ -244,82 +244,77 @@ kbd {
   .brand span { display: none; }
 }
 
-/* Buttons */
+/* Buttons: compact, flat, slightly rounded */
 
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 13px 24px;
-  border: 1px solid var(--border-strong);
-  border-radius: 999px;
-  background: rgb(13 22 48 / .55);
-  backdrop-filter: blur(10px);
+  height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgb(255 255 255 / .16);
+  border-radius: 10px;
+  background: rgb(255 255 255 / .04);
   color: var(--text);
+  font-size: .95rem;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1;
   text-decoration: none;
   white-space: nowrap;
-  transition: background-color .15s, border-color .15s, filter .15s;
+  transition: background-color .15s, border-color .15s;
 }
 
 .button:hover {
-  background: rgb(13 22 48 / .85);
-  border-color: var(--accent-light);
+  border-color: rgb(255 255 255 / .28);
+  background: rgb(255 255 255 / .08);
   color: var(--text);
 }
 
 .button.primary {
-  border-color: transparent;
-  background: linear-gradient(180deg, #5a96ff, var(--accent-strong));
-  box-shadow: inset 0 0 0 1px rgb(143 196 255 / .35), 0 8px 28px rgb(47 107 255 / .42);
+  border-color: var(--accent-strong);
+  background: var(--accent-strong);
   color: #fff;
 }
 
-.button.primary:hover { filter: brightness(1.1); color: #fff; }
+.button.primary:hover {
+  border-color: #4a7fff;
+  background: #4a7fff;
+  color: #fff;
+}
 
-.button.small { padding: 8px 16px; font-size: .9rem; }
+.button.small {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: .88rem;
+}
 
 .top .button.small { color: #fff; }
 
-/* Center the text on its capital letters, not on the line box, which
+/* Center the label on its capital letters, not on the line box, which
    keeps room for descenders and makes the label look too high. */
 @supports (text-box: trim-both cap alphabetic) {
-  .button {
-    padding-block: 18px;
-    text-box: trim-both cap alphabetic;
-  }
-
-  .button.small { padding-block: 12px; }
-
-  .gpu #gpu-label,
-  .top .icon span {
-    text-box: trim-both cap alphabetic;
-  }
-
-  .gpu label {
-    padding-block: 13px;
-    line-height: 1;
+  .button,
+  .top .icon span,
+  .copy {
     text-box: trim-both cap alphabetic;
   }
 
   .copy {
     padding-block: 10px;
     line-height: 1;
-    text-box: trim-both cap alphabetic;
   }
 }
 
-/* Home: hero */
+/* Home: hero, the text on the left and the download on the right */
 
 .hero {
   position: relative;
   margin-top: calc(-1 * var(--header) - 1px);
-  padding: calc(var(--header) + 72px) 0 0;
+  padding: calc(var(--header) + 80px) 0 0;
   overflow: hidden;
   isolation: isolate;
-  text-align: center;
 }
 
 .hero-bg img {
@@ -330,7 +325,7 @@ kbd {
   height: 100%;
   object-fit: cover;
   object-position: 50% 30%;
-  opacity: .7;
+  opacity: .38;
 }
 
 /* Keep the text readable over the wallpaper and blend into the page */
@@ -345,136 +340,143 @@ kbd {
 }
 
 .hero-text {
-  max-width: 940px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(340px, .8fr);
+  gap: 64px;
+  align-items: center;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
 }
 
 .hero h1 {
   margin: 0 0 20px;
-  font-size: clamp(2.35rem, 6.2vw, 4.3rem);
-  font-weight: 700;
-  line-height: 1.04;
-  letter-spacing: -.035em;
+  font-size: clamp(2.2rem, 4.4vw, 3.3rem);
+  font-weight: 650;
+  line-height: 1.07;
+  letter-spacing: -.034em;
 }
 
-.hero h1 .glow {
-  background: linear-gradient(90deg, #a9d3ff, var(--accent) 60%, #7fe0ff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
+.hero h1 .soft { color: var(--muted); }
 
 .lead {
-  max-width: 38em;
-  margin: 0 auto 30px;
+  max-width: 34em;
+  margin: 0;
   color: var(--muted);
-  font-size: clamp(1.06rem, 2.3vw, 1.22rem);
-  text-wrap: balance;
+  font-size: clamp(1.02rem, 2vw, 1.14rem);
+  text-wrap: pretty;
 }
 
-/* Graphics card choice: a two-option segmented switch */
-.gpu {
-  display: inline-flex;
-  max-width: 100%;
-  align-items: center;
-  gap: 4px;
-  margin: 0 0 18px;
-  padding: 4px;
-  border: 1px solid var(--border-strong);
-  border-radius: 999px;
-  background: rgb(13 22 48 / .6);
-  backdrop-filter: blur(10px);
-}
-
-.gpu #gpu-label {
-  padding: 0 10px 0 14px;
-  color: var(--muted);
-  font-size: .9rem;
-}
-
-.gpu label {
-  position: relative;
-  padding: 6px 16px;
-  border-radius: 999px;
-  color: var(--muted);
-  font-weight: 600;
-  font-size: .95rem;
-  cursor: pointer;
-  transition: background-color .15s, color .15s;
-}
-
-@media (max-width: 420px) {
-  .gpu #gpu-label { padding: 0 4px 0 8px; font-size: .85rem; }
-  .gpu label { padding: 6px 12px; font-size: .9rem; white-space: nowrap; }
-}
-
-.gpu input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.gpu label:has(input:checked) {
-  background: var(--accent);
-  color: #fff;
-}
-
-.gpu label:has(input:focus-visible) {
-  outline: 2px solid var(--accent-light);
-  outline-offset: 2px;
-}
+.hero-copy .actions { margin-top: 28px; }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   gap: 12px;
 }
 
-.fine {
-  margin: 16px 0 0;
-  color: var(--muted);
-  font-size: .88rem;
+/* Download panel: the two editions as a choice, one button */
+.download {
+  padding: 22px;
+  border: 1px solid rgb(255 255 255 / .1);
+  border-radius: 14px;
+  background: rgb(10 19 48 / .82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-/* Keep the room of the NVIDIA note when it is hidden, so switching the
-   graphics card does not change the hero height. */
-.hero-text p[data-nvidia-only][hidden] {
-  display: block;
-  visibility: hidden;
+.download h2 {
+  margin: 0 0 4px;
+  font-size: 1.02rem;
+  font-weight: 600;
 }
 
-/* The desktop under the download button, with a blue glow behind it */
-.hero-shot {
+.download > p { margin: 0 0 16px; color: var(--muted); font-size: .88rem; }
+
+.editions {
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+}
+
+.edition {
   position: relative;
-  max-width: 1100px;
-  margin: 40px auto 0;
-  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 8px;
+  padding: 12px 14px;
+  border: 1px solid rgb(255 255 255 / .1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color .15s, background-color .15s;
 }
 
-.hero-shot::before {
-  content: "";
-  position: absolute;
-  inset: 10% 8% -4%;
-  z-index: -1;
-  background: radial-gradient(closest-side, rgb(79 141 255 / .5), transparent);
-  filter: blur(48px);
+.edition:hover { border-color: rgb(255 255 255 / .22); }
+
+.edition:has(input:checked) {
+  border-color: var(--accent-strong);
+  background: rgb(47 107 255 / .08);
+}
+
+.edition:has(input:focus-visible) {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 2px;
+}
+
+.edition input {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent-strong);
+}
+
+.edition strong { display: block; font-size: .94rem; font-weight: 600; }
+.edition small { display: block; color: var(--muted); font-size: .82rem; }
+
+.edition .size {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: .84rem;
+  white-space: nowrap;
+}
+
+.download .button { width: 100%; }
+
+.download .note-nvidia {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: .84rem;
+  line-height: 1.45;
+}
+
+.fine {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: .8rem;
+  text-align: center;
+}
+
+/* The desktop under the text */
+.hero-shot {
+  max-width: 1100px;
+  margin: 56px auto 0;
+  padding: 0 24px;
 }
 
 .frame {
   display: block;
-  padding: 6px;
-  border-radius: 16px;
-  background: linear-gradient(180deg, rgb(143 196 255 / .38), rgb(143 196 255 / .06));
-  box-shadow: 0 30px 80px rgb(0 0 0 / .6);
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / .12);
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgb(0 0 0 / .5);
 }
 
 .frame img {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 11px;
   background: var(--surface);
 }
 
@@ -485,14 +487,18 @@ kbd {
   justify-content: center;
   gap: 12px 36px;
   margin: 0;
-  padding: 40px 24px 0;
+  padding: 36px 24px 0;
   list-style: none;
   color: var(--muted);
-  font-size: .92rem;
+  font-size: .88rem;
 }
 
 .trust li { display: flex; align-items: center; gap: 8px; }
-.trust svg { flex: none; color: var(--accent-light); }
+.trust svg { flex: none; }
+
+@media (max-width: 900px) {
+  .hero-text { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+}
 
 /* Home: sections */
 
@@ -506,10 +512,10 @@ main {
 
 .eyebrow {
   margin: 0 0 10px;
-  color: var(--accent-light);
+  color: var(--muted);
   font-size: .8rem;
   font-weight: 600;
-  letter-spacing: .12em;
+  letter-spacing: .1em;
   text-transform: uppercase;
 }
 
@@ -517,8 +523,8 @@ main {
 .final h2 {
   max-width: 20em;
   margin: 0 0 14px;
-  font-size: clamp(1.85rem, 4.2vw, 2.7rem);
-  font-weight: 700;
+  font-size: clamp(1.8rem, 4vw, 2.55rem);
+  font-weight: 650;
   line-height: 1.1;
   letter-spacing: -.028em;
 }
@@ -543,7 +549,7 @@ main {
   flex-direction: column;
   overflow: hidden;
   padding: 28px 28px 0;
-  border: 1px solid var(--border-soft);
+  border: 1px solid rgb(255 255 255 / .08);
   border-radius: var(--radius-large);
   background: var(--card);
 }
@@ -568,10 +574,9 @@ main {
   max-height: 300px;
   margin-top: auto;
   overflow: hidden;
-  border: 1px solid var(--border-strong);
+  border: 1px solid rgb(255 255 255 / .1);
   border-bottom: 0;
-  border-radius: 12px 12px 0 0;
-  box-shadow: 0 -10px 40px rgb(0 0 0 / .35);
+  border-radius: 10px 10px 0 0;
 }
 
 .card .crop img { display: block; width: 100%; height: auto; }
@@ -579,12 +584,12 @@ main {
 .card-icon {
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   margin-bottom: 18px;
-  border-radius: 12px;
-  background: rgb(79 141 255 / .16);
-  color: var(--accent-light);
+  border-radius: 9px;
+  background: rgb(255 255 255 / .06);
+  color: var(--text);
 }
 
 .more {
@@ -611,7 +616,7 @@ main {
 
 .steps3 li {
   padding: 26px;
-  border: 1px solid var(--border-soft);
+  border: 1px solid rgb(255 255 255 / .08);
   border-radius: var(--radius-large);
   background: var(--card);
   counter-increment: step;
@@ -621,13 +626,14 @@ main {
   content: counter(step);
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   margin-bottom: 16px;
+  border: 1px solid rgb(255 255 255 / .22);
   border-radius: 50%;
-  background: var(--accent-strong);
-  color: #fff;
-  font-weight: 700;
+  color: var(--text);
+  font-size: .85rem;
+  font-weight: 600;
 }
 
 .steps3 h3 { margin: 0 0 6px; font-size: 1.08rem; }
@@ -636,9 +642,9 @@ main {
 /* Switching from another bootc system: folded, for those who need it */
 .switch {
   margin: 16px 0 0;
-  border: 1px solid var(--border-soft);
+  border: 1px solid rgb(255 255 255 / .08);
   border-radius: var(--radius-large);
-  background: var(--bg-raised);
+  background: var(--card);
 }
 
 .switch > summary {
@@ -675,16 +681,15 @@ main {
 .final {
   margin: 104px 0 0;
   padding: 64px 24px;
-  border: 1px solid var(--border-strong);
-  border-radius: 28px;
-  background:
-    radial-gradient(80% 120% at 50% 0%, rgb(79 141 255 / .32), transparent 70%),
-    var(--bg-raised);
+  border: 1px solid rgb(255 255 255 / .1);
+  border-radius: 16px;
+  background: var(--card);
   text-align: center;
 }
 
 .final h2 { margin-right: auto; margin-left: auto; }
 .final p { margin: 0 auto 28px; color: var(--muted); }
+.final .actions { justify-content: center; }
 
 /* Content pages */
 
@@ -1361,14 +1366,13 @@ main {
   .hero { padding-top: calc(var(--header) + 44px); }
   .hero-text { padding: 0 16px; }
   .hero-shot { margin-top: 32px; padding: 0 12px; }
-  .frame { padding: 4px; border-radius: 12px; }
-  .frame img { border-radius: 8px; }
+  .frame { border-radius: 10px; }
+  .download { padding: 18px; }
   .trust { flex-direction: column; align-items: center; gap: 10px; }
   .section { padding-top: 80px; }
   .bento { grid-template-columns: minmax(0, 1fr); }
   .card.wide, .card.half, .card.third { grid-column: auto; }
   .card { padding: 24px 22px 0; }
-  .hero-text p[data-nvidia-only][hidden] { display: none; }
   .card.text { padding-bottom: 24px; }
   .switch > summary { padding: 16px 18px; }
   .switch > div { padding: 0 18px 18px; }

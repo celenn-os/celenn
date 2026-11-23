@@ -73,22 +73,27 @@
       <source media="(max-width: 900px)" srcset="../img/wallpaper-1280.jpg">
       <img src="../img/wallpaper-2560.jpg" alt="" fetchpriority="high">
     </picture>
-    <div id="download" class="hero-text">
-      <h1>Der COSMIC-Desktop, <span class="glow">bereit ab dem ersten Start</span></h1>
-      <p class="lead">Ein unabhängiges Image auf der Basis von Universal&nbsp;Blue, mit sicheren Updates im Hintergrund, Jugendschutz und Systemwerkzeugen ganz ohne Terminal.</p>
-      <div class="gpu" role="radiogroup" aria-labelledby="gpu-label">
-        <span id="gpu-label">Grafikkarte</span>
-        <label><input type="radio" name="gpu" value="main" checked> AMD oder Intel</label>
-        <label><input type="radio" name="gpu" value="nvidia"> NVIDIA</label>
+    <div class="hero-text">
+      <div class="hero-copy">
+        <h1>Der COSMIC-Desktop, <span class="soft">bereit ab dem ersten Start</span></h1>
+        <p class="lead">Ein unabhängiges Image auf der Basis von Universal&nbsp;Blue, mit sicheren Updates im Hintergrund, Jugendschutz und Systemwerkzeugen ganz ohne Terminal.</p>
+        <div class="actions">
+          <a class="button" href="install/">Installationsanleitung</a>
+        </div>
       </div>
-      <div class="actions">
+      <div id="download" class="download">
+        <h2>cosmic-blue herunterladen</h2>
+        <p>Live-ISO: vor der Installation ausprobieren.</p>
+        <fieldset class="editions">
+          <legend class="visually-hidden">Grafikkarte</legend>
+          <label class="edition"><input type="radio" name="gpu" value="main" checked><span><strong>AMD oder Intel</strong><small>Die meisten Computer</small></span><span class="size">etwa <span data-iso-size="main">3,9</span>&nbsp;GB</span></label>
+          <label class="edition"><input type="radio" name="gpu" value="nvidia"><span><strong>NVIDIA</strong><small>GTX 16xx, RTX 20xx und neuer</small></span><span class="size">etwa <span data-iso-size="nvidia">4,8</span>&nbsp;GB</span></label>
+        </fieldset>
         <!-- Filled in by build.sh -->
         <a class="button primary" href="@ISO_URL@" data-nvidia-href="@ISO_NVIDIA_URL@">Live-ISO herunterladen</a>
-        <a class="button" href="install/">Installationsanleitung</a>
+        <p class="note-nvidia" data-nvidia-only hidden>Ältere NVIDIA-Karte? Nehmen Sie die Version für AMD oder Intel, die den freien Treiber nutzt.</p>
+        <p class="fine">x86-64<!-- checksum --> · <a href="@ISO_URL@.sha256" data-nvidia-href="@ISO_NVIDIA_URL@.sha256">SHA-256</a> · <a href="@ISO_URL@.sha256.sigstore.json" data-nvidia-href="@ISO_NVIDIA_URL@.sha256.sigstore.json">Signatur</a><!-- /checksum --></p>
       </div>
-      <p class="fine">x86-64 · <span data-main-only>etwa <span data-iso-size="main">3,9</span>&nbsp;GB</span><span data-nvidia-only hidden>etwa <span data-iso-size="nvidia">4,8</span>&nbsp;GB</span><!-- checksum --> · <a href="@ISO_URL@.sha256" data-nvidia-href="@ISO_NVIDIA_URL@.sha256">SHA-256</a> · <a href="@ISO_URL@.sha256.sigstore.json" data-nvidia-href="@ISO_NVIDIA_URL@.sha256.sigstore.json">Signatur</a><!-- /checksum --></p>
-      <p class="fine" data-nvidia-only hidden>Mit dem NVIDIA-Treiber, für GTX-16xx-, RTX-20xx- und neuere Karten.
-      Ältere NVIDIA-Karte? Nehmen Sie die Version für AMD oder Intel, die den freien Treiber nutzt.</p>
     </div>
     <!-- shot:tools-overview -->
     <div class="hero-shot">
