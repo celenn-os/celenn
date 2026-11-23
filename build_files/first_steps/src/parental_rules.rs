@@ -370,15 +370,44 @@ pub fn day_number(date: &str) -> Option<i64> {
     Some(era * 146_097 + doe - 719_468)
 }
 
-/// More time granted by a parent: (unix time of the grant, minutes)
-pub fn load_extra(user: &str) -> Vec<(i64, u32)> {
+/// More time granted by a parent
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Grant {
+    /// Unix time of the grant
+    pub at: i64,
+    /// Minutes; 0: no limit for the rest of the day, bedtime included
+    pub minutes: u32,
+    /// The minutes may also go past the bedtime start (the parent turned
+    /// "Keep to bedtime" off)
+    pub past_bedtime: bool,
+}
+
+impl Grant {
+    pub fn new(at: i64, minutes: u32, past_bedtime: bool) -> Grant {
+        Grant {
+            at,
+            minutes,
+            past_bedtime,
+        }
+    }
+
+    /// A line of the grants file: "unix minutes [bedtime|late]" (no third
+    /// word: a grant from before the choice, which went past bedtime)
+    fn parse(line: &str) -> Option<Grant> {
+        let mut parts = line.split_whitespace();
+        let at = parts.next()?.parse().ok()?;
+        let minutes = parts.next()?.parse().ok()?;
+        let past_bedtime = parts.next() != Some("bedtime");
+        Some(Grant::new(at, minutes, past_bedtime))
+    }
+}
+
+/// More time granted by a parent (cosmic-blue-parental-extend)
+pub fn load_extra(user: &str) -> Vec<Grant> {
     std::fs::read_to_string(extra_path(user))
         .unwrap_or_default()
         .lines()
-        .filter_map(|line| {
-            let mut parts = line.split_whitespace();
-            Some((parts.next()?.parse().ok()?, parts.next()?.parse().ok()?))
-        })
+        .filter_map(Grant::parse)
         .collect()
 }
 
@@ -405,14 +434,15 @@ pub struct Verdict {
 }
 
 /// Applies the rules to the time used and the time granted
-pub fn verdict(rules: &Rules, used: u64, extra: &[(i64, u32)], now: &Now) -> Verdict {
+pub fn verdict(rules: &Rules, used: u64, extra: &[Grant], now: &Now) -> Verdict {
     // More time granted today adds to the daily limit; granted less than
-    // its length ago, it also allows that long past the bedtime start
+    // its length ago and allowed past bedtime, it also allows that long past
+    // the bedtime start
     let day_start = now.unix - i64::from(now.minute) * 60;
     let extra_today: u64 = extra
         .iter()
-        .filter(|(at, _)| *at >= day_start)
-        .map(|(_, minutes)| u64::from(*minutes) * 60)
+        .filter(|grant| grant.at >= day_start)
+        .map(|grant| u64::from(grant.minutes) * 60)
         .sum();
     // "No limit today" (0 minutes) also lifts tonight's bedtime hours, until
     // they end the next morning (or now, when granted during them)
@@ -430,11 +460,13 @@ pub fn verdict(rules: &Rules, used: u64, extra: &[(i64, u32)], now: &Now) -> Ver
     };
     let override_until = extra
         .iter()
-        .map(|(at, minutes)| {
-            if *minutes == 0 {
-                until_morning(*at)
+        .filter_map(|grant| {
+            if grant.minutes == 0 {
+                Some(until_morning(grant.at))
             } else {
-                at + i64::from(*minutes) * 60
+                grant
+                    .past_bedtime
+                    .then_some(grant.at + i64::from(grant.minutes) * 60)
             }
         })
         .max()
@@ -444,7 +476,7 @@ pub fn verdict(rules: &Rules, used: u64, extra: &[(i64, u32)], now: &Now) -> Ver
     // bedtime hours still apply)
     let unlimited_today = extra
         .iter()
-        .any(|(at, minutes)| *at >= day_start && *minutes == 0);
+        .any(|grant| grant.at >= day_start && grant.minutes == 0);
     let allowed_today = rules
         .daily_limit(now.weekday)
         .filter(|_| !unlimited_today)
@@ -568,15 +600,15 @@ mod tests {
         assert_eq!(v.remaining, Some(60 * 60));
         // More time
         let n = now(600, 5);
-        let v = verdict(&rules, 120 * 60, &[(n.unix - 60, 15)], &n);
+        let v = verdict(&rules, 120 * 60, &[Grant::new(n.unix - 60, 15, true)], &n);
         assert_eq!(v.remaining, Some(15 * 60));
         // No limit today, but not tomorrow
-        let v = verdict(&rules, 300 * 60, &[(n.unix - 60, 0)], &n);
+        let v = verdict(&rules, 300 * 60, &[Grant::new(n.unix - 60, 0, true)], &n);
         assert_eq!(
             (v.blocked, v.remaining, v.allowed_today),
             (None, None, None)
         );
-        let v = verdict(&rules, 300 * 60, &[(n.unix - 86400, 0)], &n);
+        let v = verdict(&rules, 300 * 60, &[Grant::new(n.unix - 86400, 0, true)], &n);
         assert_eq!(v.blocked, Some(Block::Limit));
     }
 
@@ -585,7 +617,7 @@ mod tests {
         // Granted on Friday at 18:00 (bedtime 20:30 to 07:00)
         let rules = Rules::default();
         let at = now(18 * 60, 5).unix;
-        let granted = [(at, 0)];
+        let granted = [Grant::new(at, 0, true)];
         // Friday 21:00, all the time used: still on, no end tonight
         let v = verdict(&rules, 300 * 60, &granted, &now(21 * 60, 5));
         assert_eq!(v.blocked, None);
@@ -609,7 +641,7 @@ mod tests {
         // Granted during bedtime (22:00): on, no limit today, and the next
         // bedtime is Saturday's
         let n = now(22 * 60, 5);
-        let v = verdict(&rules, 0, &[(n.unix, 0)], &n);
+        let v = verdict(&rules, 0, &[Grant::new(n.unix, 0, true)], &n);
         assert_eq!((v.blocked, v.remaining), (None, Some((22 * 60 + 30) * 60)));
     }
 
@@ -629,9 +661,26 @@ mod tests {
         assert_eq!(v.back_at, Some(7 * 60));
         // More time during bedtime
         let n = now(21 * 60, 5);
-        let v = verdict(&rules, 0, &[(n.unix - 5 * 60, 30)], &n);
+        let v = verdict(&rules, 0, &[Grant::new(n.unix - 5 * 60, 30, true)], &n);
         assert_eq!(v.blocked, None);
         assert_eq!(v.remaining, Some(25 * 60));
+        // ... unless the parent kept to bedtime: closed all the same
+        let v = verdict(&rules, 0, &[Grant::new(n.unix - 5 * 60, 30, false)], &n);
+        assert_eq!(v.blocked, Some(Block::Bedtime));
+        // Kept to bedtime, granted just before it: the session still closes
+        // at the bedtime start
+        let n = now(20 * 60 + 25, 5);
+        let v = verdict(&rules, 0, &[Grant::new(n.unix, 30, false)], &n);
+        assert_eq!(v.remaining, Some(5 * 60));
+        let v = verdict(&rules, 0, &[Grant::new(n.unix, 30, true)], &n);
+        assert_eq!(v.remaining, Some(30 * 60));
+        // Grants file lines, old ones included
+        assert_eq!(
+            Grant::parse("100 30 bedtime"),
+            Some(Grant::new(100, 30, false))
+        );
+        assert_eq!(Grant::parse("100 30 late"), Some(Grant::new(100, 30, true)));
+        assert_eq!(Grant::parse("100 30"), Some(Grant::new(100, 30, true)));
         // Both: the first end wins
         let rules = Rules::default();
         let v = verdict(&rules, 110 * 60, &[], &now(20 * 60, 5));

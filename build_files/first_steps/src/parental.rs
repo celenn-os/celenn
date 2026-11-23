@@ -13,8 +13,9 @@
 //     1 minutes before the session closes, with an "Ask for more time"
 //     button, and tells the service which application is in front
 //     (parental_focus.rs);
-//   - that button's window: a parent gives 15, 30 or 60 minutes, or no
-//     limit for the day, with their password, there and then.
+//   - that button's window: a parent gives some more time (a few clicks,
+//     or a typed duration, up to 4 h) or no limit for the day, with their
+//     password, there and then; it shows when the session will close.
 //
 // The rules are applied by a service (parental_daemon.rs: screen time,
 // closing the session, the web filter) and at login (PAM). Changing them
@@ -80,6 +81,23 @@ const STEP: u32 = 15;
 /// Bounds of a daily screen time, in minutes
 const LIMIT_MIN: u32 = 5;
 const LIMIT_MAX: u32 = 12 * 60;
+/// More time a parent can give at once, in minutes, and its - and + step
+/// (more: "No limit today")
+const EXTRA_MIN: u32 = 5;
+const EXTRA_MAX: u32 = 4 * 60;
+const EXTRA_STEP: u32 = 5;
+/// The ready-made amounts of more time, in minutes
+const EXTRA_CHOICES: [u32; 4] = [15, 30, 60, 120];
+
+/// More time one step up or down: the next multiple of the step
+fn extra_step(value: u32, up: bool) -> u32 {
+    let next = if up {
+        value / EXTRA_STEP * EXTRA_STEP + EXTRA_STEP
+    } else {
+        (value.div_ceil(EXTRA_STEP) * EXTRA_STEP).saturating_sub(EXTRA_STEP)
+    };
+    next.clamp(EXTRA_MIN, EXTRA_MAX)
+}
 
 /// A time setting of a child account: a daily screen time or a bedtime end
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -249,11 +267,20 @@ const TEXTS: &[&str] = &[
     "Recommended",
     "More time for {}",
     "A parent confirms with their password.",
-    "+15 min",
-    "+30 min",
-    "+60 min",
+    "Extra time",
     "No limit today",
-    "Give",
+    "Bedtime included, until tomorrow morning",
+    "The session closes in {}.",
+    "The session will close at {new} instead of {old}.",
+    "The session will close at {}.",
+    "No limit until tomorrow at {}.",
+    "No limit for the rest of the day.",
+    "Give {}",
+    "Remove the limit",
+    "At most 4 h. For more, turn on No limit today.",
+    "Keep to bedtime",
+    "The session closes at {} all the same.",
+    "Bedtime ({}) does not apply to this time.",
     "{} minutes left",
     "1 minute left",
     "Your session closes at {}. Save your work.",
@@ -316,8 +343,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
     };
     let size = match mode {
-        // The child's picture, the title, four choices and the buttons
-        Mode::MoreTime => cosmic::iced::Size::new(440.0, 520.0),
+        // The child's picture, the title, the amount, ready-made amounts,
+        // bedtime, no limit, when the session closes and the buttons
+        Mode::MoreTime => cosmic::iced::Size::new(440.0, 620.0),
         // At most the height a 1366x768 screen or a VM window leaves
         // (about 690 px): the child's page is in tabs so that it fits
         Mode::Parent(_) => cosmic::iced::Size::new(760.0, 680.0),
@@ -603,7 +631,7 @@ struct Account {
     admin: bool,
     rules: Option<Rules>,
     usage: Usage,
-    extra: Vec<(i64, u32)>,
+    extra: Vec<parental_rules::Grant>,
     avatar: Option<widget::image::Handle>,
 }
 
@@ -755,7 +783,15 @@ enum Message {
     TogglePassword,
     Create,
     Created(String, Outcome),
-    Minutes(u32),
+    /// More time: a ready-made amount, - or +, typed (then done with it)
+    Extra(u32),
+    ExtraStep(bool),
+    ExtraEdit(String),
+    ExtraCommit,
+    /// "No limit today" turned on or off
+    NoLimit(bool),
+    /// "Keep to bedtime" turned on or off
+    KeepBedtime(bool),
     Give,
     Given(Outcome),
     Card(CardMessage),
@@ -797,7 +833,16 @@ struct App {
     /// The tabs of a child's page
     tabs: segmented_button::SingleSelectModel,
     busy: bool,
-    minutes: u32,
+    /// The more time to give, in minutes, what is typed in its field, and
+    /// "No limit today"
+    extra: u32,
+    extra_typed: Option<String>,
+    no_limit: bool,
+    /// "Keep to bedtime": the more time does not go past it
+    keep_bedtime: bool,
+    /// The child's rules and time, for the "more time" window (read again
+    /// after each change in it)
+    child: Option<ChildTime>,
     /// The time setting being typed in, and what is typed
     editing: Option<(Field, String)>,
     /// The applications installed (read when a child's page opens)
@@ -850,6 +895,22 @@ fn save(user: String, rules: Rules) -> Task<Message> {
 }
 
 impl App {
+    /// The more time typed, taken; Some: it was wrong (a toast says why)
+    fn commit_extra(&mut self) -> Option<Task<Message>> {
+        let typed = self.extra_typed.take()?;
+        match Field::Weekdays.parse(&typed) {
+            Some(minutes) if minutes > EXTRA_MAX => {
+                self.extra = EXTRA_MAX;
+                Some(self.toast("At most 4 h. For more, turn on No limit today."))
+            }
+            Some(minutes) => {
+                self.extra = minutes.max(EXTRA_MIN);
+                None
+            }
+            None => Some(self.toast("Type a duration, for example 45 or 1:20.")),
+        }
+    }
+
     fn toast(&mut self, message: &'static str) -> Task<Message> {
         self.toasts
             .push(widget::toaster::Toast::new(tr(message)))
@@ -946,7 +1007,11 @@ impl Application for App {
                 .insert(|b| b.text(tr("This week")).data(Tab::Week))
                 .build(),
             busy: false,
-            minutes: 30,
+            extra: 30,
+            extra_typed: None,
+            no_limit: false,
+            keep_bedtime: true,
+            child: None,
             editing: None,
             apps: None,
             search: String::new(),
@@ -954,6 +1019,7 @@ impl Application for App {
             toasts: Toasts::new(Message::CloseToast),
         };
         if matches!(app.mode, Mode::MoreTime) {
+            app.child = ChildTime::read();
             // A small dialog: only its close button
             app.core.window.show_maximize = false;
             app.core.window.show_minimize = false;
@@ -1086,16 +1152,42 @@ impl Application for App {
                     None => {}
                 }
             }
-            Message::Minutes(minutes) => self.minutes = minutes,
+            Message::Extra(minutes) => {
+                self.extra_typed = None;
+                self.extra = minutes;
+                self.child = ChildTime::read();
+            }
+            Message::ExtraStep(up) => {
+                self.extra_typed = None;
+                self.extra = extra_step(self.extra, up);
+                self.child = ChildTime::read();
+            }
+            Message::ExtraEdit(typed) => self.extra_typed = Some(typed),
+            Message::ExtraCommit => {
+                self.child = ChildTime::read();
+                return self.commit_extra().unwrap_or_else(Task::none);
+            }
+            Message::KeepBedtime(on) => {
+                self.keep_bedtime = on;
+                self.child = ChildTime::read();
+            }
+            Message::NoLimit(on) => {
+                self.no_limit = on;
+                self.child = ChildTime::read();
+            }
             Message::Give => {
+                // What was typed and not done with yet counts
+                if let Some(wrong) = self.commit_extra() {
+                    return wrong;
+                }
                 self.busy = true;
-                // 0: no limit for the rest of the day
-                let amount = if self.minutes == 0 {
-                    "day".to_owned()
+                let mut args = vec![EXTEND.to_owned(), user_name()];
+                if self.no_limit {
+                    args.push("day".to_owned());
                 } else {
-                    self.minutes.to_string()
-                };
-                let args = vec![EXTEND.to_owned(), user_name(), amount];
+                    args.push(self.extra.to_string());
+                    args.push(if self.keep_bedtime { "bedtime" } else { "late" }.to_owned());
+                }
                 self.card = None;
                 return Task::perform(failure::run("pkexec", args, None), |result| {
                     cosmic::Action::App(Message::Given(result))
@@ -2072,7 +2164,10 @@ impl App {
     /// The child's window: a parent gives more time with their password
     fn more_time(&self) -> Element<'_, Message> {
         let cosmic_theme::Spacing {
-            space_s, space_m, ..
+            space_xxs,
+            space_s,
+            space_m,
+            ..
         } = theme::spacing();
         let user = user_name();
         let account = self.account(&user);
@@ -2081,49 +2176,140 @@ impl App {
             Some(account) => avatar(account, 64),
             None => widget::icon::from_name(ICON).size(64).into(),
         };
-        // The choices as a list: one picked, then "Give" (the only
-        // suggested button)
-        let choices = [
-            ("+15 min", 15),
-            ("+30 min", 30),
-            ("+60 min", 60),
-            ("No limit today", 0),
-        ]
-        .into_iter()
-        .fold(settings::section(), |section, (label, minutes)| {
-            section.add(
-                widget::radio(
-                    text::body(tr(label)),
-                    minutes,
-                    Some(self.minutes),
-                    Message::Minutes,
-                )
-                .width(Length::Fill),
+        let on = !self.no_limit && !self.busy;
+        // The amount: - and +, a field to type it in, then ready-made ones
+        let shown = self
+            .extra_typed
+            .clone()
+            .unwrap_or_else(|| duration(u64::from(self.extra) * 60));
+        let step = |icon: &'static str, up: bool| {
+            widget::button::icon(widget::icon::from_name(icon))
+                .on_press_maybe(on.then_some(Message::ExtraStep(up)))
+        };
+        let mut field = widget::text_input("", shown)
+            .select_on_focus(true)
+            .width(Length::Fixed(96.0));
+        if on {
+            field = field
+                .on_input(Message::ExtraEdit)
+                .on_submit(|_| Message::ExtraCommit)
+                .on_unfocus(Message::ExtraCommit);
+        }
+        let amount = settings::item_row(vec![
+            style::row_title(tr("Extra time"))
+                .width(Length::Fill)
+                .into(),
+            widget::row::with_capacity(3)
+                .push(step("list-remove-symbolic", false))
+                .push(field)
+                .push(step("list-add-symbolic", true))
+                .align_y(Alignment::Center)
+                .into(),
+        ])
+        .align_y(Alignment::Center);
+        let choices = EXTRA_CHOICES
+            .into_iter()
+            .fold(
+                widget::row::with_capacity(EXTRA_CHOICES.len()).spacing(space_xxs),
+                |row, minutes| {
+                    let label = duration(u64::from(minutes) * 60);
+                    let picked = self.extra_typed.is_none() && self.extra == minutes;
+                    // Same width each, the text centered
+                    let class = if picked {
+                        theme::Button::Suggested
+                    } else {
+                        theme::Button::Standard
+                    };
+                    row.push(
+                        widget::button::custom(text::body(label).center().width(Length::Fill))
+                            .padding([5, 8])
+                            .width(Length::Fill)
+                            .class(class)
+                            .on_press_maybe(on.then_some(Message::Extra(minutes))),
+                    )
+                },
             )
-        });
+            .width(Length::Fill);
+        let no_limit = settings::item_row(vec![
+            two_lines(
+                tr("No limit today"),
+                tr("Bedtime included, until tomorrow morning").to_owned(),
+            ),
+            widget::toggler(self.no_limit)
+                .on_toggle_maybe((!self.busy).then_some(Message::NoLimit))
+                .into(),
+        ])
+        .spacing(space_s);
+        // Only with bedtime hours: whether the more time goes past them
+        let bedtime = self
+            .child
+            .as_ref()
+            .map(|child| &child.rules)
+            .filter(|rules| rules.bedtime_enabled && rules.bedtime_start != rules.bedtime_end)
+            .map(|rules| {
+                let start = parental_rules::clock(rules.bedtime_start);
+                let caption = if self.keep_bedtime {
+                    fill(tr("The session closes at {} all the same."), &start)
+                } else {
+                    fill(tr("Bedtime ({}) does not apply to this time."), &start)
+                };
+                settings::item_row(vec![
+                    two_lines(tr("Keep to bedtime"), caption),
+                    widget::toggler(self.keep_bedtime)
+                        .on_toggle_maybe(on.then_some(Message::KeepBedtime))
+                        .into(),
+                ])
+                .spacing(space_s)
+            });
+        let section = settings::section()
+            .add(amount)
+            .add(choices)
+            .add_maybe(bedtime)
+            .add(no_limit);
+
+        // Now, and once given
+        let (status, after) = self
+            .child
+            .as_ref()
+            .map(|child| child.texts(self.no_limit, self.extra, self.keep_bedtime))
+            .unwrap_or_default();
+
         let give: Element<'_, Message> = if self.busy {
             widget::progress_bar::indeterminate_circular().into()
         } else {
-            widget::button::suggested(tr("Give"))
+            let label = if self.no_limit {
+                tr("Remove the limit").to_owned()
+            } else {
+                fill(tr("Give {}"), &duration(u64::from(self.extra) * 60))
+            };
+            widget::button::suggested(label)
                 .on_press(Message::Give)
                 .into()
         };
-        widget::column::with_capacity(6)
+        let centered = |line: String| style::dim_caption(line).center().width(Length::Fill);
+        let mut column = widget::column::with_capacity(8)
             .spacing(space_s)
             .padding([0, space_m, space_m, space_m])
             .align_x(Alignment::Center)
             .push(picture)
             .push(
-                text::title3(fill(tr("More time for {}"), &name))
-                    .center()
-                    .width(Length::Fill),
+                widget::column::with_capacity(2)
+                    .spacing(space_xxs)
+                    .push(
+                        text::title3(fill(tr("More time for {}"), &name))
+                            .center()
+                            .width(Length::Fill),
+                    )
+                    .push_maybe(status.map(centered)),
             )
-            .push(
-                style::dim_caption(tr("A parent confirms with their password."))
-                    .center()
-                    .width(Length::Fill),
-            )
-            .push(choices)
+            .push(section);
+        if let Some(after) = after {
+            column = column.push(text::body(after).center().width(Length::Fill));
+        }
+        column
+            .push(centered(
+                tr("A parent confirms with their password.").to_owned(),
+            ))
             .push(
                 widget::row::with_capacity(3)
                     .spacing(space_s)
@@ -2135,6 +2321,82 @@ impl App {
             .apply(widget::container)
             .center_x(Length::Fill)
             .into()
+    }
+}
+
+/// A child's rules and time used, read in its session for the "more time"
+/// window
+#[derive(Clone, Debug)]
+struct ChildTime {
+    rules: Rules,
+    used: u64,
+    extra: Vec<parental_rules::Grant>,
+    now: Now,
+}
+
+impl ChildTime {
+    fn read() -> Option<ChildTime> {
+        let user = user_name();
+        let rules = Rules::load(&user)?;
+        let now = Now::read()?;
+        let used = Usage::load(&user).used_today(&now);
+        Some(ChildTime {
+            rules,
+            used,
+            extra: parental_rules::load_extra(&user),
+            now,
+        })
+    }
+
+    /// When the session closes, in minutes after midnight (None: not today)
+    fn end(&self, extra: &[parental_rules::Grant]) -> Option<(u64, u32)> {
+        let remaining = parental_rules::verdict(&self.rules, self.used, extra, &self.now)
+            .remaining
+            .filter(|remaining| *remaining > 0)?;
+        let end = (self.now.minute + remaining.div_ceil(60) as u32) % (24 * 60);
+        Some((remaining, end))
+    }
+
+    /// What the window says now, and once the time is given
+    fn texts(
+        &self,
+        no_limit: bool,
+        minutes: u32,
+        keep_bedtime: bool,
+    ) -> (Option<String>, Option<String>) {
+        let before = self.end(&self.extra);
+        let status = before
+            .map(|(remaining, _)| fill(tr("The session closes in {}."), &duration(remaining)));
+        let after = if no_limit {
+            if self.rules.bedtime_enabled && self.rules.bedtime_start != self.rules.bedtime_end {
+                fill(
+                    tr("No limit until tomorrow at {}."),
+                    &parental_rules::clock(self.rules.bedtime_end),
+                )
+            } else {
+                tr("No limit for the rest of the day.").to_owned()
+            }
+        } else {
+            let mut extra = self.extra.clone();
+            extra.push(parental_rules::Grant::new(
+                self.now.unix,
+                minutes,
+                !keep_bedtime,
+            ));
+            match (self.end(&extra), before) {
+                (Some((_, new)), Some((_, old))) if new != old => {
+                    tr("The session will close at {new} instead of {old}.")
+                        .replace("{new}", &parental_rules::clock(new))
+                        .replace("{old}", &parental_rules::clock(old))
+                }
+                (Some((_, new)), _) => fill(
+                    tr("The session will close at {}."),
+                    &parental_rules::clock(new),
+                ),
+                (None, _) => return (status, None),
+            }
+        };
+        (status, Some(after))
     }
 }
 
