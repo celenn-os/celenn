@@ -144,10 +144,11 @@ for page in "${all_pages[@]}"; do
     s{<!-- /?(shot(:[\w-]+)?|shots-info|no-shots) -->}{}g;' "${out}/${page}"
   sed -i -e "s|@SHOTS_DATE@|${SHOTS_DATE:-}|g" -e "s|@SHOTS_COMMIT@|${SHOTS_COMMIT:-}|g" \
     -e "s|@SHOTS_RUN@|${SHOTS_RUN:-}|g" "${out}/${page}"
-  # The screenshots keep their names from one build to the next: the commit
+  # The screenshots keep their names from one build to the next: the version
   # in their address makes browsers and link previews load the new ones
-  if [[ -n "${SHOTS_COMMIT:-}" ]]; then
-    sed -i -E "s#(img/screenshots/[a-z0-9-]+\.webp)#\1?v=${SHOTS_COMMIT}#g" "${out}/${page}"
+  shots_v="${SHOTS_VERSION:-${SHOTS_COMMIT:-}}"
+  if [[ -n "${shots_v}" ]]; then
+    sed -i -E "s#(img/screenshots/[a-z0-9-]+\.webp)#\1?v=${shots_v}#g" "${out}/${page}"
   fi
 done
 cp "${root}/website/style.css" "${root}/website/site.js" "${out}/"

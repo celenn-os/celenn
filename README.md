@@ -11,6 +11,10 @@ effect on the next reboot, and can be rolled back.
 
 [![cosmic-blue desktop with a terminal open](https://cosmic-blue-os.github.io/cosmic-blue/img/screenshots/terminal.webp)](https://cosmic-blue-os.github.io/cosmic-blue/screenshots/)
 
+It comes with its own apps: a guided tour at first login, parental controls,
+cosmic-blue Tools (system tools and extra software, without a terminal) and
+Updates. See [why cosmic-blue](https://cosmic-blue-os.github.io/cosmic-blue/why/).
+
 ## Versions
 
 <!-- versions:start (written by release-notes.yml on each stable release) -->
@@ -64,12 +68,17 @@ type the password `cosmicblue` (QWERTY keyboard layout).
 
 ## Updates and rollback
 
+The **Updates** app shows the version you run and can go back to the previous
+one. From a terminal:
+
 ```bash
 ujust update          # update now instead of waiting for the automatic update
 sudo bootc rollback   # go back to the previous version on next boot
 ```
 
 ## Developer tools
+
+Pick them in cosmic-blue Tools, *Extra software*, or from a terminal:
 
 ```bash
 ujust install-dev-tools   # Docker, VS Code, Podman Desktop and other developer tools
