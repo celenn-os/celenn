@@ -1,8 +1,9 @@
 ---
 # Project website on GitHub Pages: https://cosmic-blue-os.github.io/cosmic-blue/
 # Needs Settings > Pages > Source set to "GitHub Actions".
-# Also rebuilt after each published image build, so the screenshots page
-# shows the desktop of the latest image (website/fetch-screenshots.sh).
+# Also rebuilt after each stable promotion, so every screenshot on the site
+# comes from the stable image (website/fetch-screenshots.sh); the site build
+# fails if one is missing or comes from another image.
 name: Website
 
 on:
@@ -21,9 +22,10 @@ on:
     paths:
       - '.github/workflows/pages.yml'
       - 'website/**'
+  # Each stable promotion, weekly or by hand
   workflow_run:
     workflows:
-      - Build container image
+      - Promote stable image
     types:
       - completed
     branches:
@@ -32,11 +34,13 @@ on:
 jobs:
   build:
     name: Build website
-    # After an image build: only a published one (main, not a pull request)
+    # After a stable promotion, even a failed run: the main image may have
+    # been promoted before the nvidia one or the release notes failed.
+    # website/fetch-screenshots.sh reads which image stable is.
     if: >-
       github.event_name != 'workflow_run' ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.event != 'pull_request')
+      (github.event.workflow_run.conclusion != 'cancelled' &&
+       github.event.workflow_run.conclusion != 'skipped')
     # Job-level, so a skipped run (image build that published nothing) never
     # cancels or replaces a real one. Pull requests: a new push cancels the
     # running build. Main: runs queue; a pending one may be replaced by a
@@ -55,8 +59,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install ImageMagick
-        run: command -v convert || (sudo apt-get update && sudo apt-get install -y imagemagick)
+      - name: Install ImageMagick and skopeo
+        run: |
+          command -v convert && command -v skopeo || \
+            (sudo apt-get update && sudo apt-get install -y imagemagick skopeo)
 
       - name: Fetch the desktop screenshots
         env:

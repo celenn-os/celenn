@@ -237,7 +237,8 @@ jobs:
             > "${out}/notes.md"
           cat "${out}/notes.md" >> "${GITHUB_STEP_SUMMARY}"
           # Check the README block can be replaced, and preview it
-          python3 -I .github/scripts/readme-versions.py "${out}/versions.md" README.md
+          python3 -I .github/scripts/readme-versions.py "${out}/versions.md" README.md "${VERSION}"
+          echo "${VERSION}" > "${out}/version"
           {
             echo
             echo "### README versions block"
@@ -286,7 +287,7 @@ jobs:
           for attempt in 1 2 3; do
             git fetch -q --depth 1 origin "${BRANCH}"
             git checkout -q -f --detach FETCH_HEAD
-            python3 -I .github/scripts/readme-versions.py "${block}" README.md
+            python3 -I .github/scripts/readme-versions.py "${block}" README.md "$(cat "${RUNNER_TEMP}/notes/version")"
             if git diff --quiet README.md; then
               echo "README versions already up to date"
               exit 0
