@@ -65,7 +65,7 @@ jobs:
       pull-requests: read
     env:
       # Updated by Renovate (see .github/renovate.json5)
-      RENOVATE_VERSION: "44.234.1"
+      RENOVATE_VERSION: "44.256.1"
     steps:
       # Only when the pull request changes the config, or this workflow (a new
       # Node.js or Renovate version for the validator itself); the job is
