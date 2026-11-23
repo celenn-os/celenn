@@ -142,6 +142,7 @@ GNOME_ONLY+=(
     usr/share/glib-2.0/schemas/io.projectbluefin.chairlift.livery.gschema.xml
     usr/share/glib-2.0/schemas/io.projectbluefin.chairlift.updates.gschema.xml
     usr/share/glib-2.0/schemas/io.projectbluefin.chairlift.firstrun.gschema.xml
+    usr/share/glib-2.0/schemas/io.projectbluefin.chairlift.printers.gschema.xml
 )
 # FlatPark, the second Flatpak remote of projectbluefin/common: how far its
 # apps can be trusted is not established yet, so cosmic-blue offers it but
