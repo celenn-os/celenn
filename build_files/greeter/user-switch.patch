@@ -1,5 +1,5 @@
 diff --git a/src/greeter.rs b/src/greeter.rs
-index 852e219..c8d347e 100644
+index 852e219..afbd9bb 100644
 --- a/src/greeter.rs
 +++ b/src/greeter.rs
 @@ -300,7 +300,14 @@ pub fn main() -> Result<(), Box<dyn Error>> {
@@ -18,12 +18,21 @@ index 852e219..c8d347e 100644
              .collect(),
          user_datas,
          sessions,
-@@ -319,6 +326,31 @@ pub fn main() -> Result<(), Box<dyn Error>> {
+@@ -319,6 +326,40 @@ pub fn main() -> Result<(), Box<dyn Error>> {
      Ok(())
  }
  
 +/// cosmic-blue: the picture COSMIC Settings gives a new account
 +const DEFAULT_PICTURE: &str = "/usr/share/pixmaps/faces/pop-robot.png";
++
++/// cosmic-blue: the 2 px ring around an account avatar (64 px picture, 4 px
++/// padding), colored with the accent color when drawn
++static USER_RING: LazyLock<widget::svg::Handle> = LazyLock::new(|| {
++    widget::svg::Handle::from_memory(
++        &b"<svg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'>\
++<circle cx='36' cy='36' r='35' fill='none' stroke='#000' stroke-width='2'/></svg>"[..],
++    )
++});
 +
 +/// cosmic-blue: an account picture cut as a disk with a smooth edge (the
 +/// image widget's own rounding has a jagged one); the picture as it is when
@@ -50,7 +59,25 @@ index 852e219..c8d347e 100644
  #[derive(Clone)]
  pub struct Flags {
      user_datas: Vec<UserData>,
-@@ -972,6 +1004,88 @@ impl App {
+@@ -410,6 +451,8 @@ pub enum Message {
+     Surface(surface::Action<Message>),
+     Suspend,
+     Username(String),
++    /// cosmic-blue: the pointer entered (true) or left (false) an account avatar
++    UserHover(String, bool),
+     EnterUser(bool, String),
+     ScreenReader(bool),
+     Magnifier(bool),
+@@ -445,6 +488,8 @@ pub struct App {
+ 
+     accessibility: Accessibility,
+     authenticating: bool,
++    /// cosmic-blue: the account avatar under the pointer
++    hovered_username: Option<String>,
+ }
+ 
+ #[derive(Default)]
+@@ -972,6 +1017,106 @@ impl App {
                  column = column.push(widget::text(""));
              }
  
@@ -86,27 +113,41 @@ index 852e219..c8d347e 100644
 +                                .size(64)
 +                                .into(),
 +                        };
-+                        // A round ring in the accent color around the selected
-+                        // account (and the focused one), a fainter one on hover
++                        // The ring around the selected account (a fainter one
++                        // under the pointer) is an image drawn at the same
++                        // offset as the picture: a border would be drawn at a
++                        // fraction of a pixel while the software renderer puts
++                        // images on whole pixels, which moves the picture off
++                        // the ring's center
 +                        let selected = name == &self.selected_username.username;
-+                        let ring = move |width: f32, alpha: f32, theme: &cosmic::Theme| {
-+                            let mut style = widget::button::Style::new();
-+                            style.border_radius = 40.0.into();
-+                            style.border_width = width;
-+                            let mut color: iced::Color = theme.cosmic().accent.base.into();
-+                            color.a = alpha;
-+                            style.border_color = color;
-+                            style
-+                        };
++                        let hovered = self.hovered_username.as_ref() == Some(name);
++                        let mut avatar = iced::widget::Stack::with_capacity(2)
++                            .push(widget::container(picture).padding(4.0));
++                        if selected || hovered {
++                            avatar = avatar.push(
++                                widget::svg(USER_RING.clone())
++                                    .width(Length::Fixed(72.0))
++                                    .height(Length::Fixed(72.0))
++                                    .opacity(if selected { 1.0 } else { 0.5 })
++                                    .class(theme::Svg::custom(|theme| widget::svg::Style {
++                                        color: Some(theme.cosmic().accent.base.into()),
++                                    })),
++                            );
++                        }
++                        // Keyboard focus on another account: an accent border
 +                        let class = theme::Button::Custom {
 +                            active: Box::new(move |focused, theme| {
-+                                ring(if selected || focused { 2.0 } else { 0.0 }, 1.0, theme)
++                                let mut style = widget::button::Style::new();
++                                style.border_radius = 36.0.into();
++                                if focused && !selected {
++                                    style.border_width = 2.0;
++                                    style.border_color = theme.cosmic().accent.base.into();
++                                }
++                                style
 +                            }),
-+                            disabled: Box::new(move |theme| ring(0.0, 1.0, theme)),
-+                            hovered: Box::new(move |_, theme| {
-+                                ring(2.0, if selected { 1.0 } else { 0.5 }, theme)
-+                            }),
-+                            pressed: Box::new(move |_, theme| ring(2.0, 1.0, theme)),
++                            disabled: Box::new(|_| widget::button::Style::new()),
++                            hovered: Box::new(|_, _| widget::button::Style::new()),
++                            pressed: Box::new(|_, _| widget::button::Style::new()),
 +                        };
 +                        user_row = user_row.push(
 +                            widget::column::with_capacity(2)
@@ -114,10 +155,14 @@ index 852e219..c8d347e 100644
 +                                .width(Length::Fixed(88.0))
 +                                .align_x(Alignment::Center)
 +                                .push(
-+                                    widget::button::custom(picture)
-+                                        .class(class)
-+                                        .padding(4.0)
-+                                        .on_press(Message::Username(name.clone())),
++                                    widget::mouse_area(
++                                        widget::button::custom(avatar)
++                                            .class(class)
++                                            .padding(0.0)
++                                            .on_press(Message::Username(name.clone())),
++                                    )
++                                    .on_enter(Message::UserHover(name.clone(), true))
++                                    .on_exit(Message::UserHover(name.clone(), false)),
 +                                )
 +                                .push(
 +                                    widget::text::caption(full_name.as_str())
@@ -139,7 +184,30 @@ index 852e219..c8d347e 100644
              id_container(
                  widget::container(column)
                      .align_x(Alignment::Center)
-@@ -1434,6 +1548,9 @@ impl cosmic::Application for App {
+@@ -1212,6 +1357,7 @@ impl cosmic::Application for App {
+             randr_list: None,
+             surface_id_pairs: Vec::new(),
+             authenticating: false,
++            hovered_username: None,
+         };
+         (app, Task::batch(tasks))
+     }
+@@ -1427,6 +1573,14 @@ impl cosmic::Application for App {
+                     ]);
+                 }
+             }
++            Message::UserHover(username, true) => {
++                self.hovered_username = Some(username);
++            }
++            Message::UserHover(username, false) => {
++                if self.hovered_username.as_ref() == Some(&username) {
++                    self.hovered_username = None;
++                }
++            }
+             Message::Username(username) => {
+                 if self.dropdown_opt == Some(Dropdown::User) {
+                     self.dropdown_opt = None;
+@@ -1434,6 +1588,9 @@ impl cosmic::Application for App {
                  if self.entering_name || username != self.selected_username.username {
                      self.entering_name = false;
                      self.authenticating = false;
