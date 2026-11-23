@@ -536,7 +536,7 @@ vm_check_crashes() {
 # cosmic-blue's first steps tour, which opens at the first login of a new
 # account: one screenshot per page (Alt+Right turns the page), then closed.
 # Nobody picks where they come from, so the pages are those of the general path.
-FIRST_STEPS_PAGES=9
+FIRST_STEPS_PAGES=5
 
 first_steps_shots() {
     local page

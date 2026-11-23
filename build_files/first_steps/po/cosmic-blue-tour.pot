@@ -63,12 +63,6 @@ msgstr ""
 msgid "Updates, software, commands and tips"
 msgstr ""
 
-msgid "Report a problem"
-msgstr ""
-
-msgid "Found a bug or something unclear? Tell us on GitHub"
-msgstr ""
-
 msgid "Open"
 msgstr ""
 
@@ -189,12 +183,6 @@ msgstr ""
 msgid "Installing: {} of {}"
 msgstr ""
 
-msgid "Checking your computer…"
-msgstr ""
-
-msgid "Connected to the internet"
-msgstr ""
-
 msgid "No internet connection"
 msgstr ""
 
@@ -205,9 +193,6 @@ msgid "Network settings"
 msgstr ""
 
 msgid "NVIDIA graphics card"
-msgstr ""
-
-msgid "Its driver is installed: this is the NVIDIA edition of cosmic-blue."
 msgstr ""
 
 msgid "The NVIDIA edition of cosmic-blue has its driver: about 4 GB to download, then it starts at the next restart."
@@ -226,9 +211,6 @@ msgid "At the restart, a blue screen asks to enroll a key: choose Enroll MOK, Co
 msgstr ""
 
 msgid "Firmware updates are available"
-msgstr ""
-
-msgid "Firmware is up to date"
 msgstr ""
 
 msgid "Open Firmware"
@@ -411,19 +393,10 @@ msgstr ""
 msgid "Make it yours"
 msgstr ""
 
-msgid "What do you use your computer for?"
-msgstr ""
-
 msgid "Pick what concerns you: nothing installs without a click, and everything can be removed later."
 msgstr ""
 
 msgid "Thousands of other apps are in COSMIC Store."
-msgstr ""
-
-msgid "Your computer"
-msgstr ""
-
-msgid "Checked for you: only what concerns this computer shows up."
 msgstr ""
 
 msgid "Try it, it is safe"
@@ -433,9 +406,6 @@ msgid "Each button does the real thing."
 msgstr ""
 
 msgid "Bring your things"
-msgstr ""
-
-msgid "Your files, bookmarks and email from before."
 msgstr ""
 
 msgid "Files from an old disk"
@@ -468,18 +438,6 @@ msgstr ""
 msgid "Open Thunderbird"
 msgstr ""
 
-msgid "Good to know"
-msgstr ""
-
-msgid "Three things that work differently here."
-msgstr ""
-
-msgid "Updates apply at the next restart"
-msgstr ""
-
-msgid "The system updates itself in the background, without interrupting you. Something wrong after an update? Go back to the previous version in one click."
-msgstr ""
-
 msgid "Updates"
 msgstr ""
 
@@ -492,19 +450,7 @@ msgstr ""
 msgid "Open Flatseal"
 msgstr ""
 
-msgid "A downloaded .exe, .deb or .rpm file?"
-msgstr ""
-
-msgid "They do not install on cosmic-blue: look for the app in COSMIC Store, where it updates by itself."
-msgstr ""
-
 msgid "You are ready"
-msgstr ""
-
-msgid "One more thing worth doing: backups."
-msgstr ""
-
-msgid "What changes, and what stays the same."
 msgstr ""
 
 msgid "Windows key → the Super key"
@@ -523,12 +469,6 @@ msgid "File Explorer → Files"
 msgstr ""
 
 msgid "Super + E opens it, as on Windows"
-msgstr ""
-
-msgid "Settings and Control Panel → Settings"
-msgstr ""
-
-msgid "Everything in one place"
 msgstr ""
 
 msgid "Office → LibreOffice"
@@ -708,11 +648,59 @@ msgstr ""
 msgid "Installed. Open it to create your password file, and keep a copy of it on a USB drive."
 msgstr ""
 
-msgid "Your passwords"
+msgid "Linux and you"
 msgstr ""
 
-msgid "A password manager remembers them for you and makes up strong ones. Where do you want to keep them?"
+msgid "I am new to it"
 msgstr ""
 
-msgid "Not now? Go on: Firefox already remembers the passwords of websites, and cosmic-blue Tools offers these apps too."
+msgid "I know it well"
+msgstr ""
+
+msgid "I know it well: a shorter tour, in three steps."
+msgstr ""
+
+msgid "Passwords"
+msgstr ""
+
+msgid "Bitwarden, synced with your phone, or Secrets, only on this computer"
+msgstr ""
+
+msgid "Installed: {}"
+msgstr ""
+
+msgid "Everything updates by itself"
+msgstr ""
+
+msgid "In the background, applied at the next restart. The previous version stays one click away."
+msgstr ""
+
+msgid "Files, photos from a phone, bookmarks and email from before"
+msgstr ""
+
+msgid "Show me how"
+msgstr ""
+
+msgid "Your apps"
+msgstr ""
+
+msgid "Every shortcut, tiling included: the Keyboard shortcuts app."
+msgstr ""
+
+msgid "What is done, and what is left for when you want."
+msgstr ""
+
+msgid "What changes, and what stays the same. Try it, it is safe."
+msgstr ""
+
+msgid "Task View → Super + W"
+msgstr ""
+
+msgid "The essentials"
+msgstr ""
+
+msgid "What is different here, and your tools."
+msgstr ""
+
+msgid "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Extra software."
 msgstr ""

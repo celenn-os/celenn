@@ -62,12 +62,6 @@ msgstr "Documentazione"
 msgid "Updates, software, commands and tips"
 msgstr "Aggiornamenti, software, comandi e consigli"
 
-msgid "Report a problem"
-msgstr "Segnala un problema"
-
-msgid "Found a bug or something unclear? Tell us on GitHub"
-msgstr "Hai trovato un bug o qualcosa di poco chiaro? Diccelo su GitHub"
-
 msgid "Open"
 msgstr "Apri"
 
@@ -188,12 +182,6 @@ msgstr "Scegli…"
 msgid "Installing: {} of {}"
 msgstr "Installazione: {} di {}"
 
-msgid "Checking your computer…"
-msgstr "Controllo del computer…"
-
-msgid "Connected to the internet"
-msgstr "Connesso a Internet"
-
 msgid "No internet connection"
 msgstr "Nessuna connessione a Internet"
 
@@ -205,9 +193,6 @@ msgstr "Impostazioni di rete"
 
 msgid "NVIDIA graphics card"
 msgstr "Scheda grafica NVIDIA"
-
-msgid "Its driver is installed: this is the NVIDIA edition of cosmic-blue."
-msgstr "Il suo driver è installato: questa è l’edizione NVIDIA di cosmic-blue."
 
 msgid "The NVIDIA edition of cosmic-blue has its driver: about 4 GB to download, then it starts at the next restart."
 msgstr "L’edizione NVIDIA di cosmic-blue ha il suo driver: circa 4 GB da scaricare, poi parte al prossimo riavvio."
@@ -226,9 +211,6 @@ msgstr "Al riavvio, una schermata blu chiede di registrare una chiave: scegli En
 
 msgid "Firmware updates are available"
 msgstr "Sono disponibili aggiornamenti del firmware"
-
-msgid "Firmware is up to date"
-msgstr "Il firmware è aggiornato"
 
 msgid "Open Firmware"
 msgstr "Apri Firmware"
@@ -410,20 +392,11 @@ msgstr "Il sistema è installato e pronto. Da dove arrivi? La presentazione si a
 msgid "Make it yours"
 msgstr "Su misura per te"
 
-msgid "What do you use your computer for?"
-msgstr "Per cosa usi il computer?"
-
 msgid "Pick what concerns you: nothing installs without a click, and everything can be removed later."
 msgstr "Scegli ciò che ti interessa: nulla si installa senza un clic, e tutto si può rimuovere dopo."
 
 msgid "Thousands of other apps are in COSMIC Store."
 msgstr "Migliaia di altre app sono in COSMIC Store."
-
-msgid "Your computer"
-msgstr "Il tuo computer"
-
-msgid "Checked for you: only what concerns this computer shows up."
-msgstr "Controllato per te: compare solo ciò che riguarda questo computer."
 
 msgid "Try it, it is safe"
 msgstr "Prova, non c’è rischio"
@@ -433,9 +406,6 @@ msgstr "Ogni pulsante lo fa davvero."
 
 msgid "Bring your things"
 msgstr "Porta le tue cose"
-
-msgid "Your files, bookmarks and email from before."
-msgstr "I tuoi file, segnalibri ed email di prima."
 
 msgid "Files from an old disk"
 msgstr "File da un vecchio disco"
@@ -467,18 +437,6 @@ msgstr "Thunderbird configura il tuo account solo con indirizzo e password."
 msgid "Open Thunderbird"
 msgstr "Apri Thunderbird"
 
-msgid "Good to know"
-msgstr "Buono a sapersi"
-
-msgid "Three things that work differently here."
-msgstr "Tre cose che qui funzionano in modo diverso."
-
-msgid "Updates apply at the next restart"
-msgstr "Gli aggiornamenti si applicano al prossimo riavvio"
-
-msgid "The system updates itself in the background, without interrupting you. Something wrong after an update? Go back to the previous version in one click."
-msgstr "Il sistema si aggiorna da solo in background, senza interromperti. Qualcosa non va dopo un aggiornamento? Torna alla versione precedente con un clic."
-
 msgid "Updates"
 msgstr "Aggiornamenti"
 
@@ -491,20 +449,8 @@ msgstr "Le app girano separate dal sistema e vedono solo ciò che serve loro. Fl
 msgid "Open Flatseal"
 msgstr "Apri Flatseal"
 
-msgid "A downloaded .exe, .deb or .rpm file?"
-msgstr "Un file .exe, .deb o .rpm scaricato?"
-
-msgid "They do not install on cosmic-blue: look for the app in COSMIC Store, where it updates by itself."
-msgstr "Non si installano su cosmic-blue: cerca l’app in COSMIC Store, dove si aggiorna da sola."
-
 msgid "You are ready"
 msgstr "Sei pronto"
-
-msgid "One more thing worth doing: backups."
-msgstr "Ancora una cosa che vale la pena fare: i backup."
-
-msgid "What changes, and what stays the same."
-msgstr "Cosa cambia e cosa resta uguale."
 
 msgid "Windows key → the Super key"
 msgstr "Tasto Windows → il tasto Super"
@@ -523,12 +469,6 @@ msgstr "Esplora file → File"
 
 msgid "Super + E opens it, as on Windows"
 msgstr "Super + E lo apre, come su Windows"
-
-msgid "Settings and Control Panel → Settings"
-msgstr "Impostazioni e Pannello di controllo → Impostazioni"
-
-msgid "Everything in one place"
-msgstr "Tutto in un unico posto"
 
 msgid "Office → LibreOffice"
 msgstr "Office → LibreOffice"
@@ -707,11 +647,59 @@ msgstr "Secrets: un file cifrato nella tua cartella personale, senza account né
 msgid "Installed. Open it to create your password file, and keep a copy of it on a USB drive."
 msgstr "Installato. Aprilo per creare il tuo file di password e tienine una copia su una chiavetta USB."
 
-msgid "Your passwords"
-msgstr "Le tue password"
+msgid "Linux and you"
+msgstr "Linux e te"
 
-msgid "A password manager remembers them for you and makes up strong ones. Where do you want to keep them?"
-msgstr "Un gestore di password le ricorda per te e ne crea di robuste. Dove vuoi conservarle?"
+msgid "I am new to it"
+msgstr "Lo sto scoprendo"
 
-msgid "Not now? Go on: Firefox already remembers the passwords of websites, and cosmic-blue Tools offers these apps too."
-msgstr "Non ora? Vai avanti: Firefox ricorda già le password dei siti, e anche Strumenti di cosmic-blue offre queste app."
+msgid "I know it well"
+msgstr "Lo conosco bene"
+
+msgid "I know it well: a shorter tour, in three steps."
+msgstr "Lo conosco bene: un percorso più breve, in tre passi."
+
+msgid "Passwords"
+msgstr "Password"
+
+msgid "Bitwarden, synced with your phone, or Secrets, only on this computer"
+msgstr "Bitwarden, sincronizzato con il telefono, o Secrets, solo su questo computer"
+
+msgid "Installed: {}"
+msgstr "Installato: {}"
+
+msgid "Everything updates by itself"
+msgstr "Tutto si aggiorna da solo"
+
+msgid "In the background, applied at the next restart. The previous version stays one click away."
+msgstr "In background, applicato al prossimo riavvio. La versione precedente resta a un clic."
+
+msgid "Files, photos from a phone, bookmarks and email from before"
+msgstr "File, foto dal telefono, segnalibri ed e-mail di prima"
+
+msgid "Show me how"
+msgstr "Mostrami come"
+
+msgid "Your apps"
+msgstr "Le tue app"
+
+msgid "Every shortcut, tiling included: the Keyboard shortcuts app."
+msgstr "Tutte le scorciatoie, compresa la disposizione a mosaico: l’app Scorciatoie da tastiera."
+
+msgid "What is done, and what is left for when you want."
+msgstr "Cosa è fatto, e cosa resta per quando vuoi."
+
+msgid "What changes, and what stays the same. Try it, it is safe."
+msgstr "Cosa cambia e cosa resta uguale. Prova, è sicuro."
+
+msgid "Task View → Super + W"
+msgstr "Visualizzazione attività → Super + W"
+
+msgid "The essentials"
+msgstr "L’essenziale"
+
+msgid "What is different here, and your tools."
+msgstr "Cosa cambia qui, e i tuoi strumenti."
+
+msgid "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Extra software."
+msgstr "Ufficio, giochi, grafica e altro: COSMIC Store, o Strumenti di cosmic-blue → Software aggiuntivo."
