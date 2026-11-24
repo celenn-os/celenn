@@ -144,6 +144,29 @@ for page in "${pages[@]}"; do
 done
 (( sync_errors == 0 )) || exit 1
 
+# A command in a code block starts at the left edge: indenting the HTML
+# inside <pre> shows as spaces before the command (only the continuation of
+# a line ending in a backslash may be indented)
+indent_errors=0
+for page in "${all_pages[@]}"; do
+  if ! perl -0ne '
+      my $bad = 0;
+      while (/<pre[^>]*>(.*?)<\/pre>/gs) {
+        my @lines = split /\n/, $1, -1;
+        for my $i (1 .. $#lines) {
+          next unless $lines[$i] =~ /^[ \t]/;
+          next if $lines[$i - 1] =~ /\\\s*$/;
+          print STDERR "  $lines[$i]\n";
+          $bad = 1;
+        }
+      }
+      exit $bad;' "${root}/website/${page}"; then
+    echo "::error file=website/${page}::a line of a code block starts with spaces (HTML indentation inside <pre>)"
+    indent_errors=1
+  fi
+done
+(( indent_errors == 0 )) || exit 1
+
 for page in "${all_pages[@]}"; do
   mkdir -p "$(dirname "${out}/${page}")"
   if [[ -n "${ISO_BASE_URL:-}" ]]; then
