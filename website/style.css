@@ -351,35 +351,15 @@ kbd {
   gap: 12px;
 }
 
-/* An app window at its real size on the wallpaper, like on the desktop */
-.stage {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  padding: 64px 40px;
-  border-radius: 18px;
-  background: #0b1a4a url("img/wallpaper-1280.webp") 50% 50% / cover;
-}
-
-.stage .win {
+/* The whole desktop at the top of the home page */
+.desktop {
   display: block;
-  max-width: 100%;
-  height: auto;
-  border-radius: 12px;
-  box-shadow: 0 28px 64px rgb(0 6 30 / .55), 0 4px 14px rgb(0 6 30 / .35);
+  overflow: hidden;
+  border-radius: 14px;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / .1), 0 40px 100px rgb(0 0 0 / .6);
 }
 
-/* Two windows: the second one in front, lower right */
-.stage.duo { justify-content: flex-start; padding-left: 9%; }
-
-.stage .win-over {
-  position: absolute;
-  right: 7%;
-  bottom: 9%;
-  width: 34%;
-}
+.desktop img { display: block; width: 100%; height: auto; }
 
 .hero-shot {
   max-width: 1200px;
@@ -387,7 +367,31 @@ kbd {
   padding: 0 24px;
 }
 
-.hero-shot .stage { padding: 72px 40px; }
+/* An app window alone, at its real size, on the page background */
+.stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.stage .win {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / .06), 0 30px 80px rgb(0 0 0 / .6), 0 6px 18px rgb(0 0 0 / .4);
+}
+
+/* Two windows: the second one in front, lower right */
+.stage.duo { padding-bottom: 40px; }
+.stage.duo .win:first-child { margin-right: 22%; }
+
+.stage .win-over {
+  position: absolute;
+  right: 12%;
+  bottom: 0;
+  width: 30%;
+}
 
 /* What the user can count on, under the screenshot */
 .trust {
@@ -1160,17 +1164,20 @@ main {
   margin: 0;
   padding: 0;
   border: 0;
-  background: rgb(2 5 14 / .94);
+  background: rgb(2 5 14 / .97);
   color: var(--text);
 }
 
+/* The caption right under the image, the two centered together */
 .lightbox[open] {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .lightbox header {
   display: flex;
+  align-self: stretch;
   justify-content: flex-end;
   gap: 8px;
   padding: 12px;
@@ -1192,14 +1199,16 @@ main {
   width: auto;
   max-width: calc(100vw - 32px);
   height: auto;
-  max-height: 100%;
-  margin: auto;
+  flex: 0 1 auto;
+  min-height: 0;
+  margin: auto 16px 0;
   border-radius: 10px;
   object-fit: contain;
 }
 
 .lightbox .caption {
-  padding: 12px 16px 20px;
+  margin-bottom: auto;
+  padding: 16px 16px 24px;
   color: var(--muted);
   text-align: center;
 }
@@ -1323,16 +1332,10 @@ main {
 @media (max-width: 880px) {
   .minis, .steps3 { grid-template-columns: 1fr; gap: 32px; }
   .editions { grid-template-columns: 1fr; }
-  /* Phones: the app window shown closer, cut at the edge of the frame,
-     so its text stays readable */
-  .chapter .stage {
-    align-items: flex-start;
-    justify-content: flex-start;
-    height: 300px;
-    padding: 24px 0 0 24px;
-  }
-  .chapter .stage .win { width: 640px; max-width: none; border-radius: 10px 0 0 0; }
-  .chapter .stage .win-over { display: none; }
+  /* Phones and tablets: one window, the width of the page */
+  .stage.duo { padding-bottom: 0; }
+  .stage.duo .win:first-child { margin-right: 0; }
+  .stage .win-over { display: none; }
   .footer-cols { grid-template-columns: repeat(3, 1fr); }
   .footer-cols > div:first-child { grid-column: 1 / -1; }
 }
@@ -1343,15 +1346,13 @@ main {
   .hero-text { padding: 0 16px; }
   .hero .actions { margin-top: 28px; }
   .hero-shot { margin-top: 40px; padding: 0 16px; }
-  .hero-shot .stage { padding: 18px 12px; border-radius: 14px; }
+  .desktop { border-radius: 8px; }
   .stage .win { border-radius: 8px; }
   .trust { flex-direction: column; align-items: center; gap: 10px; }
   .section { padding-top: 80px; }
   .chapter { margin-top: 72px; padding-top: 72px; }
   .section.center + .chapter { padding-top: 56px; }
   .section > .intro, .chapter > .intro { margin-bottom: 32px; font-size: 1.04rem; }
-  .chapter .stage { height: 240px; padding: 18px 0 0 18px; border-radius: 14px; }
-  .chapter .stage .win { width: 520px; }
   .minis { padding-top: 72px; }
   #install { margin-top: 72px; }
   .download { padding: 20px; margin-bottom: 48px; }

@@ -41,7 +41,7 @@ shots=""
 zoom_shots="parental-controls-child parental-more-time first-steps-2 first-steps-3 tools-overview tools-software updates"
 # The home page shows these app windows alone, at their real size: cut out
 # along the window's light blue border
-win_shots="tools-overview first-steps-2 updates parental-controls-child parental-more-time tools-software"
+win_shots="first-steps-2 updates parental-controls-child parental-more-time tools-software"
 # Prints the window's box (WxH+X+Y) in the screenshot: the pixels of the
 # border color, kept only where they form lines at least 200 px long (the top
 # bar, 40 px, is left out)
