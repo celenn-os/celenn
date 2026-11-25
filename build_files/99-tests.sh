@@ -664,6 +664,8 @@ for theme in Dark Light; do
     # COSMIC's own "Round" style (160 px radius_xl: pill-shaped panel and dock)
     for dir in "${theme}" "${theme}.Builder"; do
         grep -q '160' "/usr/share/cosmic/com.system76.CosmicTheme.${dir}/v2/corner_radii"
+        # Our icon theme, which apps read from the theme since COSMIC 1.12
+        grep -qx '"cosmic-blue"' "/usr/share/cosmic/com.system76.CosmicTheme.${dir}/v2/icon_theme"
     done
 done
 

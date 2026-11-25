@@ -20,17 +20,22 @@ import sys
 src = pathlib.Path(sys.argv[1])
 
 
-def replace(rel, old, new):
-    path = src / rel
+def replace(rels, old, new):
+    """Replaces old in the one file of rels (tried in turn) that holds it."""
+    found = [rel for rel in rels if (src / rel).exists() and old in (src / rel).read_text()]
+    if len(found) != 1:
+        sys.exit(f"{', '.join(rels)}: expected 1 file with a match, found {len(found)}:\n{old}")
+    path = src / found[0]
     text = path.read_text()
     count = text.count(old)
     if count != 1:
-        sys.exit(f"{rel}: expected 1 match, found {count}:\n{old}")
+        sys.exit(f"{found[0]}: expected 1 match, found {count}:\n{old}")
     path.write_text(text.replace(old, new))
 
 
+# The table is in src/tab.rs up to COSMIC 1.11, in src/item/mod.rs since 1.12
 replace(
-    "src/tab.rs",
+    ["src/tab.rs", "src/item/mod.rs"],
     """        special_dirs.insert(dir, "user-home");
     }
     special_dirs
