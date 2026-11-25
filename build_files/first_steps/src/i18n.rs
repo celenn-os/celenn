@@ -1,4 +1,5 @@
-// Translations shared by cosmic-blue's libcosmic apps (the tours, Updates):
+// Translations shared by cosmic-blue's apps (the tours, Tools with its
+// Updates page, Parental controls and its service):
 // gettext PO files read at build time. Each program (crate root) defines
 //   LANGUAGES      (code, PO file contents), one per language
 //   TEMPLATE       contents of its .pot file, the list of English texts
@@ -160,4 +161,9 @@ pub fn check(texts: &[&str]) -> bool {
         LANGUAGES.len()
     );
     errors == 0
+}
+
+/// A translated text with its {} replaced by a value
+pub fn fill(text: &str, value: &str) -> String {
+    text.replacen("{}", value, 1)
 }

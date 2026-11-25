@@ -17,7 +17,6 @@ pub const WALLPAPERS: &str = "/usr/share/backgrounds/cosmic-blue";
 /// Small copies of the wallpapers, for the tour (branding/tour/thumbnails.py)
 pub const THUMBNAILS: &str = "/usr/share/cosmic-blue/wallpapers";
 pub const AVATARS: &str = "/usr/share/pixmaps/faces";
-const IMAGE_INFO: &str = "/usr/share/ublue-os/image-info.json";
 /// Homebrew, set up at the first boot (ublue-os/brew)
 pub const UPDATES_HELPER: &str = "/usr/libexec/cosmic-blue-updates-helper";
 
@@ -322,45 +321,6 @@ pub struct Computer {
     pub battery: Option<String>,
 }
 
-pub fn online() -> Option<bool> {
-    let output = Command::new("nmcli")
-        .args(["networking", "connectivity"])
-        .stdin(Stdio::null())
-        .stderr(Stdio::null())
-        .output()
-        .ok()?;
-    match String::from_utf8_lossy(&output.stdout).trim() {
-        "full" => Some(true),
-        "none" | "limited" | "portal" => Some(false),
-        _ => None,
-    }
-}
-
-/// Some(has the driver) when the computer has an NVIDIA graphics card
-fn nvidia() -> Option<bool> {
-    let entries = std::fs::read_dir("/sys/bus/pci/devices").ok()?;
-    let read = |dir: &Path, name: &str| {
-        std::fs::read_to_string(dir.join(name))
-            .map(|value| value.trim().to_owned())
-            .unwrap_or_default()
-    };
-    let found = entries.flatten().any(|entry| {
-        let dir = entry.path();
-        // Class 0x03xxxx: display controller (VGA, 3D)
-        read(&dir, "vendor") == "0x10de" && read(&dir, "class").starts_with("0x03")
-    });
-    found.then(|| image_name().ends_with("-nvidia"))
-}
-
-/// "cosmic-blue" or "cosmic-blue-nvidia"
-pub fn image_name() -> String {
-    std::fs::read_to_string(IMAGE_INFO)
-        .ok()
-        .and_then(|text| serde_json::from_str::<serde_json::Value>(&text).ok())
-        .and_then(|info| info.get("image-name")?.as_str().map(str::to_owned))
-        .unwrap_or_default()
-}
-
 fn secure_boot() -> bool {
     Command::new("mokutil")
         .arg("--sb-state")
@@ -473,9 +433,9 @@ pub fn computer() -> Computer {
         Some((device, on)) => (Some(device), Some(on)),
         None => (None, None),
     };
-    let nvidia = nvidia();
+    let nvidia = crate::edition::nvidia();
     Computer {
-        online: online(),
+        online: crate::network::online(),
         secure_boot: nvidia.is_some() && secure_boot(),
         nvidia,
         firmware: firmware(),

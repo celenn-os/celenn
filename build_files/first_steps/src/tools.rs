@@ -42,6 +42,7 @@ use cosmic::{Application, ApplicationExt, Element, executor};
 
 mod common;
 mod devtools;
+mod edition;
 mod failure;
 mod hardware;
 mod help;
@@ -50,6 +51,7 @@ mod i18n;
 mod layout;
 mod maintenance;
 mod more;
+mod network;
 mod overview;
 mod style;
 mod update_progress;

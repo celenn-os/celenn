@@ -283,12 +283,6 @@ msgstr ""
 msgid "kB"
 msgstr ""
 
-msgid "MB"
-msgstr ""
-
-msgid "GB"
-msgstr ""
-
 msgid "TB"
 msgstr ""
 

@@ -67,10 +67,7 @@ pub fn is_admin() -> bool {
     })
 }
 
-/// A translated text with its {} replaced
-pub fn fill(text: &str, value: &str) -> String {
-    text.replacen("{}", value, 1)
-}
+pub use crate::i18n::fill;
 
 /// The symbol in front of a row: in the accent color when it stands out
 pub fn state_icon<'a, M: 'static>(name: &'static str, accent: bool) -> Element<'a, M> {

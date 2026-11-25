@@ -37,7 +37,6 @@ use std::process::{Command, Stdio};
 
 const UPDATES_HELPER: &str = "/usr/libexec/cosmic-blue-updates-helper";
 const TOOLS_HELPER: &str = "/usr/libexec/cosmic-blue-tools-helper";
-const IMAGE_INFO: &str = "/usr/share/ublue-os/image-info.json";
 const FONTS_LICENSE: &str = "https://corefonts.sourceforge.net/eula.htm";
 const VMS: &str = "org.virt_manager.virt-manager";
 
@@ -473,29 +472,6 @@ fn home() -> PathBuf {
     std::env::var_os("HOME").map_or_else(|| PathBuf::from("."), PathBuf::from)
 }
 
-/// An NVIDIA graphics card: Some(whether the NVIDIA edition runs)
-fn nvidia() -> Option<bool> {
-    let read = |dir: &Path, name: &str| {
-        std::fs::read_to_string(dir.join(name))
-            .map(|value| value.trim().to_owned())
-            .unwrap_or_default()
-    };
-    let found = std::fs::read_dir("/sys/bus/pci/devices")
-        .ok()?
-        .flatten()
-        .any(|entry| {
-            let dir = entry.path();
-            // Class 0x03xxxx: display controller (VGA, 3D)
-            read(&dir, "vendor") == "0x10de" && read(&dir, "class").starts_with("0x03")
-        });
-    let image = std::fs::read_to_string(IMAGE_INFO)
-        .ok()
-        .and_then(|text| serde_json::from_str::<serde_json::Value>(&text).ok())
-        .and_then(|info| info.get("image-name")?.as_str().map(str::to_owned))
-        .unwrap_or_default();
-    found.then(|| image.ends_with("-nvidia"))
-}
-
 /// With Secure Boot on, whether the key that signs NVIDIA's driver is
 /// enrolled (mokutil reads the firmware's lists, no root needed)
 fn driver_key() -> Option<DriverKey> {
@@ -551,7 +527,7 @@ pub fn read_state() -> State {
     let has = |id: &str| apps.lines().any(|line| line.trim() == id);
     let data = std::env::var_os("XDG_DATA_HOME")
         .map_or_else(|| home().join(".local/share"), PathBuf::from);
-    let nvidia = nvidia();
+    let nvidia = crate::edition::nvidia();
     State {
         battery_limit,
         nvidia,
