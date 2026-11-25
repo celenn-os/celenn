@@ -18,9 +18,11 @@
 //       applications not allowed and the downloaded programs, and tells the
 //       child why.
 //   cosmic-blue-parental-daemon login-check
-//       PAM (pam_exec, account): refuses a login during bedtime or once the
-//       day's time is used up, with a message saying when it is possible
-//       again. Accounts without rules are always let in.
+//       the login screen's check (the PAM account module
+//       pam_cosmic_blue_parental.so, see pam_parental.rs): refuses a login
+//       during bedtime or once the day's time is used up, with a message
+//       saying when it is possible again. Accounts without rules are
+//       always let in.
 //   cosmic-blue-parental-daemon refusal
 //       the login screen's message when the check gives no reason
 //   cosmic-blue-parental-daemon status

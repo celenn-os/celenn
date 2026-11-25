@@ -4,7 +4,9 @@
 untranslated. The programs' own `--check` (run by the image build) then
 makes sure every template text is translated in every language; it only
 sees the lists of texts the programs keep (TEXTS), which this check
-completes. Run by tests/lint.sh."""
+completes. A text is also defined only once in each template and
+translation: gettext's own tools (msgfmt, translation editors) refuse a
+file with a text twice. Run by tests/lint.sh."""
 
 import pathlib
 import re
@@ -34,15 +36,26 @@ def rust_unescape(text):
     return unescape(text)
 
 
-def template(path):
-    ids = set()
+def msgids(path):
+    ids = []
     for match in MSGID.finditer(path.read_text()):
         more = re.findall(r'"((?:[^"\\]|\\.)*)"', match.group(2))
-        ids.add(unescape(match.group(1) + "".join(more)))
+        ids.append(unescape(match.group(1) + "".join(more)))
     return ids
 
 
+def template(path):
+    return set(msgids(path))
+
+
 errors = 0
+for po in sorted(CRATE.glob("po/**/*.po*")):
+    seen = set()
+    for text in msgids(po):
+        if text and text in seen:
+            print(f"{po.relative_to(CRATE)}: defined twice: {text!r}")
+            errors += 1
+        seen.add(text)
 for root, pot in PROGRAMS.items():
     known = template(CRATE / pot)
     files = [CRATE / root]
@@ -57,5 +70,5 @@ for root, pot in PROGRAMS.items():
                 line = source.count("\n", 0, match.start()) + 1
                 print(f"{file.relative_to(CRATE)}:{line}: not in {pot}: {text!r}")
                 errors += 1
-print(f"translations: {errors} untranslated text(s) found")
+print(f"translations: {errors} problem(s) found")
 sys.exit(1 if errors else 0)
