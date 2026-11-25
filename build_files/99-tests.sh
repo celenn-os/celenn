@@ -703,6 +703,10 @@ for icon in apps/com.system76.CosmicPanelAppButton apps/com.system76.CosmicPanel
     places/user-home places/user-trash mimetypes/text-plain mimetypes/image-jpeg mimetypes/application-zip; do
     test -s "/usr/share/icons/cosmic-blue/layer/${icon}.svg"
 done
+# Every app the tour and Tools offer has an icon in the theme's style
+python3 /ctx/build_files/icon_theme/check_app_icons.py /usr/share/icons/cosmic-blue \
+    /ctx/build_files/first_steps/src /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall
+test -s /usr/share/icons/cosmic-blue/layer/apps/org.kde.kalzium.svg
 # Every link of the theme points to an existing icon
 broken="$(find /usr/share/icons/cosmic-blue -xtype l)"
 [[ -z "${broken}" ]] || { echo "Broken icon links:"; echo "${broken}"; exit 1; }
