@@ -686,3 +686,18 @@ msgstr "Desfazer"
 
 msgid "The dock hides when a window covers it."
 msgstr "O dock se esconde quando uma janela o cobre."
+
+msgid "Printers and scanners"
+msgstr "Impressoras e scanners"
+
+msgid "No printer added yet. Recent printers on the network or plugged in by USB show up by themselves in the print window."
+msgstr "Nenhuma impressora adicionada ainda. Impressoras recentes na rede ou conectadas por USB aparecem sozinhas na janela de impressão."
+
+msgid "{} (default)"
+msgstr "{} (padrão)"
+
+msgid "Printers"
+msgstr "Impressoras"
+
+msgid "Scan"
+msgstr "Digitalizar"
