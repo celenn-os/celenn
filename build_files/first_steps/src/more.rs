@@ -16,7 +16,8 @@
 //                  open a list to tick (apps.rs), then virtual machines,
 //                  Microsoft fonts and the FlatPark app source
 //   Appearance     dark or light, the cosmic-blue look back, every COSMIC
-//                  setting back to the defaults, settings saved to a file
+//                  setting back to the defaults, settings and apps taken to
+//                  another computer (more_transfer.rs, transfer.rs)
 //
 // Changes that cannot be undone in one click (restart, reset, the NVIDIA
 // edition, a license) ask first, in the row itself. A change that does not
@@ -35,6 +36,10 @@ use cosmic::{Element, cosmic_theme, theme};
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+
+#[path = "more_transfer.rs"]
+mod transfer_view;
+pub use transfer_view::TransferMessage;
 
 const UPDATES_HELPER: &str = "/usr/libexec/cosmic-blue-updates-helper";
 const TOOLS_HELPER: &str = "/usr/libexec/cosmic-blue-tools-helper";
@@ -134,10 +139,7 @@ pub const TEXTS: &[&str] = &[
     "Reset",
     "Every COSMIC setting goes back to the defaults. A copy is kept in your settings folder.",
     "Log out and back in to finish.",
-    "Save my settings",
-    "A text file in your home folder, to keep or to compare.",
     "Save",
-    "Saved in your home folder.",
 ];
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -244,7 +246,6 @@ pub enum Job {
     Dark(bool),
     ResetTheme,
     ResetConfig,
-    Export,
 }
 
 impl Job {
@@ -266,7 +267,6 @@ impl Job {
             Job::Dark(false) => ujust(&["toggle-dark-mode", "light"]),
             Job::ResetTheme => ujust(&["reset-cosmic-theme", "yes"]),
             Job::ResetConfig => ujust(&["reset-cosmic-config", "yes"]),
-            Job::Export => ujust(&["export-cosmic-config"]),
         }
     }
 
@@ -282,7 +282,6 @@ impl Job {
             Job::Dark(_) => "Dark theme",
             Job::ResetTheme => "The cosmic-blue look",
             Job::ResetConfig => "All COSMIC settings",
-            Job::Export => "Save my settings",
         }
     }
 
@@ -290,7 +289,7 @@ impl Job {
         match self {
             Job::BatteryLimit(_) | Job::Nvidia | Job::DriverKey | Job::Firmware => Kind::Computer,
             Job::Fonts(_) | Job::Vms(_) | Job::FlatPark(_) => Kind::Software,
-            Job::Dark(_) | Job::ResetTheme | Job::ResetConfig | Job::Export => Kind::Appearance,
+            Job::Dark(_) | Job::ResetTheme | Job::ResetConfig => Kind::Appearance,
         }
     }
 
@@ -325,7 +324,6 @@ impl Job {
             Job::Nvidia => Some("The NVIDIA edition starts at the next restart."),
             Job::Fonts(true) => Some("Installed. Restart open apps to see them."),
             Job::ResetConfig => Some("Log out and back in to finish."),
-            Job::Export => Some("Saved in your home folder."),
             Job::ResetTheme => Some("Log out and back in to finish."),
             _ => None,
         }
@@ -357,8 +355,10 @@ pub enum Message {
     ListDone(usize, Outcome),
     Card(CardMessage),
     CloseToast(widget::ToastId),
-    /// A toast's Undo: closes it, then takes the change back
+    /// A toast's button (Undo, Show): closes it, then does it
     Undo(widget::ToastId, Box<Message>),
+    /// Change computers (more_transfer.rs)
+    Transfer(TransferMessage),
 }
 
 /// What a card's "Try again" runs again
@@ -382,6 +382,11 @@ pub struct Page {
     /// What did not work, until closed or done again
     card: Option<Card<Retry>>,
     toasts: Toasts<Message>,
+    /// Change computers: the settings file being saved, the dialog that
+    /// takes one back and the file it shows
+    saving: bool,
+    restore: Option<transfer_view::Step>,
+    restored: Option<(crate::transfer::Restore, BTreeSet<crate::transfer::Group>)>,
 }
 
 fn output(program: &str, args: &[&str]) -> String {
@@ -559,8 +564,20 @@ impl Page {
             card: None,
             toasts: Toasts::new(Message::CloseToast),
             preview_list: crate::common::preview("developer-tools").then_some(DEVELOPMENT),
+            saving: false,
+            restore: None,
+            restored: None,
         };
-        (page, refresh())
+        // `cosmic-blue-tools --restore` (the tour's "Bring your things"):
+        // the file chooser at once
+        let restore = if std::env::args().any(|arg| arg == "--restore") {
+            Task::done(cosmic::Action::App(Message::Transfer(
+                TransferMessage::Open,
+            )))
+        } else {
+            Task::none()
+        };
+        (page, Task::batch([refresh(), restore]))
     }
 
     /// A change of the desktop's look, said with a button to take it back
@@ -748,6 +765,7 @@ impl Page {
                 }
             }
             Message::CloseToast(id) => self.toasts.remove(id),
+            Message::Transfer(message) => return self.transfer_update(message),
         }
         Task::none()
     }
@@ -1199,13 +1217,7 @@ impl Page {
                 self.button(Job::ResetConfig, "Reset", false),
                 Some(Job::ResetConfig),
             ))
-            .add(self.row(
-                "document-save-symbolic",
-                "Save my settings",
-                "A text file in your home folder, to keep or to compare.",
-                self.button(Job::Export, "Save", false),
-                None,
-            ));
+            .add(self.transfer_row());
         widget::column::with_capacity(2)
             .spacing(theme::spacing().space_s)
             .push(look)
@@ -1218,7 +1230,11 @@ impl Page {
 /// steps tour installs developer tools (devtools.rs): Homebrew for the user,
 /// Flathub for everyone. None: the password prompt was dismissed; the
 /// last failure otherwise
-async fn apply_list(list: usize, installed: BTreeSet<usize>, chosen: BTreeSet<usize>) -> Outcome {
+pub(crate) async fn apply_list(
+    list: usize,
+    installed: BTreeSet<usize>,
+    chosen: BTreeSet<usize>,
+) -> Outcome {
     let (mut formulas, mut casks, mut apps) = (Vec::new(), Vec::new(), Vec::new());
     let (mut old_formulas, mut old_casks, mut old_apps) = (Vec::new(), Vec::new(), Vec::new());
     for (i, tool) in CATEGORIES[list].tools().enumerate() {

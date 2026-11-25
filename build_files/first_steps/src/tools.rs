@@ -11,8 +11,8 @@
 //                 edition, firmware settings
 //   Extra software  the kinds of apps of the first steps tour (apps.rs),
 //                 virtual machines, Microsoft fonts, FlatPark
-//   Appearance    dark theme, the cosmic-blue look, reset, save settings
-//                 (these three: more.rs)
+//   Appearance    dark theme, the cosmic-blue look, reset, change
+//                 computers (these three: more.rs)
 //   Help          documentation, questions, bug report (help.rs)
 //
 // Each button runs the same program as the matching `ujust` command, so the
@@ -27,6 +27,8 @@
 //                                   /usr/libexec/cosmic-blue-updates)
 //   cosmic-blue-tools --maintenance / --computer / --software /
 //                     --appearance / --help-page   the window, on that page
+//   cosmic-blue-tools --restore     the window, on Appearance, choosing a
+//                                   settings file to take back (transfer.rs)
 //   cosmic-blue-tools --housekeeping  empties the old trash, warns when the
 //                                   disk is almost full (no window; run by
 //                                   cosmic-blue-housekeeping.timer)
@@ -56,6 +58,11 @@ mod more;
 mod network;
 mod overview;
 mod style;
+// What the tour reads from the system; Tools uses the settings folder and
+// the first-boot apps (transfer.rs)
+#[allow(dead_code)]
+mod system;
+mod transfer;
 mod update_progress;
 mod updates_page;
 use i18n::tr;
@@ -102,6 +109,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             housekeeping::TEXTS,
             failure::TEXTS,
             overview::TEXTS,
+            transfer::TEXTS,
         ]
         .concat();
         let mut sorted = texts.clone();
@@ -128,7 +136,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         PageId::Computer
     } else if options.iter().any(|arg| arg == "--software") {
         PageId::Software
-    } else if options.iter().any(|arg| arg == "--appearance") {
+    } else if options
+        .iter()
+        .any(|arg| arg == "--appearance" || arg == "--restore")
+    {
         PageId::Appearance
     } else if options.iter().any(|arg| arg == "--help-page") {
         PageId::Help
@@ -292,6 +303,11 @@ impl Application for App {
                 .update(message)
                 .map(|action| action.map(Message::Help)),
         }
+    }
+
+    /// Change computers: the dialog that takes a settings file back
+    fn dialog(&self) -> Option<Element<'_, Message>> {
+        self.more.dialog().map(|dialog| dialog.map(Message::More))
     }
 
     fn subscription(&self) -> cosmic::iced::Subscription<Message> {

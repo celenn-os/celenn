@@ -761,6 +761,15 @@ msgstr "O que muda aqui, e suas ferramentas."
 msgid "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Extra software."
 msgstr "Escritório, jogos, gráficos e mais: COSMIC Store, ou Ferramentas do cosmic-blue → Programas extras."
 
+msgid "From another cosmic-blue computer"
+msgstr "De outro computador cosmic-blue"
+
+msgid "Your settings and the list of your apps, with the file saved there in cosmic-blue Tools → Appearance."
+msgstr "Suas configurações e a lista dos seus apps, com o arquivo salvo lá em Ferramentas do cosmic-blue → Aparência e configurações."
+
+msgid "Restore…"
+msgstr "Recuperar…"
+
 msgid "Ticked and grey: already installed."
 msgstr "Marcado e cinza: já instalado."
 
@@ -835,9 +844,6 @@ msgstr "Seus aplicativos de vídeo estão prontos."
 
 msgid "Video"
 msgstr "Vídeo"
-
-msgid "Sound"
-msgstr "Som"
 
 msgid "Steam, Heroic, Lutris, Discord…"
 msgstr "Steam, Heroic, Lutris, Discord…"

@@ -291,9 +291,6 @@ msgstr "TB"
 msgid "More apps in COSMIC Store, from outside Flathub. Less checked."
 msgstr "Più app in COSMIC Store, fuori da Flathub. Meno controllate."
 
-msgid "A text file in your home folder, to keep or to compare."
-msgstr "Un file di testo nella tua cartella home, da conservare o confrontare."
-
 msgid "Accent color, wallpaper, panel, dock, fonts…"
 msgstr "Colore di accento, sfondo, pannello, dock, caratteri…"
 
@@ -464,12 +461,6 @@ msgstr "Ripristina"
 
 msgid "Save"
 msgstr "Salva"
-
-msgid "Save my settings"
-msgstr "Salvare le mie impostazioni"
-
-msgid "Saved in your home folder."
-msgstr "Salvato nella tua cartella home."
 
 msgid "Switch"
 msgstr "Passa"
@@ -800,3 +791,104 @@ msgstr "Stampanti"
 
 msgid "Scan"
 msgstr "Scansiona"
+
+msgid "Change computers"
+msgstr "Cambiare computer"
+
+msgid "Your settings and the list of your apps in a file, to take back on another cosmic-blue computer."
+msgstr "Le tue impostazioni e l'elenco delle tue app in un file, da riprendere su un altro computer cosmic-blue."
+
+msgid "Restore…"
+msgstr "Riprendi…"
+
+msgid "Saved in Documents."
+msgstr "Salvato in Documenti."
+
+msgid "Show"
+msgstr "Mostra"
+
+msgid "Choose the file saved on your other computer"
+msgstr "Scegli il file salvato sull'altro computer"
+
+msgid "cosmic-blue-settings"
+msgstr "cosmic-blue-impostazioni"
+
+msgid "Restore these settings"
+msgstr "Riprendi queste impostazioni"
+
+msgid "Saved on {} on “{}”. Tick what you want back. Your files are not in this file: use Déjà Dup or LocalSend for them."
+msgstr "Salvate il {} su «{}». Spunta ciò che vuoi riprendere. I tuoi file non sono in questo file: per quelli usa Déjà Dup o LocalSend."
+
+msgid "Saved on {}. Tick what you want back. Your files are not in this file: use Déjà Dup or LocalSend for them."
+msgstr "Salvate il {}. Spunta ciò che vuoi riprendere. I tuoi file non sono in questo file: per quelli usa Déjà Dup o LocalSend."
+
+msgid "Look"
+msgstr "Aspetto"
+
+msgid "Dark or light theme, accent color, wallpaper, panel and dock."
+msgstr "Tema scuro o chiaro, colore di evidenziazione, sfondo, barra e dock."
+
+msgid "Keyboard and shortcuts"
+msgstr "Tastiera e scorciatoie"
+
+msgid "Keyboard layout and the shortcuts you changed."
+msgstr "Layout della tastiera e le scorciatoie che hai cambiato."
+
+msgid "Apps ({})"
+msgstr "App ({})"
+
+msgid "{} and {} more, from Flathub."
+msgstr "{} e altre {}, da Flathub."
+
+msgid "{}, from Flathub."
+msgstr "{}, da Flathub."
+
+msgid "Developer tools ({})"
+msgstr "Strumenti per sviluppatori ({})"
+
+msgid "Take them back"
+msgstr "Riprendi"
+
+msgid "Restoring…"
+msgstr "Ripresa in corso…"
+
+msgid "Restored"
+msgstr "Ripreso"
+
+
+
+msgid "Your own wallpaper is not in the file: copy the picture, then choose it in Settings."
+msgstr "Il tuo sfondo personale non è nel file: copia l'immagine, poi sceglila nelle Impostazioni."
+
+msgid "{} shortcuts start a program: for safety, add them again in Settings."
+msgstr "{} scorciatoie avviano un programma: per sicurezza, aggiungile di nuovo nelle Impostazioni."
+
+msgid "One shortcut starts a program: for safety, add it again in Settings."
+msgstr "Una scorciatoia avvia un programma: per sicurezza, aggiungila di nuovo nelle Impostazioni."
+
+msgid "{} settings unknown to this version of cosmic-blue were left out."
+msgstr "{} impostazioni sconosciute a questa versione di cosmic-blue sono state escluse."
+
+msgid "{} app names were not valid and were left out."
+msgstr "{} nomi di app non erano validi e sono stati esclusi."
+
+msgid "The apps could not be installed."
+msgstr "Non è stato possibile installare le app."
+
+msgid "A copy of your previous settings is in {}."
+msgstr "Una copia delle impostazioni precedenti è in {}."
+
+msgid "Log out and back in to see every change."
+msgstr "Esci e rientra per vedere tutte le modifiche."
+
+msgid "This file is not a cosmic-blue settings file."
+msgstr "Questo file non è un file di impostazioni di cosmic-blue."
+
+msgid "This file was saved by a newer cosmic-blue. Update this computer first."
+msgstr "Questo file viene da un cosmic-blue più recente. Aggiorna prima questo computer."
+
+msgid "This file could not be read."
+msgstr "Non è stato possibile leggere questo file."
+
+msgid "Nothing to take back: everything in this file is already here."
+msgstr "Niente da riprendere: tutto ciò che c'è in questo file è già qui."

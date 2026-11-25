@@ -761,6 +761,15 @@ msgstr "Was hier anders ist, und Ihre Werkzeuge."
 msgid "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Extra software."
 msgstr "Büro, Spiele, Grafik und mehr: COSMIC Store oder cosmic-blue Werkzeuge → Zusätzliche Software."
 
+msgid "From another cosmic-blue computer"
+msgstr "Von einem anderen cosmic-blue-Computer"
+
+msgid "Your settings and the list of your apps, with the file saved there in cosmic-blue Tools → Appearance."
+msgstr "Ihre Einstellungen und die Liste Ihrer Apps, mit der dort in cosmic-blue Werkzeuge → Aussehen und Einstellungen gespeicherten Datei."
+
+msgid "Restore…"
+msgstr "Übernehmen …"
+
 msgid "Ticked and grey: already installed."
 msgstr "Angehakt und grau: bereits installiert."
 
@@ -835,9 +844,6 @@ msgstr "Ihre Video-Apps sind bereit."
 
 msgid "Video"
 msgstr "Video"
-
-msgid "Sound"
-msgstr "Ton"
 
 msgid "Steam, Heroic, Lutris, Discord…"
 msgstr "Steam, Heroic, Lutris, Discord…"
