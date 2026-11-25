@@ -686,3 +686,18 @@ msgstr "Annulla"
 
 msgid "The dock hides when a window covers it."
 msgstr "Il dock si nasconde quando una finestra lo copre."
+
+msgid "Printers and scanners"
+msgstr "Stampanti e scanner"
+
+msgid "No printer added yet. Recent printers on the network or plugged in by USB show up by themselves in the print window."
+msgstr "Nessuna stampante aggiunta. Le stampanti recenti in rete o collegate via USB compaiono da sole nella finestra di stampa."
+
+msgid "{} (default)"
+msgstr "{} (predefinita)"
+
+msgid "Printers"
+msgstr "Stampanti"
+
+msgid "Scan"
+msgstr "Scansiona"

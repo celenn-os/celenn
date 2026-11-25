@@ -4,6 +4,8 @@
 // terminal and the window do exactly the same thing:
 //
 //   Computer       what the computer is made of (hardware.rs), the
+//                  printers and scanners (opens Print Settings and
+//                  Document Scanner: COSMIC Settings has no printer page), the
 //                  battery charge limit (toggle-battery-limit), the
 //                  NVIDIA edition for NVIDIA graphics cards (the Updates
 //                  helper, as the first steps tour) and, with Secure Boot,
@@ -39,6 +41,7 @@ const UPDATES_HELPER: &str = "/usr/libexec/cosmic-blue-updates-helper";
 const TOOLS_HELPER: &str = "/usr/libexec/cosmic-blue-tools-helper";
 const FONTS_LICENSE: &str = "https://corefonts.sourceforge.net/eula.htm";
 const VMS: &str = "org.virt_manager.virt-manager";
+const SCANNER: &str = "org.gnome.SimpleScan";
 
 pub const TEXTS: &[&str] = &[
     // Pages
@@ -56,6 +59,11 @@ pub const TEXTS: &[&str] = &[
     // Computer
     "This computer",
     "Settings",
+    "Printers and scanners",
+    "No printer added yet. Recent printers on the network or plugged in by USB show up by themselves in the print window.",
+    "{} (default)",
+    "Printers",
+    "Scan",
     "Model",
     "Virtual machine ({})",
     "Unknown",
@@ -277,6 +285,10 @@ pub enum Kind {
 /// What the rows show: read in the background, again after each change
 #[derive(Clone, Debug, Default)]
 pub struct State {
+    /// The printers added (CUPS), the default one first
+    printers: Vec<Printer>,
+    /// Document Scanner is installed
+    scanner: bool,
     /// None: no laptop battery whose charge can be limited
     battery_limit: Option<bool>,
     /// None: no NVIDIA graphics card. Some(true): the NVIDIA edition runs
@@ -294,6 +306,56 @@ pub struct State {
     /// The apps of each list installed (numbers of List::tools())
     installed: [BTreeSet<usize>; 3],
     brew: bool,
+}
+
+/// A printer added to CUPS: its name for people, and whether it is the
+/// default one
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct Printer {
+    name: String,
+    default: bool,
+}
+
+/// The printers in `LC_ALL=C lpstat -l -p -d`: each "printer QUEUE ..."
+/// line, its "Description:" (the name people gave it, else the queue's
+/// name), and the "system default destination:" line. The default first.
+fn parse_printers(lpstat: &str) -> Vec<Printer> {
+    let mut queues: Vec<(String, String)> = Vec::new();
+    let mut default = None;
+    for line in lpstat.lines() {
+        if let Some(rest) = line.strip_prefix("printer ") {
+            if let Some(queue) = rest.split_whitespace().next() {
+                queues.push((queue.to_owned(), queue.replace('_', " ")));
+            }
+        } else if let Some(description) = line.trim().strip_prefix("Description:") {
+            let description = description.trim();
+            if let (Some(last), false) = (queues.last_mut(), description.is_empty()) {
+                last.1 = description.to_owned();
+            }
+        } else if let Some(queue) = line.strip_prefix("system default destination:") {
+            default = Some(queue.trim().to_owned());
+        }
+    }
+    let mut printers: Vec<Printer> = queues
+        .into_iter()
+        .map(|(queue, name)| Printer {
+            default: default.as_deref() == Some(queue.as_str()),
+            name,
+        })
+        .collect();
+    printers.sort_by_key(|printer| !printer.default);
+    printers
+}
+
+fn printers() -> Vec<Printer> {
+    Command::new("lpstat")
+        .args(["-l", "-p", "-d"])
+        .env("LC_ALL", "C")
+        .stdin(Stdio::null())
+        .stderr(Stdio::null())
+        .output()
+        .map(|output| parse_printers(&String::from_utf8_lossy(&output.stdout)))
+        .unwrap_or_default()
 }
 
 /// The key that signs NVIDIA's driver, when Secure Boot does not know it yet
@@ -414,6 +476,10 @@ pub enum Message {
     Run(Job),
     Done(Job, Outcome),
     OpenSettings,
+    /// Print Settings (system-config-printer): add or set up a printer
+    OpenPrinters,
+    /// Document Scanner
+    OpenScanner,
     /// One bar at the bottom (true), or the top bar and the dock
     Layout(bool),
     DockVisible(bool),
@@ -459,6 +525,40 @@ fn output(program: &str, args: &[&str]) -> String {
         .output()
         .map(|output| String::from_utf8_lossy(&output.stdout).into_owned())
         .unwrap_or_default()
+}
+
+/// Printers and scanners: the printers added, and buttons to Print Settings
+/// and Document Scanner (COSMIC Settings has no printer page)
+fn printers_row<'a>(state: &State) -> Element<'a, Message> {
+    let caption = if state.printers.is_empty() {
+        tr("No printer added yet. Recent printers on the network or plugged in by USB show up by themselves in the print window.").to_owned()
+    } else {
+        state
+            .printers
+            .iter()
+            .map(|printer| {
+                if printer.default {
+                    fill(tr("{} (default)"), &printer.name)
+                } else {
+                    printer.name.clone()
+                }
+            })
+            .collect::<Vec<_>>()
+            .join(", ")
+    };
+    let mut buttons = widget::row::with_capacity(2)
+        .spacing(theme::spacing().space_xxs)
+        .push(widget::button::standard(tr("Printers")).on_press(Message::OpenPrinters));
+    if state.scanner {
+        buttons = buttons.push(widget::button::standard(tr("Scan")).on_press(Message::OpenScanner));
+    }
+    settings::item_row(vec![
+        state_icon("printer-symbolic", false),
+        label(tr("Printers and scanners"), caption),
+        buttons.into(),
+    ])
+    .spacing(theme::spacing().space_s)
+    .into()
 }
 
 /// A row that only tells: its symbol, its title, what was found
@@ -529,6 +629,8 @@ pub fn read_state() -> State {
         .map_or_else(|| home().join(".local/share"), PathBuf::from);
     let nvidia = crate::edition::nvidia();
     State {
+        printers: printers(),
+        scanner: has(SCANNER),
         battery_limit,
         nvidia,
         driver_key: if nvidia == Some(true) {
@@ -658,6 +760,8 @@ impl Page {
                 return Task::batch([toast, refresh()]);
             }
             Message::OpenSettings => spawn("cosmic-settings", &["appearance"]),
+            Message::OpenPrinters => spawn("system-config-printer", &[]),
+            Message::OpenScanner => spawn("flatpak", &["run", SCANNER]),
             Message::Layout(bottom) => {
                 if !crate::layout::set_bottom_bar(bottom) {
                     return self.toast("This did not work.");
@@ -960,7 +1064,9 @@ impl Page {
                 tr(startup).to_owned(),
             ));
 
-        let mut section = settings::section().title(tr("Settings"));
+        let mut section = settings::section()
+            .title(tr("Settings"))
+            .add(printers_row(state));
         section = section.add(match state.battery_limit {
             Some(on) => self.row(
                 "battery-good-symbolic",
@@ -1339,4 +1445,41 @@ async fn apply_list(list: List, installed: BTreeSet<usize>, chosen: BTreeSet<usi
         }
     }
     Some(result)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn printers() {
+        assert!(parse_printers("").is_empty());
+        assert!(parse_printers("no system default destination\n").is_empty());
+        let lpstat = "printer Brother_HL_L2350DW is idle.  enabled since Wed 25 Nov 2026\n\
+            \tForm mounts:\n\
+            \tDescription: Brother HL-L2350DW\n\
+            \tLocation: Office\n\
+            printer HP_LaserJet_M110w is idle.  enabled since Wed 25 Nov 2026\n\
+            \tDescription: HP LaserJet M110w\n\
+            printer Label is idle.  enabled since Wed 25 Nov 2026\n\
+            \tDescription:\n\
+            system default destination: HP_LaserJet_M110w\n";
+        assert_eq!(
+            parse_printers(lpstat),
+            vec![
+                Printer {
+                    name: "HP LaserJet M110w".into(),
+                    default: true
+                },
+                Printer {
+                    name: "Brother HL-L2350DW".into(),
+                    default: false
+                },
+                Printer {
+                    name: "Label".into(),
+                    default: false
+                },
+            ]
+        );
+    }
 }

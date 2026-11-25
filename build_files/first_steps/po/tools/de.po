@@ -686,3 +686,18 @@ msgstr "Rückgängig"
 
 msgid "The dock hides when a window covers it."
 msgstr "Das Dock verschwindet, wenn ein Fenster es verdeckt."
+
+msgid "Printers and scanners"
+msgstr "Drucker und Scanner"
+
+msgid "No printer added yet. Recent printers on the network or plugged in by USB show up by themselves in the print window."
+msgstr "Noch kein Drucker hinzugefügt. Neuere Drucker im Netzwerk oder per USB angeschlossen erscheinen von selbst im Druckfenster."
+
+msgid "{} (default)"
+msgstr "{} (Standard)"
+
+msgid "Printers"
+msgstr "Drucker"
+
+msgid "Scan"
+msgstr "Scannen"

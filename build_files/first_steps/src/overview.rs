@@ -73,6 +73,7 @@ const SETTINGS: &[(&str, &str, PageId)] = &[
         "New versions of the BIOS, SSD, dock… from their makers.",
         PageId::Maintenance,
     ),
+    ("Printers and scanners", "", PageId::Computer),
     (
         "Battery charge limit",
         "Charging stops at 80 %: the battery lasts longer when the laptop stays plugged in.",

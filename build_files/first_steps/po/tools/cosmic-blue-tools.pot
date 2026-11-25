@@ -684,3 +684,18 @@ msgstr ""
 
 msgid "The dock hides when a window covers it."
 msgstr ""
+
+msgid "Printers and scanners"
+msgstr ""
+
+msgid "No printer added yet. Recent printers on the network or plugged in by USB show up by themselves in the print window."
+msgstr ""
+
+msgid "{} (default)"
+msgstr ""
+
+msgid "Printers"
+msgstr ""
+
+msgid "Scan"
+msgstr ""
