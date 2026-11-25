@@ -21,11 +21,9 @@ SYSTEM_FILES="$(dirname "$0")/../system_files"
 
 vm_install "${IMAGE}" "${TARGET_IMGREF}"
 vm_start
-film_start film-boot 150
 vm_wait_ssh
 
 errors=0
-vm 'cat /proc/cmdline; plymouth --ping && echo "plymouth running"; journalctl -b -o cat --no-pager | grep -i plymouth | head -n 20' || true
 vm_check_system boot || errors=1
 vm_check_tuning boot || errors=1
 # Startup time and memory in use at the login screen, to follow over time
@@ -183,7 +181,6 @@ vm 'flatpak remote-add --system flatpark /usr/share/cosmic-blue/flatpak/flatpark
 
 # Let the login screen draw, then take a picture of it
 sleep 20
-film_stop
 screenshot login-screen
 
 if (( errors == 0 )); then
