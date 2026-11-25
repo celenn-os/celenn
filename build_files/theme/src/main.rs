@@ -16,7 +16,7 @@
 //! follows the accent, also when the user picks another accent in COSMIC
 //! Settings. Every color can still be changed there (Appearance).
 
-use cosmic_config::CosmicConfigEntry;
+use cosmic_config::{ConfigSet, CosmicConfigEntry};
 use cosmic_theme::palette::{Srgb, Srgba};
 use cosmic_theme::{AlphaMap, BlurStrength, Theme, ThemeBuilder};
 
@@ -108,7 +108,29 @@ fn cosmic_blue(thickness: BlurStrength, glass_dark: f32, glass_light: f32) {
             thickness,
             glass_light,
         ),
-    )
+    );
+    icon_theme();
+}
+
+/// The icon theme, which COSMIC 1.12 moved into the theme: up to COSMIC 1.11
+/// apps read it from com.system76.CosmicTk (shipped in system_files), since
+/// 1.12 from the theme (libcosmic 4c853eb), which would otherwise say
+/// "Cosmic". It is set as a config key rather than a ThemeBuilder field, so
+/// that this builds with both libcosmic versions (1.11 ignores the key).
+const ICON_THEME: &str = "cosmic-blue";
+
+fn icon_theme() {
+    for config in [
+        ThemeBuilder::dark_config(),
+        Theme::dark_config(),
+        ThemeBuilder::light_config(),
+        Theme::light_config(),
+    ] {
+        config
+            .expect("theme config")
+            .set("icon_theme", ICON_THEME)
+            .expect("write icon theme");
+    }
 }
 
 /// Writes a dark and a light theme (builder and computed theme).
