@@ -82,6 +82,48 @@ pub(super) fn state_icon<'a>(done: bool) -> Element<'a, Message> {
         .into()
 }
 
+/// A hardware check's symbol: a check mark in the accent color (all
+/// right), or information, warning or error symbols in the theme's colors
+pub(super) fn status_icon<'a>(status: readiness::Status) -> Element<'a, Message> {
+    use readiness::Status;
+    let name = match status {
+        Status::Good => return state_icon(true),
+        Status::Info => "dialog-information-symbolic",
+        Status::Warn => "dialog-warning-symbolic",
+        Status::Bad => "dialog-error-symbolic",
+    };
+    widget::icon::from_name(name)
+        .size(20)
+        .apply(widget::container)
+        .class(theme::Container::custom(move |theme| {
+            let cosmic = theme.cosmic();
+            let color = match status {
+                Status::Warn => cosmic.warning_color(),
+                Status::Bad => cosmic.destructive_color(),
+                _ => cosmic.on_bg_color(),
+            };
+            cosmic::iced::widget::container::Style {
+                icon_color: Some(color.into()),
+                ..Default::default()
+            }
+        }))
+        .into()
+}
+
+/// The command that plays a short test sound, when the session has one
+pub(super) fn test_sound() -> Option<&'static [&'static str]> {
+    const SOUNDS: [&[&str]; 2] = [
+        &[
+            "pw-play",
+            "/usr/share/sounds/freedesktop/stereo/audio-test-signal.oga",
+        ],
+        &["pw-play", "/usr/share/sounds/freedesktop/stereo/bell.oga"],
+    ];
+    SOUNDS
+        .into_iter()
+        .find(|command| in_path(command[0]) && Path::new(command[1]).is_file())
+}
+
 pub(super) fn heading<'a>(label: &'static str) -> Element<'a, Message> {
     text::heading(tr(label)).width(Length::Fill).into()
 }
@@ -151,12 +193,8 @@ impl<T: Tour> App<T> {
                 })
                 .collect(),
             Body::Ready => return self.ready_view(space_s),
-            Body::Icon(name) => {
-                return widget::container(widget::icon::from_name(*name).size(128))
-                    .padding([space_s, 0])
-                    .center_x(Length::Fill)
-                    .into();
-            }
+            Body::Readiness => return self.readiness_view(space_s),
+            Body::Install => return self.install_view(space_s),
             Body::Features(rows) => rows
                 .iter()
                 .map(|(title, subtitle)| {
@@ -696,6 +734,135 @@ impl<T: Tour> App<T> {
             );
         }
         rows
+    }
+
+    /// Live session: what the hardware checks found (readiness.rs)
+    pub(super) fn readiness_view<'a>(&'a self, space_s: u16) -> Element<'a, Message> {
+        let Some(checks) = &self.readiness else {
+            return settings::section()
+                .add(
+                    settings::item_row(vec![
+                        widget::progress_bar::indeterminate_circular()
+                            .size(20.0)
+                            .into(),
+                        text::body(tr("Checking this computer…")).into(),
+                    ])
+                    .spacing(space_s),
+                )
+                .into();
+        };
+        let rows = checks
+            .iter()
+            .map(|check| {
+                let mut items = vec![
+                    status_icon(check.status),
+                    widget::column::with_capacity(2)
+                        .spacing(2)
+                        .push(text::heading(tr(check.title)))
+                        .push(dim_caption(check.caption.as_str()).wrapping(Wrapping::Word))
+                        .width(Length::Fill)
+                        .into(),
+                ];
+                match check.help {
+                    Some(readiness::Help::TestSound) => {
+                        if let Some(sound) = test_sound() {
+                            items.push(
+                                widget::button::standard(tr("Test the sound"))
+                                    .on_press(Message::Run(Action::Launch(sound)))
+                                    .into(),
+                            );
+                        }
+                    }
+                    Some(readiness::Help::Disk) => items.push(
+                        widget::button::standard(tr("How to do it"))
+                            .trailing_icon(widget::button::link::icon())
+                            .on_press(Message::Run(Action::OpenUri(install_url("disk"))))
+                            .into(),
+                    ),
+                    None => {}
+                }
+                settings::item_row(items).spacing(space_s).into()
+            })
+            .collect();
+        let footer = widget::row::with_capacity(2)
+            .spacing(space_s)
+            .align_y(Alignment::Center)
+            .push(
+                dim_caption(tr(
+                    "A printer or a game controller: plug it in to check it.",
+                ))
+                .wrapping(Wrapping::Word)
+                .width(Length::Fill),
+            )
+            .push(widget::button::link(tr("Copy the report")).on_press(Message::CopyReport));
+        widget::column::with_capacity(2)
+            .spacing(space_s)
+            .push(section(rows))
+            .push(footer)
+            .into()
+    }
+
+    /// Live session's last page: what to look at before installing (the
+    /// checks that are not all right), and the install guide
+    pub(super) fn install_view<'a>(&'a self, space_s: u16) -> Element<'a, Message> {
+        let issues: Vec<&readiness::Check> = self
+            .readiness
+            .iter()
+            .flatten()
+            .filter(|check| check.status >= readiness::Status::Warn)
+            .collect();
+        let mut rows = Vec::new();
+        if let Some(worst) = issues.iter().map(|check| check.status).max() {
+            let title = if issues.len() == 1 {
+                tr("One thing to look at before installing").to_owned()
+            } else {
+                fill(
+                    tr("{} things to look at before installing"),
+                    &issues.len().to_string(),
+                )
+            };
+            let titles: Vec<&str> = issues.iter().map(|check| tr(check.title)).collect();
+            rows.push(
+                settings::item_row(vec![
+                    status_icon(worst),
+                    widget::column::with_capacity(2)
+                        .spacing(2)
+                        .push(text::heading(title))
+                        .push(dim_caption(titles.join(", ")).wrapping(Wrapping::Word))
+                        .width(Length::Fill)
+                        .into(),
+                    widget::button::standard(tr("Review"))
+                        .on_press(Message::PageOpen(1))
+                        .into(),
+                ])
+                .spacing(space_s)
+                .into(),
+            );
+        }
+        rows.push(
+            settings::item_row(vec![
+                row_icon("help-browser-symbolic"),
+                two_lines(
+                    text::heading(tr("Installation guide")).into(),
+                    tr("Keep Windows next to it, choose where to install, the NVIDIA key."),
+                ),
+                widget::button::standard(tr("Open"))
+                    .trailing_icon(widget::button::link::icon())
+                    .on_press(Message::Run(Action::OpenUri(install_url(""))))
+                    .into(),
+            ])
+            .spacing(space_s)
+            .into(),
+        );
+        widget::column::with_capacity(2)
+            .spacing(space_s)
+            .push(
+                widget::container(widget::icon::from_name("cosmic-blue-installer").size(128))
+                    .padding([space_s, 0])
+                    .center_x(Length::Fill),
+            )
+            .push(section(rows))
+            .into()
     }
 
     pub(super) fn ready_view<'a>(&'a self, space_s: u16) -> Element<'a, Message> {

@@ -43,9 +43,14 @@ use std::time::Duration;
 mod devtools;
 mod edition;
 mod failure;
+// The live session's hardware check reads the same details as Tools'
+// Computer page (cosmic-blue-tools), not all of them
+#[allow(dead_code)]
+mod hardware;
 mod i18n;
 mod layout;
 mod network;
+mod readiness;
 mod style;
 mod system;
 mod tour_keys;
@@ -335,12 +340,15 @@ enum Body {
     Try,
     /// What was done, what the computer needs, backups and help
     Ready,
-    /// A large icon of the icon theme, as an illustration
-    Icon(&'static str),
     /// Title and subtitle rows, without action
     Features(Vec<(&'static str, &'static str)>),
     /// Title and subtitle rows, some with a button
     Rows(Vec<Row>),
+    /// Live session: what this computer has, checked (readiness.rs)
+    Readiness,
+    /// Live session's last page: the checks to look at before installing,
+    /// and the install guide
+    Install,
 }
 
 struct Page {
@@ -382,16 +390,30 @@ enum Mode {
 }
 
 /// The cosmic-blue site in the session language
-fn docs_url() -> String {
-    let lang = match language() {
+/// The website's folder of the session language ("" for English)
+fn site_language() -> &'static str {
+    match language() {
         Some("pt_BR") => "pt-br/",
         Some("fr") => "fr/",
         Some("de") => "de/",
         Some("es") => "es/",
         Some("it") => "it/",
         _ => "",
+    }
+}
+
+fn docs_url() -> String {
+    format!("{SITE}{}docs/", site_language())
+}
+
+/// The install guide, at one of its steps ("disk") or at the top ("")
+fn install_url(step: &str) -> String {
+    let anchor = if step.is_empty() {
+        String::new()
+    } else {
+        format!("#{step}")
     };
-    format!("{SITE}{lang}docs/")
+    format!("{SITE}{}install/{anchor}", site_language())
 }
 
 const DISTROSHELF: &[&str] = &["flatpak", "run", "com.ranfdev.DistroShelf"];
@@ -643,11 +665,11 @@ fn pages(mode: &Mode, origin: Option<Origin>, experienced: bool) -> Vec<Page> {
                 Body::Welcome,
             ),
             Page::new(
-                "Try it live",
+                "Is this computer ready?",
                 Some(
-                    "cosmic-blue is running from the live media. Nothing is written to your disk, and your changes are lost when you shut down. You can start the installer at any time from the desktop or the dock.",
+                    "cosmic-blue runs from the USB drive, without touching your disk. Here is what it found.",
                 ),
-                Body::Icon("cosmic-blue-welcome"),
+                Body::Readiness,
             ),
             Page::new(
                 "What you get",
@@ -672,7 +694,7 @@ fn pages(mode: &Mode, origin: Option<Origin>, experienced: bool) -> Vec<Page> {
                 Some(
                     "The installer copies cosmic-blue to your disk. After that, it updates itself from the cosmic-blue image registry.",
                 ),
-                Body::Icon("cosmic-blue-installer"),
+                Body::Install,
             ),
         ],
         Mode::Open(_) | Mode::Shortcuts | Mode::Phone | Mode::Belongings => Vec::new(),
@@ -853,6 +875,7 @@ const TEXTS: &[&str] = &[
 fn all_texts() -> Vec<&'static str> {
     let mut texts: Vec<&'static str> = TEXTS.to_vec();
     texts.extend(failure::TEXTS);
+    texts.extend(readiness::TEXTS);
     for origin in Origin::ALL {
         // (names of operating systems are not translated)
         texts.push(origin.card().2);
@@ -1017,6 +1040,10 @@ enum Message {
     /// Flatpak apps, Homebrew tools, first-boot apps still installing
     Apps(BTreeSet<String>, BTreeSet<usize>, bool),
     Computer(Computer),
+    /// The live session's hardware checks
+    Readiness(Vec<readiness::Check>),
+    /// Copy the checks as text, to ask for help on a forum
+    CopyReport,
     SwitchNvidia,
     NvidiaDone(Option<bool>),
     Battery(bool),
@@ -1102,6 +1129,8 @@ struct App<T: Tour> {
     vault_card: Option<Card<&'static str>>,
     // Computer
     computer: Option<Computer>,
+    /// Live session: None while the checks run
+    readiness: Option<Vec<readiness::Check>>,
     nvidia: Nvidia,
     tried: BTreeSet<Try>,
     tiling: bool,
@@ -1353,6 +1382,7 @@ impl<T: Tour> Application for App<T> {
             vault_installing: None,
             vault_card: None,
             computer: None,
+            readiness: None,
             nvidia: Nvidia::Idle,
             tried: BTreeSet::new(),
             tiling: system::tiling(),
@@ -1375,6 +1405,9 @@ impl<T: Tour> Application for App<T> {
         }
         if matches!(mode, Mode::Open(_) | Mode::Phone) {
             tasks.push(check_apps());
+        }
+        if mode == Mode::Live {
+            tasks.push(blocking(readiness::run, Message::Readiness));
         }
         (app, Task::batch(tasks))
     }
@@ -1601,6 +1634,18 @@ impl<T: Tour> Application for App<T> {
             }
             Message::Computer(computer) => {
                 self.computer = Some(computer);
+            }
+            Message::Readiness(checks) => {
+                self.readiness = Some(checks);
+            }
+            Message::CopyReport => {
+                if let Some(checks) = &self.readiness {
+                    let report = readiness::report(checks, &readiness::os_version());
+                    return Task::batch([
+                        cosmic::iced::clipboard::write(report),
+                        self.toast("Copied"),
+                    ]);
+                }
             }
             Message::SwitchNvidia => {
                 self.nvidia = Nvidia::Switching;

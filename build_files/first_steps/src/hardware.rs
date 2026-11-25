@@ -222,9 +222,9 @@ pub fn memory_gb(meminfo: &str) -> u64 {
         .map_or(0, |kib| kib.div_ceil(1024 * 1024))
 }
 
-/// A graphics card's name from lspci's vendor and device names: the
-/// marketing name in brackets when there is one ("TU117M [GeForce GTX 1650
-/// Mobile]" -> "NVIDIA GeForce GTX 1650 Mobile")
+/// A device's name (graphics card, Wi-Fi card) from lspci's vendor and
+/// device names: the marketing name in brackets when there is one ("TU117M
+/// [GeForce GTX 1650 Mobile]" -> "NVIDIA GeForce GTX 1650 Mobile")
 pub fn gpu_name(vendor: &str, device: &str) -> String {
     let lower = vendor.to_lowercase();
     let vendor = if lower.contains("nvidia") {
@@ -233,6 +233,14 @@ pub fn gpu_name(vendor: &str, device: &str) -> String {
         "AMD"
     } else if lower.contains("intel") {
         "Intel"
+    } else if lower.contains("broadcom") {
+        "Broadcom"
+    } else if lower.contains("realtek") {
+        "Realtek"
+    } else if lower.contains("qualcomm") || lower.contains("atheros") {
+        "Qualcomm"
+    } else if lower.contains("mediatek") {
+        "MediaTek"
     } else if lower.contains("red hat") {
         "Red Hat"
     } else if lower.contains("vmware") {
@@ -272,34 +280,51 @@ fn gpus() -> Vec<String> {
     slots.dedup();
     slots
         .iter()
-        .map(|slot| {
-            // lspci -mm: Slot "Class" "Vendor" "Device" ...
-            let line = Command::new("lspci")
-                .args(["-mm", "-s", slot])
-                .stdin(Stdio::null())
-                .stderr(Stdio::null())
-                .output()
-                .map(|output| String::from_utf8_lossy(&output.stdout).into_owned())
-                .unwrap_or_default();
-            let fields: Vec<&str> = line.split('"').collect();
-            match (fields.get(3), fields.get(5)) {
-                (Some(vendor), Some(device)) if !device.is_empty() => gpu_name(vendor, device),
-                _ => {
-                    let vendor =
-                        match read_file(format!("/sys/bus/pci/devices/{slot}/vendor")).as_str() {
-                            "0x10de" => "NVIDIA",
-                            "0x1002" => "AMD",
-                            "0x8086" => "Intel",
-                            "0x1af4" => "Virtio",
-                            "0x15ad" => "VMware",
-                            _ => "",
-                        };
-                    vendor.to_owned()
-                }
+        .map(|slot| match pci_names(slot) {
+            Some((vendor, device)) => gpu_name(&vendor, &device),
+            None => {
+                vendor_by_id(&read_file(format!("/sys/bus/pci/devices/{slot}/vendor"))).to_owned()
             }
         })
         .filter(|name| !name.is_empty())
         .collect()
+}
+
+/// A PCI vendor's short name from its id ("0x10de"), for when lspci is
+/// missing; empty when unknown
+pub fn vendor_by_id(id: &str) -> &'static str {
+    match id {
+        "0x10de" => "NVIDIA",
+        "0x1002" => "AMD",
+        "0x8086" => "Intel",
+        "0x14e4" => "Broadcom",
+        "0x10ec" => "Realtek",
+        "0x168c" | "0x17cb" => "Qualcomm",
+        "0x14c3" => "MediaTek",
+        "0x1af4" => "Virtio",
+        "0x15ad" => "VMware",
+        _ => "",
+    }
+}
+
+/// The vendor and device names of a PCI device (slot "0000:01:00.0"), from
+/// lspci, when it is there and knows them
+pub fn pci_names(slot: &str) -> Option<(String, String)> {
+    // lspci -mm: Slot "Class" "Vendor" "Device" ...
+    let output = Command::new("lspci")
+        .args(["-mm", "-s", slot])
+        .stdin(Stdio::null())
+        .stderr(Stdio::null())
+        .output()
+        .ok()?;
+    let line = String::from_utf8_lossy(&output.stdout);
+    let fields: Vec<&str> = line.split('"').collect();
+    match (fields.get(3), fields.get(5)) {
+        (Some(vendor), Some(device)) if !device.is_empty() => {
+            Some(((*vendor).to_owned(), (*device).to_owned()))
+        }
+        _ => None,
+    }
 }
 
 fn boot() -> Boot {

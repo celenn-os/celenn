@@ -72,10 +72,121 @@ msgstr ""
 msgid "cosmic-blue is Fedora Atomic with the COSMIC desktop, made in the spirit of Bluefin: a desktop that stays out of your way and keeps itself up to date."
 msgstr ""
 
-msgid "Try it live"
+msgid "Is this computer ready?"
 msgstr ""
 
-msgid "cosmic-blue is running from the live media. Nothing is written to your disk, and your changes are lost when you shut down. You can start the installer at any time from the desktop or the dock."
+msgid "cosmic-blue runs from the USB drive, without touching your disk. Here is what it found."
+msgstr ""
+
+msgid "Wi-Fi"
+msgstr ""
+
+msgid "{}: works."
+msgstr ""
+
+msgid "Wi-Fi works."
+msgstr ""
+
+msgid "{} has no free driver. Plug in a network cable, or a small USB Wi-Fi adapter: everything else works."
+msgstr ""
+
+msgid "{} was found but does not start. Its driver may need firmware that is missing."
+msgstr ""
+
+msgid "No Wi-Fi card found. A network cable works."
+msgstr ""
+
+msgid "Sound"
+msgstr ""
+
+msgid "Sound card found."
+msgstr ""
+
+msgid "No sound card was recognized. USB or Bluetooth headphones may still work."
+msgstr ""
+
+msgid "Graphics card"
+msgstr ""
+
+msgid "{}: the driver is already in the system."
+msgstr ""
+
+msgid "{}: the NVIDIA driver is ready."
+msgstr ""
+
+msgid "{}. For games, switch to the NVIDIA edition after installing: one click in cosmic-blue Tools → Computer."
+msgstr ""
+
+msgid "{}: no driver, the picture may be slow."
+msgstr ""
+
+msgid "Memory"
+msgstr ""
+
+msgid "{} GB: too little, 4 GB is the minimum."
+msgstr ""
+
+msgid "{} GB: it works, but 8 GB are recommended for a browser with many tabs."
+msgstr ""
+
+msgid "{} GB of memory."
+msgstr ""
+
+msgid "Disk"
+msgstr ""
+
+msgid "No internal disk found. If this computer has one, its firmware may hide it: in its settings, set the storage mode to AHCI instead of RAID or Intel RST."
+msgstr ""
+
+msgid "{} GB disk: 64 GB is the minimum."
+msgstr ""
+
+msgid "{} GB disk, empty."
+msgstr ""
+
+msgid "{} GB disk."
+msgstr ""
+
+msgid "{} GB disk. Windows is on it: you can keep both."
+msgstr ""
+
+msgid "{} GB disk. Windows is on it, encrypted with BitLocker: before installing, turn BitLocker off in Windows, or at least write down its recovery key."
+msgstr ""
+
+msgid "Could not be checked."
+msgstr ""
+
+msgid "Checking this computer…"
+msgstr ""
+
+msgid "Test the sound"
+msgstr ""
+
+msgid "How to do it"
+msgstr ""
+
+msgid "Copy the report"
+msgstr ""
+
+msgid "Copied"
+msgstr ""
+
+msgid "A printer or a game controller: plug it in to check it."
+msgstr ""
+
+msgid "One thing to look at before installing"
+msgstr ""
+
+msgid "{} things to look at before installing"
+msgstr ""
+
+msgid "Review"
+msgstr ""
+
+msgid "Installation guide"
+msgstr ""
+
+msgid "Keep Windows next to it, choose where to install, the NVIDIA key."
 msgstr ""
 
 msgid "What you get"

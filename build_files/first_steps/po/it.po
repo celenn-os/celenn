@@ -71,11 +71,122 @@ msgstr "Iniziamo"
 msgid "cosmic-blue is Fedora Atomic with the COSMIC desktop, made in the spirit of Bluefin: a desktop that stays out of your way and keeps itself up to date."
 msgstr "cosmic-blue è Fedora Atomic con il desktop COSMIC, nello spirito di Bluefin: un desktop che non ti intralcia e si tiene aggiornato da solo."
 
-msgid "Try it live"
-msgstr "Provalo dal vivo"
+msgid "Is this computer ready?"
+msgstr "Questo computer è pronto?"
 
-msgid "cosmic-blue is running from the live media. Nothing is written to your disk, and your changes are lost when you shut down. You can start the installer at any time from the desktop or the dock."
-msgstr "cosmic-blue è in esecuzione dal supporto live. Non viene scritto nulla sul disco e le modifiche vanno perse allo spegnimento. Puoi avviare l’installazione in qualsiasi momento dal desktop o dalla dock."
+msgid "cosmic-blue runs from the USB drive, without touching your disk. Here is what it found."
+msgstr "cosmic-blue funziona dalla chiavetta USB, senza toccare il disco. Ecco cosa ha trovato."
+
+msgid "Wi-Fi"
+msgstr "Wi-Fi"
+
+msgid "{}: works."
+msgstr "{}: funziona."
+
+msgid "Wi-Fi works."
+msgstr "Il Wi-Fi funziona."
+
+msgid "{} has no free driver. Plug in a network cable, or a small USB Wi-Fi adapter: everything else works."
+msgstr "{} non ha un driver libero. Collega un cavo di rete o un piccolo adattatore Wi-Fi USB: tutto il resto funziona."
+
+msgid "{} was found but does not start. Its driver may need firmware that is missing."
+msgstr "{} è stato trovato ma non si avvia. Il suo driver potrebbe aver bisogno di un firmware mancante."
+
+msgid "No Wi-Fi card found. A network cable works."
+msgstr "Nessuna scheda Wi-Fi trovata. Un cavo di rete funziona."
+
+msgid "Sound"
+msgstr "Audio"
+
+msgid "Sound card found."
+msgstr "Scheda audio trovata."
+
+msgid "No sound card was recognized. USB or Bluetooth headphones may still work."
+msgstr "Nessuna scheda audio riconosciuta. Cuffie USB o Bluetooth potrebbero comunque funzionare."
+
+msgid "Graphics card"
+msgstr "Scheda grafica"
+
+msgid "{}: the driver is already in the system."
+msgstr "{}: il driver è già nel sistema."
+
+msgid "{}: the NVIDIA driver is ready."
+msgstr "{}: il driver NVIDIA è pronto."
+
+msgid "{}. For games, switch to the NVIDIA edition after installing: one click in cosmic-blue Tools → Computer."
+msgstr "{}. Per i giochi, passa all’edizione NVIDIA dopo l’installazione: un clic in Strumenti di cosmic-blue → Computer."
+
+msgid "{}: no driver, the picture may be slow."
+msgstr "{}: nessun driver, la grafica potrebbe essere lenta."
+
+msgid "Memory"
+msgstr "Memoria"
+
+msgid "{} GB: too little, 4 GB is the minimum."
+msgstr "{} GB: troppo poca, il minimo è 4 GB."
+
+msgid "{} GB: it works, but 8 GB are recommended for a browser with many tabs."
+msgstr "{} GB: funziona, ma 8 GB sono consigliati per un browser con molte schede."
+
+msgid "{} GB of memory."
+msgstr "{} GB di memoria."
+
+msgid "Disk"
+msgstr "Disco"
+
+msgid "No internal disk found. If this computer has one, its firmware may hide it: in its settings, set the storage mode to AHCI instead of RAID or Intel RST."
+msgstr "Nessun disco interno trovato. Se questo computer ne ha uno, il firmware potrebbe nasconderlo: nelle sue impostazioni, imposta la modalità di archiviazione su AHCI invece di RAID o Intel RST."
+
+msgid "{} GB disk: 64 GB is the minimum."
+msgstr "Disco da {} GB: il minimo è 64 GB."
+
+msgid "{} GB disk, empty."
+msgstr "Disco da {} GB, vuoto."
+
+msgid "{} GB disk."
+msgstr "Disco da {} GB."
+
+msgid "{} GB disk. Windows is on it: you can keep both."
+msgstr "Disco da {} GB. C’è Windows: puoi tenerli entrambi."
+
+msgid "{} GB disk. Windows is on it, encrypted with BitLocker: before installing, turn BitLocker off in Windows, or at least write down its recovery key."
+msgstr "Disco da {} GB. C’è Windows, cifrato con BitLocker: prima di installare, disattiva BitLocker in Windows, o almeno annota la chiave di ripristino."
+
+msgid "Could not be checked."
+msgstr "Non è stato possibile verificarlo."
+
+msgid "Checking this computer…"
+msgstr "Verifica di questo computer…"
+
+msgid "Test the sound"
+msgstr "Prova l’audio"
+
+msgid "How to do it"
+msgstr "Come fare"
+
+msgid "Copy the report"
+msgstr "Copia il rapporto"
+
+msgid "Copied"
+msgstr "Copiato"
+
+msgid "A printer or a game controller: plug it in to check it."
+msgstr "Una stampante o un controller: collegalo per verificarlo."
+
+msgid "One thing to look at before installing"
+msgstr "Una cosa da guardare prima di installare"
+
+msgid "{} things to look at before installing"
+msgstr "{} cose da guardare prima di installare"
+
+msgid "Review"
+msgstr "Rivedi"
+
+msgid "Installation guide"
+msgstr "Guida all’installazione"
+
+msgid "Keep Windows next to it, choose where to install, the NVIDIA key."
+msgstr "Tenere Windows accanto, scegliere dove installare, la chiave NVIDIA."
 
 msgid "What you get"
 msgstr "Cosa ti aspetta"
