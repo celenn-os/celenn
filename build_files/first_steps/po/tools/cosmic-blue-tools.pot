@@ -782,6 +782,7 @@ msgid "Your video apps are ready."
 msgstr ""
 
 msgid "Ready in one click. In each list, the apps most used on Linux are already ticked."
+msgstr ""
 
 msgid "Printers and scanners"
 msgstr ""
