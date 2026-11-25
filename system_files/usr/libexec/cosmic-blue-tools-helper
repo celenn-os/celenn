@@ -63,28 +63,47 @@ NOT_DATA='^(c12a7328-f81f-11d2-ba4b-00a0c93ec93b|e3c9e316-0b5c-4db8-817d-f92df00
 # before they are installed
 GAME_APPS=(com.valvesoftware.Steam com.heroicgameslauncher.hgl net.lutris.Lutris com.usebottles.bottles)
 
-# Gives the game launchers the folder, or takes it back (the override's
-# filesystems= list without it; other overrides stay)
+# Gives the game launchers the folder, or takes it back: the filesystems=
+# list of their system override ([Context], as `flatpak override --system`
+# writes it, which refuses apps not installed yet); other overrides stay
 games_access() { # on|off folder
     local app file
+    mkdir -p /var/lib/flatpak/overrides
     for app in "${GAME_APPS[@]}"; do
-        if [[ "$1" == on ]]; then
-            flatpak override --system --filesystem="$2" "${app}" 2>/dev/null || :
-            continue
-        fi
         file="/var/lib/flatpak/overrides/${app}"
-        [[ -f "${file}" ]] || continue
-        awk -v folder="$2" 'BEGIN { FS = OFS = "=" }
-            $1 == "filesystems" {
-                n = split(substr($0, length("filesystems=") + 1), entries, ";")
+        [[ "$1" == on || -f "${file}" ]] || continue
+        touch "${file}"
+        awk -v folder="$2" -v add="$([[ "$1" == on ]] && echo 1)" '
+            function list(entries,    n, i, kept, item) {
+                n = split(entries, item, ";")
                 kept = ""
                 for (i = 1; i <= n; i++)
-                    if (entries[i] != "" && entries[i] != folder) kept = kept entries[i] ";"
-                if (kept == "") next
-                print "filesystems=" kept
+                    if (item[i] != "" && item[i] != folder) kept = kept item[i] ";"
+                if (add) kept = kept folder ";"
+                return kept
+            }
+            function finish() {
+                if (section == "Context" && !done) {
+                    if (add) print "filesystems=" folder ";"
+                    done = 1
+                }
+            }
+            /^\[/ { finish(); section = substr($0, 2, length($0) - 2); print; next }
+            section == "Context" && /^filesystems=/ {
+                kept = list(substr($0, length("filesystems=") + 1))
+                if (kept != "") print "filesystems=" kept
+                done = 1
                 next
             }
-            { print }' "${file}" > "${file}.new" && mv "${file}.new" "${file}"
+            { print }
+            END {
+                finish()
+                if (!done && add) printf "[Context]\nfilesystems=%s;\n", folder
+            }' "${file}" > "${file}.new"
+        chmod 0644 "${file}.new"
+        mv "${file}.new" "${file}"
+        # Nothing left in it: no override at all
+        [[ "$(tr -d '[:space:]' < "${file}")" != "[Context]" ]] || rm -f "${file}"
     done
 }
 
