@@ -16,10 +16,8 @@ const DOCS: &str = "/usr/bin/cosmic-blue-docs";
 const QUESTIONS: &str = "https://github.com/cosmic-blue-os/cosmic-blue/discussions/categories/q-a";
 const REPORT: &str = "/usr/libexec/cosmic-blue-report-bug";
 const SYSTEM_INFO: &str = "/usr/libexec/cosmic-blue-system-info";
-const ICON: &str = "cosmic-blue-docs";
 
 pub const TEXTS: &[&str] = &[
-    "Help",
     "Find answers, ask a question, or tell us what goes wrong.",
     "Documentation",
     "Updates, software, commands and tips",
@@ -189,11 +187,6 @@ impl Page {
                     )),
             )
             .push(report);
-        crate::common::header(
-            ICON,
-            tr("Help"),
-            tr("Find answers, ask a question, or tell us what goes wrong."),
-            content.into(),
-        )
+        content.into()
     }
 }

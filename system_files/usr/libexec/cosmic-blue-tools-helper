@@ -15,7 +15,7 @@
 #            queued on purpose. Also run by `ujust enroll-secure-boot-key`.
 #   disks UUID=on|off...
 #            open an internal data disk at every startup, or stop doing so
-#            (Tools, Computer, Other disks). "on" adds a line to /etc/fstab
+#            (Tools, Other disks). "on" adds a line to /etc/fstab
 #            (kept by updates): the disk by its UUID, at /var/mnt/<its name>
 #            (also /mnt/<its name>), never in the way of the startup
 #            (nofail), shown in Files (x-gvfs-show), marked as ours

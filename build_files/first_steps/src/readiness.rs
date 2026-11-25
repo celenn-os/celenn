@@ -23,7 +23,7 @@ pub const TEXTS: &[&str] = &[
     "Graphics card",
     "{}: the driver is already in the system.",
     "{}: the NVIDIA driver is ready.",
-    "{}. For games, switch to the NVIDIA edition after installing: one click in cosmic-blue Tools → Computer.",
+    "{}. For games, switch to the NVIDIA edition after installing: one click in cosmic-blue Tools → NVIDIA driver.",
     "{}: no driver, the picture may be slow.",
     "Memory",
     "{} GB: too little, 4 GB is the minimum.",
@@ -300,7 +300,7 @@ pub fn graphics(pci: &[Pci]) -> Check {
             ("0x10de", Some(_)) => (
                 Status::Info,
                 tr(
-                    "{}. For games, switch to the NVIDIA edition after installing: one click in cosmic-blue Tools → Computer.",
+                    "{}. For games, switch to the NVIDIA edition after installing: one click in cosmic-blue Tools → NVIDIA driver.",
                 ),
             ),
             _ => (Status::Good, tr("{}: the driver is already in the system.")),

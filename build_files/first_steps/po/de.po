@@ -113,8 +113,8 @@ msgstr "{}: Der Treiber ist bereits im System."
 msgid "{}: the NVIDIA driver is ready."
 msgstr "{}: Der NVIDIA-Treiber ist bereit."
 
-msgid "{}. For games, switch to the NVIDIA edition after installing: one click in cosmic-blue Tools → Computer."
-msgstr "{}. Für Spiele wechseln Sie nach der Installation zur NVIDIA-Edition: ein Klick in cosmic-blue Werkzeuge → Computer."
+msgid "{}. For games, switch to the NVIDIA edition after installing: one click in cosmic-blue Tools → NVIDIA driver."
+msgstr "{}. Für Spiele wechseln Sie nach der Installation zur NVIDIA-Edition: ein Klick in cosmic-blue Werkzeuge → NVIDIA-Treiber."
 
 msgid "{}: no driver, the picture may be slow."
 msgstr "{}: kein Treiber, die Anzeige kann langsam sein."
@@ -677,8 +677,8 @@ msgstr "„{}“ hat nicht geklappt"
 msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
 msgstr "Keine Internetverbindung. Verbinden Sie sich mit einem Netzwerk und versuchen Sie es erneut. Nichts wurde geändert."
 
-msgid "The disk is full ({} free). Free up space with Clean up, in cosmic-blue Tools, Maintenance, then try again."
-msgstr "Die Festplatte ist voll ({} frei). Schaffen Sie Platz mit Aufräumen in cosmic-blue Werkzeuge, Pflege, und versuchen Sie es erneut."
+msgid "The disk is full ({} free). Free up space with cosmic-blue Tools, then try again."
+msgstr "Die Festplatte ist voll ({} frei). Geben Sie mit cosmic-blue Werkzeuge Speicherplatz frei und versuchen Sie es erneut."
 
 msgid "The server does not answer. Try again in a few minutes."
 msgstr "Der Server antwortet nicht. Versuchen Sie es in ein paar Minuten erneut."
@@ -758,14 +758,14 @@ msgstr "Das Wichtigste"
 msgid "What is different here, and your tools."
 msgstr "Was hier anders ist, und Ihre Werkzeuge."
 
-msgid "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Extra software."
-msgstr "Büro, Spiele, Grafik und mehr: COSMIC Store oder cosmic-blue Werkzeuge → Zusätzliche Software."
+msgid "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Install apps."
+msgstr "Büro, Spiele, Grafik und mehr: COSMIC Store oder cosmic-blue Werkzeuge → Apps installieren."
 
 msgid "From another cosmic-blue computer"
 msgstr "Von einem anderen cosmic-blue-Computer"
 
-msgid "Your settings and the list of your apps, with the file saved there in cosmic-blue Tools → Appearance."
-msgstr "Ihre Einstellungen und die Liste Ihrer Apps, mit der dort in cosmic-blue Werkzeuge → Aussehen und Einstellungen gespeicherten Datei."
+msgid "Your settings and the list of your apps, with the file saved there in cosmic-blue Tools → Change computers."
+msgstr "Ihre Einstellungen und die Liste Ihrer Apps, mit der dort in cosmic-blue Werkzeuge → Computer wechseln gespeicherten Datei."
 
 msgid "Restore…"
 msgstr "Übernehmen …"

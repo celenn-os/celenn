@@ -567,7 +567,7 @@ grep -q '<annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/cosmic
 if /usr/libexec/cosmic-blue-tools-helper clean everything 2>/dev/null; then
     echo "cosmic-blue-tools-helper accepted unknown arguments"; exit 1
 fi
-# Other disks (Tools, Computer): only "UUID=on|off" changes; NTFS disks are
+# Other disks (Tools, Other disks): only "UUID=on|off" changes; NTFS disks are
 # opened with the kernel's ntfs3 driver, exFAT with its exfat driver
 for args in "disks" "disks /dev/sda1=on" "disks 1234-ABCD=maybe" "disks 1234-ABCD=on;reboot"; do
     # shellcheck disable=SC2086 # each case is split into its arguments

@@ -109,7 +109,7 @@
 
     <section class="block">
       <h2 id="updates">Updates and rollback</h2>
-      <p>The <strong>Updates</strong> app shows the version you run and the previous one. <em>Go back to it</em> returns to the previous version at the next restart, without touching your files, and the version you leave is not installed again. Turn on <em>Get new features early</em> for an update every day instead of one tested update a week.</p>
+      <p>The <strong>Updates</strong> app shows the version you run. If something goes wrong after an update, <em>Go back</em> in cosmic-blue Tools returns to the previous version at the next restart, without touching your files, and the version you leave is not installed again. <em>Get new features early</em>, under <em>For experienced users…</em>, brings an update every day instead of one tested update a week.</p>
       <p>The system, Flatpak apps, Homebrew packages and the AppImages added with Gear Lever update by themselves in the background. A system update applies on the next boot. To update now, or to turn the automatic updates off:</p>
       <div class="code">
         <pre><code>ujust update           # update everything now
@@ -187,7 +187,7 @@ distrobox enter arch</code></pre>
       <h3>Printers and scanners</h3>
       <p>Most network and USB printers work right away, without a driver. To add one by hand, open <strong>Print Settings</strong>: drivers for HP, Epson, Brother, Canon and others are installed. <strong>Document Scanner</strong> scans with network and USB scanners.</p>
       <h3>Other disks</h3>
-      <p>A second internal disk, or Windows' D: drive, can open at every startup: in <strong>cosmic-blue Tools</strong>, <em>Computer → Other disks</em>. It is then always at the same place, <code>/mnt/&lt;its name&gt;</code>, in Files and for Steam, which can keep a library there. A disk in Windows format (NTFS) only opens if Windows was fully shut down: turn off Windows' Fast Startup. The disk Windows runs from and encrypted disks are not offered.</p>
+      <p>A second internal disk, or Windows' D: drive, can open at every startup: in <strong>cosmic-blue Tools</strong>, <em>Other disks</em>. It is then always at the same place, <code>/mnt/&lt;its name&gt;</code>, in Files and for Steam, which can keep a library there. A disk in Windows format (NTFS) only opens if Windows was fully shut down: turn off Windows' Fast Startup. The disk Windows runs from and encrypted disks are not offered.</p>
       <h3>Firmware updates</h3>
       <p>The <strong>Firmware</strong> app updates the firmware of the computer and its devices (BIOS/UEFI, SSD, dock…), when their maker publishes it on fwupd.org. Or from the terminal:</p>
       <div class="code">
@@ -204,7 +204,7 @@ distrobox enter arch</code></pre>
 
     <section class="block">
       <h2 id="tools">cosmic-blue Tools</h2>
-      <p><strong>cosmic-blue Tools</strong> does with buttons what would otherwise take a command: updates, freeing up disk space, the battery charge limit, the NVIDIA edition, Microsoft fonts, games, password managers and developer tools, resetting the look, taking your settings and apps to a new computer, and help. Each button runs the same thing as the matching <code>ujust</code> command. Changes to the system ask for an administrator's password.</p>
+      <p><strong>cosmic-blue Tools</strong> is a toolbox: each tile opens one tool. <em>Every day</em>: update, install apps, free up space, protect your files, print, change computers. <em>My computer</em>: what is inside, the battery, other disks, the look, the NVIDIA driver, Microsoft fonts. <em>When something is wrong</em>: go back, repair, get help. A line at the top says when something needs your attention, and <em>For experienced users…</em> gathers the update channel, older versions, firmware and virtual machines. Each tool shows the matching <code>ujust</code> command, and its <strong>?</strong> button opens its part of this guide. Changes to the system ask for an administrator's password.</p>
     </section>
 
     <section class="block">

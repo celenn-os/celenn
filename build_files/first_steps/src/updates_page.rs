@@ -33,13 +33,13 @@
 //
 // The look is the tours' (main.rs): same banner, title, rows and buttons.
 
-use crate::common::{fill, header, row_title, state_icon, two_lines};
+use crate::common::{ToastAsk, fill, row_title, state_icon, two_lines};
 use crate::failure::{self, Card, CardAction, CardMessage, Outcome};
 use crate::i18n::tr;
 use crate::update_progress::{self, Progress};
 use cosmic::app::Task;
 use cosmic::iced::{Alignment, Length, Subscription};
-use cosmic::widget::{self, settings, text, toaster::Toasts};
+use cosmic::widget::{self, settings, text};
 use cosmic::{Apply, Element, cosmic_theme, theme};
 
 const HELPER: &str = "/usr/libexec/cosmic-blue-updates-helper";
@@ -47,12 +47,10 @@ const HELPER: &str = "/usr/libexec/cosmic-blue-updates-helper";
 const HOLD: &str = "/var/lib/cosmic-blue/update-hold";
 const RELEASES: &str = "https://github.com/cosmic-blue-os/cosmic-blue/releases";
 const VENDOR: &str = "ghcr.io/cosmic-blue-os/";
-const ICON: &str = "cosmic-blue-update";
 
 /// Every text, for the translation check
 pub const TEXTS: &[&str] = &[
     "Updates",
-    "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you. If something goes wrong, you can go back to the previous version.",
     "Current version: {}",
     "Weekly updates, tested before they come out",
     "Daily updates, sooner but less tested",
@@ -89,6 +87,8 @@ pub const TEXTS: &[&str] = &[
     "Updates are paused",
     "This system stays on this version. Resume them to get one tested update a week again.",
     "Resume updates",
+    "No previous version",
+    "This computer has only ever run this version.",
 ];
 
 /// --older and --status: Some(exit code) when one of them is given
@@ -345,7 +345,8 @@ pub enum Message {
     Card(CardMessage),
     Restart,
     OpenReleases,
-    CloseToast(widget::ToastId),
+    /// A toast for the window to show (tools.rs)
+    Toast(ToastAsk<Message>),
     /// Time to read the download progress again
     Tick,
 }
@@ -360,7 +361,16 @@ pub struct Page {
     progress: Option<Progress>,
     /// The last change that did not work, until closed or tried again
     card: Option<Card<Job>>,
-    toasts: Toasts<Message>,
+}
+
+/// The parts of the page, each in its own tool (tools.rs): the version and
+/// the update waiting for a restart; going back to the previous version;
+/// the channel and the older versions, for experienced users
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Part {
+    Main,
+    Rollback,
+    Advanced,
 }
 
 fn refresh() -> Task<Message> {
@@ -428,9 +438,7 @@ async fn check() -> Outcome {
 
 impl Page {
     fn toast(&mut self, message: &'static str) -> Task<Message> {
-        self.toasts
-            .push(widget::toaster::Toast::new(tr(message)))
-            .map(cosmic::Action::App)
+        crate::common::toast(tr(message).to_owned(), None, Message::Toast)
     }
 }
 
@@ -448,7 +456,6 @@ impl Page {
             older: None,
             progress: update_progress::read(),
             card: None,
-            toasts: Toasts::new(Message::CloseToast),
         };
         (page, refresh())
     }
@@ -537,7 +544,8 @@ impl Page {
                     eprintln!("Could not open {RELEASES}: {error}");
                 }
             }
-            Message::CloseToast(id) => self.toasts.remove(id),
+            // The window shows it (tools.rs)
+            Message::Toast(_) => {}
             Message::Tick => {
                 let was_downloading = self.progress.is_some();
                 self.progress = update_progress::read();
@@ -556,7 +564,8 @@ impl Page {
         cosmic::iced::time::every(std::time::Duration::from_secs(1)).map(|_| Message::Tick)
     }
 
-    pub fn view(&self) -> Element<'_, Message> {
+    /// One part of the page (tools.rs gives it its title and frame)
+    pub fn view(&self, part: Part) -> Element<'_, Message> {
         let cosmic_theme::Spacing {
             space_xxs, space_s, ..
         } = theme::spacing();
@@ -580,43 +589,51 @@ impl Page {
                     )])),
                 );
             }
-            Some(Ok(status)) => {
-                content = content.push(self.versions(status, space_xxs, space_s));
-                if let Some(section) = self.channel_section(status, space_s) {
-                    content = content.push(section);
+            Some(Ok(status)) => match part {
+                Part::Main => {
+                    content = content.push(self.versions(status, space_xxs, space_s));
+                    if let Some(section) = self.paused_section(status, space_s) {
+                        content = content.push(section);
+                    }
                 }
-                if let Some(section) = self.older_section(status, space_s) {
-                    content = content.push(section);
+                Part::Rollback => content = content.push(self.rollback(status, space_s)),
+                Part::Advanced => {
+                    if let Some(section) = self.channel_section(status, space_s) {
+                        content = content.push(section);
+                    }
+                    if let Some(section) = self.older_section(status, space_s) {
+                        content = content.push(section);
+                    }
                 }
-            }
+            },
         }
-        // One line at the bottom, so that the window needs no scroll bar
-        // while nothing is unfolded, even on small screens
-        content = content.push(
-            widget::row::with_capacity(2)
-                .spacing(space_xxs)
-                .align_y(Alignment::Center)
-                .push(text::caption(tr(
-                    "Apps from COSMIC Store update by themselves too.",
-                )))
-                .push(
-                    widget::button::link(tr("What's new"))
-                        .trailing_icon(true)
-                        .on_press(Message::OpenReleases),
-                )
-                .apply(widget::container)
-                .center_x(Length::Fill),
-        );
+        if part == Part::Main {
+            content = content.push(
+                widget::row::with_capacity(2)
+                    .spacing(space_xxs)
+                    .align_y(Alignment::Center)
+                    .push(text::caption(tr(
+                        "Apps from COSMIC Store update by themselves too.",
+                    )))
+                    .push(
+                        widget::button::link(tr("What's new"))
+                            .trailing_icon(true)
+                            .on_press(Message::OpenReleases),
+                    )
+                    .apply(widget::container)
+                    .center_x(Length::Fill),
+            );
+        }
+        content.into()
+    }
 
-        let page = header(
-            ICON,
-            tr("Updates"),
-            tr(
-                "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you. If something goes wrong, you can go back to the previous version.",
-            ),
-            content.into(),
-        );
-        widget::toaster(&self.toasts, page)
+    /// The previous version, for the toolbox's tile (tools.rs)
+    pub fn previous(&self) -> Option<&str> {
+        let status = self.status.as_ref()?.as_ref().ok()?;
+        status
+            .previous
+            .as_ref()
+            .map(|previous| previous.version.as_str())
     }
 }
 
@@ -719,6 +736,33 @@ impl Page {
             );
         }
 
+        section.into()
+    }
+
+    /// Going back: the version that starts at the next restart, the one
+    /// set aside, the previous version and its button
+    fn rollback<'a>(&'a self, status: &'a Status, space_s: u16) -> Element<'a, Message> {
+        let idle = self.busy.is_none();
+        let mut section = settings::section();
+        if status.rollback_queued {
+            if let Some(previous) = &status.previous {
+                section = section.add(
+                    settings::item_row(vec![
+                        state_icon("system-reboot-symbolic", false),
+                        two_lines(
+                            row_title(fill(tr("Back to {} at the next restart"), &previous.version))
+                                .into(),
+                            tr("Your files and settings stay as they are. The version you leave will not be installed again: updates start again with the next one.").to_owned(),
+                        ),
+                        widget::button::suggested(tr("Restart"))
+                            .on_press(Message::Restart)
+                            .into(),
+                    ])
+                    .spacing(space_s),
+                );
+            }
+            return section.into();
+        }
         if let Some(held) = &status.held {
             section = section.add(
                 settings::item_row(vec![
@@ -752,30 +796,43 @@ impl Page {
                 .spacing(space_s),
             );
         }
+        if status.previous.is_none() && status.held.is_none() {
+            section = section.add(
+                settings::item_row(vec![
+                    state_icon("emblem-ok-symbolic", false),
+                    two_lines(
+                        row_title(tr("No previous version")).into(),
+                        tr("This computer has only ever run this version.").to_owned(),
+                    ),
+                ])
+                .spacing(space_s),
+            );
+        }
         section.into()
     }
 
-    /// The "Get new features early" switch (stable or testing), for systems
-    /// that follow a channel
-    fn channel_section<'a>(
+    /// Updates paused on an older version: said with the version, with the
+    /// button that resumes them
+    fn paused_section<'a>(
         &'a self,
         status: &'a Status,
         space_s: u16,
     ) -> Option<Element<'a, Message>> {
-        let channel = status.channel()?;
-        if channel == Channel::Pinned {
-            let button: Element<'a, Message> =
-                if matches!(self.busy, Some(Busy::Switching | Busy::Pinning)) {
-                    widget::progress_bar::indeterminate_circular().into()
-                } else {
-                    widget::button::standard(tr("Resume updates"))
-                        .on_press_maybe(
-                            (self.busy.is_none() && !status.rollback_queued)
-                                .then_some(Message::Early(false)),
-                        )
-                        .into()
-                };
-            return Some(
+        if status.channel()? != Channel::Pinned {
+            return None;
+        }
+        let button: Element<'a, Message> =
+            if matches!(self.busy, Some(Busy::Switching | Busy::Pinning)) {
+                widget::progress_bar::indeterminate_circular().into()
+            } else {
+                widget::button::standard(tr("Resume updates"))
+                    .on_press_maybe(
+                        (self.busy.is_none() && !status.rollback_queued)
+                            .then_some(Message::Early(false)),
+                    )
+                    .into()
+            };
+        Some(
                 settings::section()
                     .add(
                         settings::item_row(vec![
@@ -789,7 +846,19 @@ impl Page {
                         .spacing(space_s),
                     )
                     .into(),
-            );
+        )
+    }
+
+    /// The "Get new features early" switch (stable or testing), for systems
+    /// that follow a channel
+    fn channel_section<'a>(
+        &'a self,
+        status: &'a Status,
+        space_s: u16,
+    ) -> Option<Element<'a, Message>> {
+        let channel = status.channel()?;
+        if channel == Channel::Pinned {
+            return self.paused_section(status, space_s);
         }
         let caption = if matches!(self.busy, Some(Busy::Switching | Busy::Pinning))
             && self.progress.is_none()

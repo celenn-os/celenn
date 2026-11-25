@@ -482,7 +482,7 @@ fn essentials() -> Page {
     // No banner: the rows need the room
     Page {
         note: Some(
-            "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Extra software.",
+            "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Install apps.",
         ),
         ..Page::new(
             "The essentials",
@@ -512,7 +512,7 @@ fn belongings_rows() -> Vec<Row> {
         ),
         row_button(
             "From another cosmic-blue computer",
-            "Your settings and the list of your apps, with the file saved there in cosmic-blue Tools → Appearance.",
+            "Your settings and the list of your apps, with the file saved there in cosmic-blue Tools → Change computers.",
             "Restore…",
             Action::Launch(&[TOOLS, "--restore"]),
         ),

@@ -477,7 +477,7 @@ impl<T: Tour> App<T> {
     }
 
     /// What this computer needs, found by system::computer(): only what
-    /// asks for an action (cosmic-blue Tools → Computer has the rest)
+    /// asks for an action (cosmic-blue Tools has the rest)
     pub(super) fn computer_rows<'a>(&'a self, space_s: u16) -> Vec<Element<'a, Message>> {
         let Some(computer) = &self.computer else {
             return Vec::new();

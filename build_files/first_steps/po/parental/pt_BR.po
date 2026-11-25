@@ -200,8 +200,8 @@ msgstr "“{}” não funcionou"
 msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
 msgstr "Sem conexão com a internet. Conecte-se a uma rede e tente de novo. Nada foi alterado."
 
-msgid "The disk is full ({} free). Free up space with Clean up, in cosmic-blue Tools, Maintenance, then try again."
-msgstr "O disco está cheio ({} livres). Libere espaço com Limpar, em Ferramentas do cosmic-blue, Manutenção, e tente de novo."
+msgid "The disk is full ({} free). Free up space with cosmic-blue Tools, then try again."
+msgstr "O disco está cheio ({} livres). Libere espaço com Ferramentas do cosmic-blue e tente de novo."
 
 msgid "The server does not answer. Try again in a few minutes."
 msgstr "O servidor não responde. Tente de novo em alguns minutos."

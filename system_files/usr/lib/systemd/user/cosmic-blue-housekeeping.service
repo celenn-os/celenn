@@ -7,7 +7,7 @@ ConditionUser=!@system
 Type=oneshot
 # Deletes what stayed in the trash for more than 30 days, and shows one
 # notification when the disk is almost full (then waits for its button).
-# Both can be turned off in cosmic-blue Tools > Maintenance.
+# Both can be turned off in cosmic-blue Tools > Free up space.
 ExecStart=/usr/libexec/cosmic-blue-tools --housekeeping
 TimeoutStartSec=1h
 Nice=19
