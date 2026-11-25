@@ -99,7 +99,6 @@ pub const TEXTS: &[&str] = &[
     "FlatPark",
     "More apps in COSMIC Store, from outside Flathub. Less checked.",
     "Tick the ones you want, untick the ones to remove.",
-    "Apps",
     "For the system",
     "Apply",
     "Back to the list",
@@ -912,8 +911,9 @@ impl Page {
             .into()
     }
 
-    /// The kinds of apps as tiles, then what touches the system; or the
-    /// list of the category opened
+    /// The kinds of apps as tiles (no heading above them: the page must
+    /// fit without scrolling), then what touches the system; or the list
+    /// of the category opened
     fn software<'a>(&'a self, state: &'a State) -> Element<'a, Message> {
         let space_s = theme::spacing().space_s;
         if let Some(n) = self.open {
@@ -956,7 +956,6 @@ impl Page {
             ));
         widget::column::with_capacity(4)
             .spacing(space_s)
-            .push(text::heading(tr("Apps")))
             .push(apps::grid(tiles))
             .push(text::heading(tr("For the system")))
             .push(system)

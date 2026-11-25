@@ -667,9 +667,6 @@ msgstr ""
 msgid "The dock hides when a window covers it."
 msgstr ""
 
-msgid "Apps"
-msgstr ""
-
 msgid "Back to the list"
 msgstr ""
 
@@ -712,7 +709,7 @@ msgstr ""
 msgid "LibreOffice and OnlyOffice open and save Word, Excel and PowerPoint files."
 msgstr ""
 
-msgid "LibreOffice, OnlyOffice, PDF Arranger…"
+msgid "LibreOffice, OnlyOffice…"
 msgstr ""
 
 msgid "Lima: ujust install-dev-tools, in a terminal."

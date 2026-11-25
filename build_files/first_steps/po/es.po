@@ -381,7 +381,7 @@ msgid "Make it yours"
 msgstr "A tu gusto"
 
 msgid "Pick what concerns you: nothing installs without a click, and everything can be removed later."
-msgstr "Marca lo que te interesa: nada se instala sin un clic, y todo se puede quitar después."
+msgstr "Elige lo que te interesa: nada se instala sin un clic, y todo se puede quitar después."
 
 msgid "Thousands of other apps are in COSMIC Store."
 msgstr "Miles de aplicaciones más están en COSMIC Store."
@@ -659,8 +659,8 @@ msgstr "Marcado y en gris: ya instalado."
 msgid "Homebrew is not set up yet: only Podman Desktop can be installed now."
 msgstr "Homebrew aún no está listo: por ahora solo se puede instalar Podman Desktop."
 
-msgid "LibreOffice, OnlyOffice, PDF Arranger…"
-msgstr "LibreOffice, OnlyOffice, PDF Arranger…"
+msgid "LibreOffice, OnlyOffice…"
+msgstr "LibreOffice, OnlyOffice…"
 
 msgid "Your office apps are ready."
 msgstr "Tus aplicaciones de oficina están listas."

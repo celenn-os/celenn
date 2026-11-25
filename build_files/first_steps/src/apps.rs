@@ -52,7 +52,7 @@ pub const TICK_NOTE: &str = "Tick the ones you want, untick the ones to remove."
 pub const CATEGORIES: &[Category] = &[
     Category {
         title: "Office",
-        caption: "LibreOffice, OnlyOffice, PDF Arranger…",
+        caption: "LibreOffice, OnlyOffice…",
         icon: "x-office-document-symbolic",
         groups: &[
             (
@@ -305,7 +305,9 @@ pub fn tile<'a, M: Clone + 'static>(
     caption: String,
     on_press: Option<M>,
 ) -> Element<'a, M> {
-    let space_s = theme::spacing().space_s;
+    let cosmic::cosmic_theme::Spacing {
+        space_s, space_m, ..
+    } = theme::spacing();
     let lines = widget::column::with_capacity(2)
         .spacing(2)
         .push(text::heading(tr(category.title)))
@@ -314,16 +316,17 @@ pub fn tile<'a, M: Clone + 'static>(
     widget::row::with_capacity(3)
         .spacing(space_s)
         .align_y(Alignment::Center)
-        .push(widget::icon::from_name(category.icon).size(20))
+        .push(widget::icon::from_name(category.icon).size(24))
         .push(lines)
         .push(widget::icon::from_name("go-next-symbolic").size(16))
-        .padding([0, space_s])
+        // Aligned with the icons and buttons of the settings rows
+        .padding([0, space_m])
         .height(Length::Fill)
         .apply(widget::button::custom)
         .class(crate::style::tile_style(false))
         .padding(0)
         .width(Length::Fill)
-        .height(Length::Fixed(64.0))
+        .height(Length::Fixed(56.0))
         .on_press_maybe(on_press)
         .into()
 }

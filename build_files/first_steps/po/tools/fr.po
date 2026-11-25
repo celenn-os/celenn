@@ -669,9 +669,6 @@ msgstr "Annuler"
 msgid "The dock hides when a window covers it."
 msgstr "Le dock se cache quand une fenêtre le recouvre."
 
-msgid "Apps"
-msgstr "Applications"
-
 msgid "Back to the list"
 msgstr "Retour à la liste"
 
@@ -714,8 +711,8 @@ msgstr "Installé : {}"
 msgid "LibreOffice and OnlyOffice open and save Word, Excel and PowerPoint files."
 msgstr "LibreOffice et OnlyOffice ouvrent et enregistrent les fichiers Word, Excel et PowerPoint."
 
-msgid "LibreOffice, OnlyOffice, PDF Arranger…"
-msgstr "LibreOffice, OnlyOffice, PDF Arranger…"
+msgid "LibreOffice, OnlyOffice…"
+msgstr "LibreOffice, OnlyOffice…"
 
 msgid "Lima: ujust install-dev-tools, in a terminal."
 msgstr "Lima : ujust install-dev-tools, dans un terminal."

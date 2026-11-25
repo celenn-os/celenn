@@ -669,9 +669,6 @@ msgstr "Desfazer"
 msgid "The dock hides when a window covers it."
 msgstr "O dock se esconde quando uma janela o cobre."
 
-msgid "Apps"
-msgstr "Aplicativos"
-
 msgid "Back to the list"
 msgstr "Voltar à lista"
 
@@ -714,8 +711,8 @@ msgstr "Instalado: {}"
 msgid "LibreOffice and OnlyOffice open and save Word, Excel and PowerPoint files."
 msgstr "LibreOffice e OnlyOffice abrem e salvam arquivos do Word, Excel e PowerPoint."
 
-msgid "LibreOffice, OnlyOffice, PDF Arranger…"
-msgstr "LibreOffice, OnlyOffice, PDF Arranger…"
+msgid "LibreOffice, OnlyOffice…"
+msgstr "LibreOffice, OnlyOffice…"
 
 msgid "Lima: ujust install-dev-tools, in a terminal."
 msgstr "Lima: ujust install-dev-tools, em um terminal."
