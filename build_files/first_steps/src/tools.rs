@@ -51,6 +51,7 @@ mod i18n;
 mod layout;
 mod maintenance;
 mod more;
+mod network;
 mod overview;
 mod style;
 mod update_progress;

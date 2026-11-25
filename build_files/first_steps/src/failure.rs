@@ -109,7 +109,7 @@ pub fn failure(error: &str) -> Failure {
         .filter(|line| !line.trim().is_empty())
         .collect();
     let details = lines[lines.len().saturating_sub(DETAIL_LINES)..].join("\n");
-    let cause = cause(error, online(), free_space());
+    let cause = cause(error, crate::network::online(), free_space());
     Failure { cause, details }
 }
 
@@ -144,21 +144,6 @@ fn cause(error: &str, online: Option<bool>, free: Option<u64>) -> Cause {
         Cause::Server
     } else {
         Cause::Other
-    }
-}
-
-/// NetworkManager's connectivity: None when unknown
-fn online() -> Option<bool> {
-    let output = std::process::Command::new("nmcli")
-        .args(["networking", "connectivity"])
-        .stdin(Stdio::null())
-        .stderr(Stdio::null())
-        .output()
-        .ok()?;
-    match String::from_utf8_lossy(&output.stdout).trim() {
-        "full" | "limited" | "portal" => Some(true),
-        "none" => Some(false),
-        _ => None,
     }
 }
 

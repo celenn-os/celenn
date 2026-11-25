@@ -46,6 +46,7 @@ use std::path::{Path, PathBuf};
 
 mod failure;
 mod i18n;
+mod network;
 mod parental_agent;
 mod parental_apps;
 mod parental_focus;

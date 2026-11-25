@@ -321,20 +321,6 @@ pub struct Computer {
     pub battery: Option<String>,
 }
 
-pub fn online() -> Option<bool> {
-    let output = Command::new("nmcli")
-        .args(["networking", "connectivity"])
-        .stdin(Stdio::null())
-        .stderr(Stdio::null())
-        .output()
-        .ok()?;
-    match String::from_utf8_lossy(&output.stdout).trim() {
-        "full" => Some(true),
-        "none" | "limited" | "portal" => Some(false),
-        _ => None,
-    }
-}
-
 fn secure_boot() -> bool {
     Command::new("mokutil")
         .arg("--sb-state")
@@ -449,7 +435,7 @@ pub fn computer() -> Computer {
     };
     let nvidia = crate::edition::nvidia();
     Computer {
-        online: online(),
+        online: crate::network::online(),
         secure_boot: nvidia.is_some() && secure_boot(),
         nvidia,
         firmware: firmware(),

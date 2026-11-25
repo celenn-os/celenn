@@ -45,6 +45,7 @@ mod edition;
 mod failure;
 mod i18n;
 mod layout;
+mod network;
 mod style;
 mod system;
 mod tour_keys;
