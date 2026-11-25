@@ -52,6 +52,44 @@ pub fn page_header<'a, M: 'static>(
         .into()
 }
 
+/// A tile (the tour's origin cards, the kinds of apps): a settings-row
+/// background, an accent border when chosen, a little lighter under the
+/// mouse (a custom style is told whether
+/// the button has the keyboard focus, not whether it is selected)
+pub fn tile_style(selected: bool) -> theme::Button {
+    fn style(selected: bool, theme: &cosmic::Theme, hover: bool) -> cosmic::widget::button::Style {
+        let cosmic = theme.cosmic();
+        let component = &theme.current_container().component;
+        let mut style = cosmic::widget::button::Style::new();
+        style.background = Some(cosmic::iced::Background::Color(
+            if hover {
+                component.hover
+            } else {
+                component.base
+            }
+            .into(),
+        ));
+        style.border_radius = cosmic.corner_radii.radius_s.into();
+        style.text_color = Some(component.on.into());
+        style.icon_color = Some(if selected {
+            cosmic.accent.base.into()
+        } else {
+            component.on.into()
+        });
+        if selected {
+            style.border_width = 2.0;
+            style.border_color = cosmic.accent.base.into();
+        }
+        style
+    }
+    theme::Button::Custom {
+        active: Box::new(move |_, theme| style(selected, theme, false)),
+        disabled: Box::new(move |theme| style(selected, theme, false)),
+        hovered: Box::new(move |_, theme| style(selected, theme, true)),
+        pressed: Box::new(move |_, theme| style(selected, theme, true)),
+    }
+}
+
 /// How round the corners of a person's picture are, as a share of its side:
 /// the same shape at every size (9 px at 43 px, like the wallpapers'
 /// thumbnails in the tour)

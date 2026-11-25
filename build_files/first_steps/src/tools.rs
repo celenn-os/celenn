@@ -8,8 +8,8 @@
 //   Maintenance   disk space and cleaning up, the apps that come with
 //                 cosmic-blue, firmware (maintenance.rs)
 //   Computer      battery charge limit, NVIDIA edition, firmware settings
-//   Extra software  Microsoft fonts, games, virtual machines, FlatPark,
-//                 developer tools
+//   Extra software  the kinds of apps of the first steps tour (apps.rs),
+//                 virtual machines, Microsoft fonts, FlatPark
 //   Appearance    dark theme, the cosmic-blue look, reset, save settings
 //                 (these three: more.rs)
 //   Help          documentation, questions, bug report (help.rs)
@@ -40,6 +40,7 @@ use cosmic::iced::Limits;
 use cosmic::widget::nav_bar;
 use cosmic::{Application, ApplicationExt, Element, executor};
 
+mod apps;
 mod common;
 mod devtools;
 mod edition;
@@ -103,6 +104,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ]
         .concat();
         let mut sorted = texts.clone();
+        sorted.extend(apps::texts());
         sorted.sort_unstable();
         sorted.dedup();
         std::process::exit(if i18n::check(&sorted) { 0 } else { 1 });

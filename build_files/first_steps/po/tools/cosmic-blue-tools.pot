@@ -382,9 +382,6 @@ msgstr ""
 msgid "Dark theme"
 msgstr ""
 
-msgid "Developer tools"
-msgstr ""
-
 msgid "Every COSMIC setting goes back to the defaults. A copy is kept in your settings folder."
 msgstr ""
 
@@ -523,9 +520,6 @@ msgstr ""
 msgid "In the terminal"
 msgstr ""
 
-msgid "Docker, VS Code, Neovim…"
-msgstr ""
-
 msgid "Homebrew is not set up yet: only Podman Desktop can be installed now."
 msgstr ""
 
@@ -598,22 +592,10 @@ msgstr ""
 msgid "Passwords"
 msgstr ""
 
-msgid "Bitwarden (synced with your phone), Secrets, KeePassXC."
-msgstr ""
-
-msgid "Synced"
-msgstr ""
-
-msgid "On this computer"
-msgstr ""
-
 msgid "Your password manager is ready."
 msgstr ""
 
 msgid "Tick the ones you want, untick the ones to remove."
-msgstr ""
-
-msgid "Tick the ones you want, untick the ones to remove. Your games and saves stay."
 msgstr ""
 
 msgid "Overview"
@@ -683,4 +665,127 @@ msgid "Undo"
 msgstr ""
 
 msgid "The dock hides when a window covers it."
+msgstr ""
+
+msgid "Apps"
+msgstr ""
+
+msgid "Back to the list"
+msgstr ""
+
+msgid "Bitwarden, Secrets, KeePassXC"
+msgstr ""
+
+msgid "Bitwarden: a free account, on this computer, your phone and in Firefox. Secrets and KeePassXC: an encrypted file, no account."
+msgstr ""
+
+msgid "Chosen: {}"
+msgstr ""
+
+msgid "Development"
+msgstr ""
+
+msgid "Docker, VS Code, Zed, Neovim…"
+msgstr ""
+
+msgid "Drawing and editing"
+msgstr ""
+
+msgid "For children"
+msgstr ""
+
+msgid "For the system"
+msgstr ""
+
+msgid "GCompris, Stellarium, GeoGebra…"
+msgstr ""
+
+msgid "GIMP, Inkscape, Krita, darktable…"
+msgstr ""
+
+msgid "Graphics and photos"
+msgstr ""
+
+msgid "Installed: {}"
+msgstr ""
+
+msgid "LibreOffice and OnlyOffice open and save Word, Excel and PowerPoint files."
+msgstr ""
+
+msgid "LibreOffice, OnlyOffice, PDF Arranger…"
+msgstr ""
+
+msgid "Lima: ujust install-dev-tools, in a terminal."
+msgstr ""
+
+msgid "Messaging"
+msgstr ""
+
+msgid "Messaging and video calls"
+msgstr ""
+
+msgid "OBS Studio, Kdenlive, Audacity…"
+msgstr ""
+
+msgid "Office"
+msgstr ""
+
+msgid "Office suites"
+msgstr ""
+
+msgid "Only on this computer"
+msgstr ""
+
+msgid "PDF files"
+msgstr ""
+
+msgid "Photos"
+msgstr ""
+
+msgid "Pick the ones the people you talk to use."
+msgstr ""
+
+msgid "Removing an app keeps your games and saves."
+msgstr ""
+
+msgid "School and science"
+msgstr ""
+
+msgid "Science"
+msgstr ""
+
+msgid "Signal, Telegram, Element, Zoom…"
+msgstr ""
+
+msgid "Sound"
+msgstr ""
+
+msgid "Studying"
+msgstr ""
+
+msgid "Synced with your phone"
+msgstr ""
+
+msgid "Video"
+msgstr ""
+
+msgid "Video calls"
+msgstr ""
+
+msgid "Videos and streaming"
+msgstr ""
+
+msgid "Your graphics apps are ready."
+msgstr ""
+
+msgid "Your messaging apps are ready."
+msgstr ""
+
+msgid "Your office apps are ready."
+msgstr ""
+
+msgid "Your school apps are ready."
+msgstr ""
+
+msgid "Your video apps are ready."
 msgstr ""

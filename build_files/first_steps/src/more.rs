@@ -10,11 +10,9 @@
 //                  its driver key (Tools helper, as `ujust
 //                  enroll-secure-boot-key`), restarting into the firmware
 //                  settings (reboot-to-bios)
-//   Extra software Microsoft fonts, Steam and Heroic, a password manager,
-//                  virtual machines,
-//                  the FlatPark app source, developer tools (ticked in a
-//                  list, installed as the first steps tour does:
-//                  devtools.rs)
+//   Extra software the kinds of apps of the first steps tour, as tiles that
+//                  open a list to tick (apps.rs), then virtual machines,
+//                  Microsoft fonts and the FlatPark app source
 //   Appearance     dark or light, the cosmic-blue look back, every COSMIC
 //                  setting back to the defaults, settings saved to a file
 //
@@ -22,15 +20,16 @@
 // edition, a license) ask first, in the row itself. A change that does not
 // work shows a card at the top of its page (failure.rs).
 
+use crate::apps::{self, CATEGORIES, DEVELOPMENT, PASSWORDS};
 use crate::common::{fill, label, spawn, state_icon};
-use crate::devtools::{self, DEV_TOOLS, DevTool, ToolKind};
+use crate::devtools::{self, ToolKind};
 use crate::failure::{self, Card, CardAction, CardMessage, Outcome};
 use crate::hardware::Boot;
 use crate::i18n::tr;
 use cosmic::app::Task;
 use cosmic::iced::{Alignment, Length};
 use cosmic::widget::{self, settings, text, toaster::Toasts};
-use cosmic::{Apply, Element, cosmic_theme, theme};
+use cosmic::{Element, cosmic_theme, theme};
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -95,33 +94,15 @@ pub const TEXTS: &[&str] = &[
     "Microsoft's license applies to these fonts.",
     "Read it",
     "Accept and install",
-    "Games",
-    "Steam, Heroic, Lutris, Discord…",
-    "Stores",
-    "Windows games",
-    "And also",
-    "Your game apps are ready.",
-    "Passwords",
-    "Bitwarden (synced with your phone), Secrets, KeePassXC.",
-    "Synced",
-    "On this computer",
-    "Your password manager is ready.",
     "Virtual machines",
     "virt-manager, to run Windows or another Linux in a window.",
     "FlatPark",
     "More apps in COSMIC Store, from outside Flathub. Less checked.",
-    "Developer tools",
-    "Docker, VS Code, Neovim…",
-    "Choose…",
-    "Hide",
-    "Containers",
-    "Code editors",
-    "In the terminal",
-    "Apply",
     "Tick the ones you want, untick the ones to remove.",
-    "Tick the ones you want, untick the ones to remove. Your games and saves stay.",
-    "Homebrew is not set up yet: only Podman Desktop can be installed now.",
-    "The developer tools are ready.",
+    "Apps",
+    "For the system",
+    "Apply",
+    "Back to the list",
     // Appearance
     "Dark theme",
     "Light text on dark backgrounds. Off: the light theme.",
@@ -152,121 +133,6 @@ pub const TEXTS: &[&str] = &[
     "Saved in your home folder.",
 ];
 
-/// The game apps, from Flathub, by group. Steam and Heroic are ticked
-/// the first time the list opens
-const GAMES: &[(&str, &[DevTool])] = &[
-    (
-        "Stores",
-        &[
-            DevTool {
-                name: "Steam",
-                kind: ToolKind::Flatpak("com.valvesoftware.Steam"),
-            },
-            DevTool {
-                name: "Heroic",
-                kind: ToolKind::Flatpak("com.heroicgameslauncher.hgl"),
-            },
-            DevTool {
-                name: "Lutris",
-                kind: ToolKind::Flatpak("net.lutris.Lutris"),
-            },
-        ],
-    ),
-    (
-        "Windows games",
-        &[
-            DevTool {
-                name: "Bottles",
-                kind: ToolKind::Flatpak("com.usebottles.bottles"),
-            },
-            DevTool {
-                name: "ProtonPlus",
-                kind: ToolKind::Flatpak("com.vysp3r.ProtonPlus"),
-            },
-        ],
-    ),
-    (
-        "And also",
-        &[
-            DevTool {
-                name: "RetroArch",
-                kind: ToolKind::Flatpak("org.libretro.RetroArch"),
-            },
-            DevTool {
-                name: "Prism Launcher",
-                kind: ToolKind::Flatpak("org.prismlauncher.PrismLauncher"),
-            },
-            DevTool {
-                name: "Discord",
-                kind: ToolKind::Flatpak("com.discordapp.Discord"),
-            },
-        ],
-    ),
-];
-
-/// The password managers, from Flathub: the ones of the first steps tour's
-/// "Your passwords" page (main.rs), and KeePassXC
-const VAULT_APPS: &[(&str, &[DevTool])] = &[
-    (
-        "Synced",
-        &[DevTool {
-            name: "Bitwarden",
-            kind: ToolKind::Flatpak(devtools::BITWARDEN),
-        }],
-    ),
-    (
-        "On this computer",
-        &[
-            DevTool {
-                name: "Secrets",
-                kind: ToolKind::Flatpak("org.gnome.World.Secrets"),
-            },
-            DevTool {
-                name: "KeePassXC",
-                kind: ToolKind::Flatpak("org.keepassxc.KeePassXC"),
-            },
-        ],
-    ),
-];
-
-/// The lists of apps picked with checkboxes
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum List {
-    Dev = 0,
-    Games = 1,
-    Vault = 2,
-}
-
-impl List {
-    fn groups(self) -> &'static [(&'static str, &'static [DevTool])] {
-        match self {
-            List::Dev => DEV_TOOLS,
-            List::Games => GAMES,
-            List::Vault => VAULT_APPS,
-        }
-    }
-
-    fn tools(self) -> impl Iterator<Item = &'static DevTool> {
-        self.groups().iter().flat_map(|(_, tools)| tools.iter())
-    }
-
-    fn title(self) -> &'static str {
-        match self {
-            List::Dev => "Developer tools",
-            List::Games => "Games",
-            List::Vault => "Passwords",
-        }
-    }
-
-    fn done(self) -> &'static str {
-        match self {
-            List::Dev => "The developer tools are ready.",
-            List::Games => "Your game apps are ready.",
-            List::Vault => "Your password manager is ready.",
-        }
-    }
-}
-
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Kind {
     Computer,
@@ -291,8 +157,8 @@ pub struct State {
     dark: bool,
     bottom_bar: bool,
     dock_visible: bool,
-    /// The apps of each list installed (numbers of List::tools())
-    installed: [BTreeSet<usize>; 3],
+    /// The apps of each category installed (numbers of Category::tools())
+    installed: Vec<BTreeSet<usize>>,
     brew: bool,
 }
 
@@ -418,11 +284,12 @@ pub enum Message {
     Layout(bool),
     DockVisible(bool),
     FontsLicense,
-    /// Show or hide a list of apps
-    ListOpen(List),
-    Tick(List, usize, bool),
-    ListApply(List),
-    ListDone(List, Outcome),
+    /// Open a category's list of apps (a number of CATEGORIES), or go back
+    /// to the tiles (None)
+    ListOpen(Option<usize>),
+    Tick(usize, usize, bool),
+    ListApply(usize),
+    ListDone(usize, Outcome),
     Card(CardMessage),
     CloseToast(widget::ToastId),
     /// A toast's Undo: closes it, then takes the change back
@@ -433,19 +300,20 @@ pub enum Message {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Retry {
     Job(Job),
-    List(List),
+    List(usize),
 }
 
 pub struct Page {
     state: Option<State>,
     busy: Option<Job>,
     asking: Option<Job>,
-    /// The lists shown, the apps ticked in them, the list being applied
-    open: [bool; 3],
+    /// The category whose list is shown in place of the tiles, the apps
+    /// ticked in each list, the list being applied
+    open: Option<usize>,
     /// A list to open once the state is read (screenshot test)
-    preview_list: Option<List>,
-    chosen: [BTreeSet<usize>; 3],
-    applying: Option<List>,
+    preview_list: Option<usize>,
+    chosen: Vec<BTreeSet<usize>>,
+    applying: Option<usize>,
     /// What did not work, until closed or done again
     card: Option<Card<Retry>>,
     toasts: Toasts<Message>,
@@ -545,21 +413,24 @@ pub fn read_state() -> State {
         dark: dark(),
         bottom_bar: crate::layout::bottom_bar(),
         dock_visible: crate::layout::dock_always_visible(),
-        installed: [List::Dev, List::Games, List::Vault].map(|list| {
-            let mut installed = match list {
-                List::Dev => devtools::brew_installed(),
-                List::Games | List::Vault => BTreeSet::new(),
-            };
-            installed.extend(
-                list.tools()
-                    .enumerate()
-                    .filter_map(|(i, tool)| match tool.kind {
+        installed: CATEGORIES
+            .iter()
+            .enumerate()
+            .map(|(n, category)| {
+                let mut installed = if n == DEVELOPMENT {
+                    devtools::brew_installed()
+                } else {
+                    BTreeSet::new()
+                };
+                installed.extend(category.tools().enumerate().filter_map(
+                    |(i, tool)| match tool.kind {
                         ToolKind::Flatpak(app) if has(app) => Some(i),
                         _ => None,
-                    }),
-            );
-            installed
-        }),
+                    },
+                ));
+                installed
+            })
+            .collect(),
         brew: Path::new(devtools::BREW).exists(),
     }
 }
@@ -581,12 +452,12 @@ impl Page {
             state: None,
             busy: None,
             asking: None,
-            open: [false; 3],
-            chosen: Default::default(),
+            open: None,
+            chosen: vec![BTreeSet::new(); CATEGORIES.len()],
             applying: None,
             card: None,
             toasts: Toasts::new(Message::CloseToast),
-            preview_list: crate::common::preview("developer-tools").then_some(List::Dev),
+            preview_list: crate::common::preview("developer-tools").then_some(DEVELOPMENT),
         };
         (page, refresh())
     }
@@ -613,7 +484,7 @@ impl Page {
             Message::State(state) => {
                 self.state = Some(state);
                 if let Some(list) = self.preview_list.take() {
-                    return self.update(Message::ListOpen(list));
+                    return self.update(Message::ListOpen(Some(list)));
                 }
             }
             Message::Ask(job) => {
@@ -695,19 +566,18 @@ impl Page {
                 return self.update(*message);
             }
             Message::FontsLicense => spawn("xdg-open", &[FONTS_LICENSE]),
-            Message::ListOpen(list) => {
-                let n = list as usize;
-                self.open[n] = !self.open[n];
-                if let Some(state) = &self.state {
+            Message::ListOpen(open) => {
+                self.open = open;
+                if let (Some(n), Some(state)) = (open, &self.state) {
                     self.chosen[n] = state.installed[n].clone();
-                    // Nothing installed yet: Steam and Heroic ticked
-                    if list == List::Games && self.chosen[n].is_empty() {
-                        self.chosen[n].extend([0, 1]);
+                    // Nothing installed yet: the recommended apps ticked
+                    if self.chosen[n].is_empty() {
+                        self.chosen[n] = CATEGORIES[n].recommended();
                     }
                 }
             }
             Message::Tick(list, i, on) => {
-                let chosen = &mut self.chosen[list as usize];
+                let chosen = &mut self.chosen[list];
                 if on {
                     chosen.insert(i);
                 } else {
@@ -718,7 +588,7 @@ impl Page {
                 let Some(state) = &self.state else {
                     return Task::none();
                 };
-                let n = list as usize;
+                let n = list;
                 self.applying = Some(list);
                 self.card = None;
                 return Task::perform(
@@ -731,18 +601,22 @@ impl Page {
                 let toast = match result {
                     None => Task::none(),
                     Some(Err(failure)) => {
-                        self.card = Some(Card::new(tr(list.title()), failure, Retry::List(list)));
+                        self.card = Some(Card::new(
+                            tr(CATEGORIES[list].title),
+                            failure,
+                            Retry::List(list),
+                        ));
                         Task::none()
                     }
                     Some(Ok(())) => {
-                        let n = list as usize;
-                        self.open[n] = false;
+                        let n = list;
+                        self.open = None;
                         // Bitwarden just installed: its Firefox extension
                         // too (devtools.rs)
-                        if list == List::Vault
+                        if list == PASSWORDS
                             && let Some(state) = &self.state
                         {
-                            let bitwarden = list.tools().position(|tool| {
+                            let bitwarden = CATEGORIES[n].tools().position(|tool| {
                                 tool.kind == ToolKind::Flatpak(devtools::BITWARDEN)
                             });
                             if bitwarden.is_some_and(|i| {
@@ -752,7 +626,7 @@ impl Page {
                                 spawn(command[0], &command[1..]);
                             }
                         }
-                        self.toast(list.done())
+                        self.toast(CATEGORIES[n].done)
                     }
                 };
                 return Task::batch([toast, refresh()]);
@@ -1038,31 +912,27 @@ impl Page {
             .into()
     }
 
+    /// The kinds of apps as tiles, then what touches the system; or the
+    /// list of the category opened
     fn software<'a>(&'a self, state: &'a State) -> Element<'a, Message> {
-        let mut section = settings::section().add(self.row(
-            "font-x-generic-symbolic",
-            "Microsoft fonts",
-            "Arial, Times New Roman, Verdana… for documents made on Windows.",
-            self.install(state.fonts, Job::Fonts),
-            Some(Job::Fonts(true)),
-        ));
-        section = self.list(
-            state,
-            section,
-            List::Games,
-            "input-gaming-symbolic",
-            "Games",
-            "Steam, Heroic, Lutris, Discord…",
-        );
-        section = self.list(
-            state,
-            section,
-            List::Vault,
-            "dialog-password-symbolic",
-            "Passwords",
-            "Bitwarden (synced with your phone), Secrets, KeePassXC.",
-        );
-        section = section
+        let space_s = theme::spacing().space_s;
+        if let Some(n) = self.open {
+            return self.list(state, n);
+        }
+        let tiles = CATEGORIES
+            .iter()
+            .enumerate()
+            .map(|(n, category)| {
+                apps::tile(
+                    category,
+                    apps::tile_caption(category, &BTreeSet::new(), &state.installed[n]),
+                    self.applying
+                        .is_none()
+                        .then_some(Message::ListOpen(Some(n))),
+                )
+            })
+            .collect();
+        let system = settings::section()
             .add(self.row(
                 "computer-symbolic",
                 "Virtual machines",
@@ -1071,104 +941,46 @@ impl Page {
                 None,
             ))
             .add(self.row(
+                "font-x-generic-symbolic",
+                "Microsoft fonts",
+                "Arial, Times New Roman, Verdana… for documents made on Windows.",
+                self.install(state.fonts, Job::Fonts),
+                Some(Job::Fonts(true)),
+            ))
+            .add(self.row(
                 "system-software-install-symbolic",
                 "FlatPark",
                 "More apps in COSMIC Store, from outside Flathub. Less checked.",
                 self.toggler(state.flatpark, Job::FlatPark),
                 None,
             ));
-        section = self.list(
-            state,
-            section,
-            List::Dev,
-            "utilities-terminal-symbolic",
-            "Developer tools",
-            "Docker, VS Code, Neovim…",
-        );
-        section.into()
+        widget::column::with_capacity(4)
+            .spacing(space_s)
+            .push(text::heading(tr("Apps")))
+            .push(apps::grid(tiles))
+            .push(text::heading(tr("For the system")))
+            .push(system)
+            .into()
     }
 
-    /// A row with Choose…, then when open the apps by group, each with its
-    /// checkbox, then Apply
-    fn list<'a>(
-        &'a self,
-        state: &'a State,
-        section: settings::Section<'a, Message>,
-        list: List,
-        icon: &'static str,
-        title: &'static str,
-        caption: &'static str,
-    ) -> settings::Section<'a, Message> {
-        let n = list as usize;
-        let mut section = section.add(
-            self.row(
-                icon,
-                title,
-                caption,
-                widget::button::standard(tr(if self.open[n] { "Hide" } else { "Choose…" }))
-                    .on_press_maybe(
-                        (self.applying != Some(list)).then_some(Message::ListOpen(list)),
-                    )
-                    .into(),
-                None,
-            ),
-        );
-        if !self.open[n] {
-            return section;
-        }
+    /// A category's apps by group, each with its checkbox, then Apply
+    fn list<'a>(&'a self, state: &'a State, n: usize) -> Element<'a, Message> {
         let cosmic_theme::Spacing {
             space_xxs, space_s, ..
         } = theme::spacing();
-        let mut next = 0;
-        for (heading, tools) in list.groups() {
-            let mut cells: Vec<Element<'a, Message>> = Vec::new();
-            for tool in tools.iter() {
-                let i = next;
-                next += 1;
-                let available = state.brew || matches!(tool.kind, ToolKind::Flatpak(_));
-                let on = self.chosen[n].contains(&i);
-                let enabled = available && self.applying.is_none();
-                let checkbox = widget::checkbox(on)
-                    .on_toggle_maybe(enabled.then_some(move |on| Message::Tick(list, i, on)));
-                // The tool's name ticks the box too
-                let label = text::body(tool.name).apply(widget::mouse_area);
-                let label = if enabled {
-                    label.on_press(Message::Tick(list, i, !on))
-                } else {
-                    label
-                };
-                cells.push(
-                    widget::row::with_capacity(2)
-                        .spacing(space_xxs)
-                        .align_y(Alignment::Center)
-                        .push(checkbox)
-                        .push(label)
-                        .width(Length::Fixed(150.0))
-                        .into(),
-                );
-            }
-            // Three columns
-            let mut lines = widget::column::with_capacity(cells.len().div_ceil(3))
-                .spacing(space_xxs)
-                .width(Length::Fill);
-            let mut cells = cells.into_iter().peekable();
-            while cells.peek().is_some() {
-                let mut line = widget::row::with_capacity(3).spacing(space_s);
-                for cell in cells.by_ref().take(3) {
-                    line = line.push(cell);
-                }
-                lines = lines.push(line);
-            }
-            section = section.add(
-                widget::row::with_capacity(2)
-                    .spacing(space_s)
-                    .push(text::heading(tr(heading)).width(Length::Fixed(130.0)))
-                    .push(lines)
-                    .padding([space_xxs, space_s, space_xxs, space_s + 36]),
-            );
-        }
+        let category = &CATEGORIES[n];
+        let idle = self.applying.is_none();
+        let rows = apps::checklist(
+            category,
+            &self.chosen[n],
+            |_, tool| idle && (state.brew || matches!(tool.kind, ToolKind::Flatpak(_))),
+            move |i, on| Message::Tick(n, i, on),
+        );
+        let section = rows
+            .into_iter()
+            .fold(settings::section(), |section, row| section.add(row));
         let changed = self.chosen[n] != state.installed[n];
-        let apply: Element<'a, Message> = if self.applying == Some(list) {
+        let apply: Element<'a, Message> = if self.applying == Some(n) {
             widget::row::with_capacity(2)
                 .spacing(space_xxs)
                 .align_y(Alignment::Center)
@@ -1178,29 +990,38 @@ impl Page {
         } else {
             widget::button::suggested(tr("Apply"))
                 .on_press_maybe(
-                    (changed && self.busy.is_none() && self.applying.is_none())
-                        .then_some(Message::ListApply(list)),
+                    (changed && self.busy.is_none() && idle).then_some(Message::ListApply(n)),
                 )
                 .into()
         };
-        // How the list works, said here rather than in the row's caption so
-        // that the page stays short when the lists are closed
-        let note = if list == List::Dev && !state.brew {
-            tr("Homebrew is not set up yet: only Podman Desktop can be installed now.")
-        } else if list == List::Games {
-            tr("Tick the ones you want, untick the ones to remove. Your games and saves stay.")
+        let note = if n == DEVELOPMENT && !state.brew {
+            tr(apps::NO_BREW).to_owned()
+        } else if category.note.is_empty() {
+            tr(apps::TICK_NOTE).to_owned()
         } else {
-            tr("Tick the ones you want, untick the ones to remove.")
+            format!("{} {}", tr(apps::TICK_NOTE), tr(category.note))
         };
-        let note: Element<'a, Message> = text::caption(note).width(Length::Fill).into();
-        section.add(
-            widget::row::with_capacity(2)
-                .spacing(space_s)
-                .align_y(Alignment::Center)
-                .push(note)
-                .push(apply)
-                .padding([space_xxs, space_s, space_s, space_s + 36]),
-        )
+        widget::column::with_capacity(3)
+            .spacing(space_s)
+            .push(text::heading(tr(category.title)))
+            .push(section)
+            .push(
+                text::caption(note)
+                    .wrapping(cosmic::iced::core::text::Wrapping::Word)
+                    .width(Length::Fill),
+            )
+            .push(
+                widget::row::with_capacity(3)
+                    .spacing(space_s)
+                    .align_y(Alignment::Center)
+                    .push(
+                        widget::button::standard(tr("Back to the list"))
+                            .on_press_maybe(idle.then_some(Message::ListOpen(None))),
+                    )
+                    .push(widget::space::horizontal().width(Length::Fill))
+                    .push(apply),
+            )
+            .into()
     }
 
     fn appearance(&self, state: &State) -> Element<'_, Message> {
@@ -1292,10 +1113,10 @@ impl Page {
 /// steps tour installs developer tools (devtools.rs): Homebrew for the user,
 /// Flathub for everyone. None: the password prompt was dismissed; the
 /// last failure otherwise
-async fn apply_list(list: List, installed: BTreeSet<usize>, chosen: BTreeSet<usize>) -> Outcome {
+async fn apply_list(list: usize, installed: BTreeSet<usize>, chosen: BTreeSet<usize>) -> Outcome {
     let (mut formulas, mut casks, mut apps) = (Vec::new(), Vec::new(), Vec::new());
     let (mut old_formulas, mut old_casks, mut old_apps) = (Vec::new(), Vec::new(), Vec::new());
-    for (i, tool) in list.tools().enumerate() {
+    for (i, tool) in CATEGORIES[list].tools().enumerate() {
         let add = chosen.contains(&i) && !installed.contains(&i);
         let remove = !chosen.contains(&i) && installed.contains(&i);
         if !add && !remove {

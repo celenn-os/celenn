@@ -171,13 +171,7 @@ msgstr ""
 msgid "This did not work."
 msgstr ""
 
-msgid "Installed"
-msgstr ""
-
 msgid "Development"
-msgstr ""
-
-msgid "Choose…"
 msgstr ""
 
 msgid "Installing: {} of {}"
@@ -300,13 +294,7 @@ msgstr ""
 msgid "Office"
 msgstr ""
 
-msgid "LibreOffice: documents, spreadsheets and presentations, Word and Excel files included"
-msgstr ""
-
 msgid "Games"
-msgstr ""
-
-msgid "Steam, and Heroic Games Launcher for Epic Games and GOG"
 msgstr ""
 
 msgid "Open the launcher"
@@ -516,9 +504,6 @@ msgstr ""
 msgid "Everything in one place, Settings → Desktop for the look"
 msgstr ""
 
-msgid "Docker, VS Code, Zed, Neovim…: choose your tools"
-msgstr ""
-
 msgid "Chosen: {}"
 msgstr ""
 
@@ -534,9 +519,6 @@ msgstr ""
 msgid "In the terminal"
 msgstr ""
 
-msgid "Ticked and grey: already installed. Lima and virtual machines: ujust install-dev-tools and ujust install-vms, in a terminal."
-msgstr ""
-
 msgid "Homebrew is still being set up: the code editors and terminal tools can be chosen in a few minutes."
 msgstr ""
 
@@ -546,16 +528,7 @@ msgstr ""
 msgid "What is different from your distribution"
 msgstr ""
 
-msgid "Graphics and drawing"
-msgstr ""
-
-msgid "GIMP for photos, Inkscape for illustrations and logos, Krita for digital painting"
-msgstr ""
-
 msgid "Videos and streaming"
-msgstr ""
-
-msgid "OBS Studio to record and stream, Kdenlive to edit videos, Audacity for sound"
 msgstr ""
 
 msgid "What is different here"
@@ -624,28 +597,7 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-msgid "Install"
-msgstr ""
-
-msgid "Working…"
-msgstr ""
-
-msgid "Synced with my phone"
-msgstr ""
-
-msgid "Bitwarden: on this computer, your phone and in Firefox. Free account, everything is encrypted before it leaves the computer."
-msgstr ""
-
-msgid "Installed. Open it to create your account, then install Bitwarden on your phone."
-msgstr ""
-
 msgid "Only on this computer"
-msgstr ""
-
-msgid "Secrets: an encrypted file in your home folder, no account and no internet. KeePassXC opens it too."
-msgstr ""
-
-msgid "Installed. Open it to create your password file, and keep a copy of it on a USB drive."
 msgstr ""
 
 msgid "Linux and you"
@@ -661,9 +613,6 @@ msgid "I know it well: a shorter tour, in three steps."
 msgstr ""
 
 msgid "Passwords"
-msgstr ""
-
-msgid "Bitwarden, synced with your phone, or Secrets, only on this computer"
 msgstr ""
 
 msgid "Installed: {}"
@@ -703,4 +652,127 @@ msgid "What is different here, and your tools."
 msgstr ""
 
 msgid "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Extra software."
+msgstr ""
+
+msgid "Ticked and grey: already installed."
+msgstr ""
+
+msgid "Homebrew is not set up yet: only Podman Desktop can be installed now."
+msgstr ""
+
+msgid "LibreOffice, OnlyOffice, PDF Arranger…"
+msgstr ""
+
+msgid "Your office apps are ready."
+msgstr ""
+
+msgid "LibreOffice and OnlyOffice open and save Word, Excel and PowerPoint files."
+msgstr ""
+
+msgid "Office suites"
+msgstr ""
+
+msgid "PDF files"
+msgstr ""
+
+msgid "Messaging and video calls"
+msgstr ""
+
+msgid "Signal, Telegram, Element, Zoom…"
+msgstr ""
+
+msgid "Your messaging apps are ready."
+msgstr ""
+
+msgid "Pick the ones the people you talk to use."
+msgstr ""
+
+msgid "Messaging"
+msgstr ""
+
+msgid "Video calls"
+msgstr ""
+
+msgid "Bitwarden, Secrets, KeePassXC"
+msgstr ""
+
+msgid "Your password manager is ready."
+msgstr ""
+
+msgid "Bitwarden: a free account, on this computer, your phone and in Firefox. Secrets and KeePassXC: an encrypted file, no account."
+msgstr ""
+
+msgid "Synced with your phone"
+msgstr ""
+
+msgid "Graphics and photos"
+msgstr ""
+
+msgid "GIMP, Inkscape, Krita, darktable…"
+msgstr ""
+
+msgid "Your graphics apps are ready."
+msgstr ""
+
+msgid "Drawing and editing"
+msgstr ""
+
+msgid "Photos"
+msgstr ""
+
+msgid "And also"
+msgstr ""
+
+msgid "OBS Studio, Kdenlive, Audacity…"
+msgstr ""
+
+msgid "Your video apps are ready."
+msgstr ""
+
+msgid "Video"
+msgstr ""
+
+msgid "Sound"
+msgstr ""
+
+msgid "Steam, Heroic, Lutris, Discord…"
+msgstr ""
+
+msgid "Your game apps are ready."
+msgstr ""
+
+msgid "Removing an app keeps your games and saves."
+msgstr ""
+
+msgid "Stores"
+msgstr ""
+
+msgid "Windows games"
+msgstr ""
+
+msgid "School and science"
+msgstr ""
+
+msgid "GCompris, Stellarium, GeoGebra…"
+msgstr ""
+
+msgid "Your school apps are ready."
+msgstr ""
+
+msgid "For children"
+msgstr ""
+
+msgid "Science"
+msgstr ""
+
+msgid "Studying"
+msgstr ""
+
+msgid "Docker, VS Code, Zed, Neovim…"
+msgstr ""
+
+msgid "The developer tools are ready."
+msgstr ""
+
+msgid "Lima: ujust install-dev-tools, in a terminal."
 msgstr ""

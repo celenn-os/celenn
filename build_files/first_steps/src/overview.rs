@@ -47,7 +47,8 @@ const BACKUP_DAYS: u64 = 14;
 
 /// Every setting of the other pages that the search finds: its title,
 /// words that also find it (its caption), its page. Texts of the pages
-/// themselves, so they are already translated.
+/// themselves, so they are already translated. The kinds of apps of Extra
+/// software come from apps.rs, found by their apps' names too.
 const SETTINGS: &[(&str, &str, PageId)] = &[
     ("Updates", "", PageId::Updates),
     ("Check now", "", PageId::Updates),
@@ -89,12 +90,6 @@ const SETTINGS: &[(&str, &str, PageId)] = &[
         "Arial, Times New Roman, Verdana… for documents made on Windows.",
         PageId::Software,
     ),
-    ("Games", "Steam, Heroic, Lutris, Discord…", PageId::Software),
-    (
-        "Passwords",
-        "Bitwarden (synced with your phone), Secrets, KeePassXC.",
-        PageId::Software,
-    ),
     (
         "Virtual machines",
         "virt-manager, to run Windows or another Linux in a window.",
@@ -103,11 +98,6 @@ const SETTINGS: &[(&str, &str, PageId)] = &[
     (
         "FlatPark",
         "More apps in COSMIC Store, from outside Flathub. Less checked.",
-        PageId::Software,
-    ),
-    (
-        "Developer tools",
-        "Docker, VS Code, Neovim…",
         PageId::Software,
     ),
     (
@@ -277,17 +267,28 @@ fn fold(text: &str) -> String {
 /// the window's language or in English
 fn search(query: &str) -> Vec<(&'static str, PageId)> {
     let words: Vec<String> = fold(query).split_whitespace().map(str::to_owned).collect();
+    let categories = crate::apps::CATEGORIES.iter().map(|category| {
+        let names: Vec<&str> = category.tools().map(|tool| tool.name).collect();
+        (
+            category.title,
+            category.caption,
+            names.join(" "),
+            PageId::Software,
+        )
+    });
     SETTINGS
         .iter()
-        .filter(|(title, caption, _)| {
-            let mut haystack = fold(&format!("{} {} {title}", tr(title), tr(caption)));
+        .map(|(title, caption, page)| (*title, *caption, String::new(), *page))
+        .chain(categories)
+        .filter(|(title, caption, names, _)| {
+            let mut haystack = fold(&format!("{} {} {title} {names}", tr(title), tr(caption)));
             if !caption.is_empty() {
                 haystack.push(' ');
                 haystack.push_str(&fold(caption));
             }
             words.iter().all(|word| haystack.contains(word.as_str()))
         })
-        .map(|(title, _, page)| (*title, *page))
+        .map(|(title, _, _, page)| (title, page))
         .take(RESULTS)
         .collect()
 }

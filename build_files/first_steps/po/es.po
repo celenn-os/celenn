@@ -170,14 +170,8 @@ msgstr "Barra abajo"
 msgid "This did not work."
 msgstr "No ha funcionado."
 
-msgid "Installed"
-msgstr "Instalado"
-
 msgid "Development"
 msgstr "Desarrollo"
-
-msgid "Choose…"
-msgstr "Elegir…"
 
 msgid "Installing: {} of {}"
 msgstr "Instalando: {} de {}"
@@ -299,14 +293,8 @@ msgstr "Tus referencias del Mac"
 msgid "Office"
 msgstr "Ofimática"
 
-msgid "LibreOffice: documents, spreadsheets and presentations, Word and Excel files included"
-msgstr "LibreOffice: documentos, hojas de cálculo y presentaciones, también archivos de Word y Excel"
-
 msgid "Games"
 msgstr "Juegos"
-
-msgid "Steam, and Heroic Games Launcher for Epic Games and GOG"
-msgstr "Steam, y Heroic Games Launcher para Epic Games y GOG"
 
 msgid "Open the launcher"
 msgstr "Abrir el lanzador"
@@ -515,9 +503,6 @@ msgstr "Ajustes del Sistema → Configuración"
 msgid "Everything in one place, Settings → Desktop for the look"
 msgstr "Todo en un solo lugar, Configuración → Escritorio para la apariencia"
 
-msgid "Docker, VS Code, Zed, Neovim…: choose your tools"
-msgstr "Docker, VS Code, Zed, Neovim…: elige tus herramientas"
-
 msgid "Chosen: {}"
 msgstr "Elegidas: {}"
 
@@ -533,9 +518,6 @@ msgstr "Editores de código"
 msgid "In the terminal"
 msgstr "En la terminal"
 
-msgid "Ticked and grey: already installed. Lima and virtual machines: ujust install-dev-tools and ujust install-vms, in a terminal."
-msgstr "Marcado y en gris: ya instalado. Lima y las máquinas virtuales: ujust install-dev-tools y ujust install-vms, en una terminal."
-
 msgid "Homebrew is still being set up: the code editors and terminal tools can be chosen in a few minutes."
 msgstr "Homebrew todavía se está configurando: podrás elegir los editores de código y las herramientas de terminal en unos minutos."
 
@@ -545,17 +527,8 @@ msgstr "Volver a la lista"
 msgid "What is different from your distribution"
 msgstr "Lo que cambia respecto a tu distribución"
 
-msgid "Graphics and drawing"
-msgstr "Gráficos y dibujo"
-
-msgid "GIMP for photos, Inkscape for illustrations and logos, Krita for digital painting"
-msgstr "GIMP para fotos, Inkscape para ilustraciones y logotipos, Krita para pintura digital"
-
 msgid "Videos and streaming"
 msgstr "Vídeo y streaming"
-
-msgid "OBS Studio to record and stream, Kdenlive to edit videos, Audacity for sound"
-msgstr "OBS Studio para grabar y emitir, Kdenlive para editar vídeos, Audacity para el sonido"
 
 msgid "What is different here"
 msgstr "Lo que cambia aquí"
@@ -623,29 +596,8 @@ msgstr "Abrir el informe"
 msgid "Cancel"
 msgstr "Cancelar"
 
-msgid "Install"
-msgstr "Instalar"
-
-msgid "Working…"
-msgstr "En curso…"
-
-msgid "Synced with my phone"
-msgstr "Sincronizadas con mi móvil"
-
-msgid "Bitwarden: on this computer, your phone and in Firefox. Free account, everything is encrypted before it leaves the computer."
-msgstr "Bitwarden: en este ordenador, tu móvil y en Firefox. Cuenta gratuita, todo se cifra antes de salir del ordenador."
-
-msgid "Installed. Open it to create your account, then install Bitwarden on your phone."
-msgstr "Instalado. Ábrelo para crear tu cuenta y luego instala Bitwarden en tu móvil."
-
 msgid "Only on this computer"
 msgstr "Solo en este ordenador"
-
-msgid "Secrets: an encrypted file in your home folder, no account and no internet. KeePassXC opens it too."
-msgstr "Secrets: un archivo cifrado en tu carpeta personal, sin cuenta ni internet. KeePassXC también lo abre."
-
-msgid "Installed. Open it to create your password file, and keep a copy of it on a USB drive."
-msgstr "Instalado. Ábrelo para crear tu archivo de contraseñas y guarda una copia en una memoria USB."
 
 msgid "Linux and you"
 msgstr "Linux y tú"
@@ -661,9 +613,6 @@ msgstr "Ya lo conozco: un recorrido más corto, en tres pasos."
 
 msgid "Passwords"
 msgstr "Contraseñas"
-
-msgid "Bitwarden, synced with your phone, or Secrets, only on this computer"
-msgstr "Bitwarden, sincronizado con tu móvil, o Secrets, solo en este ordenador"
 
 msgid "Installed: {}"
 msgstr "Instalado: {}"
@@ -703,3 +652,126 @@ msgstr "Lo que cambia aquí, y tus herramientas."
 
 msgid "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Extra software."
 msgstr "Ofimática, juegos, gráficos y más: COSMIC Store, o Herramientas de cosmic-blue → Programas adicionales."
+
+msgid "Ticked and grey: already installed."
+msgstr "Marcado y en gris: ya instalado."
+
+msgid "Homebrew is not set up yet: only Podman Desktop can be installed now."
+msgstr "Homebrew aún no está listo: por ahora solo se puede instalar Podman Desktop."
+
+msgid "LibreOffice, OnlyOffice, PDF Arranger…"
+msgstr "LibreOffice, OnlyOffice, PDF Arranger…"
+
+msgid "Your office apps are ready."
+msgstr "Tus aplicaciones de oficina están listas."
+
+msgid "LibreOffice and OnlyOffice open and save Word, Excel and PowerPoint files."
+msgstr "LibreOffice y OnlyOffice abren y guardan archivos de Word, Excel y PowerPoint."
+
+msgid "Office suites"
+msgstr "Suites ofimáticas"
+
+msgid "PDF files"
+msgstr "Archivos PDF"
+
+msgid "Messaging and video calls"
+msgstr "Mensajería y videollamadas"
+
+msgid "Signal, Telegram, Element, Zoom…"
+msgstr "Signal, Telegram, Element, Zoom…"
+
+msgid "Your messaging apps are ready."
+msgstr "Tus aplicaciones de mensajería están listas."
+
+msgid "Pick the ones the people you talk to use."
+msgstr "Elige las que usan las personas con las que hablas."
+
+msgid "Messaging"
+msgstr "Mensajería"
+
+msgid "Video calls"
+msgstr "Videollamadas"
+
+msgid "Bitwarden, Secrets, KeePassXC"
+msgstr "Bitwarden, Secrets, KeePassXC"
+
+msgid "Your password manager is ready."
+msgstr "Su gestor de contraseñas está listo."
+
+msgid "Bitwarden: a free account, on this computer, your phone and in Firefox. Secrets and KeePassXC: an encrypted file, no account."
+msgstr "Bitwarden: una cuenta gratuita, en este ordenador, tu teléfono y en Firefox. Secrets y KeePassXC: un archivo cifrado, sin cuenta."
+
+msgid "Synced with your phone"
+msgstr "Sincronizadas con tu teléfono"
+
+msgid "Graphics and photos"
+msgstr "Gráficos y fotos"
+
+msgid "GIMP, Inkscape, Krita, darktable…"
+msgstr "GIMP, Inkscape, Krita, darktable…"
+
+msgid "Your graphics apps are ready."
+msgstr "Tus aplicaciones de gráficos están listas."
+
+msgid "Drawing and editing"
+msgstr "Dibujo y edición"
+
+msgid "Photos"
+msgstr "Fotos"
+
+msgid "And also"
+msgstr "Y también"
+
+msgid "OBS Studio, Kdenlive, Audacity…"
+msgstr "OBS Studio, Kdenlive, Audacity…"
+
+msgid "Your video apps are ready."
+msgstr "Tus aplicaciones de vídeo están listas."
+
+msgid "Video"
+msgstr "Vídeo"
+
+msgid "Sound"
+msgstr "Sonido"
+
+msgid "Steam, Heroic, Lutris, Discord…"
+msgstr "Steam, Heroic, Lutris, Discord…"
+
+msgid "Your game apps are ready."
+msgstr "Sus aplicaciones de juegos están listas."
+
+msgid "Removing an app keeps your games and saves."
+msgstr "Quitar una aplicación conserva tus juegos y partidas guardadas."
+
+msgid "Stores"
+msgstr "Tiendas"
+
+msgid "Windows games"
+msgstr "Juegos de Windows"
+
+msgid "School and science"
+msgstr "Escuela y ciencia"
+
+msgid "GCompris, Stellarium, GeoGebra…"
+msgstr "GCompris, Stellarium, GeoGebra…"
+
+msgid "Your school apps are ready."
+msgstr "Tus aplicaciones escolares están listas."
+
+msgid "For children"
+msgstr "Para niños"
+
+msgid "Science"
+msgstr "Ciencia"
+
+msgid "Studying"
+msgstr "Estudiar"
+
+msgid "Docker, VS Code, Zed, Neovim…"
+msgstr "Docker, VS Code, Zed, Neovim…"
+
+msgid "The developer tools are ready."
+msgstr "Las herramientas de desarrollo están listas."
+
+msgid "Lima: ujust install-dev-tools, in a terminal."
+msgstr "Lima: ujust install-dev-tools, en una terminal."
