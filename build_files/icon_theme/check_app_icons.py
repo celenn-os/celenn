@@ -12,7 +12,11 @@ id-writer, as LibreOffice's).
 A missing icon gets one in the cosmic-blue layer (OFFERED in
 branding/icons/build.py).
 
-Usage: check_app_icons.py <theme dir> <first_steps src dir> <preinstall file>
+The theme directories are the cosmic-blue theme and the Tela themes it
+inherits its application icons from (build_files/icon_theme/compose.py), not
+the fallbacks (Adwaita, hicolor), whose icons are in another style.
+
+Usage: check_app_icons.py <first_steps src dir> <preinstall file> <theme dir>...
 """
 
 import configparser
@@ -52,18 +56,20 @@ def offered(src, preinstall):
     return apps
 
 
-def app_icons(theme):
+def app_icons(themes):
     names = set()
-    for root, _dirs, files in os.walk(theme, followlinks=True):
+    for root, _dirs, files in (entry for theme in themes for entry in os.walk(theme, followlinks=True)):
         if os.sep + "apps" in root + os.sep and "symbolic" not in root:
             names.update(os.path.splitext(f)[0] for f in files)
     return names
 
 
 def main():
-    theme, src, preinstall = sys.argv[1:4]
+    if len(sys.argv) < 4:
+        sys.exit(__doc__)
+    src, preinstall, *themes = sys.argv[1:]
     apps = offered(src, preinstall)
-    icons = app_icons(theme)
+    icons = app_icons(themes)
     if len(apps) < 30 or len(icons) < 1000:
         sys.exit(f"Found only {len(apps)} offered apps and {len(icons)} app icons: check the paths")
     missing = sorted(
