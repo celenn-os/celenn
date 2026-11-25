@@ -689,6 +689,7 @@ msgid "Printers"
 msgstr ""
 
 msgid "Scan"
+msgstr ""
 
 msgid "Change computers"
 msgstr ""
