@@ -43,7 +43,7 @@ vm_install() {
         bootc install to-disk --via-loopback --generic-image --wipe \
             --target-imgref "${target}" \
             --root-ssh-authorized-keys /output/id_ed25519.pub \
-            --karg console=ttyS0,115200 --karg console=tty0 --karg rhgb --karg quiet \
+            --karg console=ttyS0,115200 --karg console=tty0 --karg rhgb --karg quiet --karg plymouth.ignore-serial-consoles \
             --karg systemd.wants=sshd.service \
             /output/disk.raw
     sudo chown "$(id -u):$(id -g)" "${WORK}/disk.raw"

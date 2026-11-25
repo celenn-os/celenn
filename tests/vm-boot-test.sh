@@ -25,6 +25,7 @@ film_start film-boot 150
 vm_wait_ssh
 
 errors=0
+vm 'cat /proc/cmdline; plymouth --ping && echo "plymouth running"; journalctl -b -o cat --no-pager | grep -i plymouth | head -n 20' || true
 vm_check_system boot || errors=1
 vm_check_tuning boot || errors=1
 # Startup time and memory in use at the login screen, to follow over time
