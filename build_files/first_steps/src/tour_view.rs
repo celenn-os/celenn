@@ -152,19 +152,25 @@ impl<T: Tour> App<T> {
             Body::Origin => return self.origin_view(space_s),
             Body::Look => return self.look_view(space_s),
             Body::Profiles => {
-                return widget::column::with_children(self.profile_rows(space_s))
-                    .spacing(space_s)
-                    .into();
+                let body = match self.sub {
+                    Some(n) => self.category_list(n, space_s),
+                    None => {
+                        let tiles = (0..CATEGORIES.len()).map(|n| self.tile(n)).collect();
+                        let mut body = vec![apps::grid(tiles)];
+                        body.extend(self.install_status(space_s));
+                        body
+                    }
+                };
+                return widget::column::with_children(body).spacing(space_s).into();
             }
             Body::Essentials(rows) => {
-                let body = match self.sub_rows(space_s) {
-                    Some(body) => body,
+                let body = match self.sub {
+                    Some(n) => self.category_list(n, space_s),
                     None => {
-                        let mut rows: Vec<Element<'a, Message>> =
+                        let rows: Vec<Element<'a, Message>> =
                             rows.iter().map(|row| row_view(row, space_s)).collect();
-                        rows.push(self.dev_row(space_s));
-                        rows.push(self.vaults_row(space_s));
-                        let mut body = vec![section(rows)];
+                        let tiles = vec![self.tile(apps::PASSWORDS), self.tile(DEVELOPMENT)];
+                        let mut body = vec![section(rows), apps::grid(tiles)];
                         body.extend(self.install_status(space_s));
                         body
                     }
@@ -208,64 +214,6 @@ impl<T: Tour> App<T> {
             Body::Rows(rows) => rows.iter().map(|row| row_view(row, space_s)).collect(),
         };
         section(rows)
-    }
-
-    pub(super) fn vaults_view<'a>(&'a self, space_s: u16) -> Element<'a, Message> {
-        let rows = VAULT_APPS
-            .iter()
-            .map(|manager| {
-                let installed = self.installed.contains(manager.app);
-                let control: Element<'a, Message> = if self.vault_installing == Some(manager.app) {
-                    widget::row::with_capacity(2)
-                        .spacing(theme::spacing().space_xxs)
-                        .align_y(Alignment::Center)
-                        .push(widget::progress_bar::indeterminate_circular().size(20.0))
-                        .push(text::body(tr("Working…")))
-                        .into()
-                } else if installed {
-                    widget::button::suggested(tr("Open"))
-                        .on_press(Message::Run(Action::Launch(manager.run)))
-                        .into()
-                } else {
-                    widget::button::standard(tr("Install"))
-                        .on_press_maybe(
-                            self.vault_installing
-                                .is_none()
-                                .then_some(Message::VaultInstall(manager.app)),
-                        )
-                        .into()
-                };
-                // Synced or kept here; a check once installed
-                let icon = if installed {
-                    state_icon(true)
-                } else if manager.app == BITWARDEN {
-                    row_icon("emblem-synchronizing-symbolic")
-                } else {
-                    row_icon("computer-symbolic")
-                };
-                settings::item_row(vec![
-                    icon,
-                    two_lines(
-                        text::heading(tr(manager.title)).into(),
-                        tr(if installed {
-                            manager.done
-                        } else {
-                            manager.caption
-                        }),
-                    ),
-                    control,
-                ])
-                .spacing(space_s)
-                .into()
-            })
-            .collect();
-        let mut column = widget::column::with_capacity(2)
-            .spacing(space_s)
-            .push(section(rows));
-        if let Some(card) = &self.vault_card {
-            column = column.push(card.view(Message::VaultCard));
-        }
-        column.into()
     }
 
     pub(super) fn origin_view<'a>(&'a self, space_s: u16) -> Element<'a, Message> {
@@ -450,48 +398,6 @@ impl<T: Tour> App<T> {
         column.into()
     }
 
-    pub(super) fn profile_rows<'a>(&'a self, space_s: u16) -> Vec<Element<'a, Message>> {
-        if let Some(body) = self.sub_rows(space_s) {
-            return body;
-        }
-        let running = matches!(self.install, Install::Running { .. });
-        let mut rows: Vec<Element<'a, Message>> = PROFILES
-            .iter()
-            .enumerate()
-            .map(|(i, profile)| {
-                let installed = self.profile_installed(profile);
-                let check: Element<'a, Message> = if installed {
-                    text::caption(tr("Installed")).into()
-                } else {
-                    widget::checkbox(self.chosen.contains(&i))
-                        .on_toggle_maybe((!running).then_some(move |on| Message::Profile(i, on)))
-                        .into()
-                };
-                settings::item_row(vec![
-                    two_lines(text::heading(tr(profile.title)).into(), tr(profile.caption)),
-                    check,
-                ])
-                .spacing(space_s)
-                .into()
-            })
-            .collect();
-        rows.push(self.dev_row(space_s));
-        rows.push(self.vaults_row(space_s));
-        let mut body = vec![section(rows)];
-        body.extend(self.install_status(space_s));
-        body
-    }
-
-    /// The developer tools or the password managers, when one of their
-    /// "Choose…" rows is open
-    pub(super) fn sub_rows<'a>(&'a self, space_s: u16) -> Option<Vec<Element<'a, Message>>> {
-        match self.sub {
-            Sub::List => None,
-            Sub::Dev => Some(self.dev_rows(space_s)),
-            Sub::Vaults => Some(vec![self.vaults_view(space_s), back_to_list()]),
-        }
-    }
-
     /// The progress of the chosen apps, or the card of an install that
     /// did not work
     pub(super) fn install_status<'a>(&'a self, space_s: u16) -> Option<Element<'a, Message>> {
@@ -513,132 +419,61 @@ impl<T: Tour> App<T> {
         }
     }
 
-    /// A "Choose…" row: title, caption, and the button that opens its list
-    pub(super) fn choose_row<'a>(
-        &'a self,
-        title: &'static str,
-        caption: String,
-        sub: Sub,
-        space_s: u16,
-    ) -> Element<'a, Message> {
+    /// A category's tile: what is chosen or installed in it, and the
+    /// button that opens its list
+    pub(super) fn tile<'a>(&'a self, n: usize) -> Element<'a, Message> {
         let running = matches!(self.install, Install::Running { .. });
-        settings::item_row(vec![
-            widget::column::with_capacity(2)
-                .spacing(2)
-                .push(text::heading(tr(title)))
-                .push(dim_caption(caption).wrapping(Wrapping::Word))
-                .width(Length::Fill)
-                .into(),
-            widget::button::standard(tr("Choose…"))
-                .on_press_maybe((!running || sub == Sub::Vaults).then_some(Message::Sub(sub)))
-                .into(),
-        ])
-        .spacing(space_s)
-        .into()
+        apps::tile(
+            &CATEGORIES[n],
+            apps::tile_caption(&CATEGORIES[n], &self.picks[n], &self.category_installed(n)),
+            (!running).then_some(Message::Sub(Some(n))),
+        )
     }
 
-    pub(super) fn dev_row<'a>(&'a self, space_s: u16) -> Element<'a, Message> {
-        let chosen = self.dev_chosen.len();
-        let caption = if chosen == 0 {
-            tr("Docker, VS Code, Zed, Neovim…: choose your tools").to_owned()
-        } else {
-            fill(tr("Chosen: {}"), &chosen.to_string())
-        };
-        self.choose_row("Development", caption, Sub::Dev, space_s)
-    }
-
-    pub(super) fn vaults_row<'a>(&'a self, space_s: u16) -> Element<'a, Message> {
-        let installed: Vec<&str> = VAULT_APPS
-            .iter()
-            .filter(|manager| self.installed.contains(manager.app))
-            .map(|manager| manager.name)
-            .collect();
-        let caption = if installed.is_empty() {
-            tr("Bitwarden, synced with your phone, or Secrets, only on this computer").to_owned()
-        } else {
-            fill(tr("Installed: {}"), &installed.join(", "))
-        };
-        self.choose_row("Passwords", caption, Sub::Vaults, space_s)
-    }
-
-    /// The developer tools, by group, each with its checkbox
-    pub(super) fn dev_rows<'a>(&'a self, space_s: u16) -> Vec<Element<'a, Message>> {
+    /// A category's apps by group, each with its checkbox (the installed
+    /// ones ticked and grey: the tour only installs), what to know, and
+    /// the way back to the tiles
+    pub(super) fn category_list<'a>(&'a self, n: usize, space_s: u16) -> Vec<Element<'a, Message>> {
+        let category = &CATEGORIES[n];
+        let installed = self.category_installed(n);
+        let mut ticked = installed.clone();
+        ticked.extend(self.picks[n].iter().copied());
+        let rows = apps::checklist(
+            category,
+            &ticked,
+            |i, tool| !installed.contains(&i) && apps::available(tool),
+            move |i, on| Message::Pick(n, i, on),
+        );
         let brew = Path::new(devtools::BREW).exists();
-        let mut i = 0;
-        let mut rows = Vec::with_capacity(DEV_TOOLS.len());
-        for (heading, tools) in DEV_TOOLS {
-            let mut grid: Vec<Element<'a, Message>> = Vec::new();
-            for tool in tools.iter() {
-                let n = i;
-                i += 1;
-                let installed = self.tool_installed(n, tool);
-                let available = brew || matches!(tool.kind, ToolKind::Flatpak(_));
-                let checkbox = widget::checkbox(installed || self.dev_chosen.contains(&n))
-                    .on_toggle_maybe(
-                        (!installed && available).then_some(move |on| Message::DevTool(n, on)),
-                    );
-                // The tool's name, aligned with its checkbox: clicking it
-                // ticks the box too
-                let label = text::body(tool.name).apply(widget::mouse_area);
-                let label = if installed || !available {
-                    label
-                } else {
-                    label.on_press(Message::DevTool(n, !self.dev_chosen.contains(&n)))
-                };
-                grid.push(
-                    widget::row::with_capacity(2)
-                        .spacing(space_s / 2)
-                        .align_y(Alignment::Center)
-                        .push(checkbox)
-                        .push(label)
-                        .width(Length::Fixed(148.0))
-                        .into(),
-                );
-            }
-            // The group's name on the left, its tools in columns on the right
-            rows.push(
-                settings::item_row(vec![
-                    text::heading(tr(heading))
-                        .width(Length::Fixed(140.0))
-                        .into(),
-                    // Three columns
-                    {
-                        let mut lines = widget::column::with_capacity(grid.len().div_ceil(3))
-                            .spacing(space_s / 2)
-                            .width(Length::Fill);
-                        let mut cells = grid.into_iter().peekable();
-                        while cells.peek().is_some() {
-                            lines = lines.push(cells.by_ref().take(3).fold(
-                                widget::row::with_capacity(3).spacing(space_s),
-                                |row, cell| row.push(cell),
-                            ));
-                        }
-                        lines.into()
-                    },
-                ])
+        let mut notes: Vec<&str> = Vec::new();
+        if !installed.is_empty() {
+            notes.push(tr("Ticked and grey: already installed."));
+        }
+        if n == DEVELOPMENT && !brew {
+            notes.push(tr(
+                "Homebrew is still being set up: the code editors and terminal tools can be chosen in a few minutes.",
+            ));
+        } else if !category.note.is_empty() {
+            notes.push(tr(category.note));
+        }
+        let mut body = vec![
+            widget::column::with_capacity(2)
                 .spacing(space_s)
-                .align_y(Alignment::Start)
+                .push(text::heading(tr(category.title)))
+                .push(section(rows))
                 .into(),
+        ];
+        if !notes.is_empty() {
+            body.push(
+                text::caption(notes.join(" "))
+                    .wrapping(Wrapping::Word)
+                    .align_x(Alignment::Center)
+                    .width(Length::Fill)
+                    .into(),
             );
         }
-        let note = if brew {
-            tr(
-                "Ticked and grey: already installed. Lima and virtual machines: ujust install-dev-tools and ujust install-vms, in a terminal.",
-            )
-        } else {
-            tr(
-                "Homebrew is still being set up: the code editors and terminal tools can be chosen in a few minutes.",
-            )
-        };
-        vec![
-            section(rows),
-            text::caption(note)
-                .wrapping(Wrapping::Word)
-                .align_x(Alignment::Center)
-                .width(Length::Fill)
-                .into(),
-            back_to_list(),
-        ]
+        body.push(back_to_list());
+        body
     }
 
     /// What this computer needs, found by system::computer(): only what
@@ -1177,47 +1012,15 @@ impl<T: Tour> App<T> {
     }
 }
 
-/// The origin cards: a settings-row background, an accent border when
-/// chosen, a little lighter under the mouse (a custom style is told whether
-/// the button has the keyboard focus, not whether it is selected)
+/// The origin cards: a tile, with an accent border when chosen
 pub(super) fn card_style(selected: bool) -> theme::Button {
-    fn style(selected: bool, theme: &cosmic::Theme, hover: bool) -> widget::button::Style {
-        let cosmic = theme.cosmic();
-        let component = &theme.current_container().component;
-        let mut style = widget::button::Style::new();
-        style.background = Some(cosmic::iced::Background::Color(
-            if hover {
-                component.hover
-            } else {
-                component.base
-            }
-            .into(),
-        ));
-        style.border_radius = cosmic.corner_radii.radius_s.into();
-        style.text_color = Some(component.on.into());
-        style.icon_color = Some(if selected {
-            cosmic.accent.base.into()
-        } else {
-            component.on.into()
-        });
-        if selected {
-            style.border_width = 2.0;
-            style.border_color = cosmic.accent.base.into();
-        }
-        style
-    }
-    theme::Button::Custom {
-        active: Box::new(move |_, theme| style(selected, theme, false)),
-        disabled: Box::new(move |theme| style(selected, theme, false)),
-        hovered: Box::new(move |_, theme| style(selected, theme, true)),
-        pressed: Box::new(move |_, theme| style(selected, theme, true)),
-    }
+    crate::style::tile_style(selected)
 }
 
-/// "Back to the list", under the developer tools and the password managers
+/// "Back to the list", under a category's list of apps
 pub(super) fn back_to_list<'a>() -> Element<'a, Message> {
     widget::button::standard(tr("Back to the list"))
-        .on_press(Message::Sub(Sub::List))
+        .on_press(Message::Sub(None))
         .apply(widget::container)
         .center_x(Length::Fill)
         .into()

@@ -281,14 +281,8 @@ msgstr "Barra in basso"
 msgid "This did not work."
 msgstr "Non ha funzionato."
 
-msgid "Installed"
-msgstr "Installato"
-
 msgid "Development"
 msgstr "Sviluppo"
-
-msgid "Choose…"
-msgstr "Scegli…"
 
 msgid "Installing: {} of {}"
 msgstr "Installazione: {} di {}"
@@ -410,14 +404,8 @@ msgstr "I tuoi punti di riferimento dal Mac"
 msgid "Office"
 msgstr "Ufficio"
 
-msgid "LibreOffice: documents, spreadsheets and presentations, Word and Excel files included"
-msgstr "LibreOffice: documenti, fogli di calcolo e presentazioni, anche file Word ed Excel"
-
 msgid "Games"
 msgstr "Giochi"
-
-msgid "Steam, and Heroic Games Launcher for Epic Games and GOG"
-msgstr "Steam, e Heroic Games Launcher per Epic Games e GOG"
 
 msgid "Open the launcher"
 msgstr "Apri il launcher"
@@ -502,9 +490,6 @@ msgstr "Il sistema è installato e pronto. Da dove arrivi? La presentazione si a
 
 msgid "Make it yours"
 msgstr "Su misura per te"
-
-msgid "Pick what concerns you: nothing installs without a click, and everything can be removed later."
-msgstr "Scegli ciò che ti interessa: nulla si installa senza un clic, e tutto si può rimuovere dopo."
 
 msgid "Thousands of other apps are in COSMIC Store."
 msgstr "Migliaia di altre app sono in COSMIC Store."
@@ -626,9 +611,6 @@ msgstr "Impostazioni di Sistema → Impostazioni"
 msgid "Everything in one place, Settings → Desktop for the look"
 msgstr "Tutto in un unico posto, Impostazioni → Desktop per l’aspetto"
 
-msgid "Docker, VS Code, Zed, Neovim…: choose your tools"
-msgstr "Docker, VS Code, Zed, Neovim…: scegli i tuoi strumenti"
-
 msgid "Chosen: {}"
 msgstr "Scelti: {}"
 
@@ -644,9 +626,6 @@ msgstr "Editor di codice"
 msgid "In the terminal"
 msgstr "Nel terminale"
 
-msgid "Ticked and grey: already installed. Lima and virtual machines: ujust install-dev-tools and ujust install-vms, in a terminal."
-msgstr "Spuntato e grigio: già installato. Lima e le macchine virtuali: ujust install-dev-tools e ujust install-vms, in un terminale."
-
 msgid "Homebrew is still being set up: the code editors and terminal tools can be chosen in a few minutes."
 msgstr "Homebrew è ancora in configurazione: potrai scegliere gli editor di codice e gli strumenti del terminale tra qualche minuto."
 
@@ -656,17 +635,8 @@ msgstr "Torna all’elenco"
 msgid "What is different from your distribution"
 msgstr "Cosa cambia rispetto alla tua distribuzione"
 
-msgid "Graphics and drawing"
-msgstr "Grafica e disegno"
-
-msgid "GIMP for photos, Inkscape for illustrations and logos, Krita for digital painting"
-msgstr "GIMP per le foto, Inkscape per illustrazioni e loghi, Krita per la pittura digitale"
-
 msgid "Videos and streaming"
 msgstr "Video e streaming"
-
-msgid "OBS Studio to record and stream, Kdenlive to edit videos, Audacity for sound"
-msgstr "OBS Studio per registrare e trasmettere, Kdenlive per montare i video, Audacity per l’audio"
 
 msgid "What is different here"
 msgstr "Cosa cambia qui"
@@ -734,29 +704,8 @@ msgstr "Apri il rapporto"
 msgid "Cancel"
 msgstr "Annulla"
 
-msgid "Install"
-msgstr "Installa"
-
-msgid "Working…"
-msgstr "In corso…"
-
-msgid "Synced with my phone"
-msgstr "Sincronizzate con il mio telefono"
-
-msgid "Bitwarden: on this computer, your phone and in Firefox. Free account, everything is encrypted before it leaves the computer."
-msgstr "Bitwarden: su questo computer, sul telefono e in Firefox. Account gratuito, tutto è cifrato prima di lasciare il computer."
-
-msgid "Installed. Open it to create your account, then install Bitwarden on your phone."
-msgstr "Installato. Aprilo per creare il tuo account, poi installa Bitwarden sul telefono."
-
 msgid "Only on this computer"
 msgstr "Solo su questo computer"
-
-msgid "Secrets: an encrypted file in your home folder, no account and no internet. KeePassXC opens it too."
-msgstr "Secrets: un file cifrato nella tua cartella personale, senza account né internet. Si apre anche con KeePassXC."
-
-msgid "Installed. Open it to create your password file, and keep a copy of it on a USB drive."
-msgstr "Installato. Aprilo per creare il tuo file di password e tienine una copia su una chiavetta USB."
 
 msgid "Linux and you"
 msgstr "Linux e te"
@@ -772,9 +721,6 @@ msgstr "Lo conosco bene: un percorso più breve, in tre passi."
 
 msgid "Passwords"
 msgstr "Password"
-
-msgid "Bitwarden, synced with your phone, or Secrets, only on this computer"
-msgstr "Bitwarden, sincronizzato con il telefono, o Secrets, solo su questo computer"
 
 msgid "Installed: {}"
 msgstr "Installato: {}"
@@ -814,3 +760,126 @@ msgstr "Cosa cambia qui, e i tuoi strumenti."
 
 msgid "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Extra software."
 msgstr "Ufficio, giochi, grafica e altro: COSMIC Store, o Strumenti di cosmic-blue → Software aggiuntivo."
+
+msgid "Ticked and grey: already installed."
+msgstr "Spuntato e grigio: già installato."
+
+msgid "Homebrew is not set up yet: only Podman Desktop can be installed now."
+msgstr "Homebrew non è ancora pronto: per ora si può installare solo Podman Desktop."
+
+msgid "LibreOffice, OnlyOffice…"
+msgstr "LibreOffice, OnlyOffice…"
+
+msgid "Your office apps are ready."
+msgstr "Le tue app per l’ufficio sono pronte."
+
+msgid "LibreOffice and OnlyOffice open and save Word, Excel and PowerPoint files."
+msgstr "LibreOffice e OnlyOffice aprono e salvano i file di Word, Excel e PowerPoint."
+
+msgid "Office suites"
+msgstr "Suite per l’ufficio"
+
+msgid "PDF files"
+msgstr "File PDF"
+
+msgid "Messaging and video calls"
+msgstr "Messaggi e videochiamate"
+
+msgid "Signal, Telegram, Element, Zoom…"
+msgstr "Signal, Telegram, Element, Zoom…"
+
+msgid "Your messaging apps are ready."
+msgstr "Le tue app di messaggistica sono pronte."
+
+msgid "Messaging"
+msgstr "Messaggi"
+
+msgid "Video calls"
+msgstr "Videochiamate"
+
+msgid "Bitwarden, Secrets, KeePassXC"
+msgstr "Bitwarden, Secrets, KeePassXC"
+
+msgid "Your password manager is ready."
+msgstr "Il tuo gestore di password è pronto."
+
+msgid "Bitwarden: a free account, on this computer, your phone and in Firefox. Secrets and KeePassXC: an encrypted file, no account."
+msgstr "Bitwarden: un account gratuito, su questo computer, sul telefono e in Firefox. Secrets e KeePassXC: un file cifrato, senza account."
+
+msgid "Synced with your phone"
+msgstr "Sincronizzate con il telefono"
+
+msgid "Graphics and photos"
+msgstr "Grafica e foto"
+
+msgid "GIMP, Inkscape, Krita, darktable…"
+msgstr "GIMP, Inkscape, Krita, darktable…"
+
+msgid "Your graphics apps are ready."
+msgstr "Le tue app di grafica sono pronte."
+
+msgid "Drawing and editing"
+msgstr "Disegno e ritocco"
+
+msgid "Photos"
+msgstr "Foto"
+
+msgid "And also"
+msgstr "E inoltre"
+
+msgid "OBS Studio, Kdenlive, Audacity…"
+msgstr "OBS Studio, Kdenlive, Audacity…"
+
+msgid "Your video apps are ready."
+msgstr "Le tue app video sono pronte."
+
+msgid "Video"
+msgstr "Video"
+
+msgid "Sound"
+msgstr "Audio"
+
+msgid "Steam, Heroic, Lutris, Discord…"
+msgstr "Steam, Heroic, Lutris, Discord…"
+
+msgid "Your game apps are ready."
+msgstr "Le tue app per i giochi sono pronte."
+
+msgid "Removing an app keeps your games and saves."
+msgstr "Rimuovere un’app mantiene i tuoi giochi e salvataggi."
+
+msgid "Stores"
+msgstr "Negozi"
+
+msgid "Windows games"
+msgstr "Giochi Windows"
+
+msgid "School and science"
+msgstr "Scuola e scienze"
+
+msgid "GCompris, Stellarium, GeoGebra…"
+msgstr "GCompris, Stellarium, GeoGebra…"
+
+msgid "Your school apps are ready."
+msgstr "Le tue app per la scuola sono pronte."
+
+msgid "For children"
+msgstr "Per i bambini"
+
+msgid "Science"
+msgstr "Scienze"
+
+msgid "Studying"
+msgstr "Studiare"
+
+msgid "VS Code, Docker, Zed, Neovim…"
+msgstr "VS Code, Docker, Zed, Neovim…"
+
+msgid "The developer tools are ready."
+msgstr "Gli strumenti per sviluppatori sono pronti."
+
+msgid "Lima: ujust install-dev-tools, in a terminal."
+msgstr "Lima: ujust install-dev-tools, in un terminale."
+
+msgid "Pick what concerns you. In each list, the apps most used on Linux are already ticked, all free. Nothing installs without your OK."
+msgstr "Scegli ciò che ti interessa. In ogni elenco, le app più usate su Linux sono già spuntate, tutte gratuite. Nulla si installa senza il tuo consenso."

@@ -40,6 +40,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::Duration;
 
+mod apps;
 mod devtools;
 mod edition;
 mod failure;
@@ -55,9 +56,9 @@ mod style;
 mod system;
 mod tour_keys;
 mod tour_view;
+use apps::{CATEGORIES, DEVELOPMENT};
 use devtools::{
-    BITWARDEN, BITWARDEN_EXTENSION, DEV_TOOLS, DevTool, ToolKind, brew_install, brew_installed,
-    dev_tools,
+    BITWARDEN, BITWARDEN_EXTENSION, DevTool, ToolKind, brew_install, brew_installed, dev_tools,
 };
 use failure::{Card, CardAction, CardMessage, Failure, Outcome};
 use i18n::{fill, language, tr};
@@ -150,84 +151,6 @@ impl Origin {
 
 /// tour-level's value for the short tour
 const EXPERIENCED: &str = "experienced";
-
-/// What the apps page shows: its list, or one of its "Choose…" rows open
-#[derive(Clone, Copy, Debug, PartialEq)]
-enum Sub {
-    List,
-    Dev,
-    Vaults,
-}
-
-/// Usage profiles: apps from Flathub, installed for everyone like the
-/// first-boot apps (flatpak's polkit rules let administrators do it without
-/// a password)
-struct Profile {
-    title: &'static str,
-    caption: &'static str,
-    apps: &'static [&'static str],
-}
-
-const PROFILES: &[Profile] = &[
-    Profile {
-        title: "Office",
-        caption: "LibreOffice: documents, spreadsheets and presentations, Word and Excel files included",
-        apps: &["org.libreoffice.LibreOffice"],
-    },
-    Profile {
-        title: "Games",
-        caption: "Steam, and Heroic Games Launcher for Epic Games and GOG",
-        apps: &["com.valvesoftware.Steam", "com.heroicgameslauncher.hgl"],
-    },
-    Profile {
-        title: "Graphics and drawing",
-        caption: "GIMP for photos, Inkscape for illustrations and logos, Krita for digital painting",
-        apps: &["org.gimp.GIMP", "org.inkscape.Inkscape", "org.kde.krita"],
-    },
-    Profile {
-        title: "Videos and streaming",
-        caption: "OBS Studio to record and stream, Kdenlive to edit videos, Audacity for sound",
-        apps: &[
-            "com.obsproject.Studio",
-            "org.kde.kdenlive",
-            "org.audacityteam.Audacity",
-        ],
-    },
-];
-
-/// A password manager of the "Your passwords" page, from Flathub for
-/// everyone like the profiles. cosmic-blue Tools offers the same ones, and
-/// KeePassXC (more.rs)
-struct VaultApp {
-    app: &'static str,
-    /// The app's name (not translated)
-    name: &'static str,
-    run: &'static [&'static str],
-    /// Where the passwords are kept
-    title: &'static str,
-    caption: &'static str,
-    /// The caption once installed: what to do next
-    done: &'static str,
-}
-
-const VAULT_APPS: &[VaultApp] = &[
-    VaultApp {
-        app: BITWARDEN,
-        name: "Bitwarden",
-        run: &["flatpak", "run", "com.bitwarden.desktop"],
-        title: "Synced with my phone",
-        caption: "Bitwarden: on this computer, your phone and in Firefox. Free account, everything is encrypted before it leaves the computer.",
-        done: "Installed. Open it to create your account, then install Bitwarden on your phone.",
-    },
-    VaultApp {
-        app: "org.gnome.World.Secrets",
-        name: "Secrets",
-        run: &["flatpak", "run", "org.gnome.World.Secrets"],
-        title: "Only on this computer",
-        caption: "Secrets: an encrypted file in your home folder, no account and no internet. KeePassXC opens it too.",
-        done: "Installed. Open it to create your password file, and keep a copy of it on a USB drive.",
-    },
-];
 
 /// Things to try on the "Try it" page: each button does the real thing
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -331,10 +254,10 @@ enum Body {
     Origin,
     /// Theme, wallpaper, avatar, dock: applied at once
     Look,
-    /// Usage profiles, developer tools and password managers
+    /// The kinds of apps, as tiles that open a list to tick (apps.rs)
     Profiles,
     /// The experienced tour's page: what is different here (rows), then
-    /// developer tools and password managers
+    /// the password managers and developer tools tiles
     Essentials(Vec<Row>),
     /// Buttons that do the real thing
     Try,
@@ -636,7 +559,7 @@ fn pages(mode: &Mode, origin: Option<Origin>, experienced: bool) -> Vec<Page> {
                 ..Page::new(
                     "Your apps",
                     Some(
-                        "Pick what concerns you: nothing installs without a click, and everything can be removed later.",
+                        "Pick what concerns you. In each list, the apps most used on Linux are already ticked, all free. Nothing installs without your OK.",
                     ),
                     Body::Profiles,
                 )
@@ -799,23 +722,12 @@ const TEXTS: &[&str] = &[
     "Open LocalSend here and on the phone, on the same Wi-Fi.",
     "On the phone, pick the photos, then this computer. They arrive in Downloads. It works the other way too.",
     "Open LocalSend",
-    // Profiles
-    "Installed",
-    "Development",
-    "Docker, VS Code, Zed, Neovim…: choose your tools",
-    "Chosen: {}",
-    "Choose…",
+    // Your apps (the categories: apps.rs)
     "Install and continue",
     "Installing: {} of {}",
-    "Containers",
-    "Code editors",
-    "In the terminal",
-    "Ticked and grey: already installed. Lima and virtual machines: ujust install-dev-tools and ujust install-vms, in a terminal.",
+    "Ticked and grey: already installed.",
     "Homebrew is still being set up: the code editors and terminal tools can be chosen in a few minutes.",
     "Back to the list",
-    "Passwords",
-    "Bitwarden, synced with your phone, or Secrets, only on this computer",
-    "Installed: {}",
     // What the computer needs (last page)
     "No internet connection",
     "Apps and updates need it.",
@@ -833,9 +745,6 @@ const TEXTS: &[&str] = &[
     "Screen scale",
     "Text and windows too small or too big? Change the scale of the screen.",
     "Display settings",
-    // Your passwords
-    "Install",
-    "Working…",
     // Try
     "Try",
     "Turn on",
@@ -880,12 +789,7 @@ fn all_texts() -> Vec<&'static str> {
         // (names of operating systems are not translated)
         texts.push(origin.card().2);
     }
-    for profile in PROFILES {
-        texts.extend([profile.title, profile.caption]);
-    }
-    for manager in VAULT_APPS {
-        texts.extend([manager.title, manager.caption, manager.done]);
-    }
+    texts.extend(apps::texts());
     for thing in Try::ALL {
         let (title, caption) = thing.texts();
         texts.extend([title, caption]);
@@ -1024,12 +928,13 @@ enum Message {
     Avatar(usize),
     /// One bar at the bottom (true), or the top bar and the dock
     Layout(bool),
-    Profile(usize, bool),
-    /// Show the developer tools, the password managers or the list again
-    Sub(Sub),
+    /// Tick or untick an app: its category, its number in it
+    Pick(usize, usize, bool),
+    /// Open a category's list (a number of CATEGORIES), or show the tiles
+    /// again (None)
+    Sub(Option<usize>),
     /// New to this (false) or experienced (true): the long or short tour
     Level(bool),
-    DevTool(usize, bool),
     /// Install what was chosen, then turn the page
     InstallAndNext,
     InstallDone(Outcome),
@@ -1049,10 +954,6 @@ enum Message {
     Battery(bool),
     BatteryDone(bool, bool),
     Try(Try),
-    /// Install a password manager (its app)
-    VaultInstall(&'static str),
-    VaultDone(&'static str, Outcome),
-    VaultCard(CardMessage),
     /// A change that did not work
     Failed,
     OpenWith(&'static [&'static str]),
@@ -1114,19 +1015,22 @@ struct App<T: Tour> {
     installed: BTreeSet<String>,
     preinstall: Vec<String>,
     preinstall_running: bool,
-    chosen: BTreeSet<usize>,
+    /// The apps ticked in each category's list (numbers of
+    /// Category::tools()), and the lists opened once (their recommended
+    /// apps are ticked the first time)
+    picks: Vec<BTreeSet<usize>>,
+    opened: BTreeSet<usize>,
+    /// The developer tools installed with Homebrew (numbers of dev_tools())
     brew: BTreeSet<usize>,
-    dev_chosen: BTreeSet<usize>,
-    /// The developer tools or the password managers, in place of the list
-    sub: Sub,
+    /// The category whose list is shown in place of the tiles
+    sub: Option<usize>,
+    /// Bitwarden is installing: its Firefox extension's page opens once it
+    /// is there
+    bitwarden_pending: bool,
     install: Install,
     /// An install that did not work, with the apps and developer tools to
     /// try again
     install_card: Option<Card<(Vec<String>, Vec<usize>)>>,
-    /// The password manager installing, and the card of one that did not
-    /// install (its app, to try again)
-    vault_installing: Option<&'static str>,
-    vault_card: Option<Card<&'static str>>,
     // Computer
     computer: Option<Computer>,
     /// Live session: None while the checks run
@@ -1168,9 +1072,23 @@ impl<T: Tour> App<T> {
         }
     }
 
+    /// The apps of a category that are installed (numbers of
+    /// Category::tools())
+    fn category_installed(&self, n: usize) -> BTreeSet<usize> {
+        CATEGORIES[n]
+            .tools()
+            .enumerate()
+            .filter(|(i, tool)| match tool.kind {
+                ToolKind::Flatpak(app) => self.installed.contains(app),
+                _ => n == DEVELOPMENT && self.brew.contains(i),
+            })
+            .map(|(i, _)| i)
+            .collect()
+    }
+
     /// Something to install is chosen
     fn anything_chosen(&self) -> bool {
-        !self.chosen.is_empty() || !self.dev_chosen.is_empty()
+        (0..CATEGORIES.len()).any(|n| !self.picks[n].is_subset(&self.category_installed(n)))
     }
 
     /// What the suggested button at the bottom of a tour page does (also
@@ -1264,10 +1182,6 @@ impl<T: Tour> App<T> {
             .filter(|app| self.installed.contains(*app))
             .count();
         Some((apps_done + tools_done, apps.len() + tools.len()))
-    }
-
-    fn profile_installed(&self, profile: &Profile) -> bool {
-        profile.apps.iter().all(|app| self.installed.contains(*app))
     }
 }
 
@@ -1373,14 +1287,13 @@ impl<T: Tour> Application for App<T> {
                 Vec::new()
             },
             preinstall_running: false,
-            chosen: BTreeSet::new(),
+            picks: vec![BTreeSet::new(); CATEGORIES.len()],
+            opened: BTreeSet::new(),
             brew: BTreeSet::new(),
-            dev_chosen: BTreeSet::new(),
-            sub: Sub::List,
+            sub: None,
+            bitwarden_pending: false,
             install: Install::Idle,
             install_card: None,
-            vault_installing: None,
-            vault_card: None,
             computer: None,
             readiness: None,
             nvidia: Nvidia::Idle,
@@ -1492,42 +1405,46 @@ impl<T: Tour> Application for App<T> {
                     return self.toast("This did not work.");
                 }
             }
-            Message::Profile(i, chosen) => {
-                if chosen {
-                    self.chosen.insert(i);
+            Message::Pick(n, i, on) => {
+                if on {
+                    self.picks[n].insert(i);
                 } else {
-                    self.chosen.remove(&i);
+                    self.picks[n].remove(&i);
                 }
             }
-            Message::Sub(sub) => self.sub = sub,
-            Message::DevTool(i, chosen) => {
-                if chosen {
-                    self.dev_chosen.insert(i);
-                } else {
-                    self.dev_chosen.remove(&i);
+            Message::Sub(sub) => {
+                // The first time a list opens, its recommended apps are
+                // ticked (unless some of its apps are already there)
+                if let Some(n) = sub
+                    && self.opened.insert(n)
+                    && self.category_installed(n).is_empty()
+                {
+                    self.picks[n].extend(CATEGORIES[n].recommended());
                 }
+                self.sub = sub;
             }
             Message::InstallAndNext => {
-                let mut apps: Vec<String> = self
-                    .chosen
-                    .iter()
-                    .flat_map(|i| PROFILES[*i].apps.iter())
-                    .filter(|app| !self.installed.contains(**app))
-                    .map(|app| (*app).to_owned())
-                    .collect();
+                let mut apps: Vec<String> = Vec::new();
                 let mut tools = Vec::new();
-                for (i, tool) in dev_tools().enumerate() {
-                    if !self.dev_chosen.contains(&i) || self.tool_installed(i, tool) {
-                        continue;
-                    }
-                    match tool.kind {
-                        ToolKind::Flatpak(app) => apps.push(app.to_owned()),
-                        ToolKind::Formula(_) | ToolKind::Cask(..) => tools.push(i),
+                for (n, category) in CATEGORIES.iter().enumerate() {
+                    let installed = self.category_installed(n);
+                    for (i, tool) in category.tools().enumerate() {
+                        if !self.picks[n].contains(&i) || installed.contains(&i) {
+                            continue;
+                        }
+                        match tool.kind {
+                            ToolKind::Flatpak(app) => apps.push(app.to_owned()),
+                            // Homebrew's: the developer tools, numbered as
+                            // dev_tools()
+                            ToolKind::Formula(_) | ToolKind::Cask(..) => tools.push(i),
+                        }
                     }
                 }
-                self.chosen.clear();
-                self.dev_chosen.clear();
-                self.sub = Sub::List;
+                self.bitwarden_pending |= apps.iter().any(|app| app == BITWARDEN);
+                for picks in &mut self.picks {
+                    picks.clear();
+                }
+                self.sub = None;
                 let mut tasks = vec![self.update(Message::Turn(1))];
                 tasks.extend(self.start_install(apps, tools));
                 return Task::batch(tasks);
@@ -1583,51 +1500,15 @@ impl<T: Tour> Application for App<T> {
                     }
                 }
             }
-            Message::VaultInstall(app) => {
-                self.vault_installing = Some(app);
-                self.vault_card = None;
-                let args = [
-                    "install",
-                    "--system",
-                    "--noninteractive",
-                    "-y",
-                    "flathub",
-                    app,
-                ]
-                .map(str::to_owned)
-                .to_vec();
-                return Task::perform(failure::run("flatpak", args, None), move |outcome| {
-                    cosmic::Action::App(Message::VaultDone(app, outcome))
-                });
-            }
-            Message::VaultDone(app, outcome) => {
-                self.vault_installing = None;
-                if matches!(outcome, Some(Ok(()))) && app == BITWARDEN {
-                    run(&Action::Launch(BITWARDEN_EXTENSION));
-                }
-                if let Some(Err(failure)) = outcome {
-                    let title = VAULT_APPS
-                        .iter()
-                        .find(|manager| manager.app == app)
-                        .map_or("", |manager| manager.title);
-                    self.vault_card = Some(Card::new(tr(title), failure, app));
-                }
-                return check_apps();
-            }
-            Message::VaultCard(message) => {
-                let Some(card) = &mut self.vault_card else {
-                    return Task::none();
-                };
-                match card.update(message) {
-                    CardAction::None => {}
-                    CardAction::Close => self.vault_card = None,
-                    CardAction::Retry(app) => return self.update(Message::VaultInstall(app)),
-                }
-            }
             Message::Tick => {
                 return check_apps();
             }
             Message::Apps(apps, brew, running) => {
+                // Bitwarden just installed: its Firefox extension too
+                if self.bitwarden_pending && apps.contains(BITWARDEN) {
+                    self.bitwarden_pending = false;
+                    run(&Action::Launch(BITWARDEN_EXTENSION));
+                }
                 self.installed = apps;
                 self.brew = brew;
                 self.preinstall_running = running;
