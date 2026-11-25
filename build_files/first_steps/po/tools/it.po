@@ -785,3 +785,18 @@ msgstr "Le tue app video sono pronte."
 
 msgid "Ready in one click. In each list, the apps most used on Linux are already ticked."
 msgstr "Pronto in un clic. In ogni elenco, le app più usate su Linux sono già spuntate."
+
+msgid "Printers and scanners"
+msgstr "Stampanti e scanner"
+
+msgid "No printer added yet. Recent printers on the network or plugged in by USB show up by themselves in the print window."
+msgstr "Nessuna stampante aggiunta. Le stampanti recenti in rete o collegate via USB compaiono da sole nella finestra di stampa."
+
+msgid "{} (default)"
+msgstr "{} (predefinita)"
+
+msgid "Printers"
+msgstr "Stampanti"
+
+msgid "Scan"
+msgstr "Scansiona"

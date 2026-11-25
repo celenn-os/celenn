@@ -7,7 +7,8 @@
 //                 (updates_page.rs; the Updates launcher opens this page)
 //   Maintenance   disk space and cleaning up, the apps that come with
 //                 cosmic-blue, firmware (maintenance.rs)
-//   Computer      battery charge limit, NVIDIA edition, firmware settings
+//   Computer      printers and scanners, battery charge limit, NVIDIA
+//                 edition, firmware settings
 //   Extra software  the kinds of apps of the first steps tour (apps.rs),
 //                 virtual machines, Microsoft fonts, FlatPark
 //   Appearance    dark theme, the cosmic-blue look, reset, save settings
