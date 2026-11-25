@@ -222,6 +222,7 @@ disk_on() { # uuid
         if [[ "${fstype}" == ntfs3 ]]; then echo "${uuid} windows-not-shut-down"; else echo "${uuid} not-opened"; fi
         return 1
     fi
+    games_access on "${mp}"
     # A Linux disk still empty (a new one, owned by root): the user's
     case "${fstype}" in
         ext4 | xfs | btrfs)
