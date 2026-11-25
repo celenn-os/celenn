@@ -6,6 +6,8 @@
 //   Computer       what the computer is made of (hardware.rs), the
 //                  printers and scanners (opens Print Settings and
 //                  Document Scanner: COSMIC Settings has no printer page), the
+//                  other disks to open at every startup (more_disks.rs,
+//                  disks.rs), the
 //                  battery charge limit (toggle-battery-limit), the
 //                  NVIDIA edition for NVIDIA graphics cards (the Updates
 //                  helper, as the first steps tour) and, with Secure Boot,
@@ -40,6 +42,9 @@ use std::process::{Command, Stdio};
 #[path = "more_transfer.rs"]
 mod transfer_view;
 pub use transfer_view::TransferMessage;
+#[path = "more_disks.rs"]
+mod disks_view;
+pub use disks_view::DisksMessage;
 
 const UPDATES_HELPER: &str = "/usr/libexec/cosmic-blue-updates-helper";
 const TOOLS_HELPER: &str = "/usr/libexec/cosmic-blue-tools-helper";
@@ -154,6 +159,8 @@ pub enum Kind {
 pub struct State {
     /// The printers added (CUPS), the default one first
     printers: Vec<Printer>,
+    /// The internal data disks (disks.rs)
+    disks: Vec<crate::disks::Disk>,
     /// Document Scanner is installed
     scanner: bool,
     /// None: no laptop battery whose charge can be limited
@@ -359,6 +366,8 @@ pub enum Message {
     Undo(widget::ToastId, Box<Message>),
     /// Change computers (more_transfer.rs)
     Transfer(TransferMessage),
+    /// Other disks (more_disks.rs)
+    Disks(DisksMessage),
 }
 
 /// What a card's "Try again" runs again
@@ -387,6 +396,10 @@ pub struct Page {
     saving: bool,
     restore: Option<transfer_view::Step>,
     restored: Option<(crate::transfer::Restore, BTreeSet<crate::transfer::Group>)>,
+    /// Other disks: the list in place of the Computer page's sections, and
+    /// whether to open it once the state is read (screenshot test)
+    disks: disks_view::DisksView,
+    preview_disks: bool,
 }
 
 fn output(program: &str, args: &[&str]) -> String {
@@ -502,6 +515,7 @@ pub fn read_state() -> State {
     let nvidia = crate::edition::nvidia();
     State {
         printers: printers(),
+        disks: crate::disks::read(),
         scanner: has(SCANNER),
         battery_limit,
         nvidia,
@@ -567,6 +581,8 @@ impl Page {
             saving: false,
             restore: None,
             restored: None,
+            disks: Default::default(),
+            preview_disks: crate::common::preview("other-disks"),
         };
         // `cosmic-blue-tools --restore` (the tour's "Bring your things"):
         // the file chooser at once
@@ -600,7 +616,11 @@ impl Page {
     pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
             Message::State(state) => {
+                self.disks_reread(&state.disks);
                 self.state = Some(state);
+                if std::mem::take(&mut self.preview_disks) {
+                    return self.update(Message::Disks(DisksMessage::Open));
+                }
                 if let Some(list) = self.preview_list.take() {
                     return self.update(Message::ListOpen(Some(list)));
                 }
@@ -766,6 +786,7 @@ impl Page {
             }
             Message::CloseToast(id) => self.toasts.remove(id),
             Message::Transfer(message) => return self.transfer_update(message),
+            Message::Disks(message) => return self.disks_update(message),
         }
         Task::none()
     }
@@ -897,8 +918,11 @@ impl Page {
         widget::toaster(&self.toasts, page)
     }
 
-    fn computer(&self, state: &State) -> Element<'_, Message> {
+    fn computer<'a>(&'a self, state: &'a State) -> Element<'a, Message> {
         let cosmic_theme::Spacing { space_s, .. } = theme::spacing();
+        if self.disks.open {
+            return self.disks_list(&state.disks);
+        }
         let hw = crate::hardware::hardware();
         // What it is made of: always there, so the page is never empty
         let model = match (&hw.virtual_machine, hw.model.is_empty()) {
@@ -957,7 +981,8 @@ impl Page {
 
         let mut section = settings::section()
             .title(tr("Settings"))
-            .add(printers_row(state));
+            .add(printers_row(state))
+            .add(self.disks_row(&state.disks));
         section = section.add(match state.battery_limit {
             Some(on) => self.row(
                 "battery-good-symbolic",

@@ -46,6 +46,7 @@ use cosmic::{Application, ApplicationExt, Element, executor};
 mod apps;
 mod common;
 mod devtools;
+mod disks;
 mod edition;
 mod failure;
 mod hardware;
@@ -110,6 +111,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             failure::TEXTS,
             overview::TEXTS,
             transfer::TEXTS,
+            disks::TEXTS,
         ]
         .concat();
         let mut sorted = texts.clone();

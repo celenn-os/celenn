@@ -20,6 +20,10 @@ source "$(dirname "$0")/vm-lib.sh"
 SYSTEM_FILES="$(dirname "$0")/../system_files"
 
 vm_install "${IMAGE}" "${TARGET_IMGREF}"
+# A second, empty disk for Other disks (disks_prepare in vm-lib.sh)
+truncate -s 1G "${WORK}/data.raw"
+# shellcheck disable=SC2054 # QEMU options are comma-separated
+VM_EXTRA_ARGS=(-drive file="${WORK}/data.raw",format=raw,if=virtio)
 vm_start
 vm_wait_ssh
 
@@ -184,6 +188,7 @@ sleep 20
 screenshot login-screen
 
 if (( errors == 0 )); then
+    disks_prepare || errors=1
     desktop_tour || { echo "::error::The test user could not log in to a COSMIC session"; errors=1; }
     # A new account: its first login and Firefox must be right (vm-lib.sh)
     for problem in "${DESKTOP_PROBLEMS[@]}"; do
@@ -200,6 +205,7 @@ if (( errors == 0 )); then
         while IFS= read -r line; do
             [[ "${line}" == "FAIL "* ]] && { echo "::error::${line#FAIL }"; errors=1; }
         done <<< "${ujust_checks}"
+        disks_checks || errors=1
         # Last: it closes the test user's session
         parental_checks || errors=1
     fi
