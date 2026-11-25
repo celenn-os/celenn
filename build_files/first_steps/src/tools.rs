@@ -42,6 +42,7 @@ use cosmic::{Application, ApplicationExt, Element, executor};
 
 mod common;
 mod devtools;
+mod edition;
 mod failure;
 mod hardware;
 mod help;

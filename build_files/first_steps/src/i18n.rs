@@ -162,3 +162,8 @@ pub fn check(texts: &[&str]) -> bool {
     );
     errors == 0
 }
+
+/// A translated text with its {} replaced by a value
+pub fn fill(text: &str, value: &str) -> String {
+    text.replacen("{}", value, 1)
+}
