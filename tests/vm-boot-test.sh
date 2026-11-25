@@ -21,6 +21,7 @@ SYSTEM_FILES="$(dirname "$0")/../system_files"
 
 vm_install "${IMAGE}" "${TARGET_IMGREF}"
 vm_start
+film_start film-boot 150
 vm_wait_ssh
 
 errors=0
@@ -181,6 +182,7 @@ vm 'flatpak remote-add --system flatpark /usr/share/cosmic-blue/flatpak/flatpark
 
 # Let the login screen draw, then take a picture of it
 sleep 20
+film_stop
 screenshot login-screen
 
 if (( errors == 0 )); then

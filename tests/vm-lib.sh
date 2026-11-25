@@ -94,6 +94,7 @@ vm_start() {
         -display none \
         -serial file:"${OUT}/${VM_SERIAL:-serial.log}" \
         -monitor unix:"${WORK}/monitor.sock",server,nowait \
+        -monitor unix:"${WORK}/film.sock",server,nowait \
         -pidfile "${WORK}/qemu.pid" -daemonize \
         "${extra[@]}"
 }
@@ -143,6 +144,37 @@ screenshot() {
     if [[ ! -s "${OUT}/${name}.png" ]]; then
         echo "screendump ${OUT}/${name}.ppm" | socat - UNIX-CONNECT:"${WORK}/monitor.sock" >/dev/null || true
     fi
+}
+
+# Boot film: a screenshot about every half second, in the background, through
+# a monitor of its own (the main one stays free for keys and screenshots).
+# Frames are named by the milliseconds since film_start.
+# Usage: film_start <dir> <seconds>; film_stop
+film_start() {
+    local dir="${OUT}/$1" seconds="$2"
+    mkdir -p "${dir}"
+    (
+        local start now
+        start="$(date +%s%3N)"
+        while now="$(date +%s%3N)"; (( now - start < seconds * 1000 )); do
+            echo "screendump ${dir}/$(printf '%06d' $((now - start))).png -f png" \
+                | socat - UNIX-CONNECT:"${WORK}/film.sock" >/dev/null 2>&1 || true
+            sleep 0.4
+        done
+    ) &
+    FILM_PID=$!
+}
+film_stop() {
+    [[ -n "${FILM_PID:-}" ]] && kill "${FILM_PID}" 2>/dev/null || true
+    wait "${FILM_PID:-}" 2>/dev/null || true
+    FILM_PID=""
+    # Keep only the frames that differ from the one before
+    local f previous="" sum
+    for f in "${OUT}"/film-*/*.png; do
+        [[ -e "${f}" ]] || continue
+        sum="$(md5sum < "${f}")"
+        if [[ "${sum}" == "${previous}" ]]; then rm -f "${f}"; else previous="${sum}"; fi
+    done
 }
 
 # Waits for SSH (a boot can take a few minutes)
@@ -392,13 +424,15 @@ desktop_tour() {
     local first_steps=false
     vm "test -e ~${DEMO_USER}/.config/cosmic-blue/first-steps-pending" && first_steps=true
     screenshot "${SHOTS}/01-login-screen"
-    demo_login 02-login-failed || return 1
+    film_start film-login 40
+    demo_login 02-login-failed || { film_stop; return 1; }
 
     # First login: COSMIC's first-run assistant (cosmic-initial-setup) must
     # not open (new accounts skip it, build_files/20-cosmic.sh); our tour
     # opens instead. (The update test's account comes from the stable
     # image, see vm-update-test.sh.)
     sleep 30
+    film_stop
     if vm "pgrep -u ${DEMO_USER} -f cosmic-initial-setup" >/dev/null; then
         screenshot "${SHOTS}/02-first-run"
         desktop_problem "COSMIC's first-run assistant opened at the first login"
