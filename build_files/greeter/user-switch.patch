@@ -1,5 +1,68 @@
+diff --git a/src/common.rs b/src/common.rs
+index 442a5a1..2f2faa4 100644
+--- a/src/common.rs
++++ b/src/common.rs
+@@ -525,3 +525,58 @@ impl<M> Common<M> {
+         ));
+     }
+ }
++
++/// cosmic-blue: the "i" icon of a login message, colored with the text color
++/// when drawn
++static INFO_ICON: std::sync::LazyLock<widget::svg::Handle> = std::sync::LazyLock::new(|| {
++    widget::svg::Handle::from_memory(
++        &b"<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'>\
++<path d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm0 1.5a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13z'/>\
++<circle cx='8' cy='4.75' r='1'/><rect x='7.25' y='6.75' width='1.5' height='5' rx='.75'/></svg>"[..],
++    )
++});
++
++/// cosmic-blue: a login message (wrong password, or a login refused by
++/// parental controls) in a light box with an icon, in the text color: the
++/// upstream pure red text could hardly be read over the dark blue panel, and
++/// sounded alarming to a child
++pub fn message_box<'a, M: 'a>(message: &'a str) -> cosmic::Element<'a, M> {
++    widget::container(
++        widget::row::with_capacity(2)
++            .spacing(10.0)
++            .push(
++                widget::container(
++                    widget::svg(INFO_ICON.clone())
++                        .width(iced::Length::Fixed(16.0))
++                        .height(iced::Length::Fixed(16.0))
++                        .class(cosmic::theme::Svg::custom(|theme| widget::svg::Style {
++                            color: Some(theme.cosmic().background(theme.transparent).on.into()),
++                        })),
++                )
++                .padding([2.0, 0.0, 0.0, 0.0]),
++            )
++            .push(widget::text::body(message).width(iced::Length::Fill)),
++    )
++    .padding([8.0, 12.0])
++    .width(iced::Length::Fill)
++    .class(cosmic::theme::Container::custom(|theme| {
++        let on = theme.cosmic().background(theme.transparent).on;
++        widget::container::Style {
++            text_color: Some(on.into()),
++            background: Some(iced::Background::Color(iced::Color {
++                a: 0.12,
++                ..on.into()
++            })),
++            border: iced::Border {
++                radius: 8.0.into(),
++                width: 1.0,
++                color: iced::Color {
++                    a: 0.16,
++                    ..on.into()
++                },
++            },
++            ..Default::default()
++        }
++    }))
++    .into()
++}
 diff --git a/src/greeter.rs b/src/greeter.rs
-index 852e219..afbd9bb 100644
+index 852e219..7735732 100644
 --- a/src/greeter.rs
 +++ b/src/greeter.rs
 @@ -300,7 +300,14 @@ pub fn main() -> Result<(), Box<dyn Error>> {
@@ -77,16 +140,32 @@ index 852e219..afbd9bb 100644
  }
  
  #[derive(Default)]
-@@ -972,6 +1017,106 @@ impl App {
+@@ -961,10 +1006,8 @@ impl App {
+                     .align_x(Alignment::Center),
+                 );
+             } else if let Some(error) = &self.common.error_opt {
+-                column = column.push(
+-                    widget::text(error)
+-                        .class(theme::Text::Color(iced::Color::from_rgb(1.0, 0.0, 0.0))),
+-                );
++                // cosmic-blue: in a readable box instead of red text
++                column = column.push(common::message_box(error));
+                 if !self.common.caps_lock {
+                     column = column.push(widget::text(""));
+                 }
+@@ -972,7 +1015,109 @@ impl App {
                  column = column.push(widget::text(""));
              }
  
-+            // cosmic-blue: with 2 to 6 accounts, show them as a row of avatars
-+            // (two rows from 5) to pick one in a click; the users menu stays
+-            id_container(
++            // cosmic-blue: with 2 to 8 accounts, show them as a row of avatars
++            // (two rows from 5) to pick one in a click; the users menu stays.
++            // The rows are put under the 280 px column, as a row of 4 is wider
++            let mut user_rows_opt = None;
 +            if matches!(self.socket_state, SocketState::Open)
 +                && !self.entering_name
 +                && !self.authenticating
-+                && (2..=6).contains(&self.usernames.len())
++                && (2..=8).contains(&self.usernames.len())
 +            {
 +                let count = self.usernames.len();
 +                let per_row = if count <= 4 { count } else { count.div_ceil(2) };
@@ -174,17 +253,37 @@ index 852e219..afbd9bb 100644
 +                    }
 +                    user_rows = user_rows.push(user_row);
 +                }
-+                column = column.push(
++                user_rows_opt = Some(
 +                    widget::container(user_rows)
 +                        .width(Length::Fill)
 +                        .align_x(Alignment::Center),
 +                );
 +            }
 +
-             id_container(
++            let main_menu = id_container(
                  widget::container(column)
                      .align_x(Alignment::Center)
-@@ -1212,6 +1357,7 @@ impl cosmic::Application for App {
+                     .width(Length::Fill),
+@@ -981,7 +1126,17 @@ impl App {
+                 } else {
+                     iced::id::Id::new("main_menu")
+                 },
+-            )
++            );
++            match user_rows_opt {
++                Some(user_rows) => Element::from(
++                    widget::column::with_capacity(2)
++                        .spacing(12.0)
++                        .width(Length::Fill)
++                        .push(main_menu)
++                        .push(user_rows),
++                ),
++                None => Element::from(main_menu),
++            }
+         };
+ 
+         let menu = widget::layer_container(
+@@ -1212,6 +1367,7 @@ impl cosmic::Application for App {
              randr_list: None,
              surface_id_pairs: Vec::new(),
              authenticating: false,
@@ -192,7 +291,7 @@ index 852e219..afbd9bb 100644
          };
          (app, Task::batch(tasks))
      }
-@@ -1427,6 +1573,14 @@ impl cosmic::Application for App {
+@@ -1427,6 +1583,14 @@ impl cosmic::Application for App {
                      ]);
                  }
              }
@@ -207,7 +306,7 @@ index 852e219..afbd9bb 100644
              Message::Username(username) => {
                  if self.dropdown_opt == Some(Dropdown::User) {
                      self.dropdown_opt = None;
-@@ -1434,6 +1588,9 @@ impl cosmic::Application for App {
+@@ -1434,6 +1598,9 @@ impl cosmic::Application for App {
                  if self.entering_name || username != self.selected_username.username {
                      self.entering_name = false;
                      self.authenticating = false;
@@ -217,3 +316,20 @@ index 852e219..afbd9bb 100644
                      let data_idx = self
                          .flags
                          .user_datas
+diff --git a/src/locker.rs b/src/locker.rs
+index ce1b3d1..ff8f865 100644
+--- a/src/locker.rs
++++ b/src/locker.rs
+@@ -606,10 +606,8 @@ impl App {
+                     .align_x(Alignment::Center),
+                 );
+             } else if let Some(error) = &self.common.error_opt {
+-                column = column.push(
+-                    widget::text(error)
+-                        .class(theme::Text::Color(iced::Color::from_rgb(1.0, 0.0, 0.0))),
+-                );
++                // cosmic-blue: in a readable box instead of red text
++                column = column.push(common::message_box(error));
+                 if !self.common.caps_lock {
+                     column = column.push(widget::text(""));
+                 }

@@ -784,6 +784,12 @@ except OSError as error:
     vm "/usr/libexec/cosmic-blue-parental-extend ${DEMO_USER} 600" 2>/dev/null \
         && problem "cosmic-blue-parental-extend accepted 600 minutes"
 
+    # Six more accounts, so that the login screen shows the most avatars it
+    # can (8, two rows of 4); removed once the login has been refused
+    local extra extra_users=(ana ben chloe david emma felix)
+    for extra in "${extra_users[@]}"; do
+        vm "useradd -m -c '${extra^}' ${extra}" || problem "could not add the account ${extra}"
+    done
     # Time up: the service closes the session, the login screen refuses it
     set_used 1600
     if wait_for 60 "! pgrep -u ${DEMO_USER} -x cosmic-panel"; then
@@ -793,8 +799,9 @@ except OSError as error:
         vm 'loginctl list-sessions; /usr/libexec/cosmic-blue-parental-daemon status' || true
     fi
     sleep 20
-    # Two accounts now (the test user and the child): the login screen shows
-    # them as a row of avatars (build_files/greeter/user-switch.patch)
+    # Eight accounts now (the test user, the child and the six above): the
+    # login screen shows them as two rows of avatars, and the refusal below in
+    # a light box (build_files/greeter/user-switch.patch)
     screenshot "${SHOTS}/09-login-users"
     type_text "${DEMO_PASSWORD}"
     monitor "sendkey ret"
@@ -814,5 +821,8 @@ except OSError as error:
     vm "journalctl -b --no-pager -u cosmic-blue-parental-controls.service" | tail -n 20 || true
     vm "journalctl -b --no-pager -g pam_cosmic_blue_parental" | tail -n 5 || true
     vm "rm -f /etc/cosmic-blue/parental-controls/${DEMO_USER}.json"
+    for extra in "${extra_users[@]}"; do
+        vm "userdel -r ${extra}" || true
+    done
     return "${parental_failed}"
 }
