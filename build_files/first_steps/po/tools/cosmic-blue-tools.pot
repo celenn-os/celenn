@@ -797,6 +797,3 @@ msgstr ""
 
 msgid "Scan"
 msgstr ""
-
-msgid "Ready in one click. In each list, the apps most used on Linux are already ticked."
-msgstr ""
