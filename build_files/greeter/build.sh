@@ -12,9 +12,11 @@
 # after it: the upstream COSMIC wallpaper). The
 # lock screen is the same program and uses the same fallback.
 #
-# user-switch.patch also shows the accounts as a row of round avatars under the
-# password field when there are 2 to 6 of them (the users menu stays), and
-# clears the error of a refused login when another user is selected. Every
+# user-switch.patch also shows the accounts as rows of round avatars under the
+# password field when there are 2 to 8 of them (the users menu stays), and
+# clears the error of a refused login when another user is selected. A login
+# message (wrong password, login refused by parental controls) shows in a
+# light box with an icon instead of red text, on the login and lock screens. Every
 # account picture is cut as a smooth disk, and an account without one gets
 # COSMIC's default picture (pop-robot.png, our planet). It is
 # applied with no fuzz: when a new cosmic-greeter no longer takes it, this
@@ -58,7 +60,7 @@ install -m 0644 "${WALLPAPER}" "${src}/${fallback}"
 
 patch --directory="${src}" --strip=1 --forward --fuzz=0 \
     < "$(dirname "$0")/user-switch.patch"
-grep -q 'cosmic-blue: with 2 to 6 accounts' "${src}/src/greeter.rs"
+grep -q 'cosmic-blue: with 2 to 8 accounts' "${src}/src/greeter.rs"
 
 # Compiled crates kept from the previous build in CARGO_CACHE_DIR
 # (Containerfile.helpers). The package's own sources are touched, so they
