@@ -890,3 +890,105 @@ msgstr ""
 
 msgid "Nothing to take back: everything in this file is already here."
 msgstr ""
+
+msgid "Other disks"
+msgstr ""
+
+msgid "No other disk in this computer."
+msgstr ""
+
+msgid "{} opens at every startup."
+msgstr ""
+
+msgid "{} open at every startup."
+msgstr ""
+
+msgid "None opens at startup yet: choose the ones Files and Steam should always find."
+msgstr ""
+
+msgid "Turn on the ones you want open at every startup, without clicking them in Files."
+msgstr ""
+
+msgid "They open at every startup, even before you log in, and always at the same place: Files, Steam and your apps find them. USB drives are not concerned."
+msgstr ""
+
+msgid "Back"
+msgstr ""
+
+msgid "{} disk"
+msgstr ""
+
+msgid "{} GB"
+msgstr ""
+
+msgid "{} TB"
+msgstr ""
+
+msgid "SSD"
+msgstr ""
+
+msgid "hard disk"
+msgstr ""
+
+msgid "Linux format ({})"
+msgstr ""
+
+msgid "Windows format (NTFS)"
+msgstr ""
+
+msgid "Windows and Mac format (exFAT)"
+msgstr ""
+
+msgid "FAT format"
+msgstr ""
+
+msgid "Good for a Steam library."
+msgstr ""
+
+msgid "For Steam games, prefer a disk in Linux format."
+msgstr ""
+
+msgid "In Files and in {}."
+msgstr ""
+
+msgid "Not opened at this startup. If Windows is also on this computer, turn off its Fast Startup."
+msgstr ""
+
+msgid "Not opened at this startup: the disk was not found, or it has an error."
+msgstr ""
+
+msgid "Encrypted with BitLocker: open it in Files, with its recovery key."
+msgstr ""
+
+msgid "Encrypted: open it in Files, with its password."
+msgstr ""
+
+msgid "Windows' own disk stays closed, so that nothing can harm it."
+msgstr ""
+
+msgid "Already opened at startup by a setting of your own."
+msgstr ""
+
+msgid "Not offered"
+msgstr ""
+
+msgid "Done."
+msgstr ""
+
+msgid "{}: a file on it is open. Close it, then try again."
+msgstr ""
+
+msgid "{}: a file on it is open. It closes at the next restart."
+msgstr ""
+
+msgid "{}: Windows did not fully shut down. In Windows, turn off Fast Startup and shut down, then try again."
+msgstr ""
+
+msgid "{}: Windows' own disk stays closed, so that nothing can harm it."
+msgstr ""
+
+msgid "{}: could not be opened."
+msgstr ""
+
+msgid "{}: could not be closed."
+msgstr ""

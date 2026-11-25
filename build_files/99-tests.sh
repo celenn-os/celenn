@@ -567,6 +567,18 @@ grep -q '<annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/cosmic
 if /usr/libexec/cosmic-blue-tools-helper clean everything 2>/dev/null; then
     echo "cosmic-blue-tools-helper accepted unknown arguments"; exit 1
 fi
+# Other disks (Tools, Computer): only "UUID=on|off" changes; NTFS disks are
+# opened with the kernel's ntfs3 driver, exFAT with its exfat driver
+for args in "disks" "disks /dev/sda1=on" "disks 1234-ABCD=maybe" "disks 1234-ABCD=on;reboot"; do
+    # shellcheck disable=SC2086 # each case is split into its arguments
+    if /usr/libexec/cosmic-blue-tools-helper ${args} 2>/dev/null; then
+        echo "cosmic-blue-tools-helper accepted: ${args}"; exit 1
+    fi
+done
+for module in ntfs3 exfat; do
+    find "/usr/lib/modules/${KVER}/kernel/fs" -name "${module}.ko*" | grep -q . \
+        || { echo "Kernel module ${module} missing (Other disks in Tools)"; exit 1; }
+done
 grep -q '/usr/libexec/cosmic-blue-clean' /usr/share/ublue-os/just/60-custom.just
 grep -q '/usr/libexec/cosmic-blue-report-bug open' /usr/share/ublue-os/just/60-custom.just
 # Only cosmic-blue's own `ujust clean-system` (Bluefin's is dropped)

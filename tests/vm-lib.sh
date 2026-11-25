@@ -438,6 +438,7 @@ desktop_tour() {
         "06-tools-help|/usr/libexec/cosmic-blue-tools --help-page" \
         "06-tools-failure|COSMIC_BLUE_TOOLS_PREVIEW=failure /usr/libexec/cosmic-blue-tools --maintenance" \
         "06-tools-developer|COSMIC_BLUE_TOOLS_PREVIEW=developer-tools /usr/libexec/cosmic-blue-tools --software" \
+        "06-tools-disks|COSMIC_BLUE_TOOLS_PREVIEW=other-disks /usr/libexec/cosmic-blue-tools --computer" \
         "06-shortcuts|/usr/libexec/cosmic-blue-tour --shortcuts"; do
         name="${entry%%|*}"
         cmd="${entry#*|}"
@@ -632,6 +633,54 @@ demo_journal() {
 # time window, more time given, its session closed when the time is up, and
 # the login refused. Returns 1 when a rule is not applied; a missing
 # screenshot or an unreachable family filter is a warning.
+# Other disks (Tools, Computer): a second, empty virtual disk (vdb, added by
+# vm-boot-test.sh) gets an ext4 partition labeled "Mes Jeux" before the
+# desktop tour (Tools then lists it), then the helper opens it at startup and
+# stops doing so, as Apply does. Returns 1 when something is wrong.
+DATA_DISK_LABEL="Mes Jeux"
+disks_prepare() {
+    vm "printf 'label: gpt\n,,0FC63DAF-8483-4772-8E79-3D69D8477DE4\n' | sfdisk -q /dev/vdb \
+        && udevadm settle && mkfs.ext4 -q -L '${DATA_DISK_LABEL}' /dev/vdb1 && udevadm settle" \
+        || { echo "::error::Other disks: could not prepare the test disk"; return 1; }
+}
+disks_checks() {
+    local failed=0 uuid uid mp=/var/mnt/Mes-Jeux output system
+    problem() { echo "::error::Other disks: $*"; failed=1; }
+    uuid="$(vm 'blkid -s UUID -o value /dev/vdb1')" || { problem "no test disk"; return 1; }
+    uid="$(vm "id -u ${DEMO_USER}")"
+    output="$(vm "PKEXEC_UID=${uid} /usr/libexec/cosmic-blue-tools-helper disks ${uuid}=on" 2>&1)" \
+        || problem "the helper did not open the disk: ${output}"
+    vm "findmnt -no SOURCE ${mp}" | grep -q '^/dev/vdb1$' || problem "the disk is not open at ${mp}"
+    vm "grep -qE '^UUID=${uuid} ${mp} ext4 [^ ]*nofail[^ ]*x-cosmic-blue-disk 0 2\$' /etc/fstab" \
+        || problem "no fstab line for it: $(vm 'cat /etc/fstab')"
+    [[ "$(vm "stat -c %u ${mp}")" == "${uid}" ]] || problem "the new, empty disk is not the user's"
+    vm "runuser -u ${DEMO_USER} -- touch /mnt/Mes-Jeux/steam-library-test" \
+        || problem "the user cannot write to it at /mnt/Mes-Jeux"
+    vm "grep -q '^filesystems=.*${mp};' /var/lib/flatpak/overrides/com.valvesoftware.Steam" \
+        || problem "Steam (Flatpak) was not given ${mp}"
+    # Again: nothing changes, no second line
+    vm "PKEXEC_UID=${uid} /usr/libexec/cosmic-blue-tools-helper disks ${uuid}=on" >/dev/null 2>&1 \
+        || problem "turning it on twice failed"
+    [[ "$(vm "grep -c 'UUID=${uuid}' /etc/fstab")" == 1 ]] || problem "two fstab lines for it"
+    # Off: closed, line and folder gone, its files kept
+    output="$(vm "/usr/libexec/cosmic-blue-tools-helper disks ${uuid}=off" 2>&1)" \
+        || problem "the helper did not close the disk: ${output}"
+    vm "mountpoint -q ${mp}" && problem "still open after off"
+    vm "grep -q 'UUID=${uuid}' /etc/fstab" && problem "its fstab line is still there"
+    vm "test -e ${mp}" && problem "its folder is still there"
+    vm "grep -q '${mp}' /var/lib/flatpak/overrides/com.valvesoftware.Steam" \
+        && problem "Steam (Flatpak) still has ${mp}"
+    vm 'd="$(mktemp -d)" && mount /dev/vdb1 "$d" && { test -e "$d/steam-library-test"; s=$?; umount "$d"; rmdir "$d"; exit "$s"; }' \
+        || problem "its files were not kept"
+    # The system's own partition is refused (in use, or in fstab)
+    system="$(vm 'findmnt -nvo UUID /sysroot')"
+    output="$(vm "/usr/libexec/cosmic-blue-tools-helper disks ${system}=on" 2>&1)" \
+        && problem "the system partition was accepted"
+    [[ "${output}" == "${system} system" || "${output}" == "${system} in-fstab" ]] \
+        || problem "the system partition: ${output}"
+    return "${failed}"
+}
+
 PARENTAL_CHILD=lea
 parental_checks() {
     local parental_failed=0 rules state day json

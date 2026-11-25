@@ -76,6 +76,11 @@ const SETTINGS: &[(&str, &str, PageId)] = &[
     ),
     ("Printers and scanners", "", PageId::Computer),
     (
+        "Other disks",
+        "Turn on the ones you want open at every startup, without clicking them in Files.",
+        PageId::Computer,
+    ),
+    (
         "Battery charge limit",
         "Charging stops at 80 %: the battery lasts longer when the laptop stays plugged in.",
         PageId::Computer,

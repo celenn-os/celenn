@@ -107,7 +107,8 @@ pub fn label<'a, M: 'static>(title: &'static str, caption: String) -> Element<'a
 
 /// What the image's screenshot test asks a page to show at once, from
 /// COSMIC_BLUE_TOOLS_PREVIEW (tests/vm-lib.sh): "failure" (a failure card on
-/// Maintenance) or "developer-tools" (the list open on Extra software)
+/// Maintenance), "developer-tools" (the list open on Extra software) or
+/// "other-disks" (the list of disks open on Computer)
 pub fn preview(what: &str) -> bool {
     std::env::var("COSMIC_BLUE_TOOLS_PREVIEW").is_ok_and(|value| value == what)
 }

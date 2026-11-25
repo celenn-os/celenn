@@ -892,3 +892,105 @@ msgstr "Não foi possível ler este arquivo."
 
 msgid "Nothing to take back: everything in this file is already here."
 msgstr "Nada para recuperar: tudo o que está neste arquivo já está aqui."
+
+msgid "Other disks"
+msgstr "Outros discos"
+
+msgid "No other disk in this computer."
+msgstr "Nenhum outro disco neste computador."
+
+msgid "{} opens at every startup."
+msgstr "{} é aberto a cada inicialização."
+
+msgid "{} open at every startup."
+msgstr "{} são abertos a cada inicialização."
+
+msgid "None opens at startup yet: choose the ones Files and Steam should always find."
+msgstr "Nenhum é aberto na inicialização ainda: escolha os que o Arquivos e o Steam devem sempre encontrar."
+
+msgid "Turn on the ones you want open at every startup, without clicking them in Files."
+msgstr "Ative os que você quer encontrar abertos a cada inicialização, sem clicar neles no Arquivos."
+
+msgid "They open at every startup, even before you log in, and always at the same place: Files, Steam and your apps find them. USB drives are not concerned."
+msgstr "Eles são abertos a cada inicialização, antes mesmo do login, e sempre no mesmo lugar: o Arquivos, o Steam e seus apps os encontram. Pen drives não estão incluídos."
+
+msgid "Back"
+msgstr "Voltar"
+
+msgid "{} disk"
+msgstr "Disco de {}"
+
+msgid "{} GB"
+msgstr "{} GB"
+
+msgid "{} TB"
+msgstr "{} TB"
+
+msgid "SSD"
+msgstr "SSD"
+
+msgid "hard disk"
+msgstr "disco rígido"
+
+msgid "Linux format ({})"
+msgstr "formato Linux ({})"
+
+msgid "Windows format (NTFS)"
+msgstr "formato Windows (NTFS)"
+
+msgid "Windows and Mac format (exFAT)"
+msgstr "formato Windows e Mac (exFAT)"
+
+msgid "FAT format"
+msgstr "formato FAT"
+
+msgid "Good for a Steam library."
+msgstr "Ótimo para uma biblioteca do Steam."
+
+msgid "For Steam games, prefer a disk in Linux format."
+msgstr "Para jogos do Steam, prefira um disco em formato Linux."
+
+msgid "In Files and in {}."
+msgstr "No Arquivos e em {}."
+
+msgid "Not opened at this startup. If Windows is also on this computer, turn off its Fast Startup."
+msgstr "Não foi aberto nesta inicialização. Se o Windows também estiver neste computador, desative a inicialização rápida dele."
+
+msgid "Not opened at this startup: the disk was not found, or it has an error."
+msgstr "Não foi aberto nesta inicialização: o disco não foi encontrado ou tem um erro."
+
+msgid "Encrypted with BitLocker: open it in Files, with its recovery key."
+msgstr "Criptografado com BitLocker: abra-o no Arquivos, com a chave de recuperação."
+
+msgid "Encrypted: open it in Files, with its password."
+msgstr "Criptografado: abra-o no Arquivos, com a senha dele."
+
+msgid "Windows' own disk stays closed, so that nothing can harm it."
+msgstr "O disco do próprio Windows fica fechado, para que nada possa danificá-lo."
+
+msgid "Already opened at startup by a setting of your own."
+msgstr "Já é aberto na inicialização por uma configuração sua."
+
+msgid "Not offered"
+msgstr "Não oferecido"
+
+msgid "Done."
+msgstr "Pronto."
+
+msgid "{}: a file on it is open. Close it, then try again."
+msgstr "{}: um arquivo dele está aberto. Feche-o e tente de novo."
+
+msgid "{}: a file on it is open. It closes at the next restart."
+msgstr "{}: um arquivo dele está aberto. Ele será fechado na próxima reinicialização."
+
+msgid "{}: Windows did not fully shut down. In Windows, turn off Fast Startup and shut down, then try again."
+msgstr "{}: o Windows não foi desligado por completo. No Windows, desative a inicialização rápida e desligue, depois tente de novo."
+
+msgid "{}: Windows' own disk stays closed, so that nothing can harm it."
+msgstr "{}: o disco do próprio Windows fica fechado, para que nada possa danificá-lo."
+
+msgid "{}: could not be opened."
+msgstr "{}: não foi possível abrir."
+
+msgid "{}: could not be closed."
+msgstr "{}: não foi possível fechar."
