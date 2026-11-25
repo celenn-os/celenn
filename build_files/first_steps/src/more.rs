@@ -993,7 +993,7 @@ impl Page {
                 )
                 .into()
         };
-        let mut notes = vec![tr(apps::RECOMMENDED), tr(apps::TICK_NOTE)];
+        let mut notes = vec![tr(apps::TICK_NOTE)];
         if n == DEVELOPMENT && !state.brew {
             notes.push(tr(apps::NO_BREW));
         } else if !category.note.is_empty() {

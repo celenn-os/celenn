@@ -770,8 +770,5 @@ msgstr "Die Entwicklerwerkzeuge sind bereit."
 msgid "Lima: ujust install-dev-tools, in a terminal."
 msgstr "Lima: ujust install-dev-tools in einem Terminal."
 
-msgid "Already ticked: the apps most used on Linux for this, all free. Add or remove as you like."
-msgstr "Bereits angehakt: die unter Linux dafür meistgenutzten Apps, alle kostenlos. Fügen Sie nach Belieben hinzu oder entfernen Sie welche."
-
 msgid "Pick what concerns you. In each list, the apps most used on Linux are already ticked, all free. Nothing installs without your OK."
 msgstr "Wählen Sie, was Sie betrifft. In jeder Liste sind die unter Linux meistgenutzten Apps bereits angehakt, alle kostenlos. Nichts wird ohne Ihr Okay installiert."

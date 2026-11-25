@@ -770,8 +770,5 @@ msgstr "Las herramientas de desarrollo están listas."
 msgid "Lima: ujust install-dev-tools, in a terminal."
 msgstr "Lima: ujust install-dev-tools, en una terminal."
 
-msgid "Already ticked: the apps most used on Linux for this, all free. Add or remove as you like."
-msgstr "Ya marcadas: las aplicaciones más usadas en Linux para esto, todas gratuitas. Añade o quita las que quieras."
-
 msgid "Pick what concerns you. In each list, the apps most used on Linux are already ticked, all free. Nothing installs without your OK."
 msgstr "Elige lo que te interesa. En cada lista, las aplicaciones más usadas en Linux ya están marcadas, todas gratuitas. Nada se instala sin tu permiso."

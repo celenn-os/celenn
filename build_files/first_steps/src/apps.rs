@@ -40,7 +40,8 @@ pub struct Category {
     pub groups: &'static [(&'static str, &'static [DevTool])],
     /// The apps ticked the first time the list opens, when none of them is
     /// installed: the ones most used on Linux for that need, all free of
-    /// charge (RECOMMENDED says so under the list)
+    /// charge (the tour's apps page and Tools' Extra software page say so,
+    /// once, at the top)
     pub recommended: &'static [&'static str],
     /// Said under the list, when it has something to add (Tools says how
     /// the list works first)
@@ -48,10 +49,6 @@ pub struct Category {
     /// Said once the apps are installed (Tools)
     pub done: &'static str,
 }
-
-/// Said under every list: why some apps are already ticked
-pub const RECOMMENDED: &str =
-    "Already ticked: the apps most used on Linux for this, all free. Add or remove as you like.";
 
 /// How the lists of Tools work (the tour only installs)
 pub const TICK_NOTE: &str = "Tick the ones you want, untick the ones to remove.";
@@ -278,7 +275,7 @@ impl Category {
 
 /// Every text of the categories, for the translation checks
 pub fn texts() -> Vec<&'static str> {
-    let mut texts = vec!["Chosen: {}", "Installed: {}", NO_BREW, RECOMMENDED];
+    let mut texts = vec!["Chosen: {}", "Installed: {}", NO_BREW];
     for category in CATEGORIES {
         texts.extend([category.title, category.caption, category.done]);
         texts.extend(Some(category.note).filter(|note| !note.is_empty()));

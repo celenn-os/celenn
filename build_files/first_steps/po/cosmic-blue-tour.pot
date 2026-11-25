@@ -771,8 +771,5 @@ msgstr ""
 msgid "Lima: ujust install-dev-tools, in a terminal."
 msgstr ""
 
-msgid "Already ticked: the apps most used on Linux for this, all free. Add or remove as you like."
-msgstr ""
-
 msgid "Pick what concerns you. In each list, the apps most used on Linux are already ticked, all free. Nothing installs without your OK."
 msgstr ""

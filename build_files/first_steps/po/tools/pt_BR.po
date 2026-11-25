@@ -783,8 +783,5 @@ msgstr "Seus aplicativos escolares estão prontos."
 msgid "Your video apps are ready."
 msgstr "Seus aplicativos de vídeo estão prontos."
 
-msgid "Already ticked: the apps most used on Linux for this, all free. Add or remove as you like."
-msgstr "Já marcados: os aplicativos mais usados no Linux para isso, todos gratuitos. Adicione ou remova como quiser."
-
 msgid "Ready in one click. In each list, the apps most used on Linux are already ticked."
 msgstr "Pronto em um clique. Em cada lista, os aplicativos mais usados no Linux já estão marcados."

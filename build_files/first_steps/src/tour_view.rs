@@ -407,7 +407,7 @@ impl<T: Tour> App<T> {
             move |i, on| Message::Pick(n, i, on),
         );
         let brew = Path::new(devtools::BREW).exists();
-        let mut notes: Vec<&str> = vec![tr(apps::RECOMMENDED)];
+        let mut notes: Vec<&str> = Vec::new();
         if !installed.is_empty() {
             notes.push(tr("Ticked and grey: already installed."));
         }

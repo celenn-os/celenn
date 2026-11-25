@@ -781,8 +781,5 @@ msgstr ""
 msgid "Your video apps are ready."
 msgstr ""
 
-msgid "Already ticked: the apps most used on Linux for this, all free. Add or remove as you like."
-msgstr ""
-
 msgid "Ready in one click. In each list, the apps most used on Linux are already ticked."
 msgstr ""
