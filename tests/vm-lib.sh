@@ -338,6 +338,10 @@ demo_user() {
         vm "useradd -m -c cosmic-blue ${DEMO_USER} && echo ${DEMO_USER}:${DEMO_PASSWORD} | chpasswd" \
             || { warn "could not create the test user"; return 1; }
     fi
+    # A fixed computer name, shown in the terminal screenshot: without it,
+    # the runner's network can name the VM after its address
+    # (ip-10-0-2-15), which changes from one run to the next
+    vm 'hostnamectl hostname fedora' || warn "could not set the computer name"
     vm 'systemctl restart cosmic-greeter.service' \
         || { warn "could not restart the login screen"; return 1; }
     wait_for 120 'pgrep -x cosmic-greeter' || { warn "the login screen did not come back"; return 1; }

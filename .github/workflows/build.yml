@@ -515,6 +515,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           SHOTS: ${{ runner.temp }}/boot-test/screenshots
           MAIN: ${{ github.event.repository.default_branch }}
+          # A pull request's build is of the pull request merged into main
+          BASE: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
           compgen -G "${SHOTS}/*.png" >/dev/null || { echo "No screenshots to compare"; exit 0; }
@@ -542,6 +544,9 @@ jobs:
             echo "## Changes on screen"
             echo
             echo "Compared with [the latest build of ${MAIN}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${reference}) (${sha:0:7})."
+            if [[ -n "${BASE}" && "${BASE}" != "${sha}" ]]; then
+              echo "${MAIN} has changed since that build (now ${BASE:0:7}): what was merged since shows up here too."
+            fi
             echo
             cat "${RUNNER_TEMP}/screenshot-diff.md"
           } >> "${GITHUB_STEP_SUMMARY}"
