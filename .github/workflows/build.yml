@@ -227,6 +227,8 @@ jobs:
         image_suffix: ${{ fromJSON(needs.version.outputs.suffixes) }}
 
     permissions:
+      # actions: read lets pull requests download the screenshots of main
+      actions: read
       contents: read
       packages: write
     # The signing key (SIGNING_SECRET) lives in the "release" environment,
@@ -501,6 +503,69 @@ jobs:
           dir: ${{ runner.temp }}/boot-test
           name: boot-test-${{ env.IMAGE_NAME }}
           title: ${{ env.IMAGE_NAME }}
+
+      # Pull requests and branches: what this build changes on screen,
+      # compared with the boot test screenshots of the latest build of main
+      # (tests/screenshot-diff.py). Information only: never fails the build.
+      - name: Compare the screenshots with main
+        id: screenshot-diff
+        if: always() && matrix.image_suffix == '' && github.ref != format('refs/heads/{0}', github.event.repository.default_branch)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHOTS: ${{ runner.temp }}/boot-test/screenshots
+          MAIN: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          compgen -G "${SHOTS}/*.png" >/dev/null || { echo "No screenshots to compare"; exit 0; }
+          # The latest successful build of main whose boot test results
+          # (kept 7 days) are still there
+          mapfile -t runs < <(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/build.yml/runs?branch=${MAIN}&status=success&per_page=20" \
+            --jq '.workflow_runs[] | select(.event != "pull_request") | "\(.id) \(.head_sha)"')
+          reference="" sha=""
+          for entry in "${runs[@]}"; do
+            read -r id head <<< "${entry}"
+            found="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${id}/artifacts?name=boot-test-${IMAGE_NAME}" \
+              --jq '[.artifacts[] | select(.expired | not)] | length')"
+            if (( found > 0 )); then reference="${id}" sha="${head}"; break; fi
+          done
+          if [[ -z "${reference}" ]]; then
+            echo "::notice::No recent build of ${MAIN} with screenshots: nothing to compare with"
+            exit 0
+          fi
+          dir="${RUNNER_TEMP}/screenshots-main"
+          gh run download "${reference}" -R "${GITHUB_REPOSITORY}" -n "boot-test-${IMAGE_NAME}" -D "${dir}"
+          tests/screenshot-diff.py "${dir}/screenshots" "${SHOTS}" "${RUNNER_TEMP}/screenshot-diff.md" \
+            "${RUNNER_TEMP}/screenshot-changes-${IMAGE_NAME}.jpg" \
+            "Changes on screen · ${GITHUB_REF_NAME} · $(git rev-parse --short HEAD)"
+          {
+            echo "## Changes on screen"
+            echo
+            echo "Compared with [the latest build of ${MAIN}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${reference}) (${sha:0:7})."
+            echo
+            cat "${RUNNER_TEMP}/screenshot-diff.md"
+          } >> "${GITHUB_STEP_SUMMARY}"
+          if [[ -f "${RUNNER_TEMP}/screenshot-changes-${IMAGE_NAME}.jpg" ]]; then
+            echo "sheet=true" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Upload the screenshot changes
+        id: upload-screenshot-diff
+        if: always() && steps.screenshot-diff.outputs.sheet == 'true'
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: ${{ runner.temp }}/screenshot-changes-${{ env.IMAGE_NAME }}.jpg
+          archive: false
+          retention-days: 7
+
+      - name: Link the screenshot changes in the run summary
+        if: always() && steps.upload-screenshot-diff.outcome == 'success'
+        continue-on-error: true
+        env:
+          URL: ${{ steps.upload-screenshot-diff.outputs.artifact-url }}
+        run: |
+          echo "[Open the changes, before and after](${URL}) (one image, opens in the browser)." >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Finish the SBOM
         id: sbom
