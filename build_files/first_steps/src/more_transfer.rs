@@ -7,7 +7,8 @@
 //             by group (developer tools left unticked), Restore, then what
 //             was done and what was not, with why
 
-use super::{List, Message, Page, apply_list, refresh};
+use super::{Message, Page, apply_list, refresh};
+use crate::apps::{CATEGORIES, DEVELOPMENT};
 use crate::common::{label, spawn, state_icon};
 use crate::failure;
 use crate::i18n::{fill, tr};
@@ -94,7 +95,7 @@ async fn install(
         };
     }
     if let Some((installed, chosen)) = dev_tools {
-        let tools = match apply_list(List::Dev, installed, chosen).await {
+        let tools = match apply_list(DEVELOPMENT, installed, chosen).await {
             Some(Ok(())) => Some(true),
             Some(Err(_)) => Some(false),
             None => None,
@@ -117,10 +118,10 @@ impl Page {
                     .state
                     .as_ref()
                     .map(|state| {
-                        List::Dev
+                        CATEGORIES[DEVELOPMENT]
                             .tools()
                             .enumerate()
-                            .filter(|(i, _)| state.installed[List::Dev as usize].contains(i))
+                            .filter(|(i, _)| state.installed[DEVELOPMENT].contains(i))
                             .map(|(_, tool)| tool.name)
                             .collect()
                     })
@@ -195,9 +196,9 @@ impl Page {
             TransferMessage::Read(Ok(mut restore)) => {
                 // Developer tools already here are not offered again
                 if let Some(state) = &self.state {
-                    let installed = &state.installed[List::Dev as usize];
+                    let installed = &state.installed[DEVELOPMENT];
                     restore.dev_tools.retain(|name| {
-                        !List::Dev
+                        !CATEGORIES[DEVELOPMENT]
                             .tools()
                             .position(|tool| tool.name == *name)
                             .is_some_and(|i| installed.contains(&i))
@@ -238,10 +239,10 @@ impl Page {
                     .as_ref()
                     .filter(|_| ticked.contains(&Group::DevTools) && !restore.dev_tools.is_empty())
                     .map(|state| {
-                        let installed = state.installed[List::Dev as usize].clone();
+                        let installed = state.installed[DEVELOPMENT].clone();
                         let mut chosen = installed.clone();
                         chosen.extend(
-                            List::Dev
+                            CATEGORIES[DEVELOPMENT]
                                 .tools()
                                 .enumerate()
                                 .filter(|(_, tool)| restore.dev_tools.contains(&tool.name))

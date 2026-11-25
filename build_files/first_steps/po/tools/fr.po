@@ -381,9 +381,6 @@ msgstr "Ordinateur"
 msgid "Dark theme"
 msgstr "Thème sombre"
 
-msgid "Developer tools"
-msgstr "Outils de développement"
-
 msgid "Every COSMIC setting goes back to the defaults. A copy is kept in your settings folder."
 msgstr "Tous les réglages COSMIC reviennent aux valeurs par défaut. Une copie est gardée dans votre dossier de configuration."
 
@@ -492,9 +489,6 @@ msgstr "Utiliser l'édition NVIDIA de cosmic-blue, avec le pilote de NVIDIA, pou
 msgid "Virtual machines"
 msgstr "Machines virtuelles"
 
-msgid "What cosmic-blue does not install by itself, ready in one click."
-msgstr "Ce que cosmic-blue n'installe pas tout seul, prêt en un clic."
-
 msgid "Working…"
 msgstr "En cours…"
 
@@ -515,9 +509,6 @@ msgstr "Conteneurs"
 
 msgid "In the terminal"
 msgstr "Dans le terminal"
-
-msgid "Docker, VS Code, Neovim…"
-msgstr "Docker, VS Code, Neovim…"
 
 msgid "Homebrew is not set up yet: only Podman Desktop can be installed now."
 msgstr "Homebrew n’est pas encore prêt : seul Podman Desktop peut être installé pour l’instant."
@@ -591,23 +582,11 @@ msgstr "Certains changements demandent le mot de passe d'un parent ou d'un admin
 msgid "Passwords"
 msgstr "Mots de passe"
 
-msgid "Bitwarden (synced with your phone), Secrets, KeePassXC."
-msgstr "Bitwarden (synchronisé avec votre téléphone), Secrets, KeePassXC."
-
-msgid "Synced"
-msgstr "Synchronisés"
-
-msgid "On this computer"
-msgstr "Sur cet ordinateur"
-
 msgid "Your password manager is ready."
 msgstr "Votre gestionnaire de mots de passe est prêt."
 
 msgid "Tick the ones you want, untick the ones to remove."
 msgstr "Cochez ceux que vous voulez, décochez ceux à retirer."
-
-msgid "Tick the ones you want, untick the ones to remove. Your games and saves stay."
-msgstr "Cochez ceux que vous voulez, décochez ceux à retirer. Vos jeux et sauvegardes restent."
 
 msgid "Overview"
 msgstr "Vue d'ensemble"
@@ -677,6 +656,126 @@ msgstr "Annuler"
 
 msgid "The dock hides when a window covers it."
 msgstr "Le dock se cache quand une fenêtre le recouvre."
+
+msgid "Back to the list"
+msgstr "Retour à la liste"
+
+msgid "Bitwarden, Secrets, KeePassXC"
+msgstr "Bitwarden, Secrets, KeePassXC"
+
+msgid "Bitwarden: a free account, on this computer, your phone and in Firefox. Secrets and KeePassXC: an encrypted file, no account."
+msgstr "Bitwarden : un compte gratuit, sur cet ordinateur, votre téléphone et dans Firefox. Secrets et KeePassXC : un fichier chiffré, sans compte."
+
+msgid "Chosen: {}"
+msgstr "Choisis : {}"
+
+msgid "Development"
+msgstr "Développement"
+
+msgid "VS Code, Docker, Zed, Neovim…"
+msgstr "VS Code, Docker, Zed, Neovim…"
+
+msgid "Drawing and editing"
+msgstr "Dessin et retouche"
+
+msgid "For children"
+msgstr "Pour les enfants"
+
+msgid "For the system"
+msgstr "Pour le système"
+
+msgid "GCompris, Stellarium, GeoGebra…"
+msgstr "GCompris, Stellarium, GeoGebra…"
+
+msgid "GIMP, Inkscape, Krita, darktable…"
+msgstr "GIMP, Inkscape, Krita, darktable…"
+
+msgid "Graphics and photos"
+msgstr "Graphisme et photo"
+
+msgid "Installed: {}"
+msgstr "Installé : {}"
+
+msgid "LibreOffice and OnlyOffice open and save Word, Excel and PowerPoint files."
+msgstr "LibreOffice et OnlyOffice ouvrent et enregistrent les fichiers Word, Excel et PowerPoint."
+
+msgid "LibreOffice, OnlyOffice…"
+msgstr "LibreOffice, OnlyOffice…"
+
+msgid "Lima: ujust install-dev-tools, in a terminal."
+msgstr "Lima : ujust install-dev-tools, dans un terminal."
+
+msgid "Messaging"
+msgstr "Messagerie"
+
+msgid "Messaging and video calls"
+msgstr "Messagerie et visio"
+
+msgid "OBS Studio, Kdenlive, Audacity…"
+msgstr "OBS Studio, Kdenlive, Audacity…"
+
+msgid "Office"
+msgstr "Bureautique"
+
+msgid "Office suites"
+msgstr "Suites bureautiques"
+
+msgid "Only on this computer"
+msgstr "Seulement sur cet ordinateur"
+
+msgid "PDF files"
+msgstr "Fichiers PDF"
+
+msgid "Photos"
+msgstr "Photos"
+
+msgid "Removing an app keeps your games and saves."
+msgstr "Retirer une application garde vos jeux et vos sauvegardes."
+
+msgid "School and science"
+msgstr "École et sciences"
+
+msgid "Science"
+msgstr "Sciences"
+
+msgid "Signal, Telegram, Element, Zoom…"
+msgstr "Signal, Telegram, Element, Zoom…"
+
+msgid "Sound"
+msgstr "Son"
+
+msgid "Studying"
+msgstr "Réviser"
+
+msgid "Synced with your phone"
+msgstr "Synchronisés avec votre téléphone"
+
+msgid "Video"
+msgstr "Vidéo"
+
+msgid "Video calls"
+msgstr "Visio"
+
+msgid "Videos and streaming"
+msgstr "Vidéo et streaming"
+
+msgid "Your graphics apps are ready."
+msgstr "Vos applications de graphisme sont prêtes."
+
+msgid "Your messaging apps are ready."
+msgstr "Vos applications de messagerie sont prêtes."
+
+msgid "Your office apps are ready."
+msgstr "Vos applications de bureautique sont prêtes."
+
+msgid "Your school apps are ready."
+msgstr "Vos applications pour l’école sont prêtes."
+
+msgid "Your video apps are ready."
+msgstr "Vos applications vidéo sont prêtes."
+
+msgid "Ready in one click. In each list, the apps most used on Linux are already ticked."
+msgstr "Prêt en un clic. Dans chaque liste, les applications les plus utilisées sous Linux sont déjà cochées."
 
 msgid "Printers and scanners"
 msgstr "Imprimantes et scanners"
