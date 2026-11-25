@@ -424,6 +424,18 @@ grep -q '^Exec=system-config-printer' /usr/share/applications/system-config-prin
 ! grep -qE '^(NoDisplay=true|OnlyShowIn=)' /usr/share/applications/system-config-printer.desktop \
     || { echo "Print Settings is hidden from the app list"; exit 1; }
 rpm -ql papers-thumbnailer | grep '^/usr/share/thumbnailers/.*\.thumbnailer$' >/dev/null
+# Game controllers work for every app (Steam, Heroic, emulators, Flatpak or
+# not) without installing anything: the game-devices-udev rules come with
+# projectbluefin/common. Fail if a common update ever drops them.
+rules=/usr/lib/udev/rules.d
+for vendor in valve sony microsoft nintendo 8bitdo; do
+    test -s "${rules}/71-${vendor}-gdu.rules" \
+        || { echo "Missing game controller rules: 71-${vendor}-gdu.rules"; exit 1; }
+done
+test -s "${rules}/71-uinput-dev-early-creation.rules"
+grep -qi '28de' "${rules}/71-valve-gdu.rules"
+grep -qi '054c' "${rules}/71-sony-gdu.rules"
+udevadm verify --no-style "${rules}"/71-*-gdu.rules
 # Microsoft core fonts are never shipped in the image (their license forbids
 # redistribution): users fetch them with `ujust install-microsoft-fonts`
 test -z "$(find /usr/share/fonts -iname 'arial*.ttf' -o -iname 'verdana*.ttf')"
