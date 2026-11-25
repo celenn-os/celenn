@@ -663,6 +663,45 @@ main {
 .switch > div { padding: 0 24px 20px; color: var(--muted); }
 .switch p { margin: 0 0 10px; }
 
+/* Questions (home page): one bordered list, a divider between answers */
+
+.faq {
+  margin: 40px 0 0;
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+}
+
+.faq details + details { border-top: 1px solid var(--border-soft); }
+
+.faq summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 24px;
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq summary::-webkit-details-marker { display: none; }
+
+.faq summary::after {
+  content: "";
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid var(--accent-light);
+  border-bottom: 2px solid var(--accent-light);
+  transform: rotate(45deg) translateY(-3px);
+  transition: transform .2s;
+}
+
+.faq details[open] > summary::after { transform: rotate(-135deg) translateY(-3px); }
+
+.faq details > p { margin: 0; padding: 0 24px 20px; color: var(--muted); max-width: 72ch; }
+
 /* Content pages */
 
 .block {
@@ -1359,6 +1398,8 @@ main {
   .download .button { width: 100%; }
   .switch > summary { padding: 16px 18px; }
   .switch > div { padding: 0 18px 18px; }
+  .faq summary { padding: 16px 18px; }
+  .faq details > p { padding: 0 18px 18px; }
   .footer-cols { grid-template-columns: 1fr 1fr; padding-top: 40px; }
   .docs { padding-top: 40px; }
   .doc-side { margin-top: -40px; }
