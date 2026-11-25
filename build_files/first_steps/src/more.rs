@@ -44,7 +44,7 @@ pub const TEXTS: &[&str] = &[
     "Computer",
     "What this computer is made of, and its settings.",
     "Extra software",
-    "What cosmic-blue does not install by itself, ready in one click.",
+    "Ready in one click. In each list, the apps most used on Linux are already ticked.",
     "Appearance",
     "The look of the desktop and your COSMIC settings.",
     // Common
@@ -745,7 +745,7 @@ impl Page {
             ),
             Kind::Software => (
                 "Extra software",
-                "What cosmic-blue does not install by itself, ready in one click.",
+                "Ready in one click. In each list, the apps most used on Linux are already ticked.",
                 "cosmic-blue-tour-store",
             ),
             Kind::Appearance => (
@@ -993,13 +993,13 @@ impl Page {
                 )
                 .into()
         };
-        let note = if n == DEVELOPMENT && !state.brew {
-            tr(apps::NO_BREW).to_owned()
-        } else if category.note.is_empty() {
-            tr(apps::TICK_NOTE).to_owned()
-        } else {
-            format!("{} {}", tr(apps::TICK_NOTE), tr(category.note))
-        };
+        let mut notes = vec![tr(apps::RECOMMENDED), tr(apps::TICK_NOTE)];
+        if n == DEVELOPMENT && !state.brew {
+            notes.push(tr(apps::NO_BREW));
+        } else if !category.note.is_empty() {
+            notes.push(tr(category.note));
+        }
+        let note = notes.join(" ");
         widget::column::with_capacity(3)
             .spacing(space_s)
             .push(text::heading(tr(category.title)))

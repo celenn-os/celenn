@@ -498,9 +498,6 @@ msgstr "Die NVIDIA-Ausgabe von cosmic-blue mit NVIDIAs eigenem Treiber verwenden
 msgid "Virtual machines"
 msgstr "Virtuelle Maschinen"
 
-msgid "What cosmic-blue does not install by itself, ready in one click."
-msgstr "Was cosmic-blue nicht selbst installiert, mit einem Klick bereit."
-
 msgid "Working…"
 msgstr "Läuft…"
 
@@ -676,7 +673,7 @@ msgid "Bitwarden, Secrets, KeePassXC"
 msgstr "Bitwarden, Secrets, KeePassXC"
 
 msgid "Bitwarden: a free account, on this computer, your phone and in Firefox. Secrets and KeePassXC: an encrypted file, no account."
-msgstr "Bitwarden: ein kostenloses Konto, auf diesem Computer, deinem Telefon und in Firefox. Secrets und KeePassXC: eine verschlüsselte Datei, kein Konto."
+msgstr "Bitwarden: ein kostenloses Konto, auf diesem Computer, Ihrem Telefon und in Firefox. Secrets und KeePassXC: eine verschlüsselte Datei, kein Konto."
 
 msgid "Chosen: {}"
 msgstr "Ausgewählt: {}"
@@ -684,8 +681,8 @@ msgstr "Ausgewählt: {}"
 msgid "Development"
 msgstr "Entwicklung"
 
-msgid "Docker, VS Code, Zed, Neovim…"
-msgstr "Docker, VS Code, Zed, Neovim…"
+msgid "VS Code, Docker, Zed, Neovim…"
+msgstr "VS Code, Docker, Zed, Neovim…"
 
 msgid "Drawing and editing"
 msgstr "Zeichnen und Bearbeiten"
@@ -741,11 +738,8 @@ msgstr "PDF-Dateien"
 msgid "Photos"
 msgstr "Fotos"
 
-msgid "Pick the ones the people you talk to use."
-msgstr "Wähle die, die deine Kontakte nutzen."
-
 msgid "Removing an app keeps your games and saves."
-msgstr "Wenn du eine App entfernst, bleiben deine Spiele und Spielstände erhalten."
+msgstr "Wenn Sie eine App entfernen, bleiben Ihre Spiele und Spielstände erhalten."
 
 msgid "School and science"
 msgstr "Schule und Wissenschaft"
@@ -763,7 +757,7 @@ msgid "Studying"
 msgstr "Lernen"
 
 msgid "Synced with your phone"
-msgstr "Mit deinem Telefon synchronisiert"
+msgstr "Mit Ihrem Telefon synchronisiert"
 
 msgid "Video"
 msgstr "Video"
@@ -775,16 +769,22 @@ msgid "Videos and streaming"
 msgstr "Video und Streaming"
 
 msgid "Your graphics apps are ready."
-msgstr "Deine Grafik-Apps sind bereit."
+msgstr "Ihre Grafik-Apps sind bereit."
 
 msgid "Your messaging apps are ready."
-msgstr "Deine Nachrichten-Apps sind bereit."
+msgstr "Ihre Nachrichten-Apps sind bereit."
 
 msgid "Your office apps are ready."
-msgstr "Deine Büro-Apps sind bereit."
+msgstr "Ihre Büro-Apps sind bereit."
 
 msgid "Your school apps are ready."
-msgstr "Deine Lern-Apps sind bereit."
+msgstr "Ihre Lern-Apps sind bereit."
 
 msgid "Your video apps are ready."
-msgstr "Deine Video-Apps sind bereit."
+msgstr "Ihre Video-Apps sind bereit."
+
+msgid "Already ticked: the apps most used on Linux for this, all free. Add or remove as you like."
+msgstr "Bereits angehakt: die unter Linux dafür meistgenutzten Apps, alle kostenlos. Fügen Sie nach Belieben hinzu oder entfernen Sie welche."
+
+msgid "Ready in one click. In each list, the apps most used on Linux are already ticked."
+msgstr "Mit einem Klick bereit. In jeder Liste sind die unter Linux meistgenutzten Apps bereits angehakt."

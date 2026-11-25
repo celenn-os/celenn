@@ -537,7 +537,7 @@ fn pages(mode: &Mode, origin: Option<Origin>, experienced: bool) -> Vec<Page> {
                 ..Page::new(
                     "Your apps",
                     Some(
-                        "Pick what concerns you: nothing installs without a click, and everything can be removed later.",
+                        "Pick what concerns you. In each list, the apps most used on Linux are already ticked, all free. Nothing installs without your OK.",
                     ),
                     Body::Profiles,
                 )

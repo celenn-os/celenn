@@ -2,7 +2,9 @@
 // the same in the first steps tour ("Your apps", main.rs) and in cosmic-blue
 // Tools (Extra software, more.rs): the same categories in the same order,
 // shown as tiles in two columns. A tile opens its list of apps to tick, with
-// the recommended ones already ticked the first time. Everything comes from
+// the recommended ones already ticked the first time: in every category, the
+// apps most used on Linux for that need, all free, so that a beginner sees
+// which ones Linux people reach for. Everything comes from
 // Flathub, for everyone, except the developer tools (Homebrew, devtools.rs).
 //
 // The order goes from everyday use to the more specialised: office,
@@ -37,7 +39,8 @@ pub struct Category {
     /// Its apps, by group: a heading, then the apps
     pub groups: &'static [(&'static str, &'static [DevTool])],
     /// The apps ticked the first time the list opens, when none of them is
-    /// installed (none where the choice is too personal)
+    /// installed: the ones most used on Linux for that need, all free of
+    /// charge (RECOMMENDED says so under the list)
     pub recommended: &'static [&'static str],
     /// Said under the list, when it has something to add (Tools says how
     /// the list works first)
@@ -45,6 +48,10 @@ pub struct Category {
     /// Said once the apps are installed (Tools)
     pub done: &'static str,
 }
+
+/// Said under every list: why some apps are already ticked
+pub const RECOMMENDED: &str =
+    "Already ticked: the apps most used on Linux for this, all free. Add or remove as you like.";
 
 /// How the lists of Tools work (the tour only installs)
 pub const TICK_NOTE: &str = "Tick the ones you want, untick the ones to remove.";
@@ -89,8 +96,8 @@ pub const CATEGORIES: &[Category] = &[
             ),
             ("Video calls", &[flatpak("Zoom", "us.zoom.Zoom")]),
         ],
-        recommended: &[],
-        note: "Pick the ones the people you talk to use.",
+        recommended: &["Signal"],
+        note: "",
         done: "Your messaging apps are ready.",
     },
     Category {
@@ -218,16 +225,16 @@ pub const CATEGORIES: &[Category] = &[
             ),
             ("Studying", &[flatpak("Anki", "net.ankiweb.Anki")]),
         ],
-        recommended: &[],
+        recommended: &["GCompris", "Stellarium", "GeoGebra"],
         note: "",
         done: "Your school apps are ready.",
     },
     Category {
         title: "Development",
-        caption: "Docker, VS Code, Zed, Neovim…",
+        caption: "VS Code, Docker, Zed, Neovim…",
         icon: "utilities-terminal-symbolic",
         groups: DEV_TOOLS,
-        recommended: &[],
+        recommended: &["VS Code"],
         note: "Lima: ujust install-dev-tools, in a terminal.",
         done: "The developer tools are ready.",
     },
@@ -248,11 +255,12 @@ impl Category {
         self.groups.iter().flat_map(|(_, tools)| tools.iter())
     }
 
-    /// The numbers of the recommended apps
+    /// The numbers of the recommended apps that can be installed now
+    /// (Homebrew's need Homebrew)
     pub fn recommended(&self) -> BTreeSet<usize> {
         self.tools()
             .enumerate()
-            .filter(|(_, tool)| self.recommended.contains(&tool.name))
+            .filter(|(_, tool)| self.recommended.contains(&tool.name) && available(tool))
             .map(|(i, _)| i)
             .collect()
     }
@@ -270,7 +278,7 @@ impl Category {
 
 /// Every text of the categories, for the translation checks
 pub fn texts() -> Vec<&'static str> {
-    let mut texts = vec!["Chosen: {}", "Installed: {}", NO_BREW];
+    let mut texts = vec!["Chosen: {}", "Installed: {}", NO_BREW, RECOMMENDED];
     for category in CATEGORIES {
         texts.extend([category.title, category.caption, category.done]);
         texts.extend(Some(category.note).filter(|note| !note.is_empty()));
@@ -441,12 +449,10 @@ mod tests {
         let mut apps = BTreeSet::new();
         for category in CATEGORIES {
             // Every recommended app is in its list
-            assert_eq!(
-                category.recommended().len(),
-                category.recommended.len(),
-                "{}",
-                category.title
-            );
+            assert!(!category.recommended.is_empty(), "{}", category.title);
+            for name in category.recommended {
+                assert!(category.tools().any(|tool| tool.name == *name), "{name}");
+            }
             // An app is in one list only
             for tool in category.tools() {
                 assert!(apps.insert(tool.name), "{}", tool.name);

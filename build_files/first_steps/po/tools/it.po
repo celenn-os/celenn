@@ -498,9 +498,6 @@ msgstr "Usare l'edizione NVIDIA di cosmic-blue, con il driver di NVIDIA, per gio
 msgid "Virtual machines"
 msgstr "Macchine virtuali"
 
-msgid "What cosmic-blue does not install by itself, ready in one click."
-msgstr "Ciò che cosmic-blue non installa da solo, pronto in un clic."
-
 msgid "Working…"
 msgstr "In corso…"
 
@@ -684,8 +681,8 @@ msgstr "Scelti: {}"
 msgid "Development"
 msgstr "Sviluppo"
 
-msgid "Docker, VS Code, Zed, Neovim…"
-msgstr "Docker, VS Code, Zed, Neovim…"
+msgid "VS Code, Docker, Zed, Neovim…"
+msgstr "VS Code, Docker, Zed, Neovim…"
 
 msgid "Drawing and editing"
 msgstr "Disegno e ritocco"
@@ -741,9 +738,6 @@ msgstr "File PDF"
 msgid "Photos"
 msgstr "Foto"
 
-msgid "Pick the ones the people you talk to use."
-msgstr "Scegli quelle che usano le persone con cui parli."
-
 msgid "Removing an app keeps your games and saves."
 msgstr "Rimuovere un’app mantiene i tuoi giochi e salvataggi."
 
@@ -788,3 +782,9 @@ msgstr "Le tue app per la scuola sono pronte."
 
 msgid "Your video apps are ready."
 msgstr "Le tue app video sono pronte."
+
+msgid "Already ticked: the apps most used on Linux for this, all free. Add or remove as you like."
+msgstr "Già spuntate: le app più usate su Linux per questo, tutte gratuite. Aggiungi o togli come preferisci."
+
+msgid "Ready in one click. In each list, the apps most used on Linux are already ticked."
+msgstr "Pronto in un clic. In ogni elenco, le app più usate su Linux sono già spuntate."

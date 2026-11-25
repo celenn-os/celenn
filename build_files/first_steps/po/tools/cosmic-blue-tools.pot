@@ -496,9 +496,6 @@ msgstr ""
 msgid "Virtual machines"
 msgstr ""
 
-msgid "What cosmic-blue does not install by itself, ready in one click."
-msgstr ""
-
 msgid "Working…"
 msgstr ""
 
@@ -682,7 +679,7 @@ msgstr ""
 msgid "Development"
 msgstr ""
 
-msgid "Docker, VS Code, Zed, Neovim…"
+msgid "VS Code, Docker, Zed, Neovim…"
 msgstr ""
 
 msgid "Drawing and editing"
@@ -739,9 +736,6 @@ msgstr ""
 msgid "Photos"
 msgstr ""
 
-msgid "Pick the ones the people you talk to use."
-msgstr ""
-
 msgid "Removing an app keeps your games and saves."
 msgstr ""
 
@@ -785,4 +779,10 @@ msgid "Your school apps are ready."
 msgstr ""
 
 msgid "Your video apps are ready."
+msgstr ""
+
+msgid "Already ticked: the apps most used on Linux for this, all free. Add or remove as you like."
+msgstr ""
+
+msgid "Ready in one click. In each list, the apps most used on Linux are already ticked."
 msgstr ""

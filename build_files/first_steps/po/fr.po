@@ -380,9 +380,6 @@ msgstr "Votre système est installé et prêt. D’où venez-vous ? Le tour s’
 msgid "Make it yours"
 msgstr "À votre goût"
 
-msgid "Pick what concerns you: nothing installs without a click, and everything can be removed later."
-msgstr "Choisissez ce qui vous concerne : rien ne s’installe sans un clic, et tout se retire plus tard."
-
 msgid "Thousands of other apps are in COSMIC Store."
 msgstr "Des milliers d’autres applications sont dans COSMIC Store."
 
@@ -683,9 +680,6 @@ msgstr "Signal, Telegram, Element, Zoom…"
 msgid "Your messaging apps are ready."
 msgstr "Vos applications de messagerie sont prêtes."
 
-msgid "Pick the ones the people you talk to use."
-msgstr "Choisissez celles qu’utilisent les personnes avec qui vous échangez."
-
 msgid "Messaging"
 msgstr "Messagerie"
 
@@ -767,11 +761,17 @@ msgstr "Sciences"
 msgid "Studying"
 msgstr "Réviser"
 
-msgid "Docker, VS Code, Zed, Neovim…"
-msgstr "Docker, VS Code, Zed, Neovim…"
+msgid "VS Code, Docker, Zed, Neovim…"
+msgstr "VS Code, Docker, Zed, Neovim…"
 
 msgid "The developer tools are ready."
 msgstr "Les outils développeur sont prêts."
 
 msgid "Lima: ujust install-dev-tools, in a terminal."
 msgstr "Lima : ujust install-dev-tools, dans un terminal."
+
+msgid "Already ticked: the apps most used on Linux for this, all free. Add or remove as you like."
+msgstr "Déjà cochées : les applications les plus utilisées sous Linux pour cet usage, toutes gratuites. Ajoutez-en ou retirez-en à votre guise."
+
+msgid "Pick what concerns you. In each list, the apps most used on Linux are already ticked, all free. Nothing installs without your OK."
+msgstr "Choisissez ce qui vous concerne. Dans chaque liste, les applications les plus utilisées sous Linux sont déjà cochées, toutes gratuites. Rien ne s’installe sans votre accord."

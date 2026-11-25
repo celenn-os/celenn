@@ -381,9 +381,6 @@ msgstr ""
 msgid "Make it yours"
 msgstr ""
 
-msgid "Pick what concerns you: nothing installs without a click, and everything can be removed later."
-msgstr ""
-
 msgid "Thousands of other apps are in COSMIC Store."
 msgstr ""
 
@@ -684,9 +681,6 @@ msgstr ""
 msgid "Your messaging apps are ready."
 msgstr ""
 
-msgid "Pick the ones the people you talk to use."
-msgstr ""
-
 msgid "Messaging"
 msgstr ""
 
@@ -768,11 +762,17 @@ msgstr ""
 msgid "Studying"
 msgstr ""
 
-msgid "Docker, VS Code, Zed, Neovim…"
+msgid "VS Code, Docker, Zed, Neovim…"
 msgstr ""
 
 msgid "The developer tools are ready."
 msgstr ""
 
 msgid "Lima: ujust install-dev-tools, in a terminal."
+msgstr ""
+
+msgid "Already ticked: the apps most used on Linux for this, all free. Add or remove as you like."
+msgstr ""
+
+msgid "Pick what concerns you. In each list, the apps most used on Linux are already ticked, all free. Nothing installs without your OK."
 msgstr ""

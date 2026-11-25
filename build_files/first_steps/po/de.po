@@ -380,9 +380,6 @@ msgstr "Ihr System ist installiert und bereit. Woher kommen Sie? Die Tour passt 
 msgid "Make it yours"
 msgstr "Nach Ihrem Geschmack"
 
-msgid "Pick what concerns you: nothing installs without a click, and everything can be removed later."
-msgstr "Wählen Sie, was Sie betrifft: Nichts wird ohne Klick installiert, und alles lässt sich später entfernen."
-
 msgid "Thousands of other apps are in COSMIC Store."
 msgstr "Tausende weitere Apps gibt es in COSMIC Store."
 
@@ -663,7 +660,7 @@ msgid "LibreOffice, OnlyOffice…"
 msgstr "LibreOffice, OnlyOffice…"
 
 msgid "Your office apps are ready."
-msgstr "Deine Büro-Apps sind bereit."
+msgstr "Ihre Büro-Apps sind bereit."
 
 msgid "LibreOffice and OnlyOffice open and save Word, Excel and PowerPoint files."
 msgstr "LibreOffice und OnlyOffice öffnen und speichern Word-, Excel- und PowerPoint-Dateien."
@@ -681,10 +678,7 @@ msgid "Signal, Telegram, Element, Zoom…"
 msgstr "Signal, Telegram, Element, Zoom…"
 
 msgid "Your messaging apps are ready."
-msgstr "Deine Nachrichten-Apps sind bereit."
-
-msgid "Pick the ones the people you talk to use."
-msgstr "Wähle die, die deine Kontakte nutzen."
+msgstr "Ihre Nachrichten-Apps sind bereit."
 
 msgid "Messaging"
 msgstr "Nachrichten"
@@ -699,10 +693,10 @@ msgid "Your password manager is ready."
 msgstr "Ihr Passwort-Manager ist bereit."
 
 msgid "Bitwarden: a free account, on this computer, your phone and in Firefox. Secrets and KeePassXC: an encrypted file, no account."
-msgstr "Bitwarden: ein kostenloses Konto, auf diesem Computer, deinem Telefon und in Firefox. Secrets und KeePassXC: eine verschlüsselte Datei, kein Konto."
+msgstr "Bitwarden: ein kostenloses Konto, auf diesem Computer, Ihrem Telefon und in Firefox. Secrets und KeePassXC: eine verschlüsselte Datei, kein Konto."
 
 msgid "Synced with your phone"
-msgstr "Mit deinem Telefon synchronisiert"
+msgstr "Mit Ihrem Telefon synchronisiert"
 
 msgid "Graphics and photos"
 msgstr "Grafik und Fotos"
@@ -711,7 +705,7 @@ msgid "GIMP, Inkscape, Krita, darktable…"
 msgstr "GIMP, Inkscape, Krita, darktable…"
 
 msgid "Your graphics apps are ready."
-msgstr "Deine Grafik-Apps sind bereit."
+msgstr "Ihre Grafik-Apps sind bereit."
 
 msgid "Drawing and editing"
 msgstr "Zeichnen und Bearbeiten"
@@ -726,7 +720,7 @@ msgid "OBS Studio, Kdenlive, Audacity…"
 msgstr "OBS Studio, Kdenlive, Audacity…"
 
 msgid "Your video apps are ready."
-msgstr "Deine Video-Apps sind bereit."
+msgstr "Ihre Video-Apps sind bereit."
 
 msgid "Video"
 msgstr "Video"
@@ -741,7 +735,7 @@ msgid "Your game apps are ready."
 msgstr "Ihre Spiele-Apps sind bereit."
 
 msgid "Removing an app keeps your games and saves."
-msgstr "Wenn du eine App entfernst, bleiben deine Spiele und Spielstände erhalten."
+msgstr "Wenn Sie eine App entfernen, bleiben Ihre Spiele und Spielstände erhalten."
 
 msgid "Stores"
 msgstr "Shops"
@@ -756,7 +750,7 @@ msgid "GCompris, Stellarium, GeoGebra…"
 msgstr "GCompris, Stellarium, GeoGebra…"
 
 msgid "Your school apps are ready."
-msgstr "Deine Lern-Apps sind bereit."
+msgstr "Ihre Lern-Apps sind bereit."
 
 msgid "For children"
 msgstr "Für Kinder"
@@ -767,11 +761,17 @@ msgstr "Wissenschaft"
 msgid "Studying"
 msgstr "Lernen"
 
-msgid "Docker, VS Code, Zed, Neovim…"
-msgstr "Docker, VS Code, Zed, Neovim…"
+msgid "VS Code, Docker, Zed, Neovim…"
+msgstr "VS Code, Docker, Zed, Neovim…"
 
 msgid "The developer tools are ready."
 msgstr "Die Entwicklerwerkzeuge sind bereit."
 
 msgid "Lima: ujust install-dev-tools, in a terminal."
 msgstr "Lima: ujust install-dev-tools in einem Terminal."
+
+msgid "Already ticked: the apps most used on Linux for this, all free. Add or remove as you like."
+msgstr "Bereits angehakt: die unter Linux dafür meistgenutzten Apps, alle kostenlos. Fügen Sie nach Belieben hinzu oder entfernen Sie welche."
+
+msgid "Pick what concerns you. In each list, the apps most used on Linux are already ticked, all free. Nothing installs without your OK."
+msgstr "Wählen Sie, was Sie betrifft. In jeder Liste sind die unter Linux meistgenutzten Apps bereits angehakt, alle kostenlos. Nichts wird ohne Ihr Okay installiert."
