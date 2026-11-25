@@ -152,7 +152,7 @@ build $target_image=image_name $tag=default_tag $version="":
 
 # Helper stages of Containerfile.helpers, in build order
 helper-stages:
-    @echo theme tour greeter store filemanager plymouth icons cursors
+    @echo theme tour greeter compositor store filemanager plymouth icons cursors
 
 # Build helper stages of Containerfile.helpers (all of them, or the ones
 # given) and write the output of each one to <dest>/<stage>, used by `just
@@ -199,7 +199,7 @@ helpers-keys:
     packages="$(podman run --rm --pull=newer "${fedora}" \
         dnf5 -q repoquery --enablerepo=fedora-source --enablerepo=updates-source \
         --latest-limit=1 --queryformat '%{full_nevra}\n' \
-        cosmic-files cosmic-greeter cosmic-settings cosmic-store plymouth-theme-spinner | sort)"
+        cosmic-comp cosmic-files cosmic-greeter cosmic-settings cosmic-store plymouth-theme-spinner | sort)"
     # COSMIC must be the version cosmic-blue is tested against
     # (build_files/cosmic-version): a new one first goes through the pull
     # request of check-cosmic-version.yml, which moves that file. Checked here,
@@ -237,6 +237,9 @@ helpers-keys:
                 greeter)
                     files build_files/greeter system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-arcs.jpg
                     package cosmic-greeter ;;
+                compositor)
+                    files build_files/compositor
+                    package cosmic-comp ;;
                 store)
                     files build_files/store
                     package cosmic-store ;;

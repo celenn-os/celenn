@@ -77,6 +77,9 @@ changes to COSMIC no longer fitting the new code:
   `build_files/filemanager/patch.py`). Each replacement must match exactly
   once. The build log names the one that no longer matches: update its
   "before" text to the new code.
+- **Compositor** (`build_files/compositor/build.sh`): one line, the
+  background color shown before the wallpaper (`CLEAR_COLOR`). If it no
+  longer matches, update its "before" text to the new code.
 - **Our apps** (`build_files/first_steps`) follow the libcosmic revision of
   the new COSMIC. Fix what `cargo clippy --all-targets -- -D warnings` and
   `cargo test` report.
