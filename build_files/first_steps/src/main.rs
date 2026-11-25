@@ -81,6 +81,7 @@ const INSTALLERS: [&str; 2] = [
 const UPDATES_APP: &str = "/usr/libexec/cosmic-blue-updates";
 /// This program, for the windows it opens (--phone)
 const TOUR: &str = "/usr/libexec/cosmic-blue-tour";
+const TOOLS: &str = "/usr/libexec/cosmic-blue-tools";
 /// LocalSend (first-boot app): files between phones and computers
 const LOCALSEND: &[&str] = &["flatpak", "run", "org.localsend.localsend_app"];
 /// A QR code of LocalSend's download page, for the phone
@@ -587,6 +588,12 @@ fn belongings_rows() -> Vec<Row> {
             Action::Launch(&[TOUR, "--phone"]),
         ),
         row_button(
+            "From another cosmic-blue computer",
+            "Your settings and the list of your apps, with the file saved there in cosmic-blue Tools → Appearance.",
+            "Restore…",
+            Action::Launch(&[TOOLS, "--restore"]),
+        ),
+        row_button(
             "Bookmarks and passwords",
             "Export them from your old browser (an HTML file for bookmarks, a CSV file for passwords), then import them in Firefox.",
             "Open Firefox",
@@ -968,7 +975,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         Some("--belongings") => {
             let settings = Settings::default()
-                .size(cosmic::iced::Size::new(680.0, 560.0))
+                .size(cosmic::iced::Size::new(680.0, 660.0))
                 .resizable(None);
             cosmic::app::run::<App<BelongingsDialog>>(settings, Mode::Belongings)?;
         }

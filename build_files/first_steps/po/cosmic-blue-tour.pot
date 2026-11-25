@@ -815,3 +815,12 @@ msgstr ""
 
 msgid "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Extra software."
 msgstr ""
+
+msgid "From another cosmic-blue computer"
+msgstr ""
+
+msgid "Your settings and the list of your apps, with the file saved there in cosmic-blue Tools → Appearance."
+msgstr ""
+
+msgid "Restore…"
+msgstr ""

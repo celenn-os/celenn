@@ -129,7 +129,7 @@ const SETTINGS: &[(&str, &str, PageId)] = &[
     ),
     ("The cosmic-blue look", "", PageId::Appearance),
     ("All COSMIC settings", "", PageId::Appearance),
-    ("Save my settings", "", PageId::Appearance),
+    ("Change computers", "", PageId::Appearance),
     ("Documentation", "", PageId::Help),
     ("Ask a question", "", PageId::Help),
     ("Report a problem", "", PageId::Help),

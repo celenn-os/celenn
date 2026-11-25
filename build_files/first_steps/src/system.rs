@@ -20,7 +20,7 @@ pub const AVATARS: &str = "/usr/share/pixmaps/faces";
 /// Homebrew, set up at the first boot (ublue-os/brew)
 pub const UPDATES_HELPER: &str = "/usr/libexec/cosmic-blue-updates-helper";
 
-fn config_dir() -> PathBuf {
+pub fn config_dir() -> PathBuf {
     std::env::var_os("XDG_CONFIG_HOME")
         .map(PathBuf::from)
         .or_else(|| std::env::var_os("HOME").map(|home| Path::new(&home).join(".config")))

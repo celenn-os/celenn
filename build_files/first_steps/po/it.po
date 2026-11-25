@@ -814,3 +814,12 @@ msgstr "Cosa cambia qui, e i tuoi strumenti."
 
 msgid "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Extra software."
 msgstr "Ufficio, giochi, grafica e altro: COSMIC Store, o Strumenti di cosmic-blue → Software aggiuntivo."
+
+msgid "From another cosmic-blue computer"
+msgstr "Da un altro computer cosmic-blue"
+
+msgid "Your settings and the list of your apps, with the file saved there in cosmic-blue Tools → Appearance."
+msgstr "Le tue impostazioni e l’elenco delle tue app, con il file salvato lì in Strumenti di cosmic-blue → Aspetto e impostazioni."
+
+msgid "Restore…"
+msgstr "Riprendi…"

@@ -47,7 +47,7 @@ tokio = { version = "1", features = ["io-util", "process", "rt"] }
 [dependencies.libcosmic]
 git = "https://github.com/pop-os/libcosmic.git"
 default-features = false
-features = ["a11y", "dbus-config", "tokio", "winit", "wgpu", "wayland"]
+features = ["a11y", "dbus-config", "tokio", "winit", "wgpu", "wayland", "xdg-portal"]
 
 [profile.release]
 lto = "thin"

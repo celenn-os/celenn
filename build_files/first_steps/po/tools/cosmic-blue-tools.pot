@@ -289,9 +289,6 @@ msgstr ""
 msgid "More apps in COSMIC Store, from outside Flathub. Less checked."
 msgstr ""
 
-msgid "A text file in your home folder, to keep or to compare."
-msgstr ""
-
 msgid "Accent color, wallpaper, panel, dock, fonts…"
 msgstr ""
 
@@ -464,12 +461,6 @@ msgid "Restore"
 msgstr ""
 
 msgid "Save"
-msgstr ""
-
-msgid "Save my settings"
-msgstr ""
-
-msgid "Saved in your home folder."
 msgstr ""
 
 msgid "Switch"
@@ -698,4 +689,104 @@ msgid "Printers"
 msgstr ""
 
 msgid "Scan"
+
+msgid "Change computers"
+msgstr ""
+
+msgid "Your settings and the list of your apps in a file, to take back on another cosmic-blue computer."
+msgstr ""
+
+msgid "Restore…"
+msgstr ""
+
+msgid "Saved in Documents."
+msgstr ""
+
+msgid "Show"
+msgstr ""
+
+msgid "Choose the file saved on your other computer"
+msgstr ""
+
+msgid "cosmic-blue-settings"
+msgstr ""
+
+msgid "Restore these settings"
+msgstr ""
+
+msgid "Saved on {} on “{}”. Tick what you want back. Your files are not in this file: use Déjà Dup or LocalSend for them."
+msgstr ""
+
+msgid "Saved on {}. Tick what you want back. Your files are not in this file: use Déjà Dup or LocalSend for them."
+msgstr ""
+
+msgid "Look"
+msgstr ""
+
+msgid "Dark or light theme, accent color, wallpaper, panel and dock."
+msgstr ""
+
+msgid "Keyboard and shortcuts"
+msgstr ""
+
+msgid "Keyboard layout and the shortcuts you changed."
+msgstr ""
+
+msgid "Apps ({})"
+msgstr ""
+
+msgid "{} and {} more, from Flathub."
+msgstr ""
+
+msgid "{}, from Flathub."
+msgstr ""
+
+msgid "Developer tools ({})"
+msgstr ""
+
+msgid "Take them back"
+msgstr ""
+
+msgid "Restoring…"
+msgstr ""
+
+msgid "Restored"
+msgstr ""
+
+
+
+msgid "Your own wallpaper is not in the file: copy the picture, then choose it in Settings."
+msgstr ""
+
+msgid "{} shortcuts start a program: for safety, add them again in Settings."
+msgstr ""
+
+msgid "One shortcut starts a program: for safety, add it again in Settings."
+msgstr ""
+
+msgid "{} settings unknown to this version of cosmic-blue were left out."
+msgstr ""
+
+msgid "{} app names were not valid and were left out."
+msgstr ""
+
+msgid "The apps could not be installed."
+msgstr ""
+
+msgid "A copy of your previous settings is in {}."
+msgstr ""
+
+msgid "Log out and back in to see every change."
+msgstr ""
+
+msgid "This file is not a cosmic-blue settings file."
+msgstr ""
+
+msgid "This file was saved by a newer cosmic-blue. Update this computer first."
+msgstr ""
+
+msgid "This file could not be read."
+msgstr ""
+
+msgid "Nothing to take back: everything in this file is already here."
 msgstr ""
