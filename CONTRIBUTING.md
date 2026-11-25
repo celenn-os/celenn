@@ -71,3 +71,5 @@ website build fails if a translated page lacks a section, a command, a
 screenshot or a language link of the English one.
 
 Proposing new COSMIC defaults: see [docs/cosmic-defaults.md](docs/cosmic-defaults.md).
+Running the project (stable promotions, COSMIC and Fedora updates, CI
+failures): see [docs/maintaining.md](docs/maintaining.md).
