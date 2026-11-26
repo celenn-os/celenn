@@ -10,7 +10,7 @@ cp -a /ctx/icons/. /usr/share/icons/
 
 python3 /ctx/build_files/icon_theme/compose.py
 if command -v gtk-update-icon-cache >/dev/null; then
-    for theme in Tela-circle-4f8dff Tela-circle-4f8dff-dark cosmic-blue; do
+    for theme in Tela-circle-3a9dff Tela-circle-3a9dff-dark cosmic-blue; do
         gtk-update-icon-cache --force "/usr/share/icons/${theme}"
     done
 fi

@@ -521,7 +521,7 @@ test -f /usr/share/icons/hicolor/scalable/apps/cosmic-blue-welcome.svg
 for icon in cosmic-blue-welcome cosmic-blue-tour-store cosmic-blue-tour-computer \
     cosmic-blue-tour-keyboard cosmic-blue-tour-bearings cosmic-blue-tour-try cosmic-blue-tour-tips \
     cosmic-blue-tour-files cosmic-blue-tour-accessibility cosmic-blue-tour-passwords org.gnome.DejaDup; do
-    [[ -n "$(find /usr/share/icons/cosmic-blue /usr/share/icons/Tela-circle-4f8dff \
+    [[ -n "$(find /usr/share/icons/cosmic-blue /usr/share/icons/Tela-circle-3a9dff \
         /usr/share/icons/hicolor -name "${icon}.svg" -print -quit)" ]] \
         || { echo "Tour icon ${icon} not found" >&2; exit 1; }
 done
@@ -715,11 +715,11 @@ for theme in Dark Light; do
 done
 
 # Icon theme: Tela circle dark (+ COSMIC symbolic icons it lacks), default for COSMIC and GTK
-test -s /usr/share/icons/Tela-circle-4f8dff-dark/index.theme
-test -s /usr/share/icons/Tela-circle-4f8dff/scalable/places/default-folder.svg
-grep -q '4f8dff' /usr/share/icons/Tela-circle-4f8dff/scalable/places/default-folder.svg
+test -s /usr/share/icons/Tela-circle-3a9dff-dark/index.theme
+test -s /usr/share/icons/Tela-circle-3a9dff/scalable/places/default-folder.svg
+grep -q '3a9dff' /usr/share/icons/Tela-circle-3a9dff/scalable/places/default-folder.svg
 test -s /usr/share/icons/cosmic-blue/index.theme
-grep -qx 'Inherits=Tela-circle-4f8dff-dark,Cosmic,Pop,Adwaita,hicolor' /usr/share/icons/cosmic-blue/index.theme
+grep -qx 'Inherits=Tela-circle-3a9dff-dark,Cosmic,Pop,Adwaita,hicolor' /usr/share/icons/cosmic-blue/index.theme
 grep -qx '"cosmic-blue"' /usr/share/cosmic/com.system76.CosmicTk/v1/icon_theme
 test "$(GSETTINGS_BACKEND=memory gsettings get org.gnome.desktop.interface icon-theme)" = "'cosmic-blue'"
 test -n "$(find /usr/share/icons/cosmic-blue/tela/symbolic -name 'audio-volume-high-symbolic.svg' -print -quit)"
@@ -739,7 +739,7 @@ done
 # Every app the tour and Tools offer has an icon in the theme's style
 python3 /ctx/build_files/icon_theme/check_app_icons.py \
     /ctx/build_files/first_steps/src /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall \
-    /usr/share/icons/cosmic-blue /usr/share/icons/Tela-circle-4f8dff-dark /usr/share/icons/Tela-circle-4f8dff
+    /usr/share/icons/cosmic-blue /usr/share/icons/Tela-circle-3a9dff-dark /usr/share/icons/Tela-circle-3a9dff
 test -s /usr/share/icons/cosmic-blue/layer/apps/org.kde.kalzium.svg
 # Every link of the theme points to an existing icon
 broken="$(find /usr/share/icons/cosmic-blue -xtype l)"
@@ -768,7 +768,7 @@ check_color() {
     [[ "${actual}" == "${expected}" ]] || { echo "${file}: ${actual}, expected ${expected}"; exit 1; }
 }
 builder=/usr/share/cosmic/com.system76.CosmicTheme
-check_color "${builder}.Dark.Builder/v2/accent" '#4f8dff'
+check_color "${builder}.Dark.Builder/v2/accent" '#3a9dff'
 check_color "${builder}.Light.Builder/v2/accent" '#1d47c4'
 check_color "${builder}.Dark.Builder/v2/bg_color" '#141c2a'
 check_color "${builder}.Light.Builder/v2/bg_color" '#d3d8e0'
@@ -790,6 +790,7 @@ if grep -q 'xkb_config$' "${DEFAULTS_LIST}"; then exit 1; fi
 cmp <("${MIGRATE}" --manifest) "${DEFAULTS_LIST}"
 for variant in /ctx/previous_defaults/theme/stock/cosmic /ctx/previous_defaults/theme/frosted/cosmic \
     /ctx/previous_defaults/theme/glass-0.8/cosmic /ctx/previous_defaults/theme/glass-0.65/cosmic \
+    /ctx/previous_defaults/theme/accent-4f8dff/cosmic \
     /ctx/build_files/previous_defaults/upstream; do
     "${MIGRATE}" --hash-tree "${variant}" | grep ' com.system76.CosmicT' >/dev/null
     missing="$(comm -23 <("${MIGRATE}" --hash-tree "${variant}" | sort) <(sort "${PREVIOUS_LIST}"))"

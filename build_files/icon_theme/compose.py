@@ -26,9 +26,9 @@ import sys
 ICONS = os.environ.get("ICONS_DIR", "/usr/share/icons")
 THEME = "cosmic-blue"
 
-TELA = "Tela-circle-4f8dff-dark"
+TELA = "Tela-circle-3a9dff-dark"
 # The full theme, where the scalable places and mimetypes of Tela are
-TELA_FULL = "Tela-circle-4f8dff"
+TELA_FULL = "Tela-circle-3a9dff"
 LAYER = os.environ.get("LAYER_DIR", os.path.join(os.path.dirname(os.path.abspath(__file__)), "layer"))
 LAYER_CONTEXTS = {"places": "Places", "mimetypes": "MimeTypes", "apps": "Applications", "actions": "Actions"}
 # Nominal size of the layer icons (the symbolic action icons are 16x16)

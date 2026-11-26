@@ -32,9 +32,9 @@
   --border-strong: rgb(127 170 255 / .3);
   --text: #eef5ff;
   --muted: #a3b5d8;
-  --accent: #4f8dff;
-  --accent-strong: #2f6bff;
-  --accent-light: #8fc4ff;
+  --accent: #3a9dff;
+  --accent-strong: #1673d4;
+  --accent-light: #94ccff;
   --radius: 14px;
   --radius-large: 14px;
   --header: 64px;
@@ -491,7 +491,7 @@ main {
   height: 40px;
   margin-bottom: 18px;
   border-radius: 10px;
-  background: rgb(79 141 255 / .14);
+  background: rgb(58 157 255 / .14);
   color: var(--accent-light);
 }
 
@@ -861,7 +861,7 @@ main {
 .doc-nav a:hover { color: var(--text); background: rgb(255 255 255 / .04); }
 
 .doc-nav a[aria-current] {
-  background: rgb(79 141 255 / .14);
+  background: rgb(58 157 255 / .14);
   color: var(--text);
   font-weight: 500;
 }
@@ -993,7 +993,7 @@ main {
 }
 
 .search li a:hover,
-.search li a:focus-visible { background: rgb(79 141 255 / .14); outline: none; }
+.search li a:focus-visible { background: rgb(58 157 255 / .14); outline: none; }
 
 .search li strong { display: block; font-weight: 600; }
 .search li span { display: block; color: var(--muted); font-size: .9rem; }
