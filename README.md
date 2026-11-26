@@ -9,7 +9,7 @@ or Bluefin.
 It is an atomic (bootc) system: updates are applied in the background, take
 effect on the next reboot, and can be rolled back.
 
-[![cosmic-blue desktop with a terminal open](https://cosmic-blue-os.github.io/cosmic-blue/img/screenshots/terminal.webp)](https://cosmic-blue-os.github.io/cosmic-blue/screenshots/)
+[![cosmic-blue desktop with a terminal open](https://cosmic-blue-os.github.io/cosmic-blue/img/screenshots/terminal.webp?v=45.20261126)](https://cosmic-blue-os.github.io/cosmic-blue/screenshots/)
 
 It comes with its own apps: a guided tour at first login, parental controls,
 cosmic-blue Tools (system tools and extra software, without a terminal) and
@@ -18,7 +18,7 @@ Updates. See [why cosmic-blue](https://cosmic-blue-os.github.io/cosmic-blue/why/
 ## Versions
 
 <!-- versions:start (written by release-notes.yml on each stable release) -->
-In the current `stable` image (cosmic-blue 45.20261123.1):
+In the current `stable` image (cosmic-blue 45.20261126):
 
 ![Fedora 45](https://img.shields.io/badge/Fedora-45-4f8dff)
 ![Kernel 7.3.4](https://img.shields.io/badge/Kernel-7.3.4-4f8dff)
