@@ -24,7 +24,7 @@ names the home folder or the user name, is binary or is bigger than 64 KB.
 Each exported setting is reviewed, never copied as is:
 
 - **Theme** (`CosmicTheme.*.Builder`): changes go into `build_files/theme`,
-  not into static files. The accent stays `#3a9dff` (dark) / `#0056b2`
+  not into static files. The accent stays `#3a9dff` (dark) / `#1d47c4`
   (light), dark mode and frosted glass stay on unless decided otherwise.
 - **Icons, cursor, wallpaper**: stay the cosmic-blue ones (`CosmicTk`,
   `CosmicBackground*`).

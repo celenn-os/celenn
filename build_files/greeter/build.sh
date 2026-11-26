@@ -18,10 +18,7 @@
 # message (wrong password, login refused by parental controls) shows in a
 # light box with an icon instead of red text, on the login and lock screens. Every
 # account picture is cut as a smooth disk, and an account without one gets
-# COSMIC's default picture (pop-robot.png, our planet).
-# clock.patch shows the clock in the text color (white in the dark theme) and
-# the date dimmed, instead of the accent blue, hard to read over the blue
-# glass and wallpaper. Both patches are
+# COSMIC's default picture (pop-robot.png, our planet). It is
 # applied with no fuzz: when a new cosmic-greeter no longer takes it, this
 # build fails and the COSMIC update pull request waits for the patch to be
 # adapted.
@@ -64,9 +61,6 @@ install -m 0644 "${WALLPAPER}" "${src}/${fallback}"
 patch --directory="${src}" --strip=1 --forward --fuzz=0 \
     < "$(dirname "$0")/user-switch.patch"
 grep -q 'cosmic-blue: with 2 to 8 accounts' "${src}/src/greeter.rs"
-patch --directory="${src}" --strip=1 --forward --fuzz=0 \
-    < "$(dirname "$0")/clock.patch"
-grep -q 'cosmic-blue: the clock in the text color' "${src}/src/time.rs"
 
 # Compiled crates kept from the previous build in CARGO_CACHE_DIR
 # (Containerfile.helpers). The package's own sources are touched, so they

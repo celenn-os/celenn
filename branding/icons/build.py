@@ -225,14 +225,7 @@ SETTINGS_COLOR = "#5f6b86"
 SYMBOLIC_COLOR = "#565656"
 
 
-# The disk of these icons: the accent (#3a9dff), darker at the same hue so
-# that the white symbols on it keep a contrast of 4:1 (2.8:1 on the accent
-# itself). The toolbox's tile icons use the same fill (first_steps
-# style::fill_under_white).
-ICON_DISK = "#1180e0"
-
-
-def tela_app(body, color=ICON_DISK):
+def tela_app(body, color="#3a9dff"):
     defs, circle = disk(color)
     return svg(circle + body, defs)
 
@@ -251,12 +244,12 @@ APPLICATIONS = tela_app("".join(
 WORKSPACES = tela_app(
     '<rect x="15" y="17" width="23" height="17" rx="2" fill="#fff" opacity=".45"/>'
     '<rect x="26" y="28" width="23" height="19" rx="2" fill="#fff"/>'
-    '<path d="M28 28h19a2 2 0 0 1 2 2v2H26v-2a2 2 0 0 1 2-2z" fill="#0e6dbe"/>'
+    '<path d="M28 28h19a2 2 0 0 1 2 2v2H26v-2a2 2 0 0 1 2-2z" fill="#1f7fe0"/>'
 )
 # The launcher: search over applications
 LAUNCHER = tela_app(
     tile(16, 16, 9, ".45") + tile(16, 27, 9, ".45") + tile(27, 16, 9, ".45")
-    + '<circle cx="34" cy="34" r="9.5" fill="#1180e0"/>'
+    + '<circle cx="34" cy="34" r="9.5" fill="#3a9dff"/>'
     '<circle cx="34" cy="34" r="7.5" fill="none" stroke="#fff" stroke-width="3.6"/>'
     '<path d="M39.6 39.6l7.4 7.4" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/>'
 )
@@ -278,7 +271,7 @@ def store(color):
 STORE = store(STORE_COLOR)
 # The same bag in the accent, for the first steps tour's apps page, where
 # every page icon is blue. The dock keeps the teal one.
-TOUR_STORE = store(ICON_DISK)
+TOUR_STORE = store("#3a9dff")
 # The settings: two sliders
 SETTINGS = tela_app(
     '<rect x="16" y="21" width="32" height="4" rx="2" fill="#fff" opacity=".45"/>'
@@ -294,10 +287,10 @@ DOCS = tela_app(
     '<path d="M32 22c-4.5-3.5-10-4.5-15-4.5v24c5 0 10.5 1 15 4.5z" fill="#fff" opacity=".75"/>'
     '<path d="M32 22c4.5-3.5 10-4.5 15-4.5v24c-5 0-10.5 1-15 4.5z" fill="#fff"/>'
     '<path d="M21 25.5c2.7 .3 5.2 .9 7.5 1.8M21 30.5c2.7 .3 5.2 .9 7.5 1.8M21 35.5c2.7 .3 5.2 .9 7.5 1.8" '
-    'stroke="#1180e0" stroke-width="1.8" stroke-linecap="round" fill="none"/>'
-    '<path d="M42.6 27.2A5 5 0 1 0 42.6 34.8" fill="none" stroke="#1180e0" stroke-width="2.4" '
+    'stroke="#3a9dff" stroke-width="1.8" stroke-linecap="round" fill="none"/>'
+    '<path d="M42.6 27.2A5 5 0 1 0 42.6 34.8" fill="none" stroke="#3a9dff" stroke-width="2.4" '
     'stroke-linecap="round"/>'
-    '<circle cx="39" cy="31" r="1.9" fill="#1180e0"/>'
+    '<circle cx="39" cy="31" r="1.9" fill="#3a9dff"/>'
 )
 
 # The live ISO installer: an arrow going down into a tray
@@ -313,7 +306,7 @@ WELCOME = tela_app(
     '<path d="M-7.5 1L-13 7.5V13L-7.5 9.5zM7.5 1L13 7.5V13L7.5 9.5z" fill="#fff" opacity=".45"/>'
     '<path d="M-4 11.5h8C4 15 2 18 0 20.5C-2 18 -4 15 -4 11.5z" fill="#fff" opacity=".45"/>'
     '<path d="M0 -17C6 -12 7.5 -5 7.5 2V9h-15V2C-7.5 -5 -6 -12 0 -17z" fill="#fff"/>'
-    '<circle cx="0" cy="-3" r="3.6" fill="#1180e0"/></g>'
+    '<circle cx="0" cy="-3" r="3.6" fill="#3a9dff"/></g>'
 )
 
 
@@ -373,24 +366,24 @@ TOUR_COMPUTER = tela_app(
     '<path d="M27.5 43h9l1.5 5h-12z" fill="#fff" opacity=".45"/>'
     '<rect x="21" y="47" width="22" height="3.4" rx="1.7" fill="#fff"/>'
     '<rect x="14" y="16" width="36" height="27" rx="3.5" fill="#fff"/>'
-    '<rect x="17.5" y="19.5" width="29" height="20" rx="1.5" fill="#1180e0"/>'
+    '<rect x="17.5" y="19.5" width="29" height="20" rx="1.5" fill="#3a9dff"/>'
     '<path d="M17.5 33.5L31 19.5h8L17.5 39.5z" fill="#fff" opacity=".3"/>'
 )
 # Keyboard shortcuts: a keyboard
 TOUR_KEYBOARD = tela_app(
     '<rect x="12" y="20" width="40" height="25" rx="4" fill="#fff"/>'
-    + "".join(f'<rect x="{16 + i * 6.6:.1f}" y="24" width="5" height="5" rx="1.2" fill="#1180e0" opacity=".55"/>'
+    + "".join(f'<rect x="{16 + i * 6.6:.1f}" y="24" width="5" height="5" rx="1.2" fill="#3a9dff" opacity=".55"/>'
               for i in range(5))
-    + "".join(f'<rect x="{19.3 + i * 6.6:.1f}" y="30.5" width="5" height="5" rx="1.2" fill="#1180e0" opacity=".55"/>'
+    + "".join(f'<rect x="{19.3 + i * 6.6:.1f}" y="30.5" width="5" height="5" rx="1.2" fill="#3a9dff" opacity=".55"/>'
               for i in range(4))
-    + '<rect x="22" y="37.5" width="20" height="4" rx="1.2" fill="#1180e0"/>'
+    + '<rect x="22" y="37.5" width="20" height="4" rx="1.2" fill="#3a9dff"/>'
 )
 # Your bearings: a compass
 TOUR_BEARINGS = tela_app(
     '<circle cx="32" cy="32" r="16" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="3.5"/>'
     '<path d="M32 18.5l5 13.5h-10z" fill="#fff"/>'
     '<path d="M32 45.5l5-13.5h-10z" fill="#fff" opacity=".45"/>'
-    '<circle cx="32" cy="32" r="2.6" fill="#1180e0"/>'
+    '<circle cx="32" cy="32" r="2.6" fill="#3a9dff"/>'
 )
 # Try it: a pointer that clicks
 TOUR_TRY = tela_app(
@@ -405,7 +398,7 @@ TOUR_TIPS = tela_app(
     'fill="#fff"/>'
     '<rect x="27" y="42" width="10" height="3.2" rx="1.6" fill="#fff" opacity=".45"/>'
     '<rect x="28.5" y="46.5" width="7" height="3.2" rx="1.6" fill="#fff" opacity=".45"/>'
-    '<path d="M28.5 25.5a5 5 0 0 1 4-3.5" fill="none" stroke="#1180e0" stroke-width="2.4" stroke-linecap="round"/>'
+    '<path d="M28.5 25.5a5 5 0 0 1 4-3.5" fill="none" stroke="#3a9dff" stroke-width="2.4" stroke-linecap="round"/>'
 )
 # Accessibility (the welcome page's row): a person, arms open
 TOUR_ACCESSIBILITY = tela_app(
@@ -436,7 +429,7 @@ PALETTE = ('M32 14C21.5 14 14 21.6 14 31.5S21.8 50 31 50c3.3 0 4.6-1.9 4.6-4.1 0
 PALETTE_WELLS = [(23.5, 33.5), (24.5, 24.5), (32.5, 20.5), (40.5, 24.5)]
 TOOLS_APPEARANCE = tela_app(
     f'<path d="{PALETTE}" fill="#fff"/>'
-    + "".join(f'<circle cx="{x}" cy="{y}" r="3.2" fill="#1180e0"{" opacity=\".55\"" if i == 3 else ""}/>'
+    + "".join(f'<circle cx="{x}" cy="{y}" r="3.2" fill="#3a9dff"{" opacity=\".55\"" if i == 3 else ""}/>'
               for i, (x, y) in enumerate(PALETTE_WELLS))
 )
 
