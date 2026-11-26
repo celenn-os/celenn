@@ -24,6 +24,9 @@ use cosmic_theme::{AlphaMap, BlurStrength, Theme, ThemeBuilder};
 const ACCENT_DARK: Srgb<u8> = Srgb::new(0x4f, 0x8d, 0xff);
 /// Light theme accent: the deep blue of the logo planet (#1d47c4), dark
 /// enough to stay readable on light surfaces.
+/// Dark theme accent of the images of 2026-11-26 (#266, reverted: the cyan
+/// side felt harsh and not "space" enough)
+const ACCENT_DARK_3A9DFF: Srgb<u8> = Srgb::new(0x3a, 0x9d, 0xff);
 const ACCENT_LIGHT: Srgb<u8> = Srgb::new(0x1d, 0x47, 0xc4);
 
 /// Window background, dark theme: night blue at the lightness of COSMIC's
@@ -94,12 +97,13 @@ fn frosted_glass(mut builder: ThemeBuilder, thickness: BlurStrength, glass: f32)
     builder
 }
 
-/// The cosmic-blue dark and light themes with the given frosted glass
-/// (thickness, glass opacity of the dark theme, of the light theme).
-fn cosmic_blue(thickness: BlurStrength, glass_dark: f32, glass_light: f32) {
+/// The cosmic-blue dark and light themes with the given dark accent and
+/// frosted glass (thickness, glass opacity of the dark theme, of the light
+/// theme).
+fn cosmic_blue(accent_dark: Srgb<u8>, thickness: BlurStrength, glass_dark: f32, glass_light: f32) {
     write(
         frosted_glass(
-            colors(frosted(ThemeBuilder::dark()), ACCENT_DARK, BG_DARK),
+            colors(frosted(ThemeBuilder::dark()), accent_dark, BG_DARK),
             thickness,
             glass_dark,
         ),
@@ -151,17 +155,29 @@ fn write(dark: ThemeBuilder, light: ThemeBuilder) {
 }
 
 /// Without an argument: the cosmic-blue themes. With "stock", "frosted",
-/// "glass-0.8" or "glass-0.65": themes from earlier images, which accounts may still hold as
-/// a copy (COSMIC's own default, written by the first-run assistant, the same
-/// with frosted glass, the default before the blue colors, and the blue
-/// themes with earlier frosted glass settings). They go into
+/// "glass-0.8", "glass-0.65" or "accent-3a9dff": themes from earlier images,
+/// which accounts may still hold as a copy (COSMIC's own default, written by
+/// the first-run assistant, the same with frosted glass, the default before
+/// the blue colors, the blue themes with earlier frosted glass settings, and
+/// the short-lived cyan accent). They go into
 /// /usr/share/cosmic-blue/previous-defaults.list, so that
 /// cosmic-blue-migrate-defaults can tell them from a user's own choice.
 fn main() {
     match std::env::args().nth(1).as_deref() {
-        None => cosmic_blue(THICKNESS, GLASS_OPACITY_DARK, GLASS_OPACITY_LIGHT),
-        Some("glass-0.8") => cosmic_blue(GLASS_0_8.0, GLASS_0_8.1, GLASS_0_8.1),
-        Some("glass-0.65") => cosmic_blue(GLASS_0_65.0, GLASS_0_65.1, GLASS_0_65.1),
+        None => cosmic_blue(
+            ACCENT_DARK,
+            THICKNESS,
+            GLASS_OPACITY_DARK,
+            GLASS_OPACITY_LIGHT,
+        ),
+        Some("accent-3a9dff") => cosmic_blue(
+            ACCENT_DARK_3A9DFF,
+            THICKNESS,
+            GLASS_OPACITY_DARK,
+            GLASS_OPACITY_LIGHT,
+        ),
+        Some("glass-0.8") => cosmic_blue(ACCENT_DARK, GLASS_0_8.0, GLASS_0_8.1, GLASS_0_8.1),
+        Some("glass-0.65") => cosmic_blue(ACCENT_DARK, GLASS_0_65.0, GLASS_0_65.1, GLASS_0_65.1),
         Some("stock") => write(ThemeBuilder::dark(), ThemeBuilder::light()),
         Some("frosted") => write(
             frosted(ThemeBuilder::dark()),
