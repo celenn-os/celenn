@@ -11,7 +11,9 @@
   welcome tour and installer, and the installed system's first steps tour.
   The Documentation and System Update icons also replace Tela's help-browser
   and system-software-update, which the first steps tour shows, and the
-  tour's commands and tiling pages get icons in the same style.
+  tour's commands and tiling pages get icons in the same style. The apps
+  cosmic-blue offers that Tela has no icon for get one too (OFFERED), so that
+  the App Library and the app lists all look alike.
 - actions: the symbolic icons of the suspend and restart buttons in the
   panel's power menu (Tela has none for restart, and its suspend icon is
   hard to read). They follow the style of Tela's shutdown icon, which stays.
@@ -498,6 +500,30 @@ FILES = tela_app(
     '-2.5 2.5h-30a2.5 2.5 0 0 1-2.5-2.5z" fill="#fff"/>'
 )
 
+# Apps cosmic-blue offers (first steps tour, Tools) that Tela has no icon for.
+# build_files/icon_theme/check_app_icons.py fails the build when another one
+# is missing.
+# Kalzium (periodic table): an atom
+KALZIUM = tela_app("".join(
+    f'<ellipse cx="32" cy="32" rx="17" ry="6.6" fill="none" stroke="#fff" stroke-width="2.6" '
+    f'transform="rotate({angle} 32 32)"{opacity}/>'
+    for angle, opacity in ((-30, ""), (30, ' stroke-opacity=".75"'), (90, ' stroke-opacity=".45"'))
+) + '<circle cx="32" cy="32" r="4.2" fill="#fff"/>', "#3aa676")
+# DistroShelf (other Linux distributions in containers): a shelf of boxes
+DISTROSHELF = tela_app(
+    '<g transform="translate(32 32.5) scale(1.12) translate(-32 -32.5)">'
+    '<rect x="17" y="18" width="3" height="29" rx="1.5" fill="#fff"/>'
+    '<rect x="44" y="18" width="3" height="29" rx="1.5" fill="#fff"/>'
+    '<rect x="17" y="30" width="30" height="3" rx="1.5" fill="#fff"/>'
+    '<rect x="17" y="43" width="30" height="3" rx="1.5" fill="#fff"/>'
+    + tile(22, 21.5, 8, ".75", 1.4) + tile(32, 21.5, 8, ".45", 1.4)
+    + tile(22, 34.5, 8, ".45", 1.4) + tile(32, 34.5, 8, ".75", 1.4)
+    + '</g>', "#e0823d")
+OFFERED = {
+    "kalzium": (KALZIUM, ["org.kde.kalzium"]),
+    "distroshelf": (DISTROSHELF, ["com.ranfdev.DistroShelf"]),
+}
+
 DOCK = {
     "applications": (APPLICATIONS, ["com.system76.CosmicPanelAppButton", "com.system76.CosmicAppLibrary"]),
     "workspaces": (WORKSPACES, ["com.system76.CosmicPanelWorkspacesButton", "com.system76.CosmicWorkspaces",
@@ -551,7 +577,7 @@ def main():
         for alias in names[1:]:
             os.symlink(f"{names[0]}.svg", actions / f"{alias}.svg")
 
-    for icon, names in DOCK.values():
+    for icon, names in [*DOCK.values(), *OFFERED.values()]:
         (apps / f"{names[0]}.svg").write_text(icon)
         for alias in names[1:]:
             os.symlink(f"{names[0]}.svg", apps / f"{alias}.svg")
