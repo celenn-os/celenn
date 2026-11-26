@@ -48,7 +48,7 @@ WIDTH = 1280
 MARGIN = 24
 BACKGROUND = (12, 18, 38)
 TEXT = (230, 236, 255)
-ACCENT = (58, 157, 255)  # #3a9dff, the cosmic-blue accent
+ACCENT = (79, 141, 255)  # #4f8dff, the cosmic-blue accent
 
 
 def font(size):

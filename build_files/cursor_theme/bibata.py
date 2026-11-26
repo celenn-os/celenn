@@ -27,7 +27,7 @@ from pathlib import Path
 COLORS = {
     "#00FF00": "#1D47C4",  # body
     "#0000FF": "#FFFFFF",  # outline
-    "#FF0000": "#3A9DFF",  # wait spinner
+    "#FF0000": "#4F8DFF",  # wait spinner
 }
 NAME = "Bibata Modern cosmic-blue"
 CANVAS = 256  # size of the Bibata SVGs, the unit of the hotspots
