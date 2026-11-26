@@ -2,7 +2,8 @@
 # Based on Bluefin's list, keeping only apps COSMIC has no equivalent for.
 # Left out because COSMIC already covers them: Text Editor (COSMIC Edit),
 # File Roller (COSMIC Files extracts and compresses archives), Showtime and
-# Decibels (COSMIC Player), Ignition (startup apps page in COSMIC Settings).
+# Decibels (COSMIC Player), Ignition (startup apps page in COSMIC Settings),
+# Mission Center (COSMIC Monitor).
 # Left out because they need GNOME: Extension Manager, Nautilus Previewer,
 # Refine (GNOME settings), Calendar and Contacts (online accounts come from
 # GNOME Settings; Thunderbird syncs calendars and contacts instead).
@@ -13,10 +14,6 @@ Branch=stable
 IsRuntime=false
 
 [Flatpak Preinstall com.ranfdev.DistroShelf]
-Branch=stable
-IsRuntime=false
-
-[Flatpak Preinstall io.missioncenter.MissionCenter]
 Branch=stable
 IsRuntime=false
 

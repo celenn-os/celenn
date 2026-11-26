@@ -1,7 +1,6 @@
 # cosmic-blue default flatpaks (ujust reset-default-apps)
 flatpak "com.github.tchx84.Flatseal"
 flatpak "com.ranfdev.DistroShelf"
-flatpak "io.missioncenter.MissionCenter"
 flatpak "org.mozilla.firefox"
 flatpak "org.mozilla.thunderbird"
 flatpak "org.gnome.Calculator"

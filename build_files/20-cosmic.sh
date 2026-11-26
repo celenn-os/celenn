@@ -9,10 +9,13 @@ dnf5 group list --hidden | grep -i cosmic || true
 # so COSMIC packages necessarily come from Fedora (checked in 99-tests.sh).
 # @cosmic-desktop-apps is skipped: on Fedora it pulls KDE/GNOME apps
 # (Okular, Rhythmbox, Nheko...) that we replace with flatpaks, like Bluefin.
+# COSMIC Monitor is the system monitor (Ctrl + Shift + Esc, see the
+# shortcuts in /usr/share/cosmic/com.system76.CosmicSettings.Shortcuts).
 dnf5 -y install \
     @cosmic-desktop \
     cosmic-edit \
     cosmic-files \
+    cosmic-monitor \
     cosmic-player \
     cosmic-store \
     cosmic-term
