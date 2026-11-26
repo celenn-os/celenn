@@ -259,18 +259,25 @@ grep -qsx 'HOMEBREW_NO_ANALYTICS=1' /etc/homebrew/brew.env \
 # Only accept key-signed cosmic-blue images (cosign.pub, signed by build.yml).
 # The scope is the whole namespace, so that switching between cosmic-blue and
 # cosmic-blue-nvidia is verified too.
+# The project is being renamed to Cyanova: the images move to
+# ghcr.io/cyanova-os, signed with the same key, so that namespace is trusted
+# too (cosmic-blue-move-to-cyanova switches installed systems to it).
 IMAGE="ghcr.io/${IMAGE_VENDOR}"
-jq --arg image "$IMAGE" 'del(.transports.docker[$image + "/cosmic-blue"])
+NEW_IMAGE="ghcr.io/cyanova-os"
+jq --arg image "$IMAGE" --arg new "$NEW_IMAGE" 'del(.transports.docker[$image + "/cosmic-blue"])
     | .transports.docker[$image] = [{
     "type": "sigstoreSigned",
     "keyPath": "/etc/pki/containers/cosmic-blue.pub",
     "signedIdentity": {"type": "matchRepository"}
-}]' /etc/containers/policy.json > /tmp/policy.json
+}]
+    | .transports.docker[$new] = .transports.docker[$image]' /etc/containers/policy.json > /tmp/policy.json
 mv /tmp/policy.json /etc/containers/policy.json
 mkdir -p /etc/containers/registries.d
 cat > /etc/containers/registries.d/cosmic-blue.yaml <<EOF
 docker:
   ${IMAGE}:
+    use-sigstore-attachments: true
+  ${NEW_IMAGE}:
     use-sigstore-attachments: true
 EOF
 
