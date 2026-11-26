@@ -1,5 +1,5 @@
 diff --git a/src/time.rs b/src/time.rs
-index bc2c22d..4949653 100644
+index bc2c22d..e095685 100644
 --- a/src/time.rs
 +++ b/src/time.rs
 @@ -99,16 +99,29 @@ impl Time {
@@ -24,7 +24,7 @@ index bc2c22d..4949653 100644
 +/// cosmic-blue: the theme's text color, a little dimmed
 +fn dimmed_text(theme: &cosmic::Theme) -> cosmic::iced::widget::text::Style {
 +    use cosmic::iced::widget::text::Catalog;
-+    let mut color: cosmic::iced::Color = theme.cosmic().on_bg_color().into();
++    let mut color: cosmic::iced::Color = theme.cosmic().background.on.into();
 +    color.a *= 0.75;
 +    let mut text_style = theme.style(&style::Text::Default);
 +    text_style.color = Some(color);
