@@ -39,7 +39,7 @@ MAIN_PACKAGES = [
     ("Podman", "podman"), ("PipeWire", "pipewire"),
     ("NetworkManager", "NetworkManager"),
 ]
-BADGE_COLOR = "4f8dff"
+BADGE_COLOR = "3a9dff"
 # Not packages: imported signing keys
 IGNORED = {"gpg-pubkey", "gpg-pubkey-release"}
 # Commits that change what is installed: the image or the live ISO

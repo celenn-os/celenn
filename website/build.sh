@@ -222,7 +222,7 @@ cp -r "${root}/website/fonts" "${out}/"
 # screenshots are there, the desktop with cosmic-blue Tools open
 og_shot=()
 if [[ -f "${out}/img/screenshots/tools-overview.webp" ]]; then
-  og_shot=( '(' "${out}/img/screenshots/tools-overview.webp" -resize 880x -bordercolor '#8fc4ff' -border 2 ')'
+  og_shot=( '(' "${out}/img/screenshots/tools-overview.webp" -resize 880x -bordercolor '#94ccff' -border 2 ')'
             -gravity north -geometry +0+196 -composite )
 fi
 convert "${wallpaper}" -resize 1200x630^ -gravity center -extent 1200x630 \

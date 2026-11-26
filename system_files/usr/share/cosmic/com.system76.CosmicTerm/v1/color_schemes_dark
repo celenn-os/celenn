@@ -7,7 +7,7 @@
     1: (
         name: "cosmic-blue",
         foreground: "#D7DEEC",
-        cursor: "#4F8DFF",
+        cursor: "#3A9DFF",
         bright_foreground: "#EEF2F9",
         dim_foreground: "#808693",
         normal: (
@@ -15,7 +15,7 @@
             red: "#FB817A",
             green: "#69C27E",
             yellow: "#EBC75E",
-            blue: "#4F8DFF",
+            blue: "#3A9DFF",
             magenta: "#C190F6",
             cyan: "#45BCD6",
             white: "#BDC4D1",
