@@ -51,7 +51,7 @@ sed '/^ *\/\//d' /usr/share/ublue-os/fastfetch.jsonc | jq empty
 if grep -qE 'fastfetch-user-count|bazaar' /usr/share/ublue-os/fastfetch.jsonc; then
     echo "Bluefin fastfetch config left in place"; exit 1
 fi
-test "$(HOME=/tmp/fastfetch-test ublue-bling-fastfetch)" = "38;2;79;141;255"
+test "$(HOME=/tmp/fastfetch-test ublue-bling-fastfetch)" = "38;2;58;157;255"
 test "$(HOME=/tmp/fastfetch-test ublue-bling-fastfetch --mode)" = dark
 HOME=/tmp/fastfetch-test fastfetch --config /usr/share/ublue-os/fastfetch.jsonc \
     --pipe true --structure os:kernel | grep cosmic-blue
