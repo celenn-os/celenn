@@ -69,6 +69,15 @@ RUN /greeter/build.sh /greeter/background.jpg
 FROM scratch AS greeter
 COPY --from=greeter-build /out /
 
+# COSMIC compositor, rebuilt from Fedora's source package with a black
+# background until the wallpaper is drawn (see build_files/compositor/build.sh)
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS compositor-build
+COPY build_files/compositor /compositor
+ENV CARGO_CACHE_DIR=/cargo
+RUN /compositor/build.sh
+FROM scratch AS compositor
+COPY --from=compositor-build /out /
+
 # COSMIC Store, rebuilt from Fedora's source package with FlatPark as a
 # recommended source, off by default (see build_files/store/patch.py)
 FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS store-build

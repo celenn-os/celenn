@@ -374,6 +374,14 @@ jobs:
           dir: ${{ runner.temp }}/helpers
           cargo: 'true'
 
+      - name: Helper stage compositor
+        uses: ./.github/actions/helper-stage
+        with:
+          stage: compositor
+          key: ${{ steps.helpers.outputs.compositor }}
+          dir: ${{ runner.temp }}/helpers
+          cargo: 'true'
+
       - name: Helper stage store
         uses: ./.github/actions/helper-stage
         with:

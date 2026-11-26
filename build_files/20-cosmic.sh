@@ -166,5 +166,15 @@ sed -e 's|^Name=.*|Name=cosmic-blue|' \
     /usr/share/plymouth/themes/bgrt/bgrt.plymouth > "${PLYMOUTH_THEME}/cosmic-blue.plymouth"
 cat "${PLYMOUTH_THEME}/cosmic-blue.plymouth"
 plymouth-set-default-theme cosmic-blue
+# The login screen takes over from the boot screen without a black screen
+# (drop-in cosmic-greeter.service.d/10-cosmic-blue-boot-screen.conf): it must
+# no longer wait for Plymouth to quit. A drop-in cannot remove an ordering,
+# so it is taken out of the packaged unit.
+GREETER_UNIT=/usr/lib/systemd/system/cosmic-greeter.service
+grep '^After=' "${GREETER_UNIT}"
+grep -q '^After=.*plymouth-quit-wait\.service' "${GREETER_UNIT}"
+sed -i -E -e '/^After=/ s/[[:space:]]*plymouth-quit-wait\.service//' -e '/^After=[[:space:]]*$/d' \
+    "${GREETER_UNIT}"
+grep '^After=' "${GREETER_UNIT}"
 # Dark GTK defaults (zz1-cosmic-blue.gschema.override)
 glib-compile-schemas /usr/share/glib-2.0/schemas

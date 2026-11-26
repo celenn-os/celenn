@@ -658,6 +658,17 @@ python3 -c "import xml.dom.minidom, sys; xml.dom.minidom.parse(sys.argv[1])" \
 # background shown before a user has a saved one
 cmp /ctx/greeter/cosmic-greeter /usr/bin/cosmic-greeter
 
+# The login screen takes over from the boot screen without waiting for it to
+# quit and clear the screen (20-cosmic.sh, cosmic-greeter.service.d)
+if grep -q 'plymouth-quit-wait' /usr/lib/systemd/system/cosmic-greeter.service; then exit 1; fi
+grep -q '^After=' /usr/lib/systemd/system/cosmic-greeter.service
+grep -qx 'ExecStartPost=-/usr/bin/plymouth quit --retain-splash' \
+    /usr/lib/systemd/system/cosmic-greeter.service.d/10-cosmic-blue-boot-screen.conf
+
+# COSMIC compositor: our rebuild, black until the wallpaper is drawn
+# (build_files/compositor/build.sh)
+cmp /ctx/compositor/cosmic-comp /usr/bin/cosmic-comp
+
 # COSMIC Store: our rebuild, with FlatPark as a recommended source (off) read
 # from the descriptor that `ujust toggle-flatpark` uses too
 cmp /ctx/store/cosmic-store /usr/bin/cosmic-store
@@ -671,7 +682,7 @@ done
 
 # The rebuilt programs carry no debug data (stripped in their helper stage),
 # which would add about 0.1 GB each to the image and the ISO
-for bin in /usr/bin/cosmic-greeter /usr/bin/cosmic-store /ctx/filemanager/bin/*; do
+for bin in /usr/bin/cosmic-greeter /usr/bin/cosmic-comp /usr/bin/cosmic-store /ctx/filemanager/bin/*; do
     sections="$(readelf -S --wide "${bin}")"
     # (.debug_gdb_scripts, Rust's debugger helpers, is loaded data and stays)
     if grep -q ' \.debug_info ' <<<"${sections}"; then

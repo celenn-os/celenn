@@ -14,6 +14,7 @@ for step in \
     10-system-files.sh \
     20-cosmic.sh \
     23-greeter.sh \
+    23-compositor.sh \
     24-store.sh \
     24-filemanager.sh \
     25-icon-theme.sh \
