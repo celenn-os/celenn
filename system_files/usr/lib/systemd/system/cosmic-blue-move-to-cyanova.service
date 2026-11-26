@@ -1,0 +1,10 @@
+[Unit]
+Description=Move to the cosmic-blue image under its new name, Cyanova
+Documentation=file:///usr/libexec/cosmic-blue-move-to-cyanova
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=/run/ostree-booted
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/cosmic-blue-move-to-cyanova
