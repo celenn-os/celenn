@@ -20,14 +20,13 @@ use cosmic_config::{ConfigSet, CosmicConfigEntry};
 use cosmic_theme::palette::{Srgb, Srgba};
 use cosmic_theme::{AlphaMap, BlurStrength, Theme, ThemeBuilder};
 
-/// Dark theme accent: a sky blue between the cyan and the blue of the logo
-/// orbit gradient (#3a9dff).
-const ACCENT_DARK: Srgb<u8> = Srgb::new(0x3a, 0x9d, 0xff);
-/// Dark theme accent of earlier images (until 2026-11-26): the middle of the
-/// logo orbit gradient.
-const ACCENT_DARK_4F8DFF: Srgb<u8> = Srgb::new(0x4f, 0x8d, 0xff);
+/// Dark theme accent: the middle of the logo orbit gradient (#4f8dff).
+const ACCENT_DARK: Srgb<u8> = Srgb::new(0x4f, 0x8d, 0xff);
 /// Light theme accent: the deep blue of the logo planet (#1d47c4), dark
 /// enough to stay readable on light surfaces.
+/// Dark theme accent of the images of 2026-11-26 (#266, reverted: the cyan
+/// side felt harsh and not "space" enough)
+const ACCENT_DARK_3A9DFF: Srgb<u8> = Srgb::new(0x3a, 0x9d, 0xff);
 const ACCENT_LIGHT: Srgb<u8> = Srgb::new(0x1d, 0x47, 0xc4);
 
 /// Window background, dark theme: night blue at the lightness of COSMIC's
@@ -156,11 +155,11 @@ fn write(dark: ThemeBuilder, light: ThemeBuilder) {
 }
 
 /// Without an argument: the cosmic-blue themes. With "stock", "frosted",
-/// "glass-0.8", "glass-0.65" or "accent-4f8dff": themes from earlier images,
+/// "glass-0.8", "glass-0.65" or "accent-3a9dff": themes from earlier images,
 /// which accounts may still hold as a copy (COSMIC's own default, written by
 /// the first-run assistant, the same with frosted glass, the default before
 /// the blue colors, the blue themes with earlier frosted glass settings, and
-/// the earlier dark accent). They go into
+/// the short-lived cyan accent). They go into
 /// /usr/share/cosmic-blue/previous-defaults.list, so that
 /// cosmic-blue-migrate-defaults can tell them from a user's own choice.
 fn main() {
@@ -171,16 +170,14 @@ fn main() {
             GLASS_OPACITY_DARK,
             GLASS_OPACITY_LIGHT,
         ),
-        Some("accent-4f8dff") => cosmic_blue(
-            ACCENT_DARK_4F8DFF,
+        Some("accent-3a9dff") => cosmic_blue(
+            ACCENT_DARK_3A9DFF,
             THICKNESS,
             GLASS_OPACITY_DARK,
             GLASS_OPACITY_LIGHT,
         ),
-        Some("glass-0.8") => cosmic_blue(ACCENT_DARK_4F8DFF, GLASS_0_8.0, GLASS_0_8.1, GLASS_0_8.1),
-        Some("glass-0.65") => {
-            cosmic_blue(ACCENT_DARK_4F8DFF, GLASS_0_65.0, GLASS_0_65.1, GLASS_0_65.1)
-        }
+        Some("glass-0.8") => cosmic_blue(ACCENT_DARK, GLASS_0_8.0, GLASS_0_8.1, GLASS_0_8.1),
+        Some("glass-0.65") => cosmic_blue(ACCENT_DARK, GLASS_0_65.0, GLASS_0_65.1, GLASS_0_65.1),
         Some("stock") => write(ThemeBuilder::dark(), ThemeBuilder::light()),
         Some("frosted") => write(
             frosted(ThemeBuilder::dark()),

@@ -3,7 +3,7 @@
 # commit (Fedora doesn't package it), with the folders and the blue parts of
 # the application icons recolored to the cosmic-blue accent.
 #
-# Result: /out/Tela-circle-3a9dff (full theme) and /out/Tela-circle-3a9dff-dark
+# Result: /out/Tela-circle-4f8dff (full theme) and /out/Tela-circle-4f8dff-dark
 # (light monochrome icons for dark themes, links to the first one for the rest).
 set -euxo pipefail
 
@@ -11,7 +11,7 @@ set -euxo pipefail
 TELA_REPO="https://github.com/vinceliuice/Tela-circle-icon-theme.git"
 TELA_COMMIT="ee3cf47bcb05c3d99a0860b54254d2ff3d1d2c69"
 # Dark accent of build_files/theme/src/main.rs, without '#'
-ACCENT="3a9dff"
+ACCENT="4f8dff"
 
 dnf5 -y install git-core /usr/bin/gtk-update-icon-cache
 
