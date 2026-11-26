@@ -120,3 +120,11 @@ COPY build_files/cursor_theme /cursor_theme
 RUN /cursor_theme/bibata.sh
 FROM scratch AS cursors
 COPY --from=cursors-build /out /
+
+# uupd, Universal Blue's update tool, built from its source at a pinned release
+# (see build_files/uupd/build.sh)
+FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS uupd-build
+COPY build_files/uupd/build.sh /build.sh
+RUN /build.sh
+FROM scratch AS uupd
+COPY --from=uupd-build /out /

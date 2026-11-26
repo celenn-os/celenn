@@ -57,6 +57,8 @@ HOME=/tmp/fastfetch-test fastfetch --config /usr/share/ublue-os/fastfetch.jsonc 
     --pipe true --structure os:kernel | grep cosmic-blue
 # (no grep -q: it would end fc-list with SIGPIPE, exit 141 under pipefail)
 fc-list : family | grep 'Symbols Nerd Font' >/dev/null
+# Monospace is still an ordinary font, not the symbols-only one
+fc-match monospace family | grep -v 'Symbols Nerd Font' >/dev/null
 # Logo art: only background colors and upper half blocks (gapless in
 # COSMIC Terminal), and the ff alias
 if LC_ALL=C.UTF-8 grep -q '[▁▂▃▄▅▆▇█▏▎▍▌▋▊▉▐▖▗▘▝▚▞▙▛▜▟]' /usr/share/ublue-os/fastfetch/cosmic-blue-*.txt; then
@@ -406,13 +408,14 @@ IMPORTANT_PACKAGES=(
     pipewire
     systemd
     tailscale
-    uupd
     wireplumber
     zsh
 )
 for package in "${IMPORTANT_PACKAGES[@]}"; do
     rpm -q "${package}" >/dev/null || { echo "Missing package: ${package}"; exit 1; }
 done
+# uupd is built in Containerfile.helpers, not installed from a package
+uupd --version >/dev/null
 
 # Everyday pieces: printing, scanning, codecs, fonts, disks, file previews
 rpm -q cups cups-pk-helper foomatic-db-ppds system-config-printer hplip \
