@@ -995,7 +995,7 @@ report-bug mode="open":
 clean-system confirm="ask":
     #!/usr/bin/bash
     set -euo pipefail
-    # Same script as "Clean up" in cosmic-blue Tools (Maintenance page).
+    # Same script as "Clean up" in cosmic-blue Tools (Free up space).
     # Unused Flatpak runtimes, dangling Podman/Docker images, old Homebrew
     # downloads, update caches. Named images, containers and volumes stay:
     # `podman system prune` removes those when you are sure.
@@ -1009,6 +1009,6 @@ clean-system confirm="ask":
 enroll-secure-boot-key:
     #!/usr/bin/bash
     set -euo pipefail
-    # Same as "Allow" in cosmic-blue Tools, Computer (password cosmicblue,
+    # Same as "Allow" in cosmic-blue Tools, NVIDIA driver (password cosmicblue,
     # see the helper)
     sudo /usr/libexec/cosmic-blue-tools-helper driver-key

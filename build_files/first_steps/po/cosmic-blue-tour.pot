@@ -114,7 +114,7 @@ msgstr ""
 msgid "{}: the NVIDIA driver is ready."
 msgstr ""
 
-msgid "{}. For games, switch to the NVIDIA edition after installing: one click in cosmic-blue Tools → Computer."
+msgid "{}. For games, switch to the NVIDIA edition after installing: one click in cosmic-blue Tools → NVIDIA driver."
 msgstr ""
 
 msgid "{}: no driver, the picture may be slow."
@@ -678,7 +678,7 @@ msgstr ""
 msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
 msgstr ""
 
-msgid "The disk is full ({} free). Free up space with Clean up, in cosmic-blue Tools, Maintenance, then try again."
+msgid "The disk is full ({} free). Free up space with cosmic-blue Tools, then try again."
 msgstr ""
 
 msgid "The server does not answer. Try again in a few minutes."
@@ -759,13 +759,13 @@ msgstr ""
 msgid "What is different here, and your tools."
 msgstr ""
 
-msgid "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Extra software."
+msgid "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Install apps."
 msgstr ""
 
 msgid "From another cosmic-blue computer"
 msgstr ""
 
-msgid "Your settings and the list of your apps, with the file saved there in cosmic-blue Tools → Appearance."
+msgid "Your settings and the list of your apps, with the file saved there in cosmic-blue Tools → Change computers."
 msgstr ""
 
 msgid "Restore…"

@@ -139,20 +139,14 @@ impl Page {
             TransferMessage::Saved(result) => {
                 self.saving = false;
                 return match result {
-                    Ok(_) => self
-                        .toasts
-                        .push(
-                            widget::toaster::Toast::new(tr("Saved in Documents.")).action(
-                                tr("Show").to_owned(),
-                                |id| {
-                                    Message::Undo(
-                                        id,
-                                        Box::new(Message::Transfer(TransferMessage::ShowFolder)),
-                                    )
-                                },
-                            ),
-                        )
-                        .map(cosmic::Action::App),
+                    Ok(_) => crate::common::toast(
+                        tr("Saved in Documents.").to_owned(),
+                        Some((
+                            tr("Show").to_owned(),
+                            Message::Transfer(TransferMessage::ShowFolder),
+                        )),
+                        Message::Toast,
+                    ),
                     Err(error) => {
                         eprintln!("Could not save the settings: {error}");
                         self.toast("This did not work.")

@@ -27,7 +27,7 @@ const DETAIL_LINES: usize = 12;
 pub const TEXTS: &[&str] = &[
     "“{}” did not work",
     "No internet connection. Connect to a network, then try again. Nothing was changed.",
-    "The disk is full ({} free). Free up space with Clean up, in cosmic-blue Tools, Maintenance, then try again.",
+    "The disk is full ({} free). Free up space with cosmic-blue Tools, then try again.",
     "The server does not answer. Try again in a few minutes.",
     "Something unexpected went wrong. Nothing was changed.",
     "Try again",
@@ -245,7 +245,7 @@ impl<J: Clone> Card<J> {
             )
             .to_owned(),
             Cause::DiskFull => tr(
-                "The disk is full ({} free). Free up space with Clean up, in cosmic-blue Tools, Maintenance, then try again.",
+                "The disk is full ({} free). Free up space with cosmic-blue Tools, then try again.",
             )
             .replacen("{}", &free_space().map(size).unwrap_or_default(), 1),
             Cause::Server => tr("The server does not answer. Try again in a few minutes.").to_owned(),

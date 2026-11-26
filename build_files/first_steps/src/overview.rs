@@ -1,16 +1,19 @@
-// cosmic-blue Tools, the Overview page (the window's first page): where
-// things stand, in one sentence and four cards (system version, backups,
-// disk space, firmware), each with the button to its page; and a search
-// through every setting of the other pages.
+// cosmic-blue Tools, the toolbox (the window's first page): where things
+// stand, in one line; a search through every tool and setting; then the
+// tools as tiles, in groups, each saying how things are (tools.rs asks the
+// pages that know), and under them the tools for experienced users, the
+// first steps tour again and the documentation. Also the "Protect your
+// files" tool, whose facts are read here.
 // It only reads: nothing changes from here, and nothing is ever said
 // outside the window (no notifications about updates).
 
-use crate::PageId;
-use crate::common::{dim_caption, fill, label, row_title, spawn};
+use crate::common::{Summary, dim_caption, fill, label, row_title, spawn, state_icon, tool_icon};
 use crate::i18n::tr;
 use crate::maintenance::{self, Disk};
-use crate::updates_page::{self, Summary};
+use crate::updates_page::{self, Summary as System};
+use crate::{GROUPS, Tool};
 use cosmic::app::Task;
+use cosmic::iced::core::text::{Ellipsize, EllipsizeHeightLimit};
 use cosmic::iced::{Alignment, Length};
 use cosmic::widget::{self, settings, text};
 use cosmic::{Apply, Element, cosmic_theme, theme};
@@ -18,116 +21,95 @@ use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub const TEXTS: &[&str] = &[
-    "Overview",
-    "All is well",
-    "One thing needs your attention",
-    "{} things need your attention",
-    "cosmic-blue looks after itself. Here is where things stand.",
-    "System up to date",
-    "Version {}. The next one installs by itself in the background.",
-    "Update ready",
+    "All is well: cosmic-blue looks after itself.",
+    "One thing needs your attention: {}",
+    "{} things need your attention: {}",
+    "Up to date, version {}",
     "Version {} starts at the next restart.",
+    "Updates are paused",
+    "The system version could not be read.",
+    "One device has an update.",
+    "{} devices have an update.",
+    "Not set up yet.",
+    "Last backup today.",
+    "Last backup {} days ago.",
+    "{} free",
+    "Almost full: {} free.",
     "Backups",
     "Not set up yet. A USB drive is enough: Déjà Dup keeps a copy of your home folder.",
     "Set up",
-    "Last backup today.",
-    "Last backup {} days ago.",
-    "Almost full: {} free.",
-    "Nothing new from the makers.",
-    "One device has an update.",
-    "{} devices have an update.",
-    "Search a setting",
+    "Open",
+    "Search a tool",
     "Nothing found.",
+    "Version {}",
 ];
 
-/// The icon of the page's header: the app's own
-const ICON: &str = "cosmic-blue-tools";
 /// A backup older than this many days asks for attention
 const BACKUP_DAYS: u64 = 14;
 
-/// Every setting of the other pages that the search finds: its title,
-/// words that also find it (its caption), its page. Texts of the pages
-/// themselves, so they are already translated. The kinds of apps of Extra
-/// software come from apps.rs, found by their apps' names too.
-const SETTINGS: &[(&str, &str, PageId)] = &[
-    ("Updates", "", PageId::Updates),
-    ("Check now", "", PageId::Updates),
-    ("Get new features early", "", PageId::Updates),
-    ("An older version", "", PageId::Updates),
-    ("What's new", "", PageId::Updates),
-    ("Disk space", "", PageId::Maintenance),
-    (
-        "Free up space",
-        "Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of the developer tools. Your files stay.",
-        PageId::Maintenance,
-    ),
-    ("Trash", "", PageId::Maintenance),
-    (
-        "Delete files that stayed in the trash for more than 30 days",
-        "",
-        PageId::Maintenance,
-    ),
-    ("Warn when the disk is almost full", "", PageId::Maintenance),
-    ("Apps that come with cosmic-blue", "", PageId::Maintenance),
+/// Every setting inside the tools that the search finds, besides the
+/// tools themselves: its title, words that also find it (its caption), its
+/// tool. Texts of the pages themselves, so they are already translated.
+/// The kinds of apps come from apps.rs, found by their apps' names too.
+const SETTINGS: &[(&str, &str, Tool)] = &[
+    ("Check now", "", Tool::Update),
+    ("What's new", "", Tool::Update),
     (
         "Firmware updates",
         "New versions of the BIOS, SSD, dock… from their makers.",
-        PageId::Maintenance,
+        Tool::Update,
     ),
-    ("Printers and scanners", "", PageId::Computer),
+    ("Get new features early", "", Tool::Advanced),
+    ("An older version", "", Tool::Advanced),
+    ("Disk space", "", Tool::Space),
+    ("Trash", "", Tool::Space),
     (
-        "Other disks",
-        "Turn on the ones you want open at every startup, without clicking them in Files.",
-        PageId::Computer,
+        "Delete files that stayed in the trash for more than 30 days",
+        "",
+        Tool::Space,
     ),
-    (
-        "Battery charge limit",
-        "Charging stops at 80 %: the battery lasts longer when the laptop stays plugged in.",
-        PageId::Computer,
-    ),
-    ("NVIDIA graphics card", "", PageId::Computer),
+    ("Warn when the disk is almost full", "", Tool::Space),
+    ("Backups", "Déjà Dup", Tool::Backup),
+    ("Printers and scanners", "", Tool::Print),
+    ("Battery charge limit", "", Tool::Battery),
+    ("NVIDIA graphics card", "", Tool::Nvidia),
     (
         "Firmware settings (BIOS/UEFI)",
         "Restart into the computer's own settings: boot order, virtualization, Secure Boot…",
-        PageId::Computer,
-    ),
-    (
-        "Microsoft fonts",
-        "Arial, Times New Roman, Verdana… for documents made on Windows.",
-        PageId::Software,
+        Tool::Advanced,
     ),
     (
         "Virtual machines",
         "virt-manager, to run Windows or another Linux in a window.",
-        PageId::Software,
+        Tool::Advanced,
     ),
     (
         "FlatPark",
         "More apps in COSMIC Store, from outside Flathub. Less checked.",
-        PageId::Software,
+        Tool::Advanced,
     ),
     (
         "Dark theme",
         "Light text on dark backgrounds. Off: the light theme.",
-        PageId::Appearance,
+        Tool::Look,
     ),
     (
         "Layout",
         "Top bar and dock: like the Mac. One bar at the bottom: like Windows.",
-        PageId::Appearance,
+        Tool::Look,
     ),
-    ("Dock always visible", "", PageId::Appearance),
+    ("Dock always visible", "", Tool::Look),
     (
         "More in Settings",
         "Accent color, wallpaper, panel, dock, fonts…",
-        PageId::Appearance,
+        Tool::Look,
     ),
-    ("The cosmic-blue look", "", PageId::Appearance),
-    ("All COSMIC settings", "", PageId::Appearance),
-    ("Change computers", "", PageId::Appearance),
-    ("Documentation", "", PageId::Help),
-    ("Ask a question", "", PageId::Help),
-    ("Report a problem", "", PageId::Help),
+    ("The cosmic-blue look", "", Tool::Repair),
+    ("All COSMIC settings", "", Tool::Repair),
+    ("Apps that come with cosmic-blue", "", Tool::Repair),
+    ("Documentation", "", Tool::Help),
+    ("Ask a question", "", Tool::Help),
+    ("Report a problem", "", Tool::Help),
 ];
 
 /// At most this many results, so that the page does not scroll
@@ -142,7 +124,7 @@ pub enum Backup {
 
 #[derive(Clone, Debug, Default)]
 pub struct Facts {
-    system: Option<Result<Summary, String>>,
+    system: Option<Result<System, String>>,
     /// None: Déjà Dup is not installed
     backup: Option<Backup>,
     disk: Option<Disk>,
@@ -154,9 +136,13 @@ pub struct Facts {
 pub enum Message {
     Facts(Box<Facts>),
     Search(String),
-    /// Opens a page (handled by the window, tools.rs)
-    Go(PageId),
+    /// Opens a tool (handled by the window, tools.rs)
+    Go(Tool),
     Backups,
+    /// The first steps tour again
+    Tour,
+    /// The documentation
+    Docs,
 }
 
 pub struct Page {
@@ -269,22 +255,29 @@ fn fold(text: &str) -> String {
         .collect()
 }
 
-/// The settings whose title or caption hold every word of the query, in
-/// the window's language or in English
-fn search(query: &str) -> Vec<(&'static str, PageId)> {
+/// The tools and settings whose title or caption hold every word of the
+/// query, in the window's language or in English
+fn search(query: &str) -> Vec<(&'static str, Tool)> {
     let words: Vec<String> = fold(query).split_whitespace().map(str::to_owned).collect();
+    let tools = Tool::ALL.into_iter().map(|tool| {
+        let (title, lead, _) = tool.texts();
+        (title, lead, String::new(), tool)
+    });
     let categories = crate::apps::CATEGORIES.iter().map(|category| {
         let names: Vec<&str> = category.tools().map(|tool| tool.name).collect();
         (
             category.title,
             category.caption,
             names.join(" "),
-            PageId::Software,
+            Tool::Apps,
         )
     });
-    SETTINGS
-        .iter()
-        .map(|(title, caption, page)| (*title, *caption, String::new(), *page))
+    tools
+        .chain(
+            SETTINGS
+                .iter()
+                .map(|(title, caption, tool)| (*title, *caption, String::new(), *tool)),
+        )
         .chain(categories)
         .filter(|(title, caption, names, _)| {
             let mut haystack = fold(&format!("{} {} {title} {names}", tr(title), tr(caption)));
@@ -294,34 +287,9 @@ fn search(query: &str) -> Vec<(&'static str, PageId)> {
             }
             words.iter().all(|word| haystack.contains(word.as_str()))
         })
-        .map(|(title, _, _, page)| (title, page))
+        .map(|(title, _, _, tool)| (title, tool))
         .take(RESULTS)
         .collect()
-}
-
-/// A page's name, as in the sidebar
-pub fn page_name(page: PageId) -> &'static str {
-    match page {
-        PageId::Overview => "Overview",
-        PageId::Updates => "Updates",
-        PageId::Maintenance => "Maintenance",
-        PageId::Computer => "Computer",
-        PageId::Software => "Extra software",
-        PageId::Appearance => "Appearance",
-        PageId::Help => "Help",
-    }
-}
-
-/// One card: its state (fine or needs attention), its title, what it is
-/// about, maybe a bar, and the button to its page
-struct Card {
-    fine: bool,
-    title: String,
-    caption: String,
-    share: Option<f32>,
-    button: &'static str,
-    suggested: bool,
-    message: Message,
 }
 
 impl Page {
@@ -340,198 +308,192 @@ impl Page {
             Message::Facts(facts) => self.facts = Some(*facts),
             Message::Search(query) => self.query = query,
             Message::Backups => spawn("deja-dup", &[]),
-            // tools.rs opens the page
+            Message::Tour => spawn(crate::TOUR, &[]),
+            Message::Docs => spawn("xdg-open", &[&crate::common::site_url("docs/")]),
+            // tools.rs opens the tool
             Message::Go(_) => {}
         }
         Task::none()
     }
 
-    fn cards(facts: &Facts) -> Vec<Card> {
-        let mut cards = Vec::with_capacity(5);
-        match &facts.system {
-            Some(Ok(system)) => cards.push(match (&system.staged, system.paused) {
-                (_, true) => Card {
-                    fine: false,
-                    title: tr("Updates are paused").to_owned(),
-                    caption: tr("This system stays on this version. Resume them to get one tested update a week again.").to_owned(),
-                    share: None,
-                    button: "Updates",
-                    suggested: false,
-                    message: Message::Go(PageId::Updates),
+    /// What the tiles of Update, Protect your files and Free up space say
+    pub fn summary(&self, tool: Tool) -> Summary {
+        let Some(facts) = &self.facts else {
+            return Summary::Unknown;
+        };
+        match tool {
+            Tool::Update => match &facts.system {
+                Some(Ok(System { paused: true, .. })) => {
+                    Summary::Warns(tr("Updates are paused").to_owned())
+                }
+                Some(Ok(System {
+                    staged: Some(staged),
+                    ..
+                })) => Summary::Says(fill(tr("Version {} starts at the next restart."), staged)),
+                Some(Ok(system)) => match facts.firmware {
+                    Some(1) => Summary::Warns(tr("One device has an update.").to_owned()),
+                    Some(devices) if devices > 1 => {
+                        Summary::Warns(fill(tr("{} devices have an update."), &devices.to_string()))
+                    }
+                    _ => Summary::Says(fill(tr("Up to date, version {}"), &system.version)),
                 },
-                (Some(staged), false) => Card {
-                    fine: true,
-                    title: tr("Update ready").to_owned(),
-                    caption: fill(tr("Version {} starts at the next restart."), staged),
-                    share: None,
-                    button: "Updates",
-                    suggested: false,
-                    message: Message::Go(PageId::Updates),
-                },
-                (None, false) => Card {
-                    fine: true,
-                    title: tr("System up to date").to_owned(),
-                    caption: fill(
-                        tr("Version {}. The next one installs by itself in the background."),
-                        &system.version,
-                    ),
-                    share: None,
-                    button: "Updates",
-                    suggested: false,
-                    message: Message::Go(PageId::Updates),
-                },
-            }),
-            Some(Err(_)) => cards.push(Card {
-                fine: false,
-                title: tr("Updates").to_owned(),
-                caption: tr("The system version could not be read: is this computer installed with cosmic-blue?").to_owned(),
-                share: None,
-                button: "Updates",
-                suggested: false,
-                message: Message::Go(PageId::Updates),
-            }),
-            None => {}
+                Some(Err(_)) => {
+                    Summary::Warns(tr("The system version could not be read.").to_owned())
+                }
+                None => Summary::Unknown,
+            },
+            Tool::Backup => match facts.backup {
+                None => Summary::Hidden,
+                Some(Backup::Never) => Summary::Warns(tr("Not set up yet.").to_owned()),
+                Some(Backup::Last(0)) => Summary::Says(tr("Last backup today.").to_owned()),
+                Some(Backup::Last(days)) => {
+                    let text = fill(tr("Last backup {} days ago."), &days.to_string());
+                    if days > BACKUP_DAYS {
+                        Summary::Warns(text)
+                    } else {
+                        Summary::Says(text)
+                    }
+                }
+            },
+            Tool::Space => match &facts.disk {
+                Some(disk) if disk.total > 0 && disk.used as f32 / disk.total as f32 >= 0.9 => {
+                    Summary::Warns(fill(
+                        tr("Almost full: {} free."),
+                        &maintenance::size(disk.free),
+                    ))
+                }
+                Some(disk) => Summary::Says(fill(tr("{} free"), &maintenance::size(disk.free))),
+                None => Summary::Unknown,
+            },
+            _ => Summary::Unknown,
         }
-        match facts.backup {
-            Some(Backup::Never) => cards.push(Card {
-                fine: false,
-                title: tr("Backups").to_owned(),
-                caption: tr("Not set up yet. A USB drive is enough: Déjà Dup keeps a copy of your home folder.").to_owned(),
-                share: None,
-                button: "Set up",
-                suggested: true,
-                message: Message::Backups,
-            }),
-            Some(Backup::Last(days)) => cards.push(Card {
-                fine: days <= BACKUP_DAYS,
-                title: tr("Backups").to_owned(),
-                caption: if days == 0 {
-                    tr("Last backup today.").to_owned()
-                } else {
-                    fill(tr("Last backup {} days ago."), &days.to_string())
-                },
-                share: None,
-                button: "Open",
-                suggested: false,
-                message: Message::Backups,
-            }),
-            None => {}
-        }
-        if let Some(disk) = &facts.disk {
-            let share = if disk.total > 0 {
-                disk.used as f32 / disk.total as f32
-            } else {
-                0.0
-            };
-            let fine = share < 0.9;
-            cards.push(Card {
-                fine,
-                title: tr("Disk space").to_owned(),
-                caption: if fine {
-                    fill(tr("{} free"), &maintenance::size(disk.free))
-                } else {
-                    fill(tr("Almost full: {} free."), &maintenance::size(disk.free))
-                },
-                share: Some(share),
-                button: "Maintenance",
-                suggested: !fine,
-                message: Message::Go(PageId::Maintenance),
-            });
-        }
-        if let Some(devices) = facts.firmware {
-            cards.push(Card {
-                fine: devices == 0,
-                title: tr("Firmware updates").to_owned(),
-                caption: match devices {
-                    0 => tr("Nothing new from the makers.").to_owned(),
-                    1 => tr("One device has an update.").to_owned(),
-                    n => fill(tr("{} devices have an update."), &n.to_string()),
-                },
-                share: None,
-                button: "Maintenance",
-                suggested: false,
-                message: Message::Go(PageId::Maintenance),
-            });
-        }
-        // Fewer than four: help fills the grid
-        if cards.len() < 4 {
-            cards.push(Card {
-                fine: true,
-                title: tr("Help").to_owned(),
-                caption: tr("Find answers, ask a question, or tell us what goes wrong.").to_owned(),
-                share: None,
-                button: "Open",
-                suggested: false,
-                message: Message::Go(PageId::Help),
-            });
-        }
-        cards
     }
 
-    fn card(card: Card) -> Element<'static, Message> {
+    /// Protect your files: Déjà Dup, how recent the last backup is
+    pub fn backup_view(&self) -> Element<'_, Message> {
+        let space_s = theme::spacing().space_s;
+        let backup = self.facts.as_ref().and_then(|facts| facts.backup.clone());
+        let (caption, button) = match backup {
+            None | Some(Backup::Never) => (
+                tr("Not set up yet. A USB drive is enough: Déjà Dup keeps a copy of your home folder.")
+                    .to_owned(),
+                widget::button::suggested(tr("Set up")),
+            ),
+            Some(Backup::Last(0)) => (
+                tr("Last backup today.").to_owned(),
+                widget::button::standard(tr("Open")),
+            ),
+            Some(Backup::Last(days)) => (
+                fill(tr("Last backup {} days ago."), &days.to_string()),
+                if days > BACKUP_DAYS {
+                    widget::button::suggested(tr("Open"))
+                } else {
+                    widget::button::standard(tr("Open"))
+                },
+            ),
+        };
+        settings::section()
+            .add(
+                settings::item_row(vec![
+                    state_icon("document-save-symbolic", false),
+                    label(tr("Backups"), caption),
+                    button.on_press(Message::Backups).into(),
+                ])
+                .spacing(space_s),
+            )
+            .into()
+    }
+
+    /// The toolbox: where things stand, the search, the tiles of the
+    /// tools shown (in GROUPS' order, with what each says); and its footer
+    pub fn view<'a>(
+        &'a self,
+        tiles: &[(Tool, Summary)],
+    ) -> (Element<'a, Message>, Element<'a, Message>) {
         let cosmic_theme::Spacing {
             space_xxs,
             space_xs,
             space_s,
-            space_m,
             ..
         } = theme::spacing();
-        let fine = card.fine;
-        let symbol = widget::icon::from_name(if fine {
-            "object-select-symbolic"
-        } else {
-            "dialog-warning-symbolic"
-        })
-        .size(20)
-        .apply(widget::container)
-        .class(theme::Container::custom(move |theme| {
-            let cosmic = theme.cosmic();
-            cosmic::iced::widget::container::Style {
-                icon_color: Some(
-                    if fine {
-                        cosmic.accent_color()
-                    } else {
-                        cosmic.warning_color()
-                    }
-                    .into(),
-                ),
-                ..Default::default()
-            }
-        }));
-        let button = if card.suggested {
-            widget::button::suggested(tr(card.button))
-        } else {
-            widget::button::standard(tr(card.button))
-        }
-        .on_press(card.message);
-        widget::column::with_capacity(5)
-            .spacing(space_xs)
-            .push(
+        let attention: Vec<&str> = tiles
+            .iter()
+            .filter(|(_, summary)| matches!(summary, Summary::Warns(_)))
+            .map(|(tool, _)| tr(tool.title()))
+            .collect();
+        let status: Element<'a, Message> = match attention.len() {
+            0 => dim_caption(tr("All is well: cosmic-blue looks after itself.")).into(),
+            count => {
+                let names = attention.join(", ");
+                let line = if count == 1 {
+                    fill(tr("One thing needs your attention: {}"), &names)
+                } else {
+                    fill(
+                        &fill(tr("{} things need your attention: {}"), &count.to_string()),
+                        &names,
+                    )
+                };
                 widget::row::with_capacity(2)
-                    .spacing(space_xs)
+                    .spacing(space_xxs)
                     .align_y(Alignment::Center)
-                    .push(symbol)
-                    .push(row_title(card.title)),
-            )
-            .push_maybe(card.share.map(|share| {
-                widget::progress_bar::determinate_linear(share)
-                    .width(Length::Fill)
-                    .girth(6)
-            }))
+                    .push(warning(
+                        widget::icon::from_name("dialog-warning-symbolic")
+                            .size(16)
+                            .into(),
+                    ))
+                    .push(text::body(line))
+                    .into()
+            }
+        };
+        let search = widget::search_input(tr("Search a tool"), self.query.as_str())
+            .on_input(Message::Search)
+            .on_clear(Message::Search(String::new()))
+            .width(Length::Fixed(360.0));
+        let mut body = widget::column::with_capacity(8)
+            .align_x(Alignment::Center)
+            .push(text::title3(tr("Toolbox")))
+            .push(widget::space::vertical().height(space_xxs))
+            .push(status)
+            .push(widget::space::vertical().height(space_s))
+            .push(search)
+            .push(widget::space::vertical().height(space_xs));
+        if self.query.trim().is_empty() {
+            for (group, tools) in GROUPS {
+                let shown: Vec<Element<'a, Message>> = tiles
+                    .iter()
+                    .filter(|(tool, summary)| tools.contains(tool) && *summary != Summary::Hidden)
+                    .map(|(tool, summary)| tile(*tool, summary))
+                    .collect();
+                body = body
+                    .push(
+                        text::heading(tr(group))
+                            .width(Length::Fill)
+                            .apply(widget::container)
+                            .padding([space_s, 0, space_xs, 0]),
+                    )
+                    .push(grid(shown));
+            }
+        } else {
+            body = body
+                .push(widget::space::vertical().height(space_s))
+                .push(self.results());
+        }
+        let footer = widget::row::with_capacity(4)
+            .spacing(space_xxs)
+            .align_y(Alignment::Center)
             .push(
-                dim_caption(card.caption)
-                    .wrapping(cosmic::iced::core::text::Wrapping::Word)
-                    .height(Length::Fill),
+                widget::button::standard(tr("For experienced users…"))
+                    .on_press(Message::Go(Tool::Advanced)),
             )
-            .push(button)
-            .apply(widget::container)
-            .padding([space_s, space_m])
-            .width(Length::Fill)
-            .height(168)
-            .class(theme::Container::Card)
-            .apply(widget::container)
-            .padding([0, 0, space_xxs, 0])
-            .into()
+            .push(widget::space::horizontal().width(Length::Fill))
+            .push(widget::button::standard(tr("First steps again")).on_press(Message::Tour))
+            .push(widget::tooltip(
+                widget::button::icon(widget::icon::from_name("help-browser-symbolic"))
+                    .on_press(Message::Docs),
+                text::body(tr("Help on this tool")),
+                widget::tooltip::Position::Top,
+            ));
+        (body.into(), footer.into())
     }
 
     fn results(&self) -> Element<'_, Message> {
@@ -540,12 +502,12 @@ impl Page {
             return text::body(tr("Nothing found.")).into();
         }
         let mut section = settings::section();
-        for (title, page) in found {
+        for (title, tool) in found {
             section = section.add(
                 settings::item_row(vec![
-                    label(title, tr(page_name(page)).to_owned()),
+                    label(title, tr(tool.title()).to_owned()),
                     widget::button::standard(tr("Open"))
-                        .on_press(Message::Go(page))
+                        .on_press(Message::Go(tool))
                         .into(),
                 ])
                 .align_y(Alignment::Center),
@@ -553,73 +515,79 @@ impl Page {
         }
         section.into()
     }
+}
 
-    pub fn view(&self) -> Element<'_, Message> {
-        let cosmic_theme::Spacing {
-            space_xxs,
-            space_s,
-            space_m,
-            ..
-        } = theme::spacing();
-        let cards = self.facts.as_ref().map(Self::cards).unwrap_or_default();
-        let attention: Vec<&Card> = cards.iter().filter(|card| !card.fine).collect();
-        let title = match attention.len() {
-            0 => tr("All is well").to_owned(),
-            1 => tr("One thing needs your attention").to_owned(),
-            n => fill(tr("{} things need your attention"), &n.to_string()),
-        };
-        // What needs attention, by name (each card says why)
-        let caption = if attention.is_empty() {
-            tr("cosmic-blue looks after itself. Here is where things stand.").to_owned()
-        } else {
-            attention
-                .iter()
-                .map(|card| card.title.as_str())
-                .collect::<Vec<_>>()
-                .join(" · ")
-        };
-        let search = widget::search_input(tr("Search a setting"), self.query.as_str())
-            .on_input(Message::Search)
-            .on_clear(Message::Search(String::new()))
-            .width(Length::Fill);
-        let body: Element<'_, Message> = if self.query.trim().is_empty() {
-            let mut grid = widget::column::with_capacity(2).spacing(space_s);
-            let mut cards = cards.into_iter();
-            while let Some(first) = cards.next() {
-                let second = cards.next();
-                grid = grid.push(
-                    widget::row::with_capacity(2)
-                        .spacing(space_s)
-                        .push(Self::card(first))
-                        .push_maybe(second.map(Self::card)),
-                );
+/// In the warning color
+fn warning<'a>(element: Element<'a, Message>) -> Element<'a, Message> {
+    element
+        .apply(widget::container)
+        .class(theme::Container::custom(|theme| {
+            let color = theme.cosmic().warning_color();
+            cosmic::iced::widget::container::Style {
+                icon_color: Some(color.into()),
+                text_color: Some(color.into()),
+                ..Default::default()
             }
-            grid.into()
-        } else {
-            self.results()
-        };
-        widget::column::with_capacity(6)
-            .push(widget::space::vertical().height(space_xxs))
-            .push(crate::style::page_header(
-                widget::icon::from_name(ICON).size(44).into(),
-                if self.facts.is_some() {
-                    title
-                } else {
-                    tr("Overview").to_owned()
-                },
-                self.facts.as_ref().map(|_| caption),
-            ))
-            .push(widget::space::vertical().height(space_m))
-            .push(search)
-            .push(widget::space::vertical().height(space_m))
-            .push(body)
-            .max_width(640.0)
-            .width(640.0)
-            .apply(widget::container)
-            .center_x(Length::Fill)
-            .apply(widget::scrollable)
-            .into()
+        }))
+        .into()
+}
+
+/// A tool's tile: its round symbol, its title, what it says (in the warning
+/// color when it needs attention), as one button that opens it
+/// Tile texts stay on one line, cut with an ellipsis when too long
+const ONE_LINE: Ellipsize = Ellipsize::End(EllipsizeHeightLimit::Lines(1));
+
+fn tile<'a>(tool: Tool, summary: &Summary) -> Element<'a, Message> {
+    let cosmic_theme::Spacing { space_s, .. } = theme::spacing();
+    let (title, _, usual) = tool.texts();
+    let caption: Element<'a, Message> = match summary {
+        Summary::Warns(caption) => {
+            warning(text::caption(caption.clone()).ellipsize(ONE_LINE).into())
+        }
+        Summary::Says(caption) => dim_caption(caption.clone()).ellipsize(ONE_LINE).into(),
+        Summary::Unknown | Summary::Hidden => dim_caption(tr(usual)).ellipsize(ONE_LINE).into(),
+    };
+    widget::row::with_capacity(2)
+        .spacing(space_s)
+        .align_y(Alignment::Center)
+        .push(tool_icon(tool.icon(), 36))
+        .push(
+            widget::column::with_capacity(2)
+                .spacing(2)
+                .push(row_title(tr(title)).ellipsize(ONE_LINE))
+                .push(caption)
+                .width(Length::Fill)
+                .clip(true),
+        )
+        .padding([0, space_s])
+        .height(Length::Fill)
+        .apply(widget::button::custom)
+        .class(crate::style::tile_style(false))
+        .padding(0)
+        .width(Length::Fill)
+        .height(Length::Fixed(54.0))
+        .on_press(Message::Go(tool))
+        .into()
+}
+
+/// Tiles in three columns
+fn grid<'a>(tiles: Vec<Element<'a, Message>>) -> Element<'a, Message> {
+    let space_xs = theme::spacing().space_xs;
+    let mut lines = widget::column::with_capacity(tiles.len().div_ceil(3)).spacing(space_xs);
+    let mut tiles = tiles.into_iter().peekable();
+    while tiles.peek().is_some() {
+        let mut line = widget::row::with_capacity(3).spacing(space_xs);
+        let mut count = 0;
+        for tile in tiles.by_ref().take(3) {
+            line = line.push(tile);
+            count += 1;
+        }
+        for _ in count..3 {
+            line = line.push(widget::space::horizontal().width(Length::Fill));
+        }
+        lines = lines.push(line);
     }
+    lines.width(Length::Fill).into()
 }
 
 #[cfg(test)]
@@ -639,9 +607,10 @@ mod tests {
                 .map(|(_, page)| page)
                 .collect::<Vec<_>>()
         };
-        assert_eq!(pages("steam"), [PageId::Software]);
-        assert!(pages("dark").contains(&PageId::Appearance));
-        assert!(pages("BIOS").contains(&PageId::Computer));
+        assert_eq!(pages("steam"), [Tool::Apps]);
+        assert!(pages("dark").contains(&Tool::Look));
+        assert!(pages("BIOS").contains(&Tool::Advanced));
+        assert!(pages("backup").contains(&Tool::Backup));
         assert!(pages("nothing like this").is_empty());
         // Every word counts
         assert_eq!(search("battery limit").len(), 1);

@@ -1,4 +1,4 @@
-// "Change computers" (Tools › Appearance): the settings people choose and
+// "Change computers" (a tool of cosmic-blue Tools): the settings people choose and
 // the list of their apps, saved to a JSON file, then taken back on another
 // cosmic-blue computer.
 //

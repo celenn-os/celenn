@@ -15,13 +15,13 @@
 //     installed them.
 //   - Firmware updates: opens GNOME Firmware.
 
-use crate::common::{dim_caption, fill, label, row_title, spawn, state_icon, two_lines};
+use crate::common::{ToastAsk, dim_caption, fill, label, row_title, spawn, state_icon, two_lines};
 use crate::failure::{self, Card, CardAction, CardMessage, Outcome};
 use crate::housekeeping;
 use crate::i18n::tr;
 use cosmic::app::Task;
 use cosmic::iced::{Alignment, Length};
-use cosmic::widget::{self, settings, text, toaster::Toasts};
+use cosmic::widget::{self, settings, text};
 use cosmic::{Element, cosmic_theme, theme};
 use std::collections::BTreeSet;
 use std::process::{Command, Stdio};
@@ -30,11 +30,8 @@ const CLEAN: &str = "/usr/libexec/cosmic-blue-clean";
 const PREINSTALL_DIR: &str = "/usr/share/flatpak/preinstall.d";
 const DISK_USAGE: &str = "org.gnome.baobab";
 const FIRMWARE: &str = "org.gnome.Firmware";
-const ICON: &str = "cosmic-blue-tools";
 
 pub const TEXTS: &[&str] = &[
-    "Maintenance",
-    "Keep the computer tidy and in shape, without typing commands.",
     "Disk space",
     "{used} used of {total}",
     "{} free",
@@ -70,6 +67,7 @@ pub const TEXTS: &[&str] = &[
     "Firmware updates",
     "New versions of the BIOS, SSD, dock… from their makers.",
     "Open",
+    "Clean up the system",
 ];
 
 #[derive(Clone, Debug, Default)]
@@ -112,7 +110,8 @@ pub enum Message {
     Done(Busy, Outcome),
     Card(CardMessage),
     Open(&'static str),
-    CloseToast(widget::ToastId),
+    /// A toast for the window to show (tools.rs)
+    Toast(ToastAsk<Message>),
 }
 
 pub struct Page {
@@ -122,7 +121,16 @@ pub struct Page {
     free_before: Option<u64>,
     /// What did not work, until closed or done again
     card: Option<Card<Busy>>,
-    toasts: Toasts<Message>,
+}
+
+/// The parts of the page, each in its own tool (tools.rs): disk space and
+/// the trash; putting back the apps that come with cosmic-blue; firmware
+/// updates
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Part {
+    Space,
+    Repair,
+    Firmware,
 }
 
 /// Size and use of the disk that holds the home folders and apps (/var:
@@ -265,15 +273,12 @@ impl Page {
                     Busy::Cleaning,
                 )
             }),
-            toasts: Toasts::new(Message::CloseToast),
         };
         (page, refresh())
     }
 
     fn toast(&mut self, message: String) -> Task<Message> {
-        self.toasts
-            .push(widget::toaster::Toast::new(message))
-            .map(cosmic::Action::App)
+        crate::common::toast(message, None, Message::Toast)
     }
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
@@ -374,12 +379,24 @@ impl Page {
                 }
             }
             Message::Open(app) => spawn("flatpak", &["run", app]),
-            Message::CloseToast(id) => self.toasts.remove(id),
+            // The window shows it (tools.rs)
+            Message::Toast(_) => {}
         }
         Task::none()
     }
 
-    pub fn view(&self) -> Element<'_, Message> {
+    /// Whether GNOME Firmware is installed (Update shows it then)
+    pub fn has_firmware(&self) -> bool {
+        self.state.as_ref().is_some_and(|state| state.firmware_app)
+    }
+
+    /// How many of the apps that come with cosmic-blue were removed
+    pub fn missing(&self) -> usize {
+        self.state.as_ref().map_or(0, |state| state.missing.len())
+    }
+
+    /// One part of the page (tools.rs gives it its title and frame)
+    pub fn view(&self, part: Part) -> Element<'_, Message> {
         let cosmic_theme::Spacing {
             space_xxs, space_s, ..
         } = theme::spacing();
@@ -387,17 +404,30 @@ impl Page {
         let mut content = widget::column::with_capacity(6)
             .spacing(space_s)
             .align_x(Alignment::Center);
-        if let Some(card) = &self.card {
+        // What did not work, in the part it belongs to
+        let card_part = |busy: Busy| {
+            if busy == Busy::Reinstalling {
+                Part::Repair
+            } else {
+                Part::Space
+            }
+        };
+        if let Some(card) = self
+            .card
+            .as_ref()
+            .filter(|card| card_part(card.job) == part)
+        {
             content = content.push(card.view(Message::Card));
         }
         let Some(state) = &self.state else {
-            return crate::common::header(
-                ICON,
-                tr("Maintenance"),
-                tr("Keep the computer tidy and in shape, without typing commands."),
-                content.into(),
-            );
+            return content.into();
         };
+        if part == Part::Firmware {
+            return self.firmware(state);
+        }
+        if part == Part::Repair {
+            return content.push(self.apps(state)).into();
+        }
 
         // Disk space
         let mut disk = settings::section().title(tr("Disk space"));
@@ -449,7 +479,7 @@ impl Page {
             settings::item_row(vec![
                 state_icon("edit-clear-all-symbolic", false),
                 label(
-                    tr("Free up space"),
+                    tr("Clean up the system"),
                     tr("Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of tools. Your files stay as they are.").to_owned(),
                 ),
                 clean,
@@ -518,6 +548,16 @@ impl Page {
                 ),
         );
 
+        content.into()
+    }
+
+    /// The apps that come with cosmic-blue, and the button that puts back
+    /// the ones removed
+    fn apps(&self, state: &State) -> Element<'_, Message> {
+        let cosmic_theme::Spacing {
+            space_xxs, space_s, ..
+        } = theme::spacing();
+        let idle = self.busy.is_none();
         // Apps that come with cosmic-blue
         let caption = if state.missing.is_empty() {
             tr("All of them are installed.").to_owned()
@@ -550,8 +590,15 @@ impl Page {
                     .into(),
             );
         }
-        let mut system = settings::section().add(settings::item_row(apps_row).spacing(space_s));
+        settings::section()
+            .add(settings::item_row(apps_row).spacing(space_s))
+            .into()
+    }
 
+    /// Firmware updates: GNOME Firmware, when it is installed
+    fn firmware(&self, state: &State) -> Element<'_, Message> {
+        let space_s = theme::spacing().space_s;
+        let mut system = settings::section();
         // Firmware
         if state.firmware_app {
             system = system.add(
@@ -568,15 +615,7 @@ impl Page {
                 .spacing(space_s),
             );
         }
-        content = content.push(system);
-
-        let page = crate::common::header(
-            ICON,
-            tr("Maintenance"),
-            tr("Keep the computer tidy and in shape, without typing commands."),
-            content.into(),
-        );
-        widget::toaster(&self.toasts, page)
+        system.into()
     }
 }
 

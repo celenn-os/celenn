@@ -1,51 +1,63 @@
-// What the pages of cosmic-blue Tools share (tools.rs): the page frame (a
-// compact header with the page's icon, its title and purpose), the rows'
-// text and symbols, and running a command in the background.
+// What the tools of cosmic-blue Tools share (tools.rs): their toasts, their
+// round symbol, the rows' text and symbols, and running a command in the
+// background.
 
-use crate::i18n::tr;
 use cosmic::iced::Length;
 use cosmic::iced::core::text::Wrapping;
 use cosmic::widget;
-use cosmic::{Apply, Element, cosmic_theme, theme};
+use cosmic::{Apply, Element, theme};
 use std::sync::OnceLock;
 
-/// A page: its header as in COSMIC Settings (the page's icon, its title and
-/// what it is for, on the left), then its content; it scrolls only when the
-/// window is made smaller than its default size
-pub fn header<'a, M: 'static>(
-    icon: &'static str,
-    title: &'static str,
-    lead: &'static str,
-    content: Element<'a, M>,
-) -> Element<'a, M> {
-    let cosmic_theme::Spacing {
-        space_xxs, space_m, ..
-    } = theme::spacing();
-    // A child or a standard account: the changes that need root ask for
-    // someone else's password, said once under the page's purpose
-    let lead = if is_admin() {
-        lead.to_owned()
-    } else {
-        format!(
-            "{lead}\n{}",
-            tr("Some changes ask for the password of a parent or an administrator.")
-        )
-    };
-    widget::column::with_capacity(5)
-        .push(widget::space::vertical().height(space_xxs))
-        .push(crate::style::page_header(
-            widget::icon::from_name(icon).size(44).into(),
-            title,
-            Some(lead),
-        ))
-        .push(widget::space::vertical().height(space_m))
-        .push(content)
-        .push(widget::space::vertical().height(space_m))
-        .max_width(640.0)
-        .width(640.0)
+/// A short message a page asks the window to show at the bottom (tools.rs
+/// keeps one toaster for every page, so that pages made of several parts
+/// show their messages the same way): its text, and maybe a button, with
+/// its label and the page's message it sends
+#[derive(Clone, Debug)]
+pub struct ToastAsk<M> {
+    pub text: String,
+    pub action: Option<(String, Box<M>)>,
+}
+
+/// Asks the window for a toast; `wrap` is the page's message that carries it
+pub fn toast<M: Send + 'static>(
+    text: String,
+    action: Option<(String, M)>,
+    wrap: fn(ToastAsk<M>) -> M,
+) -> cosmic::app::Task<M> {
+    let action = action.map(|(label, message)| (label, Box::new(message)));
+    cosmic::app::Task::done(cosmic::Action::App(wrap(ToastAsk { text, action })))
+}
+
+/// What a tool's tile on the toolbox says (tools.rs): nothing known yet
+/// (its usual caption), not shown (nothing to do on this computer), how
+/// things are, or something that needs attention
+#[derive(Clone, Debug, PartialEq)]
+pub enum Summary {
+    Unknown,
+    Hidden,
+    Says(String),
+    Warns(String),
+}
+
+/// A tool's symbol in a round accent-colored button shape, as the dock's
+/// icons of cosmic-blue: on the toolbox's tiles and at the top of a tool
+pub fn tool_icon<'a, M: 'static>(name: &'static str, size: u16) -> Element<'a, M> {
+    widget::icon::from_name(name)
+        .size(size / 2)
         .apply(widget::container)
-        .center_x(Length::Fill)
-        .apply(widget::scrollable)
+        .center(Length::Fixed(f32::from(size)))
+        .class(theme::Container::custom(move |theme| {
+            let accent = theme.cosmic().accent_color();
+            cosmic::iced::widget::container::Style {
+                icon_color: Some(cosmic::iced::Color::WHITE),
+                background: Some(cosmic::iced::Background::Color(accent.into())),
+                border: cosmic::iced::Border {
+                    radius: (f32::from(size) / 2.0).into(),
+                    ..Default::default()
+                },
+                ..Default::default()
+            }
+        }))
         .into()
 }
 
@@ -106,11 +118,23 @@ pub fn label<'a, M: 'static>(title: &'static str, caption: String) -> Element<'a
 }
 
 /// What the image's screenshot test asks a page to show at once, from
-/// COSMIC_BLUE_TOOLS_PREVIEW (tests/vm-lib.sh): "failure" (a failure card on
-/// Maintenance), "developer-tools" (the list open on Extra software) or
-/// "other-disks" (the list of disks open on Computer)
+/// COSMIC_BLUE_TOOLS_PREVIEW (tests/vm-lib.sh): "failure" (a failure card in
+/// Free up space) or "developer-tools" (the list open in Install apps)
 pub fn preview(what: &str) -> bool {
     std::env::var("COSMIC_BLUE_TOOLS_PREVIEW").is_ok_and(|value| value == what)
+}
+
+/// A page of the cosmic-blue site in the session language ("docs/#updates")
+pub fn site_url(path: &str) -> String {
+    let language = match crate::i18n::language() {
+        Some("pt_BR") => "pt-br/",
+        Some("fr") => "fr/",
+        Some("de") => "de/",
+        Some("es") => "es/",
+        Some("it") => "it/",
+        _ => "",
+    };
+    format!("https://cosmic-blue-os.github.io/cosmic-blue/{language}{path}")
 }
 
 /// Starts a program without waiting for it (a browser, another app)

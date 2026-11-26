@@ -6,11 +6,11 @@
 //   - Files that stayed in the trash for more than 30 days are deleted. The
 //     trash of the home folder only, not those of USB drives.
 //   - When the disk is almost full, one notification says so, with a button
-//     that opens the Maintenance page. Again a week later if it still is,
+//     that opens the Free up space tool. Again a week later if it still is,
 //     or at once when it gets critical. Never in a child's session (Parental
 //     controls): the parent sees it in theirs.
 //
-// Both are on by default; the Maintenance page turns them off. Off is a
+// Both are on by default; the Free up space tool turns them off. Off is a
 // file in ~/.config/cosmic-blue/ (keep-trash, no-disk-warning), so nothing
 // is written while they stay on.
 
@@ -210,7 +210,7 @@ fn is_child() -> bool {
     })
 }
 
-/// One notification, with a button that opens the Maintenance page. Waits
+/// One notification, with a button that opens the Free up space tool. Waits
 /// for it to be clicked or closed.
 fn notify(free: u64) {
     let action = format!("open={}", tr("Free up space"));
@@ -233,7 +233,7 @@ fn notify(free: u64) {
         .output();
     match output {
         Ok(output) if String::from_utf8_lossy(&output.stdout).trim() == "open" => {
-            spawn("/usr/libexec/cosmic-blue-tools", &["--maintenance"]);
+            spawn("/usr/libexec/cosmic-blue-tools", &["--tool", "space"]);
         }
         Ok(_) => {}
         Err(error) => eprintln!("notify-send: {error}"),

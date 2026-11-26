@@ -1,11 +1,10 @@
-// "Other disks" on the Computer page (more.rs, disks.rs): the row, with
-// which disks open at startup and Choose…, and the list that replaces the
-// page's sections: one switch per disk, Back and Apply. Apply asks for the
-// administrator password once (pkexec, cosmic-blue-tools-helper disks),
-// then says, under the list, what could not be done and why.
+// The "Other disks" tool (more.rs, disks.rs): one switch per disk, then
+// Apply. Apply asks for the administrator password once (pkexec,
+// cosmic-blue-tools-helper disks), then says, under the list, what could not
+// be done and why.
 
 use super::{Message, Page, refresh};
-use crate::common::{label, state_icon};
+use crate::common::state_icon;
 use crate::disks::{self, Disk, Status};
 use crate::i18n::tr;
 use cosmic::app::Task;
@@ -17,8 +16,8 @@ use std::collections::BTreeSet;
 
 #[derive(Clone, Debug)]
 pub enum DisksMessage {
+    /// The tool was opened: the switches show what is set now
     Open,
-    Back,
     Switch(String, bool),
     Apply,
     /// The helper's output, and whether everything was done (None: the
@@ -29,7 +28,6 @@ pub enum DisksMessage {
 /// The list: the disks switched on, what Apply said
 #[derive(Default)]
 pub struct DisksView {
-    pub open: bool,
     on: BTreeSet<String>,
     applying: bool,
     notes: Vec<String>,
@@ -68,11 +66,11 @@ impl Page {
         let disks = self.state.as_ref().map(|state| state.disks.as_slice());
         match message {
             DisksMessage::Open => {
-                self.disks.open = true;
-                self.disks.notes.clear();
-                self.disks.on = switched_on(disks.unwrap_or_default());
+                if !self.disks.applying {
+                    self.disks.notes.clear();
+                    self.disks.on = switched_on(disks.unwrap_or_default());
+                }
             }
-            DisksMessage::Back => self.disks.open = false,
             DisksMessage::Switch(uuid, on) => {
                 if on {
                     self.disks.on.insert(uuid);
@@ -112,7 +110,6 @@ impl Page {
                 }
                 self.disks.notes = notes;
                 let toast = if success && self.disks.notes.is_empty() {
-                    self.disks.open = false;
                     self.toast("Done.")
                 } else {
                     Task::none()
@@ -125,48 +122,29 @@ impl Page {
         Task::none()
     }
 
-    /// The row on the Computer page
-    pub(super) fn disks_row<'a>(&self, disks: &[Disk]) -> Element<'a, Message> {
-        let problem = disks.iter().any(Disk::problem);
-        let mut items = vec![
-            state_icon(
-                if problem {
-                    "dialog-warning-symbolic"
-                } else {
-                    "drive-harddisk-symbolic"
-                },
-                problem,
-            ),
-            label(tr("Other disks"), disks::summary(disks)),
-        ];
-        if !disks.is_empty() {
-            items.push(
-                widget::button::standard(tr("Choose…"))
-                    .on_press_maybe(
-                        self.busy
-                            .is_none()
-                            .then_some(Message::Disks(DisksMessage::Open)),
-                    )
-                    .into(),
-            );
-        }
-        settings::item_row(items)
-            .spacing(theme::spacing().space_s)
-            .into()
-    }
-
     /// The disks read again: the switches show what is set now
     pub(super) fn disks_reread(&mut self, disks: &[Disk]) {
-        if self.disks.open && !self.disks.applying {
+        if !self.disks.applying {
             self.disks.on = switched_on(disks);
         }
     }
 
-    /// The list, in place of the Computer page's sections
+    /// The list of disks, each with its switch, then Apply
     pub(super) fn disks_list<'a>(&'a self, disks: &'a [Disk]) -> Element<'a, Message> {
         let cosmic_theme::Spacing {
             space_xxs, space_s, ..
         } = theme::spacing();
+        if disks.is_empty() {
+            return settings::section()
+                .add(
+                    settings::item_row(vec![
+                        state_icon("drive-harddisk-symbolic", false),
+                        crate::common::label(tr("Other disks"), disks::summary(disks)),
+                    ])
+                    .spacing(space_s),
+                )
+                .into();
+        }
         let idle = !self.disks.applying;
         let section = disks.iter().fold(settings::section(), |section, disk| {
             let icon = match disk.status {
@@ -213,15 +191,8 @@ impl Page {
                 )
                 .into()
         };
-        let mut column = widget::column::with_capacity(6)
+        let mut column = widget::column::with_capacity(5)
             .spacing(space_s)
-            .push(text::heading(tr("Other disks")))
-            .push(
-                text::caption(tr(
-                    "Turn on the ones you want open at every startup, without clicking them in Files.",
-                ))
-                .wrapping(Wrapping::Word),
-            )
             .push(section);
         for note in &self.disks.notes {
             column = column.push(
@@ -248,10 +219,6 @@ impl Page {
                 widget::row::with_capacity(3)
                     .spacing(space_s)
                     .align_y(Alignment::Center)
-                    .push(
-                        widget::button::standard(tr("Back"))
-                            .on_press_maybe(idle.then_some(Message::Disks(DisksMessage::Back))),
-                    )
                     .push(widget::space::horizontal().width(Length::Fill))
                     .push(apply),
             )

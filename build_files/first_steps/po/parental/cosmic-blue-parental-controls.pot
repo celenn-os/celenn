@@ -200,7 +200,7 @@ msgstr ""
 msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
 msgstr ""
 
-msgid "The disk is full ({} free). Free up space with Clean up, in cosmic-blue Tools, Maintenance, then try again."
+msgid "The disk is full ({} free). Free up space with cosmic-blue Tools, then try again."
 msgstr ""
 
 msgid "The server does not answer. Try again in a few minutes."

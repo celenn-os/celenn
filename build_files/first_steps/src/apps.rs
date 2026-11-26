@@ -1,6 +1,6 @@
 // The kinds of apps that cosmic-blue offers to install without a terminal,
 // the same in the first steps tour ("Your apps", main.rs) and in cosmic-blue
-// Tools (Extra software, more.rs): the same categories in the same order,
+// Tools (Install apps, more.rs): the same categories in the same order,
 // shown as tiles in two columns. A tile opens its list of apps to tick, with
 // the recommended ones already ticked the first time: in every category, the
 // apps most used on Linux for that need, all free, so that a beginner sees
@@ -40,7 +40,7 @@ pub struct Category {
     pub groups: &'static [(&'static str, &'static [DevTool])],
     /// The apps ticked the first time the list opens, when none of them is
     /// installed: the ones most used on Linux for that need, all free of
-    /// charge (the tour's apps page and Tools' Extra software page say so,
+    /// charge (the tour's apps page and Tools' Install apps tool say so,
     /// once, at the top)
     pub recommended: &'static [&'static str],
     /// Said under the list, when it has something to add (Tools says how

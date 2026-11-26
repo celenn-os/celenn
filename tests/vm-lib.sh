@@ -424,21 +424,23 @@ desktop_tour() {
 
     # Files (folder icons), Settings (accent, theme), COSMIC Store (our
     # rebuild, which no other step starts: a crash fails vm_check_crashes),
-    # cosmic-blue Tools (each page, a failure card, the developer tools list)
+    # cosmic-blue Tools (its home, tools, a failure card, the developer tools list)
     # and Keyboard shortcuts (cosmic-blue's own apps; images before them skip
     # them). A command may start with VARIABLE=value settings.
     local entry name cmd program settings
     for entry in "05-files|cosmic-files" "06-settings|cosmic-settings appearance" "06-store|cosmic-store" \
         "06-tools-overview|/usr/libexec/cosmic-blue-tools" \
         "06-updates|/usr/libexec/cosmic-blue-updates" \
-        "06-tools-maintenance|/usr/libexec/cosmic-blue-tools --maintenance" \
-        "06-tools-computer|/usr/libexec/cosmic-blue-tools --computer" \
-        "06-tools-software|/usr/libexec/cosmic-blue-tools --software" \
-        "06-tools-appearance|/usr/libexec/cosmic-blue-tools --appearance" \
-        "06-tools-help|/usr/libexec/cosmic-blue-tools --help-page" \
-        "06-tools-failure|COSMIC_BLUE_TOOLS_PREVIEW=failure /usr/libexec/cosmic-blue-tools --maintenance" \
-        "06-tools-developer|COSMIC_BLUE_TOOLS_PREVIEW=developer-tools /usr/libexec/cosmic-blue-tools --software" \
-        "06-tools-disks|COSMIC_BLUE_TOOLS_PREVIEW=other-disks /usr/libexec/cosmic-blue-tools --computer" \
+        "06-tools-space|/usr/libexec/cosmic-blue-tools --tool space" \
+        "06-tools-inside|/usr/libexec/cosmic-blue-tools --tool inside" \
+        "06-tools-software|/usr/libexec/cosmic-blue-tools --tool apps" \
+        "06-tools-look|/usr/libexec/cosmic-blue-tools --tool look" \
+        "06-tools-repair|/usr/libexec/cosmic-blue-tools --tool repair" \
+        "06-tools-advanced|/usr/libexec/cosmic-blue-tools --tool advanced" \
+        "06-tools-help|/usr/libexec/cosmic-blue-tools --tool help" \
+        "06-tools-failure|COSMIC_BLUE_TOOLS_PREVIEW=failure /usr/libexec/cosmic-blue-tools --tool space" \
+        "06-tools-developer|COSMIC_BLUE_TOOLS_PREVIEW=developer-tools /usr/libexec/cosmic-blue-tools --tool apps" \
+        "06-tools-disks|/usr/libexec/cosmic-blue-tools --tool disks" \
         "06-shortcuts|/usr/libexec/cosmic-blue-tour --shortcuts"; do
         name="${entry%%|*}"
         cmd="${entry#*|}"
@@ -633,7 +635,7 @@ demo_journal() {
 # time window, more time given, its session closed when the time is up, and
 # the login refused. Returns 1 when a rule is not applied; a missing
 # screenshot or an unreachable family filter is a warning.
-# Other disks (Tools, Computer): a second, empty virtual disk (vdb, added by
+# Other disks (Tools, Other disks): a second, empty virtual disk (vdb, added by
 # vm-boot-test.sh) gets an ext4 partition labeled "Mes Jeux" before the
 # desktop tour (Tools then lists it), then the helper opens it at startup and
 # stops doing so, as Apply does. Returns 1 when something is wrong.

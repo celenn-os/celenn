@@ -1,39 +1,41 @@
-// Three pages of cosmic-blue Tools (tools.rs) that turn `ujust` commands
-// into buttons. Each button runs the matching command (`ujust <recipe>`,
-// without a terminal: the recipes then skip their questions), so the
-// terminal and the window do exactly the same thing:
+// Tools of cosmic-blue Tools (tools.rs) that turn `ujust` commands into
+// buttons. Each button runs the matching command (`ujust <recipe>`, without
+// a terminal: the recipes then skip their questions), so the terminal and
+// the window do exactly the same thing. Each part is one tool:
 //
-//   Computer       what the computer is made of (hardware.rs), the
-//                  printers and scanners (opens Print Settings and
-//                  Document Scanner: COSMIC Settings has no printer page), the
-//                  other disks to open at every startup (more_disks.rs,
-//                  disks.rs), the
-//                  battery charge limit (toggle-battery-limit), the
-//                  NVIDIA edition for NVIDIA graphics cards (the Updates
-//                  helper, as the first steps tour) and, with Secure Boot,
-//                  its driver key (Tools helper, as `ujust
-//                  enroll-secure-boot-key`), restarting into the firmware
-//                  settings (reboot-to-bios)
-//   Extra software the kinds of apps of the first steps tour, as tiles that
-//                  open a list to tick (apps.rs), then virtual machines,
-//                  Microsoft fonts and the FlatPark app source
-//   Appearance     dark or light, the cosmic-blue look back, every COSMIC
-//                  setting back to the defaults, settings and apps taken to
-//                  another computer (more_transfer.rs, transfer.rs)
+//   Print       the printers added, Print Settings and Document Scanner
+//               (COSMIC Settings has no printer page)
+//   Inside      what the computer is made of (hardware.rs)
+//   Battery     the battery charge limit (toggle-battery-limit)
+//   Disks       the other disks to open at every startup (more_disks.rs,
+//               disks.rs)
+//   Look        dark or light, the layout, the dock
+//   Nvidia      the NVIDIA edition for NVIDIA graphics cards (the Updates
+//               helper, as the first steps tour) and, with Secure Boot, its
+//               driver key (Tools helper, as `ujust enroll-secure-boot-key`)
+//   Fonts       Microsoft fonts
+//   Apps        the kinds of apps of the first steps tour, as tiles that
+//               open a list to tick (apps.rs)
+//   Transfer    settings and apps taken to another computer
+//               (more_transfer.rs, transfer.rs)
+//   Repair      the cosmic-blue look back, every COSMIC setting back to the
+//               defaults
+//   Advanced    restarting into the firmware settings (reboot-to-bios),
+//               virtual machines, the FlatPark app source
 //
 // Changes that cannot be undone in one click (restart, reset, the NVIDIA
 // edition, a license) ask first, in the row itself. A change that does not
-// work shows a card at the top of its page (failure.rs).
+// work shows a card at the top of its tool (failure.rs).
 
 use crate::apps::{self, CATEGORIES, DEVELOPMENT, PASSWORDS};
-use crate::common::{fill, label, spawn, state_icon};
+use crate::common::{Summary, ToastAsk, fill, label, spawn, state_icon};
 use crate::devtools::{self, ToolKind};
 use crate::failure::{self, Card, CardAction, CardMessage, Outcome};
 use crate::hardware::Boot;
 use crate::i18n::tr;
 use cosmic::app::Task;
 use cosmic::iced::{Alignment, Length};
-use cosmic::widget::{self, settings, text, toaster::Toasts};
+use cosmic::widget::{self, settings, text};
 use cosmic::{Element, cosmic_theme, theme};
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
@@ -53,20 +55,14 @@ const VMS: &str = "org.virt_manager.virt-manager";
 const SCANNER: &str = "org.gnome.SimpleScan";
 
 pub const TEXTS: &[&str] = &[
-    // Pages
-    "Computer",
-    "What this computer is made of, and its settings.",
-    "Extra software",
+    // The Install apps tool
     "Ready in one click. In each list, the apps most used on Linux are already ticked.",
-    "Appearance",
-    "The look of the desktop and your COSMIC settings.",
     // Common
     "Install",
     "Remove",
     "Cancel",
     "Working…",
     // Computer
-    "This computer",
     "Settings",
     "Printers and scanners",
     "No printer added yet. Recent printers on the network or plugged in by USB show up by themselves in the print window.",
@@ -117,7 +113,6 @@ pub const TEXTS: &[&str] = &[
     "FlatPark",
     "More apps in COSMIC Store, from outside Flathub. Less checked.",
     "Tick the ones you want, untick the ones to remove.",
-    "For the system",
     "Apply",
     "Back to the list",
     // Appearance
@@ -145,13 +140,29 @@ pub const TEXTS: &[&str] = &[
     "Every COSMIC setting goes back to the defaults. A copy is kept in your settings folder.",
     "Log out and back in to finish.",
     "Save",
+    "No printer added yet.",
+    "Charging stops at 80 %.",
+    "Off: the battery charges fully.",
+    "Choose the ones that open at startup.",
+    "Its driver waits for your OK.",
+    "NVIDIA's own driver.",
+    "The open driver built into Linux.",
 ];
 
+/// The parts of these pages, each one tool (tools.rs)
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Kind {
-    Computer,
-    Software,
-    Appearance,
+pub enum Part {
+    Print,
+    Inside,
+    Battery,
+    Disks,
+    Look,
+    Nvidia,
+    Fonts,
+    Apps,
+    Transfer,
+    Repair,
+    Advanced,
 }
 
 /// What the rows show: read in the background, again after each change
@@ -292,11 +303,15 @@ impl Job {
         }
     }
 
-    fn kind(self) -> Kind {
+    /// The tool whose row it is
+    fn part(self) -> Part {
         match self {
-            Job::BatteryLimit(_) | Job::Nvidia | Job::DriverKey | Job::Firmware => Kind::Computer,
-            Job::Fonts(_) | Job::Vms(_) | Job::FlatPark(_) => Kind::Software,
-            Job::Dark(_) | Job::ResetTheme | Job::ResetConfig => Kind::Appearance,
+            Job::BatteryLimit(_) => Part::Battery,
+            Job::Nvidia | Job::DriverKey => Part::Nvidia,
+            Job::Firmware | Job::Vms(_) | Job::FlatPark(_) => Part::Advanced,
+            Job::Fonts(_) => Part::Fonts,
+            Job::Dark(_) => Part::Look,
+            Job::ResetTheme | Job::ResetConfig => Part::Repair,
         }
     }
 
@@ -361,9 +376,9 @@ pub enum Message {
     ListApply(usize),
     ListDone(usize, Outcome),
     Card(CardMessage),
-    CloseToast(widget::ToastId),
-    /// A toast's button (Undo, Show): closes it, then does it
-    Undo(widget::ToastId, Box<Message>),
+    /// A toast for the window to show (tools.rs); its button (Undo, Show)
+    /// sends its message back here
+    Toast(ToastAsk<Message>),
     /// Change computers (more_transfer.rs)
     Transfer(TransferMessage),
     /// Other disks (more_disks.rs)
@@ -390,16 +405,13 @@ pub struct Page {
     applying: Option<usize>,
     /// What did not work, until closed or done again
     card: Option<Card<Retry>>,
-    toasts: Toasts<Message>,
     /// Change computers: the settings file being saved, the dialog that
     /// takes one back and the file it shows
     saving: bool,
     restore: Option<transfer_view::Step>,
     restored: Option<(crate::transfer::Restore, BTreeSet<crate::transfer::Group>)>,
-    /// Other disks: the list in place of the Computer page's sections, and
-    /// whether to open it once the state is read (screenshot test)
+    /// Other disks: the switches and what Apply said
     disks: disks_view::DisksView,
-    preview_disks: bool,
 }
 
 fn output(program: &str, args: &[&str]) -> String {
@@ -576,13 +588,11 @@ impl Page {
             chosen: vec![BTreeSet::new(); CATEGORIES.len()],
             applying: None,
             card: None,
-            toasts: Toasts::new(Message::CloseToast),
             preview_list: crate::common::preview("developer-tools").then_some(DEVELOPMENT),
             saving: false,
             restore: None,
             restored: None,
             disks: Default::default(),
-            preview_disks: crate::common::preview("other-disks"),
         };
         // `cosmic-blue-tools --restore` (the tour's "Bring your things"):
         // the file chooser at once
@@ -598,19 +608,15 @@ impl Page {
 
     /// A change of the desktop's look, said with a button to take it back
     fn undo_toast(&mut self, message: &'static str, undo: Message) -> Task<Message> {
-        self.toasts
-            .push(
-                widget::toaster::Toast::new(tr(message)).action(tr("Undo").to_owned(), move |id| {
-                    Message::Undo(id, Box::new(undo.clone()))
-                }),
-            )
-            .map(cosmic::Action::App)
+        crate::common::toast(
+            tr(message).to_owned(),
+            Some((tr("Undo").to_owned(), undo)),
+            Message::Toast,
+        )
     }
 
     fn toast(&mut self, message: &'static str) -> Task<Message> {
-        self.toasts
-            .push(widget::toaster::Toast::new(tr(message)))
-            .map(cosmic::Action::App)
+        crate::common::toast(tr(message).to_owned(), None, Message::Toast)
     }
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
@@ -618,9 +624,6 @@ impl Page {
             Message::State(state) => {
                 self.disks_reread(&state.disks);
                 self.state = Some(state);
-                if std::mem::take(&mut self.preview_disks) {
-                    return self.update(Message::Disks(DisksMessage::Open));
-                }
                 if let Some(list) = self.preview_list.take() {
                     return self.update(Message::ListOpen(Some(list)));
                 }
@@ -701,10 +704,8 @@ impl Page {
                     Message::DockVisible(!visible),
                 );
             }
-            Message::Undo(id, message) => {
-                self.toasts.remove(id);
-                return self.update(*message);
-            }
+            // The window shows it (tools.rs)
+            Message::Toast(_) => {}
             Message::FontsLicense => spawn("xdg-open", &[FONTS_LICENSE]),
             Message::ListOpen(open) => {
                 self.open = open;
@@ -784,7 +785,6 @@ impl Page {
                     }
                 }
             }
-            Message::CloseToast(id) => self.toasts.remove(id),
             Message::Transfer(message) => return self.transfer_update(message),
             Message::Disks(message) => return self.disks_update(message),
         }
@@ -877,52 +877,138 @@ impl Page {
             .into()
     }
 
-    pub fn view(&self, kind: Kind) -> Element<'_, Message> {
+    /// One tool (tools.rs gives it its title and frame); the card of a
+    /// change that did not work above it
+    pub fn view(&self, part: Part) -> Element<'_, Message> {
         let cosmic_theme::Spacing { space_s, .. } = theme::spacing();
-        let (title, intro, icon) = match kind {
-            Kind::Computer => (
-                "Computer",
-                "What this computer is made of, and its settings.",
-                // The tour's screen, in the style of the other pages' icons
-                "cosmic-blue-tour-computer",
-            ),
-            Kind::Software => (
-                "Extra software",
-                "Ready in one click. In each list, the apps most used on Linux are already ticked.",
-                "cosmic-blue-tour-store",
-            ),
-            Kind::Appearance => (
-                "Appearance",
-                "The look of the desktop and your COSMIC settings.",
-                "cosmic-blue-tools-appearance",
-            ),
-        };
         let mut content = widget::column::with_capacity(3)
             .spacing(space_s)
             .align_x(Alignment::Center);
-        let card_kind = self.card.as_ref().map(|card| match card.job {
-            Retry::Job(job) => job.kind(),
-            Retry::List(_) => Kind::Software,
+        let card_part = self.card.as_ref().map(|card| match card.job {
+            Retry::Job(job) => job.part(),
+            Retry::List(_) => Part::Apps,
         });
-        if let Some(card) = self.card.as_ref().filter(|_| card_kind == Some(kind)) {
+        if let Some(card) = self.card.as_ref().filter(|_| card_part == Some(part)) {
             content = content.push(card.view(Message::Card));
         }
-        if let Some(state) = &self.state {
-            content = content.push(match kind {
-                Kind::Computer => self.computer(state),
-                Kind::Software => self.software(state),
-                Kind::Appearance => self.appearance(state),
-            });
+        let Some(state) = &self.state else {
+            return content.into();
+        };
+        fn section(row: Element<'_, Message>) -> Element<'_, Message> {
+            settings::section().add(row).into()
         }
-        let page = crate::common::header(icon, tr(title), tr(intro), content.into());
-        widget::toaster(&self.toasts, page)
+        content
+            .push(match part {
+                Part::Print => section(printers_row(state)),
+                Part::Inside => self.inside(state),
+                Part::Battery => section(self.battery(state)),
+                Part::Disks => self.disks_list(&state.disks),
+                Part::Look => self.look(state),
+                Part::Nvidia => self.nvidia(state),
+                Part::Fonts => section(self.row(
+                    "font-x-generic-symbolic",
+                    "Microsoft fonts",
+                    "Arial, Times New Roman, Verdana… for documents made on Windows.",
+                    self.install(state.fonts, Job::Fonts),
+                    Some(Job::Fonts(true)),
+                )),
+                Part::Apps => self.software(state),
+                Part::Transfer => section(self.transfer_row()),
+                Part::Repair => self.repair(),
+                Part::Advanced => self.advanced(state),
+            })
+            .into()
     }
 
-    fn computer<'a>(&'a self, state: &'a State) -> Element<'a, Message> {
-        let cosmic_theme::Spacing { space_s, .. } = theme::spacing();
-        if self.disks.open {
-            return self.disks_list(&state.disks);
+    /// What the toolbox's tile says about a tool (tools.rs)
+    pub fn summary(&self, part: Part) -> Summary {
+        let Some(state) = &self.state else {
+            return Summary::Unknown;
+        };
+        match part {
+            Part::Print => match state.printers.iter().find(|printer| printer.default) {
+                _ if state.printers.is_empty() => {
+                    Summary::Says(tr("No printer added yet.").to_owned())
+                }
+                Some(printer) => Summary::Says(printer.name.clone()),
+                None => Summary::Says(state.printers[0].name.clone()),
+            },
+            Part::Inside => {
+                let hw = crate::hardware::hardware();
+                let model = match (&hw.virtual_machine, hw.model.is_empty()) {
+                    (Some(hypervisor), _) => fill(tr("Virtual machine ({})"), hypervisor),
+                    (None, false) => hw.model.clone(),
+                    (None, true) => tr("Unknown").to_owned(),
+                };
+                if hw.memory_gb > 0 {
+                    // Memory first: a long model name is cut at the end
+                    Summary::Says(format!(
+                        "{}, {model}",
+                        fill(tr("{} GB of memory"), &hw.memory_gb.to_string())
+                    ))
+                } else {
+                    Summary::Says(model)
+                }
+            }
+            Part::Battery => match state.battery_limit {
+                None => Summary::Hidden,
+                Some(true) => Summary::Says(tr("Charging stops at 80 %.").to_owned()),
+                Some(false) => Summary::Says(tr("Off: the battery charges fully.").to_owned()),
+            },
+            Part::Disks => {
+                if state.disks.is_empty() {
+                    Summary::Hidden
+                } else if state.disks.iter().any(crate::disks::Disk::problem) {
+                    Summary::Warns(crate::disks::summary(&state.disks))
+                } else if state.disks.iter().any(crate::disks::Disk::at_startup) {
+                    Summary::Says(crate::disks::summary(&state.disks))
+                } else {
+                    Summary::Says(tr("Choose the ones that open at startup.").to_owned())
+                }
+            }
+            Part::Look => Summary::Says(
+                tr(if state.dark {
+                    "Dark theme"
+                } else {
+                    "Light theme"
+                })
+                .to_owned(),
+            ),
+            Part::Nvidia => match (state.nvidia, state.driver_key) {
+                (None, _) => Summary::Hidden,
+                (Some(true), Some(DriverKey::Missing)) => {
+                    Summary::Warns(tr("Its driver waits for your OK.").to_owned())
+                }
+                (Some(true), _) => Summary::Says(tr("NVIDIA's own driver.").to_owned()),
+                (Some(false), _) => {
+                    Summary::Says(tr("The open driver built into Linux.").to_owned())
+                }
+            },
+            Part::Fonts => Summary::Says(
+                tr(if state.fonts {
+                    "Installed."
+                } else {
+                    "Arial, Times New Roman, Verdana…"
+                })
+                .to_owned(),
+            ),
+            Part::Apps => Summary::Says(tr("Office, games, school, development…").to_owned()),
+            Part::Transfer => Summary::Says(tr("Your settings and apps, in one file.").to_owned()),
+            Part::Repair | Part::Advanced => Summary::Unknown,
         }
+    }
+
+    /// The tool opened (tools.rs): lists show what is installed now
+    pub fn opened(&mut self, part: Part) -> Task<Message> {
+        match part {
+            Part::Disks => self.update(Message::Disks(DisksMessage::Open)),
+            Part::Apps => self.update(Message::ListOpen(None)),
+            _ => Task::none(),
+        }
+    }
+
+    /// What the computer is made of, and how it starts
+    fn inside<'a>(&'a self, state: &'a State) -> Element<'a, Message> {
         let hw = crate::hardware::hardware();
         // What it is made of: always there, so the page is never empty
         let model = match (&hw.virtual_machine, hw.model.is_empty()) {
@@ -960,8 +1046,7 @@ impl Page {
             Boot::Uefi(Some(false)) => "UEFI, Secure Boot off",
             Boot::Uefi(None) => "UEFI",
         };
-        let info = settings::section()
-            .title(tr("This computer"))
+        settings::section()
             .add(info_row("computer-symbolic", "Model", model))
             .add(info_row(
                 "power-profile-performance-symbolic",
@@ -977,13 +1062,13 @@ impl Page {
                 "system-shutdown-symbolic",
                 "Startup",
                 tr(startup).to_owned(),
-            ));
+            ))
+            .into()
+    }
 
-        let mut section = settings::section()
-            .title(tr("Settings"))
-            .add(printers_row(state))
-            .add(self.disks_row(&state.disks));
-        section = section.add(match state.battery_limit {
+    /// The battery charge limit, or why there is nothing to set
+    fn battery<'a>(&self, state: &State) -> Element<'a, Message> {
+        match state.battery_limit {
             Some(on) => self.row(
                 "battery-good-symbolic",
                 "Battery charge limit",
@@ -998,7 +1083,12 @@ impl Page {
                 widget::space::horizontal().width(0).into(),
                 None,
             ),
-        });
+        }
+    }
+
+    /// The NVIDIA edition and its driver key
+    fn nvidia<'a>(&'a self, state: &'a State) -> Element<'a, Message> {
+        let mut section = settings::section();
         match state.nvidia {
             Some(true) => {
                 section = section.add(match state.driver_key {
@@ -1036,7 +1126,22 @@ impl Page {
             }
             None => {}
         }
-        section = section.add(if state.efi {
+        if state.nvidia.is_none() {
+            section = section.add(self.row(
+                "video-display-symbolic",
+                "NVIDIA graphics card",
+                "No NVIDIA graphics card in this computer: its open driver is already the right one.",
+                widget::space::horizontal().width(0).into(),
+                None,
+            ));
+        }
+        section.into()
+    }
+
+    /// For experienced users: the firmware settings, virtual machines,
+    /// FlatPark
+    fn advanced<'a>(&'a self, state: &'a State) -> Element<'a, Message> {
+        let firmware = if state.efi {
             self.row(
                 "preferences-system-symbolic",
                 "Firmware settings (BIOS/UEFI)",
@@ -1052,19 +1157,28 @@ impl Page {
                 widget::space::horizontal().width(0).into(),
                 None,
             )
-        });
-        widget::column::with_capacity(2)
-            .spacing(space_s)
-            .push(info)
-            .push(section)
+        };
+        settings::section()
+            .add(firmware)
+            .add(self.row(
+                "computer-symbolic",
+                "Virtual machines",
+                "virt-manager, to run Windows or another Linux in a window.",
+                self.install(state.vms, Job::Vms),
+                None,
+            ))
+            .add(self.row(
+                "system-software-install-symbolic",
+                "FlatPark",
+                "More apps in COSMIC Store, from outside Flathub. Less checked.",
+                self.toggler(state.flatpark, Job::FlatPark),
+                None,
+            ))
             .into()
     }
 
-    /// The kinds of apps as tiles (no heading above them: the page must
-    /// fit without scrolling), then what touches the system; or the list
-    /// of the category opened
+    /// The kinds of apps as tiles; or the list of the category opened
     fn software<'a>(&'a self, state: &'a State) -> Element<'a, Message> {
-        let space_s = theme::spacing().space_s;
         if let Some(n) = self.open {
             return self.list(state, n);
         }
@@ -1081,34 +1195,7 @@ impl Page {
                 )
             })
             .collect();
-        let system = settings::section()
-            .add(self.row(
-                "computer-symbolic",
-                "Virtual machines",
-                "virt-manager, to run Windows or another Linux in a window.",
-                self.install(state.vms, Job::Vms),
-                None,
-            ))
-            .add(self.row(
-                "font-x-generic-symbolic",
-                "Microsoft fonts",
-                "Arial, Times New Roman, Verdana… for documents made on Windows.",
-                self.install(state.fonts, Job::Fonts),
-                Some(Job::Fonts(true)),
-            ))
-            .add(self.row(
-                "system-software-install-symbolic",
-                "FlatPark",
-                "More apps in COSMIC Store, from outside Flathub. Less checked.",
-                self.toggler(state.flatpark, Job::FlatPark),
-                None,
-            ));
-        widget::column::with_capacity(4)
-            .spacing(space_s)
-            .push(apps::grid(tiles))
-            .push(text::heading(tr("For the system")))
-            .push(system)
-            .into()
+        apps::grid(tiles)
     }
 
     /// A category's apps by group, each with its checkbox, then Apply
@@ -1172,7 +1259,8 @@ impl Page {
             .into()
     }
 
-    fn appearance(&self, state: &State) -> Element<'_, Message> {
+    /// Dark or light, the layout, the dock, more in Settings
+    fn look(&self, state: &State) -> Element<'_, Message> {
         let space_s = theme::spacing().space_s;
         let layout_buttons = [(false, "Top bar and dock"), (true, "Bar at the bottom")]
             .into_iter()
@@ -1227,7 +1315,12 @@ impl Page {
                 None,
             ),
         );
-        let settings_section = settings::section()
+        look.into()
+    }
+
+    /// The cosmic-blue look back, or every COSMIC setting
+    fn repair(&self) -> Element<'_, Message> {
+        settings::section()
             .add(self.row(
                 "edit-undo-symbolic",
                 "The cosmic-blue look",
@@ -1242,11 +1335,6 @@ impl Page {
                 self.button(Job::ResetConfig, "Reset", false),
                 Some(Job::ResetConfig),
             ))
-            .add(self.transfer_row());
-        widget::column::with_capacity(2)
-            .spacing(theme::spacing().space_s)
-            .push(look)
-            .push(settings_section)
             .into()
     }
 }

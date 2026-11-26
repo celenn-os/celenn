@@ -8,9 +8,6 @@ msgstr ""
 msgid "Updates"
 msgstr "Aggiornamenti"
 
-msgid "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you. If something goes wrong, you can go back to the previous version."
-msgstr "cosmic-blue si aggiorna da solo in background. Una nuova versione parte al prossimo riavvio, senza interromperti. Se qualcosa non va, puoi tornare alla versione precedente."
-
 msgid "Current version: {}"
 msgstr "Versione attuale: {}"
 
@@ -138,12 +135,6 @@ msgstr "Riprendi gli aggiornamenti"
 msgid "cosmic-blue Tools"
 msgstr "Strumenti di cosmic-blue"
 
-msgid "Maintenance"
-msgstr "Manutenzione"
-
-msgid "Keep the computer tidy and in shape, without typing commands."
-msgstr "Mantenere il computer in ordine e in forma, senza digitare comandi."
-
 msgid "Disk space"
 msgstr "Spazio su disco"
 
@@ -240,9 +231,6 @@ msgstr "Nuove versioni di BIOS, SSD, dock… dai loro produttori."
 msgid "Open"
 msgstr "Apri"
 
-msgid "Help"
-msgstr "Aiuto"
-
 msgid "Find answers, ask a question, or tell us what goes wrong."
 msgstr "Trovare risposte, fare una domanda o dirci cosa non va."
 
@@ -300,9 +288,6 @@ msgstr "Accetta e installa"
 msgid "All COSMIC settings"
 msgstr "Tutte le impostazioni di COSMIC"
 
-msgid "Appearance"
-msgstr "Aspetto e impostazioni"
-
 msgid "Arial, Times New Roman, Verdana… for documents made on Windows."
 msgstr "Arial, Times New Roman, Verdana… per i documenti creati su Windows."
 
@@ -314,9 +299,6 @@ msgstr "Torna alle impostazioni predefinite di cosmic-blue, per tutto. Una copia
 
 msgid "Battery charge limit"
 msgstr "Limite di carica della batteria"
-
-msgid "This computer"
-msgstr "Questo computer"
 
 msgid "Settings"
 msgstr "Impostazioni"
@@ -366,26 +348,17 @@ msgstr "Questo computer non ha una batteria: niente da regolare."
 msgid "This computer starts in legacy BIOS mode. To open its settings, press the key shown when it powers on, often F2, F10 or Del."
 msgstr "Questo computer si avvia in modalità BIOS legacy. Per aprire le sue impostazioni, premete il tasto indicato all'accensione, spesso F2, F10 o Canc."
 
-msgid "What this computer is made of, and its settings."
-msgstr "Com'è fatto questo computer, e le sue impostazioni."
-
 msgid "Cancel"
 msgstr "Annulla"
 
 msgid "Charging stops at 80 %: the battery lasts longer when the laptop stays plugged in."
 msgstr "La carica si ferma all'80 %: la batteria dura di più quando il portatile resta collegato."
 
-msgid "Computer"
-msgstr "Computer"
-
 msgid "Dark theme"
 msgstr "Tema scuro"
 
 msgid "Every COSMIC setting goes back to the defaults. A copy is kept in your settings folder."
 msgstr "Tutte le impostazioni di COSMIC tornano a quelle predefinite. Una copia resta nella cartella delle impostazioni."
-
-msgid "Extra software"
-msgstr "Software aggiuntivo"
 
 msgid "Firmware settings (BIOS/UEFI)"
 msgstr "Impostazioni del firmware (BIOS/UEFI)"
@@ -477,9 +450,6 @@ msgstr "Il computer si riavvia subito. Salva prima il tuo lavoro."
 msgid "The cosmic-blue look"
 msgstr "L'aspetto di cosmic-blue"
 
-msgid "The look of the desktop and your COSMIC settings."
-msgstr "L'aspetto del desktop e le tue impostazioni di COSMIC."
-
 msgid "Use it"
 msgstr "Usala"
 
@@ -561,8 +531,8 @@ msgstr "Qualcosa di inatteso è andato storto. Non è stato modificato nulla."
 msgid "Technical details"
 msgstr "Dettagli tecnici"
 
-msgid "The disk is full ({} free). Free up space with Clean up, in cosmic-blue Tools, Maintenance, then try again."
-msgstr "Il disco è pieno ({} liberi). Liberate spazio con Pulisci, in Strumenti di cosmic-blue, Manutenzione, poi riprovate."
+msgid "The disk is full ({} free). Free up space with cosmic-blue Tools, then try again."
+msgstr "Il disco è pieno ({} liberi). Libera spazio con Strumenti di cosmic-blue, poi riprova."
 
 msgid "The report opens in your browser, filled in: the cosmic-blue version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
 msgstr "Il rapporto si apre nel browser, già compilato: la versione di cosmic-blue, l'hardware e questo errore. Nessun file né dato personale. Lo rileggete prima di inviarlo; scrivete nella vostra lingua. Per inviarlo serve un account GitHub."
@@ -588,30 +558,6 @@ msgstr "Il tuo gestore di password è pronto."
 msgid "Tick the ones you want, untick the ones to remove."
 msgstr "Seleziona quelli che vuoi, deseleziona quelli da rimuovere."
 
-msgid "Overview"
-msgstr "Panoramica"
-
-msgid "All is well"
-msgstr "Tutto a posto"
-
-msgid "One thing needs your attention"
-msgstr "Una cosa richiede la tua attenzione"
-
-msgid "{} things need your attention"
-msgstr "{} cose richiedono la tua attenzione"
-
-msgid "cosmic-blue looks after itself. Here is where things stand."
-msgstr "cosmic-blue si prende cura di sé. Ecco a che punto sono le cose."
-
-msgid "System up to date"
-msgstr "Sistema aggiornato"
-
-msgid "Version {}. The next one installs by itself in the background."
-msgstr "Versione {}. La prossima si installa da sola in background."
-
-msgid "Update ready"
-msgstr "Aggiornamento pronto"
-
 msgid "Version {} starts at the next restart."
 msgstr "La versione {} parte al prossimo riavvio."
 
@@ -633,17 +579,11 @@ msgstr "Ultimo backup {} giorni fa."
 msgid "Almost full: {} free."
 msgstr "Quasi pieno: {} liberi."
 
-msgid "Nothing new from the makers."
-msgstr "Niente di nuovo dai produttori."
-
 msgid "One device has an update."
 msgstr "Un dispositivo ha un aggiornamento."
 
 msgid "{} devices have an update."
 msgstr "{} dispositivi hanno un aggiornamento."
-
-msgid "Search a setting"
-msgstr "Cerca un'impostazione"
 
 msgid "Nothing found."
 msgstr "Nessun risultato."
@@ -680,9 +620,6 @@ msgstr "Disegno e ritocco"
 
 msgid "For children"
 msgstr "Per i bambini"
-
-msgid "For the system"
-msgstr "Per il sistema"
 
 msgid "GCompris, Stellarium, GeoGebra…"
 msgstr "GCompris, Stellarium, GeoGebra…"
@@ -994,3 +931,189 @@ msgstr "{}: non è stato possibile aprirlo."
 
 msgid "{}: could not be closed."
 msgstr "{}: non è stato possibile chiuderlo."
+
+msgid "A copy of your files"
+msgstr "Una copia dei tuoi file"
+
+msgid "A copy of your files on a USB drive or another disk, made by itself every day."
+msgstr "Una copia dei tuoi file su una chiavetta USB o un altro disco, fatta da sola ogni giorno."
+
+msgid "All is well: cosmic-blue looks after itself."
+msgstr "Tutto bene: cosmic-blue si prende cura di sé."
+
+msgid "Apps, look, settings"
+msgstr "App, aspetto, impostazioni"
+
+msgid "Arial, Times New Roman, Verdana…"
+msgstr "Arial, Times New Roman, Verdana…"
+
+msgid "Channel, versions, firmware, virtual machines"
+msgstr "Canale, versioni, firmware, macchine virtuali"
+
+msgid "Dark or light, and the layout of the desktop."
+msgstr "Scuro o chiaro, e la disposizione del desktop."
+
+msgid "Disk space and the trash"
+msgstr "Spazio su disco e cestino"
+
+msgid "Disks open at startup"
+msgstr "Dischi aperti all’avvio"
+
+msgid "Every day"
+msgstr "Ogni giorno"
+
+msgid "First steps again"
+msgstr "Rivedi Primi passi"
+
+msgid "For experienced users"
+msgstr "Per utenti esperti"
+
+msgid "For experienced users…"
+msgstr "Per utenti esperti…"
+
+msgid "Get help"
+msgstr "Ottenere aiuto"
+
+msgid "Go back"
+msgstr "Tornare indietro"
+
+msgid "Guide, questions, report a problem"
+msgstr "Guida, domande, segnalare un problema"
+
+msgid "Help on this tool"
+msgstr "Aiuto su questo strumento"
+
+msgid "In a terminal:"
+msgstr "In un terminale:"
+
+msgid "Install apps"
+msgstr "Installare app"
+
+msgid "Make it yours"
+msgstr "Su misura per te"
+
+msgid "My computer"
+msgstr "Il mio computer"
+
+msgid "NVIDIA driver"
+msgstr "Driver NVIDIA"
+
+msgid "Not set up yet."
+msgstr "Non ancora configurato."
+
+msgid "Office, games, school, development…"
+msgstr "Ufficio, giochi, scuola, sviluppo…"
+
+msgid "One thing needs your attention: {}"
+msgstr "Una cosa richiede la tua attenzione: {}"
+
+msgid "Print and scan"
+msgstr "Stampare e scansionare"
+
+msgid "Printers on the network or plugged in by USB show up by themselves. Add one or set it up here."
+msgstr "Le stampanti in rete o collegate via USB compaiono da sole. Aggiungine una o configurala qui."
+
+msgid "Processor, memory, graphics card"
+msgstr "Processore, memoria, scheda grafica"
+
+msgid "Protect your files"
+msgstr "Proteggi i tuoi file"
+
+msgid "Put back what is missing: the apps that come with cosmic-blue, the cosmic-blue look, your COSMIC settings."
+msgstr "Rimetti ciò che manca: le app incluse in cosmic-blue, l’aspetto di cosmic-blue, le tue impostazioni di COSMIC."
+
+msgid "Remove what nothing uses any more. Your files stay as they are."
+msgstr "Rimuovi ciò che non serve più. I tuoi file restano come sono."
+
+msgid "Repair"
+msgstr "Riparare"
+
+msgid "Search a tool"
+msgstr "Cerca uno strumento"
+
+msgid "Something wrong since the last update? Go back to the previous version. Your files and settings stay as they are."
+msgstr "Qualcosa non va dall’ultimo aggiornamento? Torna alla versione precedente. I tuoi file e le impostazioni restano come sono."
+
+msgid "Spare the battery"
+msgstr "Preservare la batteria"
+
+msgid "The battery charge limit"
+msgstr "Il limite di carica della batteria"
+
+msgid "The graphics card's driver"
+msgstr "Il driver della scheda grafica"
+
+msgid "The system version could not be read."
+msgstr "Impossibile leggere la versione del sistema."
+
+msgid "The system, the apps and the devices"
+msgstr "Il sistema, le app e i dispositivi"
+
+msgid "Theme and layout"
+msgstr "Tema e disposizione"
+
+msgid "To the previous version"
+msgstr "Alla versione precedente"
+
+msgid "Toolbox"
+msgstr "Cassetta degli attrezzi"
+
+msgid "Up to date, version {}"
+msgstr "Aggiornato, versione {}"
+
+msgid "Update"
+msgstr "Aggiornare"
+
+msgid "Useful when you know what you are doing. Each one is also a ujust command."
+msgstr "Utile quando sai cosa stai facendo. Ognuno è anche un comando ujust."
+
+msgid "Version {}"
+msgstr "Versione {}"
+
+msgid "What this computer is made of, and how it starts."
+msgstr "Di cosa è fatto questo computer e come si avvia."
+
+msgid "What's inside"
+msgstr "Cosa c’è dentro"
+
+msgid "When something is wrong"
+msgstr "Quando qualcosa non va"
+
+msgid "Your settings and apps, in one file."
+msgstr "Le tue impostazioni e app, in un solo file."
+
+msgid "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you."
+msgstr "cosmic-blue si aggiorna in background. Una nuova versione parte al prossimo riavvio, senza interromperti."
+
+msgid "{} things need your attention: {}"
+msgstr "{} cose richiedono la tua attenzione: {}"
+
+msgid "Charging stops at 80 %."
+msgstr "La carica si ferma all'80 %."
+
+msgid "Choose the ones that open at startup."
+msgstr "Scegli quelli che si aprono all'avvio."
+
+msgid "Clean up the system"
+msgstr "Pulire il sistema"
+
+msgid "Its driver waits for your OK."
+msgstr "Il suo driver attende il tuo consenso."
+
+msgid "NVIDIA's own driver."
+msgstr "Il driver di NVIDIA."
+
+msgid "No previous version"
+msgstr "Nessuna versione precedente"
+
+msgid "No printer added yet."
+msgstr "Nessuna stampante aggiunta."
+
+msgid "Off: the battery charges fully."
+msgstr "Disattivato: la batteria si carica del tutto."
+
+msgid "The open driver built into Linux."
+msgstr "Il driver libero integrato in Linux."
+
+msgid "This computer has only ever run this version."
+msgstr "Questo computer ha sempre usato solo questa versione."
