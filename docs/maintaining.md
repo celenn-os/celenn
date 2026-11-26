@@ -64,15 +64,17 @@ ships a new one, `check-cosmic-version.yml` opens a pull request (label
 When that pull request fails, the cause is usually one of cosmic-blue's
 changes to COSMIC no longer fitting the new code:
 
-- **Login screen** (`build_files/greeter/user-switch.patch`, applied with no
-  fuzz). Regenerate it against the new release:
+- **Login screen** (`build_files/greeter/user-switch.patch` and
+  `clock.patch`, applied with no fuzz). Regenerate the one that no longer
+  applies against the new release:
   1. Clone `pop-os/cosmic-greeter` and check out the new release tag (for
      example `epoch-1.12.0`).
   2. Apply the old patch with fuzz (`patch -p1 --fuzz=3 <
      user-switch.patch`), fix the rejected parts by hand, and check that it
      builds (`cargo check`).
-  3. Write the new patch with `git diff > user-switch.patch`. It must still
-     contain the marker comment `cosmic-blue: with 2 to 6 accounts`.
+  3. Write the new patch with `git diff > user-switch.patch` (one patch at a
+     time). It must still contain its marker comment (`cosmic-blue: with 2
+     to 8 accounts`, `cosmic-blue: the clock in the text color`).
 - **COSMIC Store and Files** (`build_files/store/patch.py`,
   `build_files/filemanager/patch.py`). Each replacement must match exactly
   once. The build log names the one that no longer matches: update its

@@ -769,10 +769,13 @@ check_color() {
 }
 builder=/usr/share/cosmic/com.system76.CosmicTheme
 check_color "${builder}.Dark.Builder/v2/accent" '#3a9dff'
-check_color "${builder}.Light.Builder/v2/accent" '#1d47c4'
+check_color "${builder}.Light.Builder/v2/accent" '#0056b2'
 check_color "${builder}.Dark.Builder/v2/bg_color" '#141c2a'
 check_color "${builder}.Light.Builder/v2/bg_color" '#d3d8e0'
-# The active window outline follows the accent
+# The active window outline follows the accent, 1 px wide
+grep -qx 1 "${builder}.Dark.Builder/v2/active_hint"
+grep -qx 1 "${builder}.Light.Builder/v2/active_hint"
+grep -qx 1 "${builder}.Dark/v2/active_hint"
 grep -qx None "${builder}.Dark.Builder/v2/window_hint"
 grep -qx None "${builder}.Light.Builder/v2/window_hint"
 
@@ -790,7 +793,7 @@ if grep -q 'xkb_config$' "${DEFAULTS_LIST}"; then exit 1; fi
 cmp <("${MIGRATE}" --manifest) "${DEFAULTS_LIST}"
 for variant in /ctx/previous_defaults/theme/stock/cosmic /ctx/previous_defaults/theme/frosted/cosmic \
     /ctx/previous_defaults/theme/glass-0.8/cosmic /ctx/previous_defaults/theme/glass-0.65/cosmic \
-    /ctx/previous_defaults/theme/accent-4f8dff/cosmic \
+    /ctx/previous_defaults/theme/accent-4f8dff/cosmic /ctx/previous_defaults/theme/accent-3a9dff/cosmic \
     /ctx/build_files/previous_defaults/upstream; do
     "${MIGRATE}" --hash-tree "${variant}" | grep ' com.system76.CosmicT' >/dev/null
     missing="$(comm -23 <("${MIGRATE}" --hash-tree "${variant}" | sort) <(sort "${PREVIOUS_LIST}"))"

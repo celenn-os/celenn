@@ -26,9 +26,21 @@ const ACCENT_DARK: Srgb<u8> = Srgb::new(0x3a, 0x9d, 0xff);
 /// Dark theme accent of earlier images (until 2026-11-26): the middle of the
 /// logo orbit gradient.
 const ACCENT_DARK_4F8DFF: Srgb<u8> = Srgb::new(0x4f, 0x8d, 0xff);
-/// Light theme accent: the deep blue of the logo planet (#1d47c4), dark
-/// enough to stay readable on light surfaces.
-const ACCENT_LIGHT: Srgb<u8> = Srgb::new(0x1d, 0x47, 0xc4);
+/// Light theme accent: the dark theme accent's hue (oklch 252) made dark
+/// enough to stay readable on light surfaces (4.9:1 on the window
+/// background), so that both modes share one blue.
+const ACCENT_LIGHT: Srgb<u8> = Srgb::new(0x00, 0x56, 0xb2);
+/// Light theme accent of earlier images (until 2026-11-26): the deep blue
+/// of the logo planet, a more violet hue (265) than the dark accent.
+const ACCENT_LIGHT_1D47C4: Srgb<u8> = Srgb::new(0x1d, 0x47, 0xc4);
+
+/// Width of the outline of the active window, in pixels. COSMIC's 3 px
+/// outline in the bright accent frames every window heavily over the blue
+/// wallpaper; 1 px still shows which window is active. COSMIC Settings
+/// (Desktop > Window management) can change it.
+const ACTIVE_HINT: u32 = 1;
+/// Outline width of earlier images (COSMIC's default, until 2026-11-26)
+const ACTIVE_HINT_3: u32 = 3;
 
 /// Window background, dark theme: night blue at the lightness of COSMIC's
 /// default dark gray (oklch 0.225 0.03, hue of the accent).
@@ -40,8 +52,14 @@ const BG_LIGHT: Srgb<u8> = Srgb::new(0xd3, 0xd8, 0xe0);
 /// COSMIC only keeps its hue and chroma).
 const NEUTRAL_TINT: Srgb<u8> = Srgb::new(0x5a, 0x64, 0x75);
 
-fn colors(builder: ThemeBuilder, accent: Srgb<u8>, bg: Srgb<u8>) -> ThemeBuilder {
+fn colors(
+    mut builder: ThemeBuilder,
+    accent: Srgb<u8>,
+    bg: Srgb<u8>,
+    active_hint: u32,
+) -> ThemeBuilder {
     let bg: Srgb = bg.into_format();
+    builder.active_hint = active_hint;
     builder
         .accent(accent.into_format())
         .bg_color(Srgba::new(bg.red, bg.green, bg.blue, 1.0))
@@ -98,20 +116,56 @@ fn frosted_glass(mut builder: ThemeBuilder, thickness: BlurStrength, glass: f32)
     builder
 }
 
-/// The cosmic-blue dark and light themes with the given dark accent and
-/// frosted glass (thickness, glass opacity of the dark theme, of the light
-/// theme).
-fn cosmic_blue(accent_dark: Srgb<u8>, thickness: BlurStrength, glass_dark: f32, glass_light: f32) {
+/// What changed between the cosmic-blue themes of successive images
+struct Look {
+    accent_dark: Srgb<u8>,
+    accent_light: Srgb<u8>,
+    active_hint: u32,
+    thickness: BlurStrength,
+    glass_dark: f32,
+    glass_light: f32,
+}
+
+/// The current cosmic-blue themes
+const CURRENT: Look = Look {
+    accent_dark: ACCENT_DARK,
+    accent_light: ACCENT_LIGHT,
+    active_hint: ACTIVE_HINT,
+    thickness: THICKNESS,
+    glass_dark: GLASS_OPACITY_DARK,
+    glass_light: GLASS_OPACITY_LIGHT,
+};
+
+/// The themes of earlier images, by the name of their variant
+/// (until 2026-11-26: light accent #1d47c4 and a 3 px active window outline)
+const UNTIL_20261126: Look = Look {
+    accent_light: ACCENT_LIGHT_1D47C4,
+    active_hint: ACTIVE_HINT_3,
+    ..CURRENT
+};
+
+/// The cosmic-blue dark and light themes
+fn cosmic_blue(look: &Look) {
     write(
         frosted_glass(
-            colors(frosted(ThemeBuilder::dark()), accent_dark, BG_DARK),
-            thickness,
-            glass_dark,
+            colors(
+                frosted(ThemeBuilder::dark()),
+                look.accent_dark,
+                BG_DARK,
+                look.active_hint,
+            ),
+            look.thickness,
+            look.glass_dark,
         ),
         frosted_glass(
-            colors(frosted(ThemeBuilder::light()), ACCENT_LIGHT, BG_LIGHT),
-            thickness,
-            glass_light,
+            colors(
+                frosted(ThemeBuilder::light()),
+                look.accent_light,
+                BG_LIGHT,
+                look.active_hint,
+            ),
+            look.thickness,
+            look.glass_light,
         ),
     );
     icon_theme();
@@ -156,31 +210,37 @@ fn write(dark: ThemeBuilder, light: ThemeBuilder) {
 }
 
 /// Without an argument: the cosmic-blue themes. With "stock", "frosted",
-/// "glass-0.8", "glass-0.65" or "accent-4f8dff": themes from earlier images,
+/// "glass-0.8", "glass-0.65", "accent-4f8dff" or "accent-3a9dff": themes
+/// from earlier images,
 /// which accounts may still hold as a copy (COSMIC's own default, written by
 /// the first-run assistant, the same with frosted glass, the default before
 /// the blue colors, the blue themes with earlier frosted glass settings, and
-/// the earlier dark accent). They go into
+/// the earlier dark accent, the earlier light accent and outline). They go
+/// into
 /// /usr/share/cosmic-blue/previous-defaults.list, so that
 /// cosmic-blue-migrate-defaults can tell them from a user's own choice.
 fn main() {
     match std::env::args().nth(1).as_deref() {
-        None => cosmic_blue(
-            ACCENT_DARK,
-            THICKNESS,
-            GLASS_OPACITY_DARK,
-            GLASS_OPACITY_LIGHT,
-        ),
-        Some("accent-4f8dff") => cosmic_blue(
-            ACCENT_DARK_4F8DFF,
-            THICKNESS,
-            GLASS_OPACITY_DARK,
-            GLASS_OPACITY_LIGHT,
-        ),
-        Some("glass-0.8") => cosmic_blue(ACCENT_DARK_4F8DFF, GLASS_0_8.0, GLASS_0_8.1, GLASS_0_8.1),
-        Some("glass-0.65") => {
-            cosmic_blue(ACCENT_DARK_4F8DFF, GLASS_0_65.0, GLASS_0_65.1, GLASS_0_65.1)
-        }
+        None => cosmic_blue(&CURRENT),
+        Some("accent-3a9dff") => cosmic_blue(&UNTIL_20261126),
+        Some("accent-4f8dff") => cosmic_blue(&Look {
+            accent_dark: ACCENT_DARK_4F8DFF,
+            ..UNTIL_20261126
+        }),
+        Some("glass-0.8") => cosmic_blue(&Look {
+            accent_dark: ACCENT_DARK_4F8DFF,
+            thickness: GLASS_0_8.0,
+            glass_dark: GLASS_0_8.1,
+            glass_light: GLASS_0_8.1,
+            ..UNTIL_20261126
+        }),
+        Some("glass-0.65") => cosmic_blue(&Look {
+            accent_dark: ACCENT_DARK_4F8DFF,
+            thickness: GLASS_0_65.0,
+            glass_dark: GLASS_0_65.1,
+            glass_light: GLASS_0_65.1,
+            ..UNTIL_20261126
+        }),
         Some("stock") => write(ThemeBuilder::dark(), ThemeBuilder::light()),
         Some("frosted") => write(
             frosted(ThemeBuilder::dark()),

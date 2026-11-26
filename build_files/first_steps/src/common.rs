@@ -40,17 +40,19 @@ pub enum Summary {
 }
 
 /// A tool's symbol in a round accent-colored button shape, as the dock's
-/// icons of cosmic-blue: on the toolbox's tiles and at the top of a tool
+/// icons of cosmic-blue: on the toolbox's tiles and at the top of a tool.
+/// The accent is darkened if needed so that the white symbol stays readable
+/// (style::fill_under_white).
 pub fn tool_icon<'a, M: 'static>(name: &'static str, size: u16) -> Element<'a, M> {
     widget::icon::from_name(name)
         .size(size / 2)
         .apply(widget::container)
         .center(Length::Fixed(f32::from(size)))
         .class(theme::Container::custom(move |theme| {
-            let accent = theme.cosmic().accent_color();
+            let fill = crate::style::fill_under_white(theme.cosmic().accent_color());
             cosmic::iced::widget::container::Style {
                 icon_color: Some(cosmic::iced::Color::WHITE),
-                background: Some(cosmic::iced::Background::Color(accent.into())),
+                background: Some(cosmic::iced::Background::Color(fill.into())),
                 border: cosmic::iced::Border {
                     radius: (f32::from(size) / 2.0).into(),
                     ..Default::default()

@@ -5,6 +5,7 @@
 // (Each program uses its part)
 #![allow(dead_code)]
 
+use cosmic::cosmic_theme::palette::{Clamp, FromColor, IntoColor, Oklch, Srgb, Srgba};
 use cosmic::theme;
 use cosmic::widget::{self, text};
 use std::borrow::Cow;
@@ -133,6 +134,39 @@ fn rounded_coverage(size: f32, x: f32, y: f32) -> f32 {
     (0.5 - distance).clamp(0.0, 1.0)
 }
 
+/// The fill of a round icon button with a white symbol (the toolbox's tiles,
+/// as the dock's icons): the accent, made darker when needed so that white
+/// keeps a contrast of at least 4:1 on it. The bright dark theme accent
+/// (#3a9dff) only gives 2.8:1; it keeps its hue and becomes #1180e0. A
+/// darker accent (the light theme's) is used as is.
+pub fn fill_under_white(accent: Srgba) -> Srgba {
+    let mut oklch: Oklch = Srgb::new(accent.red, accent.green, accent.blue).into_color();
+    let mut srgb = accent.color;
+    while contrast_with_white(srgb) < MIN_WHITE_CONTRAST && oklch.l > 0.3 {
+        oklch.l -= 0.005;
+        srgb = Srgb::from_color(oklch).clamp();
+    }
+    Srgba::new(srgb.red, srgb.green, srgb.blue, accent.alpha)
+}
+
+/// Contrast of white text or symbols on a filled icon button
+const MIN_WHITE_CONTRAST: f32 = 4.0;
+
+/// WCAG contrast ratio between white and a color
+fn contrast_with_white(color: Srgb) -> f32 {
+    let luminance = |c: f32| {
+        if c <= 0.04045 {
+            c / 12.92
+        } else {
+            ((c + 0.055) / 1.055).powf(2.4)
+        }
+    };
+    let l = 0.2126 * luminance(color.red)
+        + 0.7152 * luminance(color.green)
+        + 0.0722 * luminance(color.blue);
+    1.05 / (l + 0.05)
+}
+
 /// A button for a person's picture, `size` pixels wide: the selected (or
 /// focused) one outlined in the accent color, a fainter outline on hover,
 /// drawn over the picture's edge in its rounded shape, as the image buttons
@@ -167,7 +201,29 @@ pub fn picture_button<'a, M: Clone + 'a>(
 
 #[cfg(test)]
 mod tests {
-    use super::rounded_coverage;
+    use super::{contrast_with_white, fill_under_white, rounded_coverage};
+    use cosmic::cosmic_theme::palette::{IntoColor, Oklch, Srgb, Srgba};
+
+    fn hex(color: Srgba) -> String {
+        let c: Srgba<u8> = color.into_format();
+        format!("#{:02x}{:02x}{:02x}", c.red, c.green, c.blue)
+    }
+
+    #[test]
+    fn icon_fill_keeps_white_readable() {
+        // The dark theme accent gets darker, same hue, white at 4:1
+        let accent = Srgba::new(0x3a as f32 / 255.0, 0x9d as f32 / 255.0, 1.0, 1.0);
+        let fill = fill_under_white(accent);
+        let ratio = contrast_with_white(fill.color);
+        assert!((4.0..4.3).contains(&ratio), "{} {ratio}", hex(fill));
+        let before: Oklch = Srgb::new(accent.red, accent.green, accent.blue).into_color();
+        let after: Oklch = fill.color.into_color();
+        let hue = (before.hue.into_degrees() - after.hue.into_degrees()).abs();
+        assert!(hue < 3.0, "hue moved by {hue}");
+        // The light theme accent is dark enough: unchanged
+        let light = Srgba::new(0.0, 0x56 as f32 / 255.0, 0xb2 as f32 / 255.0, 1.0);
+        assert_eq!(hex(fill_under_white(light)), "#0056b2");
+    }
 
     #[test]
     fn rounded_square_edges() {

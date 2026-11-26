@@ -28,7 +28,7 @@ fi
 # Theme builder accent, e.g. Some("#3a9dff"); None when COSMIC's default is
 # used. Fallback: the cosmic-blue accents (build_files/theme).
 DEFAULT_DARK="#3a9dff"
-DEFAULT_LIGHT="#1d47c4"
+DEFAULT_LIGHT="#0056b2"
 if [[ "${MODE}" == light ]]; then
     BUILDER=com.system76.CosmicTheme.Light.Builder/v2/accent
     DEFAULT="${DEFAULT_LIGHT}"
