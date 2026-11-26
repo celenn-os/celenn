@@ -151,6 +151,10 @@ for combo in '\[Ctrl, Alt\], key: "t"' '\[Super\], key: "e"' \
     grep -q "${combo}" "${SHORTCUTS}/custom"
     if grep -q "${combo}" "${SHORTCUTS}/defaults"; then exit 1; fi
 done
+# Each program a custom shortcut starts is installed
+for program in $(grep -o 'Spawn("[^" ]*' "${SHORTCUTS}/custom" | cut -d'"' -f2); do
+    command -v "${program}"
+done
 # Floating top panel (gap from the screen edge, as COSMIC Settings' "Gap"
 # toggle sets it)
 PANEL=/usr/share/cosmic/com.system76.CosmicPanel.Panel/v1
@@ -195,7 +199,8 @@ for cp in 10cb00 10cb01 10cb02 10cb03 10cb04 10cb05 10cb06; do
     fc-list --format '%{file}\n' ":charset=${cp}" | grep -F /cosmic-blue-prompt.ttf >/dev/null
 done
 if grep -q 'Fedora\|\\ue0b0' /usr/share/cosmic-blue/starship.toml; then exit 1; fi
-grep -q 'io.missioncenter.MissionCenter' /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall
+# The system monitor is COSMIC Monitor (rpm)
+rpm -q cosmic-monitor
 # Fedora's own wallpapers stay available
 rpm -q "f${FEDORA_MAJOR_VERSION}-backgrounds-base"
 # Each wallpaper is listed once in COSMIC Settings: no aliases, no copies
@@ -360,9 +365,11 @@ test -f /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall
 # First-boot flatpaks and `ujust reset-default-apps` install the same apps
 diff <(sed -n 's/^\[Flatpak Preinstall \(.*\)\]$/\1/p' /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall | sort) \
      <(sed -n 's/^flatpak "\(.*\)"$/\1/p' /usr/share/ublue-os/homebrew/system-flatpaks.Brewfile | sort)
-# No flatpak that duplicates a COSMIC app or needs GNOME
+# No flatpak that duplicates a COSMIC app (Mission Center: COSMIC Monitor) or
+# needs GNOME
 for app in io.github.flattool.Ignition org.gnome.FileRoller org.gnome.Showtime \
-           org.gnome.Decibels page.tesk.Refine org.gnome.Calendar org.gnome.Contacts; do
+           org.gnome.Decibels page.tesk.Refine org.gnome.Calendar org.gnome.Contacts \
+           io.missioncenter.MissionCenter; do
     if grep -q "${app}" /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall; then exit 1; fi
 done
 test ! -e /usr/lib/systemd/system/flatpak-add-fedora-repos.service
