@@ -44,6 +44,7 @@ COPY --from=helpers /filemanager /filemanager
 COPY --from=helpers /plymouth /system_files/cosmic-blue/usr/share/plymouth/themes/cosmic-blue
 COPY --from=helpers /icons /icons
 COPY --from=helpers /cursors /system_files/cosmic-blue/usr/share/icons
+COPY --from=helpers /uupd /uupd
 # Public key used to verify the image signature on update
 COPY cosign.pub /system_files/cosmic-blue/etc/pki/containers/cosmic-blue.pub
 

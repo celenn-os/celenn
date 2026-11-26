@@ -419,6 +419,13 @@ jobs:
           key: ${{ steps.helpers.outputs.cursors }}
           dir: ${{ runner.temp }}/helpers
 
+      - name: Helper stage uupd
+        uses: ./.github/actions/helper-stage
+        with:
+          stage: uupd
+          key: ${{ steps.helpers.outputs.uupd }}
+          dir: ${{ runner.temp }}/helpers
+
       # This actually builds the container image
       - name: Build Image
         id: build-image

@@ -119,8 +119,9 @@
   // Tela circle is fetched by git at a pinned commit in
   // build_files/icon_theme/tela.sh, the Bibata cursors (sources kept in the
   // repository, release recorded in build_files/cursor_theme/bibata.sh),
-  // Starship at a pinned release in
-  // build_files/30-packages.sh, titanoboa at a pinned commit in
+  // Starship and the Nerd Font symbols at a pinned release in
+  // build_files/30-packages.sh, uupd at a pinned release in
+  // build_files/uupd/build.sh, titanoboa at a pinned commit in
   // .github/workflows/build-live-iso.yml, Renovate (config validator) at a
   // pinned version in .github/workflows/lint.yml, chunkah at a pinned digest
   // in the Justfile
@@ -132,6 +133,22 @@
         "STARSHIP_REPO=\"https://github\\.com/(?<depName>[^\"]+)\"\\s+STARSHIP_VERSION=\"(?<currentValue>[^\"]+)\""
       ],
       "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^build_files/30-packages\\.sh$/"],
+      "matchStrings": [
+        "NERD_FONTS_REPO=\"https://github\\.com/(?<depName>[^\"]+)\"\\s+NERD_FONTS_VERSION=\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^build_files/uupd/build\\.sh$/"],
+      "matchStrings": [
+        "UUPD_REPO=\"https://github\\.com/(?<depName>[^\"]+)\\.git\"\\s+UUPD_VERSION=\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "github-tags"
     },
     {
       "customType": "regex",

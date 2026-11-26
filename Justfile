@@ -152,7 +152,7 @@ build $target_image=image_name $tag=default_tag $version="":
 
 # Helper stages of Containerfile.helpers, in build order
 helper-stages:
-    @echo theme tour greeter compositor store filemanager plymouth icons cursors
+    @echo theme tour greeter compositor store filemanager plymouth icons cursors uupd
 
 # Build helper stages of Containerfile.helpers (all of them, or the ones
 # given) and write the output of each one to <dest>/<stage>, used by `just
@@ -253,6 +253,8 @@ helpers-keys:
                     files build_files/icon_theme/tela.sh ;;
                 cursors)
                     files build_files/cursor_theme ;;
+                uupd)
+                    files build_files/uupd ;;
                 *)
                     echo "No cache key inputs for the helper stage ${stage}" >&2
                     exit 1 ;;

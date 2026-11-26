@@ -120,17 +120,32 @@ dnf5 config-manager addrepo --from-repofile=https://pkgs.tailscale.com/stable/fe
 dnf5 config-manager setopt tailscale-stable.enabled=0
 dnf5 -y install --enablerepo=tailscale-stable tailscale
 
-# uupd (Universal Blue's update tool) from the ublue-os/packages COPR,
-# enabled only during the install, as in Bluefin.
-dnf5 -y copr enable ublue-os/packages
-dnf5 -y install --repo="copr:copr.fedorainfracloud.org:ublue-os:packages" uupd
-dnf5 -y copr disable ublue-os/packages
+# uupd (Universal Blue's update tool), built from its source at a pinned
+# release in Containerfile.helpers, "uupd" stage (see build_files/uupd/build.sh),
+# rather than from the ublue-os/packages COPR: the build does not depend on
+# the COPR servers (down on 2026-11-26). Its units are enabled in 50-services.sh.
+cp -a /ctx/uupd/. /
 
-# Nerd Font symbols (icons of fastfetch and Starship), from the che/nerd-fonts
-# COPR as in Bluefin, enabled only during the install
-dnf5 -y copr enable che/nerd-fonts
-dnf5 -y install --repo="copr:copr.fedorainfracloud.org:che:nerd-fonts" nerd-fonts
-dnf5 -y copr disable che/nerd-fonts
+# Nerd Font symbols (icons of fastfetch and Starship), the official
+# "Symbols Only" release (updated by Renovate) checked against the SHA-256
+# list published with that release, rather than from the che/nerd-fonts COPR
+NERD_FONTS_REPO="https://github.com/ryanoasis/nerd-fonts"
+NERD_FONTS_VERSION="v3.5.1"
+NERD_FONTS_ASSET="NerdFontsSymbolsOnly.tar.xz"
+NERD_FONTS_URL="${NERD_FONTS_REPO}/releases/download/${NERD_FONTS_VERSION}"
+curl -fsSL --retry 3 -o "/tmp/${NERD_FONTS_ASSET}" "${NERD_FONTS_URL}/${NERD_FONTS_ASSET}"
+curl -fsSL --retry 3 -o /tmp/nerd-fonts.sha256 "${NERD_FONTS_URL}/SHA-256.txt"
+(cd /tmp && grep -E "  ${NERD_FONTS_ASSET}\$" nerd-fonts.sha256 | sha256sum -c -)
+mkdir -p /tmp/nerd-fonts
+tar -xJf "/tmp/${NERD_FONTS_ASSET}" -C /tmp/nerd-fonts
+install -Dpm 0644 -t /usr/share/fonts/nerd-fonts-symbols \
+    /tmp/nerd-fonts/SymbolsNerdFont-Regular.ttf /tmp/nerd-fonts/SymbolsNerdFontMono-Regular.ttf
+install -Dpm 0644 -t /usr/share/licenses/nerd-fonts-symbols /tmp/nerd-fonts/LICENSE
+# Fonts only: the release's fontconfig rule (10-nerd-font-symbols.conf) is
+# left out, as it puts the symbols font first for "monospace", which some
+# apps would then pick as their whole font. Fontconfig already falls back to
+# it for the symbols other fonts lack.
+rm -rf "/tmp/${NERD_FONTS_ASSET}" /tmp/nerd-fonts.sha256 /tmp/nerd-fonts
 
 # Starship (shell prompt), official binary of a pinned release (updated by
 # Renovate), checked against the SHA-256 published with that release
