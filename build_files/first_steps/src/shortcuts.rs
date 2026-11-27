@@ -60,7 +60,7 @@ pub const SHORTCUTS: &[(&str, &[(&str, &str)])] = &[
 pub const SHORTCUT_COLUMNS: [&[usize]; 3] = [&[0, 4], &[1], &[2, 3]];
 
 /// Key names drawn translated on the keys ("Shift" is "Maj" in French)
-pub const KEY_LABELS: &[&str] = &["Shift", "Escape", "Space"];
+pub const KEY_LABELS: &[&str] = &["Shift", "Ctrl", "Escape", "Space"];
 
 /// The shortcuts sheet already open (its process number in the runtime
 /// folder, still running with --shortcuts): close it and say so; otherwise

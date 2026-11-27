@@ -911,6 +911,9 @@ msgstr "Esc fecha esta janela."
 msgid "Shift"
 msgstr "Shift"
 
+msgid "Ctrl"
+msgstr "Ctrl"
+
 msgid "Escape"
 msgstr "Esc"
 

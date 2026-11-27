@@ -392,7 +392,11 @@ version *images:
     trap 'rm -f "${tags}"' EXIT
     for image in "${images[@]}"; do
         ref="docker://ghcr.io/{{ lowercase(repo_organization) }}/${image,,}"
-        if ! out="$(skopeo list-tags --retry-times 3 "${ref}" 2>&1)"; then
+        # With GHCR_CREDS (user:token, set by build.yml) the registry also
+        # answers for a repository not pushed yet, or private
+        creds=()
+        [[ -n "${GHCR_CREDS:-}" ]] && creds=(--creds "${GHCR_CREDS}")
+        if ! out="$(skopeo list-tags --retry-times 3 "${creds[@]}" "${ref}" 2>&1)"; then
             # A repository that was never pushed has no tags; any other error
             # could hide a taken version, so it stops the build.
             if grep -qiE 'name unknown|repository name not known|not found' <<< "${out}"; then

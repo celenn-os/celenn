@@ -911,6 +911,9 @@ msgstr "Esc cierra esta ventana."
 msgid "Shift"
 msgstr "Mayús"
 
+msgid "Ctrl"
+msgstr "Ctrl"
+
 msgid "Escape"
 msgstr "Esc"
 
