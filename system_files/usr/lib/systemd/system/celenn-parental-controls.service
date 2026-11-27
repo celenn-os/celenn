@@ -1,0 +1,31 @@
+# Parental controls: screen time, bedtime and web filter of the child accounts
+# (rules in /etc/celenn/parental-controls, set with the Parental controls
+# app; see build_files/first_steps/src/parental_daemon.rs). Starts only on
+# systems with child accounts: the app's helper starts it with the first one.
+[Unit]
+Description=Celenn OS parental controls
+ConditionDirectoryNotEmpty=/etc/celenn/parental-controls
+After=systemd-logind.service
+
+[Service]
+ExecStart=/usr/libexec/celenn-parental-daemon run
+Restart=always
+RestartSec=5
+# Root, for nftables, closing sessions and the group of the child accounts
+# (/etc/group stays writable), but nothing more
+NoNewPrivileges=yes
+ProtectSystem=true
+# (Read-only, not hidden: the notifications to a child whose program it
+# stopped go through its session bus, /run/user/<uid>/bus)
+ProtectHome=read-only
+PrivateTmp=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,1120 @@
+# Texts of Celenn OS Tools (build_files/first_steps/src/tools.rs and its
+# pages: updates_page.rs, maintenance.rs, help.rs).
+# Each language has a copy with its translations: <language>.po
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Updates"
+msgstr ""
+
+msgid "Current version: {}"
+msgstr ""
+
+msgid "Weekly updates, tested before they come out"
+msgstr ""
+
+msgid "Daily updates, sooner but less tested"
+msgstr ""
+
+msgid "dev channel: every change, for testers"
+msgstr ""
+
+msgid "This system stays on this version: it does not update by itself."
+msgstr ""
+
+msgid "Check now"
+msgstr ""
+
+msgid "Checking…"
+msgstr ""
+
+msgid "You are up to date."
+msgstr ""
+
+msgid "Ready for the next restart: {}"
+msgstr ""
+
+msgid "Downloaded and checked. It takes effect at the next restart."
+msgstr ""
+
+msgid "Restart"
+msgstr ""
+
+msgid "Previous version: {}"
+msgstr ""
+
+msgid "Something wrong since the last update? Go back to this version. Your files and settings stay as they are."
+msgstr ""
+
+msgid "Go back to it"
+msgstr ""
+
+msgid "Back to {} at the next restart"
+msgstr ""
+
+msgid "Your files and settings stay as they are. The version you leave will not be installed again: updates start again with the next one."
+msgstr ""
+
+msgid "Version {} is set aside"
+msgstr ""
+
+msgid "You went back from it, so it will not be installed again. Updates start again with the next version."
+msgstr ""
+
+msgid "Get new features early"
+msgstr ""
+
+msgid ""
+"Off (recommended): one tested update a week.\n"
+"On: an update every day, sooner but less tested."
+msgstr ""
+
+msgid "You follow the dev channel, chosen in a terminal. Turn this off to go back to one tested update a week."
+msgstr ""
+
+msgid "Downloading the new version… This can take a few minutes."
+msgstr ""
+
+msgid "Downloading the new version: {done} of {total} ({percent}%)"
+msgstr ""
+
+msgid "Installing the new version…"
+msgstr ""
+
+msgid "MB"
+msgstr ""
+
+msgid "GB"
+msgstr ""
+
+msgid "The system version could not be read: is this computer installed with Celenn OS?"
+msgstr ""
+
+msgid "Apps from COSMIC Store update by themselves too."
+msgstr ""
+
+msgid "What's new"
+msgstr ""
+
+msgid "An older version"
+msgstr ""
+
+msgid "Choose the stable version of a past week. The system then stays on it, without updates, until you resume them."
+msgstr ""
+
+msgid "Choose…"
+msgstr ""
+
+msgid "Hide"
+msgstr ""
+
+msgid "Stable version of {}"
+msgstr ""
+
+msgid "Use this one"
+msgstr ""
+
+msgid "No older version found. Are you online?"
+msgstr ""
+
+msgid "{y}-{m}-{d}"
+msgstr ""
+
+msgid "Updates are paused"
+msgstr ""
+
+msgid "This system stays on this version. Resume them to get one tested update a week again."
+msgstr ""
+
+msgid "Resume updates"
+msgstr ""
+
+msgid "Celenn OS Tools"
+msgstr ""
+
+msgid "Disk space"
+msgstr ""
+
+msgid "{used} used of {total}"
+msgstr ""
+
+msgid "{} free"
+msgstr ""
+
+msgid "See what takes space"
+msgstr ""
+
+msgid "Free up space"
+msgstr ""
+
+msgid "Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of tools. Your files stay as they are."
+msgstr ""
+
+msgid "Clean up"
+msgstr ""
+
+msgid "Cleaning up…"
+msgstr ""
+
+msgid "{} freed"
+msgstr ""
+
+msgid "Everything was already tidy."
+msgstr ""
+
+msgid "Trash"
+msgstr ""
+
+msgid "{} in the trash"
+msgstr ""
+
+msgid "The trash is empty."
+msgstr ""
+
+msgid "Empty"
+msgstr ""
+
+msgid "Emptying…"
+msgstr ""
+
+msgid "Automatically"
+msgstr ""
+
+msgid "Delete files that stayed in the trash for more than 30 days"
+msgstr ""
+
+msgid "Like on Windows and the Mac. Newer ones can still be put back."
+msgstr ""
+
+msgid "Warn when the disk is almost full"
+msgstr ""
+
+msgid "A notification when less than 10 % is free (20 GB at most)."
+msgstr ""
+
+msgid "The disk is almost full"
+msgstr ""
+
+msgid "{} left. Updates and new apps need room."
+msgstr ""
+
+msgid "Apps that come with Celenn OS"
+msgstr ""
+
+msgid "All of them are installed."
+msgstr ""
+
+msgid "One of them was removed. Put it back?"
+msgstr ""
+
+msgid "{} of them were removed. Put them back?"
+msgstr ""
+
+msgid "Reinstall"
+msgstr ""
+
+msgid "Installing…"
+msgstr ""
+
+msgid "The apps are back."
+msgstr ""
+
+msgid "Firmware updates"
+msgstr ""
+
+msgid "New versions of the BIOS, SSD, dock… from their makers."
+msgstr ""
+
+msgid "Open"
+msgstr ""
+
+msgid "Find answers, ask a question, or tell us what goes wrong."
+msgstr ""
+
+msgid "Documentation"
+msgstr ""
+
+msgid "Updates, software, commands and tips"
+msgstr ""
+
+msgid "Ask a question"
+msgstr ""
+
+msgid "Other Celenn OS users and its makers answer, on GitHub."
+msgstr ""
+
+msgid "Report a problem"
+msgstr ""
+
+msgid "Opens the bug report form with the details of this computer filled in. They hold no personal data. A GitHub account is needed."
+msgstr ""
+
+msgid "Show the details"
+msgstr ""
+
+msgid "Hide the details"
+msgstr ""
+
+msgid "Report"
+msgstr ""
+
+msgid "Copy"
+msgstr ""
+
+msgid "Copied."
+msgstr ""
+
+msgid "B"
+msgstr ""
+
+msgid "kB"
+msgstr ""
+
+msgid "TB"
+msgstr ""
+
+msgid "More apps in COSMIC Store, from outside Flathub. Less checked."
+msgstr ""
+
+msgid "Accent color, wallpaper, panel, dock, fonts…"
+msgstr ""
+
+msgid "Accept and install"
+msgstr ""
+
+msgid "All COSMIC settings"
+msgstr ""
+
+msgid "Arial, Times New Roman, Verdana… for documents made on Windows."
+msgstr ""
+
+msgid "Back to the Celenn OS colors, dark theme, icons, fonts and wallpaper. Panel, dock, keyboard and shortcuts stay."
+msgstr ""
+
+msgid "Back to the Celenn OS defaults, for every setting. A copy of the current ones is kept."
+msgstr ""
+
+msgid "Battery charge limit"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "Model"
+msgstr ""
+
+msgid "Virtual machine ({})"
+msgstr ""
+
+msgid "Unknown"
+msgstr ""
+
+msgid "Processor and memory"
+msgstr ""
+
+msgid "{} cores"
+msgstr ""
+
+msgid "{} GB of memory"
+msgstr ""
+
+msgid "Graphics card"
+msgstr ""
+
+msgid "{}. The open driver built into Linux works with it: nothing to install."
+msgstr ""
+
+msgid "Startup"
+msgstr ""
+
+msgid "UEFI, Secure Boot on"
+msgstr ""
+
+msgid "UEFI, Secure Boot off"
+msgstr ""
+
+msgid "UEFI"
+msgstr ""
+
+msgid "Legacy BIOS"
+msgstr ""
+
+msgid "No battery on this computer: nothing to set."
+msgstr ""
+
+msgid "This computer starts in legacy BIOS mode. To open its settings, press the key shown when it powers on, often F2, F10 or Del."
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Charging stops at 80 %: the battery lasts longer when the laptop stays plugged in."
+msgstr ""
+
+msgid "Dark theme"
+msgstr ""
+
+msgid "Every COSMIC setting goes back to the defaults. A copy is kept in your settings folder."
+msgstr ""
+
+msgid "Firmware settings (BIOS/UEFI)"
+msgstr ""
+
+msgid "FlatPark"
+msgstr ""
+
+msgid "Games"
+msgstr ""
+
+msgid "Install"
+msgstr ""
+
+msgid "Installed. Restart open apps to see them."
+msgstr ""
+
+msgid "Light text on dark backgrounds. Off: the light theme."
+msgstr ""
+
+msgid "Dock always visible"
+msgstr ""
+
+msgid "Off: it hides when a window covers it."
+msgstr ""
+
+msgid "This did not work."
+msgstr ""
+
+msgid "Layout"
+msgstr ""
+
+msgid "Top bar and dock: like the Mac. One bar at the bottom: like Windows."
+msgstr ""
+
+msgid "Top bar and dock"
+msgstr ""
+
+msgid "Bar at the bottom"
+msgstr ""
+
+msgid "Log out and back in to finish."
+msgstr ""
+
+msgid "Microsoft fonts"
+msgstr ""
+
+msgid "Microsoft's license applies to these fonts."
+msgstr ""
+
+msgid "More in Settings"
+msgstr ""
+
+msgid "NVIDIA graphics card"
+msgstr ""
+
+msgid "Read it"
+msgstr ""
+
+msgid "Remove"
+msgstr ""
+
+msgid "Reset"
+msgstr ""
+
+msgid "Restart into the computer's own settings: boot order, virtualization, Secure Boot…"
+msgstr ""
+
+msgid "Restart now"
+msgstr ""
+
+msgid "Restore"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Switch"
+msgstr ""
+
+msgid "The NVIDIA edition is downloaded now and starts at the next restart. With Secure Boot on, a blue screen asks for the password celennos once."
+msgstr ""
+
+msgid "The NVIDIA edition starts at the next restart."
+msgstr ""
+
+msgid "The computer restarts now. Save your work first."
+msgstr ""
+
+msgid "The Celenn OS look"
+msgstr ""
+
+msgid "Use it"
+msgstr ""
+
+msgid "Use the NVIDIA edition of Celenn OS, with NVIDIA's own driver, for games and graphics apps."
+msgstr ""
+
+msgid "Virtual machines"
+msgstr ""
+
+msgid "Working…"
+msgstr ""
+
+msgid "You use the NVIDIA edition, with NVIDIA's own driver."
+msgstr ""
+
+msgid "virt-manager, to run Windows or another Linux in a window."
+msgstr ""
+
+msgid "Apply"
+msgstr ""
+
+msgid "Code editors"
+msgstr ""
+
+msgid "Containers"
+msgstr ""
+
+msgid "In the terminal"
+msgstr ""
+
+msgid "Other tools"
+msgstr ""
+
+msgid "Homebrew is not set up yet: only the apps from Flathub can be installed now."
+msgstr ""
+
+msgid "The developer tools are ready."
+msgstr ""
+
+msgid "Stores"
+msgstr ""
+
+msgid "Windows games"
+msgstr ""
+
+msgid "And also"
+msgstr ""
+
+msgid "Steam, Heroic, Lutris, Discord…"
+msgstr ""
+
+msgid "Your game apps are ready."
+msgstr ""
+
+msgid "Allow"
+msgstr ""
+
+msgid "At the next restart, a blue screen asks for the password celennos: choose Enroll MOK, Continue, Yes, type celennos, then Reboot. The keyboard may be in QWERTY."
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Network settings"
+msgstr ""
+
+msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
+msgstr ""
+
+msgid "Open the report"
+msgstr ""
+
+msgid "Report the problem"
+msgstr ""
+
+msgid "Secure Boot does not let NVIDIA's driver load yet. Allow it once: at the next restart, a blue screen asks for the password celennos."
+msgstr ""
+
+msgid "Something unexpected went wrong. Nothing was changed."
+msgstr ""
+
+msgid "Technical details"
+msgstr ""
+
+msgid "The disk is full ({} free). Free up space with Celenn OS Tools, then try again."
+msgstr ""
+
+msgid "The report opens in your browser, filled in: the Celenn OS version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
+msgstr ""
+
+msgid "The server does not answer. Try again in a few minutes."
+msgstr ""
+
+msgid "Try again"
+msgstr ""
+
+msgid "“{}” did not work"
+msgstr ""
+
+msgid "Some changes ask for the password of a parent or an administrator."
+msgstr ""
+
+msgid "Passwords"
+msgstr ""
+
+msgid "Your password manager is ready."
+msgstr ""
+
+msgid "Tick the ones you want, untick the ones to remove."
+msgstr ""
+
+msgid "Version {} starts at the next restart."
+msgstr ""
+
+msgid "Backups"
+msgstr ""
+
+msgid "Not set up yet. A USB drive is enough: Déjà Dup keeps a copy of your home folder."
+msgstr ""
+
+msgid "Set up"
+msgstr ""
+
+msgid "Last backup today."
+msgstr ""
+
+msgid "Last backup {} days ago."
+msgstr ""
+
+msgid "Almost full: {} free."
+msgstr ""
+
+msgid "One device has an update."
+msgstr ""
+
+msgid "{} devices have an update."
+msgstr ""
+
+msgid "Nothing found."
+msgstr ""
+
+msgid "Light theme"
+msgstr ""
+
+msgid "Undo"
+msgstr ""
+
+msgid "The dock hides when a window covers it."
+msgstr ""
+
+msgid "Back to the list"
+msgstr ""
+
+msgid "Bitwarden, Secrets, KeePassXC"
+msgstr ""
+
+msgid "Bitwarden: a free account, on this computer, your phone and in Firefox. Secrets and KeePassXC: an encrypted file, no account."
+msgstr ""
+
+msgid "Chosen: {}"
+msgstr ""
+
+msgid "Development"
+msgstr ""
+
+msgid "VS Code, Docker, Zed, Neovim…"
+msgstr ""
+
+msgid "Drawing and editing"
+msgstr ""
+
+msgid "For children"
+msgstr ""
+
+msgid "GCompris, Stellarium, GeoGebra…"
+msgstr ""
+
+msgid "GIMP, Inkscape, Krita, darktable…"
+msgstr ""
+
+msgid "Graphics and photos"
+msgstr ""
+
+msgid "Installed: {}"
+msgstr ""
+
+msgid "LibreOffice and OnlyOffice open and save Word, Excel and PowerPoint files."
+msgstr ""
+
+msgid "LibreOffice, OnlyOffice…"
+msgstr ""
+
+msgid "Lima: ujust install-dev-tools, in a terminal."
+msgstr ""
+
+msgid "Messaging"
+msgstr ""
+
+msgid "Messaging and video calls"
+msgstr ""
+
+msgid "OBS Studio, Kdenlive, Audacity…"
+msgstr ""
+
+msgid "Office"
+msgstr ""
+
+msgid "Office suites"
+msgstr ""
+
+msgid "Only on this computer"
+msgstr ""
+
+msgid "PDF files"
+msgstr ""
+
+msgid "Photos"
+msgstr ""
+
+msgid "Removing an app keeps your games and saves."
+msgstr ""
+
+msgid "School and science"
+msgstr ""
+
+msgid "Science"
+msgstr ""
+
+msgid "Signal, Telegram, Element, Zoom…"
+msgstr ""
+
+msgid "Sound"
+msgstr ""
+
+msgid "Studying"
+msgstr ""
+
+msgid "Synced with your phone"
+msgstr ""
+
+msgid "Video"
+msgstr ""
+
+msgid "Video calls"
+msgstr ""
+
+msgid "Videos and streaming"
+msgstr ""
+
+msgid "Your graphics apps are ready."
+msgstr ""
+
+msgid "Your messaging apps are ready."
+msgstr ""
+
+msgid "Your office apps are ready."
+msgstr ""
+
+msgid "Your school apps are ready."
+msgstr ""
+
+msgid "Your video apps are ready."
+msgstr ""
+
+msgid "Ready in one click. In each list, the apps most used on Linux are already ticked."
+msgstr ""
+
+msgid "Printers and scanners"
+msgstr ""
+
+msgid "No printer added yet. Recent printers on the network or plugged in by USB show up by themselves in the print window."
+msgstr ""
+
+msgid "{} (default)"
+msgstr ""
+
+msgid "Printers"
+msgstr ""
+
+msgid "Scan"
+msgstr ""
+
+msgid "Change computers"
+msgstr ""
+
+msgid "Your settings and the list of your apps in a file, to take back on another Celenn OS computer."
+msgstr ""
+
+msgid "Restore…"
+msgstr ""
+
+msgid "Saved in Documents."
+msgstr ""
+
+msgid "Show"
+msgstr ""
+
+msgid "Choose the file saved on your other computer"
+msgstr ""
+
+msgid "celenn-settings"
+msgstr ""
+
+msgid "Restore these settings"
+msgstr ""
+
+msgid "Saved on {} on “{}”. Tick what you want back. Your files are not in this file: use Déjà Dup or LocalSend for them."
+msgstr ""
+
+msgid "Saved on {}. Tick what you want back. Your files are not in this file: use Déjà Dup or LocalSend for them."
+msgstr ""
+
+msgid "Look"
+msgstr ""
+
+msgid "Dark or light theme, accent color, wallpaper, panel and dock."
+msgstr ""
+
+msgid "Keyboard and shortcuts"
+msgstr ""
+
+msgid "Keyboard layout and the shortcuts you changed."
+msgstr ""
+
+msgid "Apps ({})"
+msgstr ""
+
+msgid "{} and {} more, from Flathub."
+msgstr ""
+
+msgid "{}, from Flathub."
+msgstr ""
+
+msgid "Developer tools ({})"
+msgstr ""
+
+msgid "Take them back"
+msgstr ""
+
+msgid "Restoring…"
+msgstr ""
+
+msgid "Restored"
+msgstr ""
+
+
+
+msgid "Your own wallpaper is not in the file: copy the picture, then choose it in Settings."
+msgstr ""
+
+msgid "{} shortcuts start a program: for safety, add them again in Settings."
+msgstr ""
+
+msgid "One shortcut starts a program: for safety, add it again in Settings."
+msgstr ""
+
+msgid "{} settings unknown to this version of Celenn OS were left out."
+msgstr ""
+
+msgid "{} app names were not valid and were left out."
+msgstr ""
+
+msgid "The apps could not be installed."
+msgstr ""
+
+msgid "A copy of your previous settings is in {}."
+msgstr ""
+
+msgid "Log out and back in to see every change."
+msgstr ""
+
+msgid "This file is not a Celenn OS settings file."
+msgstr ""
+
+msgid "This file was saved by a newer Celenn OS. Update this computer first."
+msgstr ""
+
+msgid "This file could not be read."
+msgstr ""
+
+msgid "Nothing to take back: everything in this file is already here."
+msgstr ""
+
+msgid "Other disks"
+msgstr ""
+
+msgid "No other disk in this computer."
+msgstr ""
+
+msgid "{} opens at every startup."
+msgstr ""
+
+msgid "{} open at every startup."
+msgstr ""
+
+msgid "None opens at startup yet: choose the ones Files and Steam should always find."
+msgstr ""
+
+msgid "Turn on the ones you want open at every startup, without clicking them in Files."
+msgstr ""
+
+msgid "They open at every startup, even before you log in, and always at the same place: Files, Steam and your apps find them. USB drives are not concerned."
+msgstr ""
+
+msgid "Back"
+msgstr ""
+
+msgid "{} disk"
+msgstr ""
+
+msgid "{} GB"
+msgstr ""
+
+msgid "{} TB"
+msgstr ""
+
+msgid "SSD"
+msgstr ""
+
+msgid "hard disk"
+msgstr ""
+
+msgid "Linux format ({})"
+msgstr ""
+
+msgid "Windows format (NTFS)"
+msgstr ""
+
+msgid "Windows and Mac format (exFAT)"
+msgstr ""
+
+msgid "FAT format"
+msgstr ""
+
+msgid "Good for a Steam library."
+msgstr ""
+
+msgid "For Steam games, prefer a disk in Linux format."
+msgstr ""
+
+msgid "In Files and in {}."
+msgstr ""
+
+msgid "Not opened at this startup. If Windows is also on this computer, turn off its Fast Startup."
+msgstr ""
+
+msgid "Not opened at this startup: the disk was not found, or it has an error."
+msgstr ""
+
+msgid "Encrypted with BitLocker: open it in Files, with its recovery key."
+msgstr ""
+
+msgid "Encrypted: open it in Files, with its password."
+msgstr ""
+
+msgid "Windows' own disk stays closed, so that nothing can harm it."
+msgstr ""
+
+msgid "Already opened at startup by a setting of your own."
+msgstr ""
+
+msgid "Not offered"
+msgstr ""
+
+msgid "Done."
+msgstr ""
+
+msgid "{}: a file on it is open. Close it, then try again."
+msgstr ""
+
+msgid "{}: a file on it is open. It closes at the next restart."
+msgstr ""
+
+msgid "{}: Windows did not fully shut down. In Windows, turn off Fast Startup and shut down, then try again."
+msgstr ""
+
+msgid "{}: Windows' own disk stays closed, so that nothing can harm it."
+msgstr ""
+
+msgid "{}: could not be opened."
+msgstr ""
+
+msgid "{}: could not be closed."
+msgstr ""
+
+msgid "A copy of your files"
+msgstr ""
+
+msgid "A copy of your files on a USB drive or another disk, made by itself every day."
+msgstr ""
+
+msgid "All is well: Celenn OS looks after itself."
+msgstr ""
+
+msgid "Apps, look, settings"
+msgstr ""
+
+msgid "Arial, Times New Roman, Verdana…"
+msgstr ""
+
+msgid "Channel, versions, firmware, virtual machines"
+msgstr ""
+
+msgid "Dark or light, and the layout of the desktop."
+msgstr ""
+
+msgid "Disk space and the trash"
+msgstr ""
+
+msgid "Disks open at startup"
+msgstr ""
+
+msgid "Every day"
+msgstr ""
+
+msgid "First steps again"
+msgstr ""
+
+msgid "For experienced users"
+msgstr ""
+
+msgid "For experienced users…"
+msgstr ""
+
+msgid "Get help"
+msgstr ""
+
+msgid "Go back"
+msgstr ""
+
+msgid "Guide, questions, report a problem"
+msgstr ""
+
+msgid "Help on this tool"
+msgstr ""
+
+msgid "In a terminal:"
+msgstr ""
+
+msgid "Install apps"
+msgstr ""
+
+msgid "Make it yours"
+msgstr ""
+
+msgid "My computer"
+msgstr ""
+
+msgid "NVIDIA driver"
+msgstr ""
+
+msgid "Not set up yet."
+msgstr ""
+
+msgid "Office, games, school, development…"
+msgstr ""
+
+msgid "One thing needs your attention: {}"
+msgstr ""
+
+msgid "Print and scan"
+msgstr ""
+
+msgid "Printers on the network or plugged in by USB show up by themselves. Add one or set it up here."
+msgstr ""
+
+msgid "Processor, memory, graphics card"
+msgstr ""
+
+msgid "Protect your files"
+msgstr ""
+
+msgid "Put back what is missing: the apps that come with Celenn OS, the Celenn OS look, your COSMIC settings."
+msgstr ""
+
+msgid "Remove what nothing uses any more. Your files stay as they are."
+msgstr ""
+
+msgid "Repair"
+msgstr ""
+
+msgid "Search a tool"
+msgstr ""
+
+msgid "Something wrong since the last update? Go back to the previous version. Your files and settings stay as they are."
+msgstr ""
+
+msgid "Spare the battery"
+msgstr ""
+
+msgid "The battery charge limit"
+msgstr ""
+
+msgid "The graphics card's driver"
+msgstr ""
+
+msgid "The system version could not be read."
+msgstr ""
+
+msgid "The system, the apps and the devices"
+msgstr ""
+
+msgid "Theme and layout"
+msgstr ""
+
+msgid "To the previous version"
+msgstr ""
+
+msgid "Toolbox"
+msgstr ""
+
+msgid "Up to date, version {}"
+msgstr ""
+
+msgid "Update"
+msgstr ""
+
+msgid "Useful when you know what you are doing. Each one is also a ujust command."
+msgstr ""
+
+msgid "Version {}"
+msgstr ""
+
+msgid "What this computer is made of, and how it starts."
+msgstr ""
+
+msgid "What's inside"
+msgstr ""
+
+msgid "When something is wrong"
+msgstr ""
+
+msgid "Your settings and apps, in one file."
+msgstr ""
+
+msgid "Celenn OS updates itself in the background. A new version starts at the next restart, without interrupting you."
+msgstr ""
+
+msgid "{} things need your attention: {}"
+msgstr ""
+
+msgid "Charging stops at 80 %."
+msgstr ""
+
+msgid "Choose the ones that open at startup."
+msgstr ""
+
+msgid "Clean up the system"
+msgstr ""
+
+msgid "Its driver waits for your OK."
+msgstr ""
+
+msgid "NVIDIA's own driver."
+msgstr ""
+
+msgid "No previous version"
+msgstr ""
+
+msgid "No printer added yet."
+msgstr ""
+
+msgid "Off: the battery charges fully."
+msgstr ""
+
+msgid "The open driver built into Linux."
+msgstr ""
+
+msgid "This computer has only ever run this version."
+msgstr ""

@@ -13,12 +13,12 @@ use std::process::{Command, Stdio};
 
 /// Apps installed at the first boot (flatpak-preinstall.service)
 const PREINSTALL_DIR: &str = "/usr/share/flatpak/preinstall.d";
-pub const WALLPAPERS: &str = "/usr/share/backgrounds/cosmic-blue";
+pub const WALLPAPERS: &str = "/usr/share/backgrounds/celenn";
 /// Small copies of the wallpapers, for the tour (branding/tour/thumbnails.py)
-pub const THUMBNAILS: &str = "/usr/share/cosmic-blue/wallpapers";
+pub const THUMBNAILS: &str = "/usr/share/celenn/wallpapers";
 pub const AVATARS: &str = "/usr/share/pixmaps/faces";
 /// Homebrew, set up at the first boot (ublue-os/brew)
-pub const UPDATES_HELPER: &str = "/usr/libexec/cosmic-blue-updates-helper";
+pub const UPDATES_HELPER: &str = "/usr/libexec/celenn-updates-helper";
 
 pub fn config_dir() -> PathBuf {
     std::env::var_os("XDG_CONFIG_HOME")
@@ -51,15 +51,15 @@ pub fn cosmic_write(id: &str, key: &str, value: &str) -> bool {
     result.is_ok()
 }
 
-/// The tour's own memory (~/.config/cosmic-blue/<name>)
+/// The tour's own memory (~/.config/celenn/<name>)
 pub fn tour_read(name: &str) -> Option<String> {
-    std::fs::read_to_string(config_dir().join("cosmic-blue").join(name))
+    std::fs::read_to_string(config_dir().join("celenn").join(name))
         .ok()
         .map(|value| value.trim().to_owned())
 }
 
 pub fn tour_write(name: &str, value: &str) {
-    let dir = config_dir().join("cosmic-blue");
+    let dir = config_dir().join("celenn");
     if let Err(error) =
         std::fs::create_dir_all(&dir).and_then(|()| std::fs::write(dir.join(name), value))
     {
@@ -83,7 +83,7 @@ pub fn set_dark(dark: bool) -> bool {
     cosmic_write(id, "is_dark", if dark { "true" } else { "false" })
 }
 
-/// The wallpapers of cosmic-blue that have a small copy, sorted by name:
+/// The wallpapers of Celenn OS that have a small copy, sorted by name:
 /// (wallpaper, its small copy)
 pub fn wallpapers() -> Vec<(PathBuf, PathBuf)> {
     let Ok(entries) = std::fs::read_dir(THUMBNAILS) else {
@@ -110,7 +110,7 @@ pub fn current_wallpaper() -> Option<PathBuf> {
 }
 
 /// The same wallpaper on every screen. Only the picture of the current
-/// setting (the person's, else cosmic-blue's default,
+/// setting (the person's, else Celenn OS's default,
 /// /usr/share/cosmic/com.system76.CosmicBackground) changes: the other
 /// fields, including any a new COSMIC adds, stay as they are.
 pub fn set_wallpaper(path: &Path) -> bool {
@@ -156,7 +156,7 @@ fn with_source(entry: &str, source: &str) -> Option<String> {
         .then(|| format!("{}{}{}", &entry[..value_start], source, &value[end + 2..]))
 }
 
-/// cosmic-blue's avatars (512 x 512 PNG), sorted by name. Links are left out:
+/// Celenn OS's avatars (512 x 512 PNG), sorted by name. Links are left out:
 /// pop-robot.png, COSMIC Settings' default picture, is a link to planet.png
 /// and would show the planet twice.
 pub fn avatars() -> Vec<PathBuf> {
@@ -446,7 +446,7 @@ pub fn computer() -> Computer {
 
 // --- Files that do not install here ------------------------------------------
 
-/// The kind of a file that cannot be installed on cosmic-blue
+/// The kind of a file that cannot be installed on Celenn OS
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Package {
     Windows,

@@ -1,0 +1,116 @@
+#!/usr/bin/bash
+# The changes the Parental controls app (/usr/libexec/celenn-parental-controls)
+# makes to the system, run as root through pkexec after an administrator
+# password (polkit action io.github.celenn_os.parental.manage). Only these:
+#
+#   set <user>        the rules of a child account, as JSON on the standard
+#                     input (see build_files/first_steps/src/parental_rules.rs)
+#   add-child <user> <full name> [<picture>]
+#                     creates an account without administrator rights, with
+#                     the password on the first line of the standard input and
+#                     its rules (JSON) on the second; its profile picture is
+#                     one of Celenn OS's (/usr/share/pixmaps/faces/*.png)
+#
+# Administrators cannot get rules: they could remove them anyway.
+# The rules are applied by celenn-parental-controls.service, started here.
+set -euo pipefail
+
+CONFIG_DIR=/etc/celenn/parental-controls
+
+usage() {
+    echo "Usage: ${0##*/} set <user> | add-child <user> <full name> [<picture>]" >&2
+    exit 2
+}
+
+valid_user() {
+    [[ "$1" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]
+}
+
+# A person's account (user id 1000 and up) without administrator rights
+check_child() {
+    local uid
+    uid="$(id -u "$1" 2>/dev/null)" || { echo "No account named $1." >&2; exit 1; }
+    if (( uid < 1000 )); then
+        echo "$1 is a system account." >&2
+        exit 1
+    fi
+    if id -nG "$1" | tr ' ' '\n' | grep -qx wheel; then
+        echo "$1 is an administrator: rules would not hold." >&2
+        exit 1
+    fi
+}
+
+# Writes the rules read from JSON (the first argument), each value checked
+# and kept in its range
+write_rules() {
+    local user="$1" json="$2" rules
+    rules="$(jq -ce '
+        def minutes($top): if type == "number" then ([floor, 0] | max) as $v | [$v, $top] | min else error("not a number") end;
+        def flag: if type == "boolean" then . else error("not true or false") end;
+        {
+          limit: {enabled: (.limit.enabled | flag), weekdays: (.limit.weekdays | minutes(1440)), weekend: (.limit.weekend | minutes(1440))},
+          bedtime: {enabled: (.bedtime.enabled | flag), start: (.bedtime.start | minutes(1439)), end: (.bedtime.end | minutes(1439))},
+          web_filter: (.web_filter | flag),
+          apps: {
+            enabled: ((.apps.enabled // false) | flag),
+            allowed: ((.apps.allowed // []) | if type == "array" then . else error("not a list") end
+                | map(select(type == "string" and test("^[A-Za-z0-9._+-]{1,255}$"))) | unique)
+          }
+        }' <<<"${json}")" || { echo "Rules not understood: ${json}" >&2; exit 1; }
+    install -d -m 0755 "${CONFIG_DIR}"
+    printf '%s\n' "${rules}" > "${CONFIG_DIR}/${user}.json.tmp"
+    chmod 0644 "${CONFIG_DIR}/${user}.json.tmp"
+    mv -f "${CONFIG_DIR}/${user}.json.tmp" "${CONFIG_DIR}/${user}.json"
+    # The group of the child accounts (polkit and D-Bus rules: no VPN of
+    # their own, no time zone change), at once; the service keeps it
+    groupadd -f celenn-children
+    usermod -aG celenn-children "${user}"
+    systemctl start celenn-parental-controls.service
+}
+
+case "${1:-} $#" in
+    "set 2")
+        valid_user "$2" || usage
+        check_child "$2"
+        write_rules "$2" "$(cat)"
+        ;;
+    "add-child 3" | "add-child 4")
+        valid_user "$2" || usage
+        name="$3"
+        picture="${4:-}"
+        if [[ -n "${picture}" ]] && ! [[ "${picture}" =~ ^/usr/share/pixmaps/faces/[a-z0-9-]+\.png$ && -f "${picture}" ]]; then
+            echo "Picture not allowed: ${picture}" >&2
+            exit 1
+        fi
+        if [[ -z "${name}" || ${#name} -gt 64 || "${name}" == *[:,$'\n']* ]]; then
+            echo "Name not allowed: ${name}" >&2
+            exit 1
+        fi
+        if id -u "$2" >/dev/null 2>&1; then
+            echo "An account named $2 exists already." >&2
+            exit 1
+        fi
+        IFS= read -r password || true
+        IFS= read -r json || true
+        if [[ -z "${password}" ]]; then
+            echo "No password given." >&2
+            exit 1
+        fi
+        useradd --create-home --comment "${name}" "$2"
+        printf '%s:%s\n' "$2" "${password}" | chpasswd
+        check_child "$2"
+        write_rules "$2" "${json}"
+        # The picture, through AccountsService (the login screen and COSMIC
+        # Settings read it there); the account works without it
+        if [[ -n "${picture}" ]]; then
+            account="$(busctl --system call org.freedesktop.Accounts /org/freedesktop/Accounts \
+                org.freedesktop.Accounts FindUserByName s "$2" 2>/dev/null | cut -d '"' -f 2)" || true
+            if [[ -z "${account}" ]] || ! busctl --system call org.freedesktop.Accounts "${account}" \
+                    org.freedesktop.Accounts.User SetIconFile s "${picture}" >/dev/null 2>&1; then
+                echo "The picture of $2 could not be set." >&2
+            fi
+        fi
+        echo "Account $2 created."
+        ;;
+    *) usage ;;
+esac

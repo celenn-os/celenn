@@ -1,4 +1,4 @@
-# Brazilian Portuguese translation of cosmic-blue Parental controls
+# Brazilian Portuguese translation of Celenn OS Parental controls
 # (build_files/first_steps/src/parental.rs).
 msgid ""
 msgstr ""
@@ -200,8 +200,8 @@ msgstr "“{}” não funcionou"
 msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
 msgstr "Sem conexão com a internet. Conecte-se a uma rede e tente de novo. Nada foi alterado."
 
-msgid "The disk is full ({} free). Free up space with cosmic-blue Tools, then try again."
-msgstr "O disco está cheio ({} livres). Libere espaço com Ferramentas do cosmic-blue e tente de novo."
+msgid "The disk is full ({} free). Free up space with Celenn OS Tools, then try again."
+msgstr "O disco está cheio ({} livres). Libere espaço com Ferramentas do Celenn OS e tente de novo."
 
 msgid "The server does not answer. Try again in a few minutes."
 msgstr "O servidor não responde. Tente de novo em alguns minutos."
@@ -221,8 +221,8 @@ msgstr "Relatar o problema"
 msgid "Technical details"
 msgstr "Detalhes técnicos"
 
-msgid "The report opens in your browser, filled in: the cosmic-blue version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
-msgstr "O relatório abre no navegador, já preenchido: a versão do cosmic-blue, o hardware e este erro. Nenhum arquivo ou dado pessoal. Você revisa antes de enviar; escreva no seu idioma. Para enviar é preciso uma conta no GitHub."
+msgid "The report opens in your browser, filled in: the Celenn OS version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
+msgstr "O relatório abre no navegador, já preenchido: a versão do Celenn OS, o hardware e este erro. Nenhum arquivo ou dado pessoal. Você revisa antes de enviar; escreva no seu idioma. Para enviar é preciso uma conta no GitHub."
 
 msgid "Open the report"
 msgstr "Abrir o relatório"

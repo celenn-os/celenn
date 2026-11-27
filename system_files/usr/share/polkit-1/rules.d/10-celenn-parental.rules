@@ -1,0 +1,16 @@
+// Parental controls: a child account (group celenn-children, kept up to
+// date by celenn-parental-controls.service) needs a parent's password to
+// add or change a network connection (a VPN of its own would go around the
+// web filter; joining a new Wi-Fi network asks too) and to change the time
+// zone or the clock (screen time is counted per day). Early in the order
+// (10-) so that no other rule allows it first.
+polkit.addRule(function (action, subject) {
+    if (!subject.isInGroup("celenn-children")) {
+        return polkit.Result.NOT_HANDLED;
+    }
+    if (action.id.indexOf("org.freedesktop.NetworkManager.settings.modify.") === 0
+            || action.id.indexOf("org.freedesktop.timedate1.") === 0) {
+        return polkit.Result.AUTH_ADMIN;
+    }
+    return polkit.Result.NOT_HANDLED;
+});

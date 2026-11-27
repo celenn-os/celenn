@@ -1,4 +1,4 @@
-// cosmic-blue Parental controls: how long and when children can use the
+// Celenn OS Parental controls: how long and when children can use the
 // computer, and a family filter for the web.
 //
 //   - the parent's window: the child accounts (accounts without
@@ -20,20 +20,20 @@
 // The rules are applied by a service (parental_daemon.rs: screen time,
 // closing the session, the web filter) and at login (PAM). Changing them
 // needs an administrator password: the app runs
-// /usr/libexec/cosmic-blue-parental-helper (polkit action
-// io.github.cosmic_blue_os.parental.manage, remembered a few minutes), and
-// more time /usr/libexec/cosmic-blue-parental-extend (action
-// io.github.cosmic_blue_os.parental.extend, asked every time, so that a
+// /usr/libexec/celenn-parental-helper (polkit action
+// io.github.celenn_os.parental.manage, remembered a few minutes), and
+// more time /usr/libexec/celenn-parental-extend (action
+// io.github.celenn_os.parental.extend, asked every time, so that a
 // child cannot give itself more).
 //
-//   cosmic-blue-parental-controls               the parent's window
-//   cosmic-blue-parental-controls --user NAME   the same, on a child's page
-//   cosmic-blue-parental-controls --more-time   the "more time" window
-//   cosmic-blue-parental-controls --agent       the warnings (autostart)
-//   cosmic-blue-parental-controls --check       image build test: every text
+//   celenn-parental-controls               the parent's window
+//   celenn-parental-controls --user NAME   the same, on a child's page
+//   celenn-parental-controls --more-time   the "more time" window
+//   celenn-parental-controls --agent       the warnings (autostart)
+//   celenn-parental-controls --check       image build test: every text
 //                                               has its translations
 //
-// The look is that of cosmic-blue Tools: a compact page header (the picture,
+// The look is that of Celenn OS Tools: a compact page header (the picture,
 // the title and a caption, style.rs), then COSMIC settings sections.
 
 use cosmic::app::{Core, Settings, Task};
@@ -66,17 +66,17 @@ pub(crate) const LANGUAGES: &[(&str, &str)] = &[
     ("it", include_str!("../po/parental/it.po")),
     ("pt_BR", include_str!("../po/parental/pt_BR.po")),
 ];
-pub(crate) const TEMPLATE: &str = include_str!("../po/parental/cosmic-blue-parental-controls.pot");
+pub(crate) const TEMPLATE: &str = include_str!("../po/parental/celenn-parental-controls.pot");
 pub(crate) const PO_DIR: &str = "po/parental";
-pub(crate) const TEMPLATE_NAME: &str = "cosmic-blue-parental-controls.pot";
+pub(crate) const TEMPLATE_NAME: &str = "celenn-parental-controls.pot";
 
-const HELPER: &str = "/usr/libexec/cosmic-blue-parental-helper";
-const EXTEND: &str = "/usr/libexec/cosmic-blue-parental-extend";
-const ICON: &str = "cosmic-blue-parental-controls";
+const HELPER: &str = "/usr/libexec/celenn-parental-helper";
+const EXTEND: &str = "/usr/libexec/celenn-parental-extend";
+const ICON: &str = "celenn-parental-controls";
 /// The child's launcher (see more_time_launcher)
-const MORE_TIME_ID: &str = "io.github.cosmic_blue_os.ParentalControls.MoreTime";
+const MORE_TIME_ID: &str = "io.github.celenn_os.ParentalControls.MoreTime";
 const AVATARS: &str = "/var/lib/AccountsService/icons";
-/// cosmic-blue's profile pictures (branding/avatars), one to pick for a new
+/// Celenn OS's profile pictures (branding/avatars), one to pick for a new
 /// child account
 const FACES: &str = "/usr/share/pixmaps/faces";
 /// COSMIC's picture for accounts without one (a link to our planet)
@@ -736,7 +736,7 @@ impl Application for App {
     type Executor = executor::Default;
     type Flags = Mode;
     type Message = Message;
-    const APP_ID: &'static str = "io.github.cosmic_blue_os.ParentalControls";
+    const APP_ID: &'static str = "io.github.celenn_os.ParentalControls";
 
     fn core(&self) -> &Core {
         &self.core

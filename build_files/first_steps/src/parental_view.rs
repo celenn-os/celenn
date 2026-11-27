@@ -37,7 +37,7 @@ pub(super) fn app_icon<'a>() -> Element<'a, Message> {
     widget::icon::from_name(ICON).size(44).into()
 }
 
-/// cosmic-blue's profile pictures, to pick one for a new child account, cut
+/// Celenn OS's profile pictures, to pick one for a new child account, cut
 /// as rounded squares (the links, such as COSMIC's default picture, are not listed
 /// twice)
 pub(super) fn faces() -> Vec<(PathBuf, widget::image::Handle)> {

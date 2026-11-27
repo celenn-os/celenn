@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # Replaces Fedora's cosmic-greeter binary (login and lock screens) with the one
-# rebuilt from the same source package with the cosmic-blue wallpaper as its
+# rebuilt from the same source package with the Celenn OS wallpaper as its
 # built-in background (see build_files/greeter/build.sh).
 set -euox pipefail
 

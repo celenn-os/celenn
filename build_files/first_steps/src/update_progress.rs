@@ -1,6 +1,6 @@
 // Progress of a system download, for the progress bar of the Updates page.
 //
-// cosmic-blue-bootc (the bootc that uupd and cosmic-blue-updates-helper run)
+// celenn-bootc (the bootc that uupd and celenn-updates-helper run)
 // copies bootc's progress, JSON lines written to its --progress-fd, to
 // PROGRESS. Each line is an event: "ProgressBytes" while the image is
 // downloaded (task "pulling": bytes and bytesTotal of what is left to
@@ -10,7 +10,7 @@
 use crate::i18n::{language, tr};
 use std::time::{Duration, SystemTime};
 
-pub const PROGRESS: &str = "/run/cosmic-blue/update-progress.jsonl";
+pub const PROGRESS: &str = "/run/celenn/update-progress.jsonl";
 /// bootc writes an event at least every few seconds while it downloads;
 /// an older file was left by a download that was stopped
 const FRESH: Duration = Duration::from_secs(60);

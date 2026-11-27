@@ -16,9 +16,14 @@ from PIL import Image
 from scipy.ndimage import gaussian_filter
 
 W, H = 5120, 2880
-# where the mark sat in the horizontal logo, centred 60 px below the middle
+# where the mark sat in the horizontal logo of the old name (559.7 logo units
+# wide), centred 60 px below the middle
 SCALE = 2900 / 559.7
 MARK = (W / 2 - 559.7 * SCALE / 2 + 50 * SCALE, H / 2 + 60)
+LOGO = (Path(__file__).parent / "../logo/celenn-logo-horizontal-dark.svg").read_text()
+# the horizontal logo's text runs from x 118 to its width less 6, and from
+# y 19 to 81, in logo units
+TEXT_RIGHT = float(LOGO.split('viewBox="0 0 ')[1].split()[0]) - 6
 # COSMIC scales the wallpaper to fill the screen and crops the rest. The name
 # sits close to the bottom right corner, just above the dock, as far right as
 # it can while staying whole on these screen shapes (4:3, 5:4 and 21:9
@@ -41,10 +46,9 @@ def safe_box():
             min(b[2] for b in boxes), min(b[3] for b in boxes))
 
 
-# the name (the horizontal logo's text runs from x 118 to 559.7 and from y 19
-# to 81 in logo units)
-NAME_WIDTH = 760
-NAME_K = NAME_WIDTH / (559.7 - 118)
+# the name, its letters as tall as the old name's were at 760 px wide
+NAME_K = 760 / (559.7 - 118)
+NAME_WIDTH = (TEXT_RIGHT - 118) * NAME_K
 _right, _bottom = safe_box()[2] - RIGHT, H - BOTTOM
 NAME_BOX = (_right - NAME_WIDTH, _bottom - 62 * NAME_K, _right, _bottom)
 
@@ -64,7 +68,7 @@ def main():
     here = Path(__file__).parent
     bg_path, out = sys.argv[1:3]
     text_mode = sys.argv[3] if len(sys.argv) > 3 else "none"
-    logo = (here / "../logo/cosmic-blue-logo-horizontal-dark.svg").read_text()
+    logo = LOGO
     defs = logo[logo.index("<defs>"):logo.index("</defs>") + 7]
     icon = logo[logo.index('<g transform="translate(50 50)">') + 32:logo.index('</g><g transform="translate(118')]
     text = logo[logo.index('<g transform="translate(118'):logo.rindex("</svg>")]
@@ -74,8 +78,8 @@ def main():
             k = NAME_K
             x0, y0 = NAME_BOX[0] - 118 * k, NAME_BOX[1] - 19 * k
         else:                       # centred under the mark
-            width = 1150
-            k = width / (559.7 - 118)
+            k = 1150 / (559.7 - 118)  # letters as tall as the old name's
+            width = (TEXT_RIGHT - 118) * k
             x0, y0 = MARK[0] - width / 2 - 118 * k, MARK[1] + 47 * SCALE + 170 - 19 * k
         parts.append(f'<g transform="translate({x0:.1f} {y0:.1f}) scale({k:.4f})">{text}</g>')
     svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}">{defs}'

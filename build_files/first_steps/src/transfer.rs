@@ -1,9 +1,9 @@
-// "Change computers" (a tool of cosmic-blue Tools): the settings people choose and
+// "Change computers" (a tool of Celenn OS Tools): the settings people choose and
 // the list of their apps, saved to a JSON file, then taken back on another
-// cosmic-blue computer.
+// Celenn OS computer.
 //
 // What travels: the COSMIC settings of SETTINGS (theme, wallpaper of
-// cosmic-blue, panel, dock, keyboard, shortcuts), the Flathub apps installed
+// Celenn OS, panel, dock, keyboard, shortcuts), the Flathub apps installed
 // on top of the first-boot ones, and the developer tools ticked in Tools.
 // Never a personal file, a password, an account or browser history, nor
 // what belongs to the machine (screens, scale, hardware).
@@ -28,12 +28,12 @@ use std::process::{Command, Stdio};
 
 pub const TEXTS: &[&str] = &[
     "Change computers",
-    "Your settings and the list of your apps in a file, to take back on another cosmic-blue computer.",
+    "Your settings and the list of your apps in a file, to take back on another Celenn OS computer.",
     "Restore…",
     "Saved in Documents.",
     "Show",
     "Choose the file saved on your other computer",
-    "cosmic-blue-settings",
+    "celenn-settings",
     "Restore these settings",
     "Saved on {} on “{}”. Tick what you want back. Your files are not in this file: use Déjà Dup or LocalSend for them.",
     "Saved on {}. Tick what you want back. Your files are not in this file: use Déjà Dup or LocalSend for them.",
@@ -52,21 +52,23 @@ pub const TEXTS: &[&str] = &[
     "Your own wallpaper is not in the file: copy the picture, then choose it in Settings.",
     "{} shortcuts start a program: for safety, add them again in Settings.",
     "One shortcut starts a program: for safety, add it again in Settings.",
-    "{} settings unknown to this version of cosmic-blue were left out.",
+    "{} settings unknown to this version of Celenn OS were left out.",
     "{} app names were not valid and were left out.",
     "The apps could not be installed.",
     "A copy of your previous settings is in {}.",
     "Log out and back in to see every change.",
-    "This file is not a cosmic-blue settings file.",
-    "This file was saved by a newer cosmic-blue. Update this computer first.",
+    "This file is not a Celenn OS settings file.",
+    "This file was saved by a newer Celenn OS. Update this computer first.",
     "This file could not be read.",
     "Nothing to take back: everything in this file is already here.",
 ];
 
 /// Version of the file's layout. A file with a higher number comes from a
-/// newer cosmic-blue and is refused (its meaning may have changed).
+/// newer Celenn OS and is refused (its meaning may have changed).
 pub const FORMAT: u64 = 1;
-const MADE_BY: &str = "cosmic-blue settings";
+const MADE_BY: &str = "Celenn OS settings";
+/// What files saved before the project was renamed say
+const MADE_BY_BEFORE_RENAME: &str = "cosmic-blue settings";
 /// Bigger files and values are not settings files (the largest COSMIC
 /// setting, a computed theme, is about 10 KB)
 const MAX_FILE: u64 = 2 * 1024 * 1024;
@@ -291,7 +293,7 @@ pub fn save(dev_tools: Vec<&'static str>) -> Result<PathBuf, String> {
     let folder = documents();
     let stem = format!(
         "{}-{}",
-        tr("cosmic-blue-settings"),
+        tr("celenn-settings"),
         content["date"].as_str().unwrap_or_default()
     );
     let mut path = folder.join(format!("{stem}.json"));
@@ -344,21 +346,24 @@ pub fn read(path: &Path, installed_apps: &BTreeSet<String>) -> Result<Restore, &
         .map_err(|_| "This file could not be read.")?
         .len();
     if size > MAX_FILE {
-        return Err("This file is not a cosmic-blue settings file.");
+        return Err("This file is not a Celenn OS settings file.");
     }
     let text = std::fs::read_to_string(path).map_err(|_| "This file could not be read.")?;
     parse(&text, installed_apps)
 }
 
 pub fn parse(text: &str, installed_apps: &BTreeSet<String>) -> Result<Restore, &'static str> {
-    let not_ours = "This file is not a cosmic-blue settings file.";
+    let not_ours = "This file is not a Celenn OS settings file.";
     let file: Value = serde_json::from_str(text).map_err(|_| not_ours)?;
-    if file["made_by"].as_str() != Some(MADE_BY) {
+    if !matches!(
+        file["made_by"].as_str(),
+        Some(MADE_BY | MADE_BY_BEFORE_RENAME)
+    ) {
         return Err(not_ours);
     }
     match file["format"].as_u64() {
         Some(format) if format > FORMAT => {
-            return Err("This file was saved by a newer cosmic-blue. Update this computer first.");
+            return Err("This file was saved by a newer Celenn OS. Update this computer first.");
         }
         Some(_) => {}
         None => return Err(not_ours),
@@ -635,7 +640,7 @@ pub fn left_out(restore: &Restore, report: &Report) -> Vec<String> {
     let unknown = restore.unknown_settings + report.failed;
     if unknown > 0 {
         lines.push(fill(
-            tr("{} settings unknown to this version of cosmic-blue were left out."),
+            tr("{} settings unknown to this version of Celenn OS were left out."),
             &unknown.to_string(),
         ));
     }
@@ -749,7 +754,7 @@ mod tests {
         let newer = json!({"format": FORMAT + 1, "made_by": MADE_BY}).to_string();
         assert_eq!(
             parse(&newer, &none),
-            Err("This file was saved by a newer cosmic-blue. Update this computer first.")
+            Err("This file was saved by a newer Celenn OS. Update this computer first.")
         );
     }
 
@@ -774,7 +779,7 @@ mod tests {
     #[test]
     fn wallpapers() {
         assert!(!own_wallpaper(
-            "(output: \"all\", source: Path(\"/usr/share/backgrounds/cosmic-blue/galaxy.jxl\"))"
+            "(output: \"all\", source: Path(\"/usr/share/backgrounds/celenn/galaxy.jxl\"))"
         ));
         assert!(own_wallpaper(
             "(output: \"all\", source: Path(\"/home/lea/Pictures/cat.jpg\"))"
@@ -786,7 +791,7 @@ mod tests {
 
     #[test]
     fn round_trip() {
-        let dir = std::env::temp_dir().join(format!("cosmic-blue-transfer-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("celenn-transfer-{}", std::process::id()));
         let from = dir.join("from/cosmic");
         let to = dir.join("to/cosmic");
         for (id, key, value) in [

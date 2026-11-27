@@ -1,4 +1,4 @@
-# COSMIC version that cosmic-blue is built and tested against (Fedora's
+# COSMIC version that Celenn OS is built and tested against (Fedora's
 # cosmic-settings package). The theme tool (build_files/theme/Cargo.toml pins
 # the matching libcosmic revision) and the tours (build_files/first_steps,
 # same libcosmic and Cargo.lock as cosmic-initial-setup) follow it.

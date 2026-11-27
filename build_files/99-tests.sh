@@ -6,7 +6,7 @@ set -euox pipefail
 jq -e '.transports.docker."ghcr.io/ublue-os"' /etc/containers/policy.json >/dev/null
 # No Bluefin wallpapers
 test ! -e /usr/share/backgrounds/bluefin
-# Profile pictures: the 22 cosmic-blue avatars only (512x512 PNG), and the
+# Profile pictures: the 22 Celenn OS avatars only (512x512 PNG), and the
 # picture COSMIC Settings uses for accounts without one (pop-robot.png, a
 # Pop!_OS file) is the planet avatar
 faces=/usr/share/pixmaps/faces
@@ -19,34 +19,34 @@ for face in "${faces}"/*.png; do
     test "$(od -An -tx1 -N8 "${face}" | tr -d ' ')" = 89504e470d0a1a0a
     test "$(od -An -tu1 -j16 -N8 "${face}" | tr -s ' ')" = " 0 0 2 0 0 0 2 0"
 done
-# cosmic-blue wallpapers: arcs (the logo and name) is the COSMIC default, the others are
+# Celenn OS wallpapers: arcs (the logo and name) is the COSMIC default, the others are
 # extras. No light duplicates.
-bg=/usr/share/backgrounds/cosmic-blue
+bg=/usr/share/backgrounds/celenn
 for name in arcs deep-spiral eclipse galactic-river galaxy gas-veils line-orbits \
         ringed-planet orbits waves milky-way; do
-    test -s "${bg}/cosmic-blue-${name}.jpg"
+    test -s "${bg}/celenn-${name}.jpg"
 done
-test -s "${bg}/cosmic-blue.jpg"
-test ! -e "${bg}/cosmic-blue-light.jpg"
-test ! -e "${bg}/cosmic-blue-orbits-light.jpg"
-test ! -e "${bg}/cosmic-blue-constellation.jpg"
-test ! -e "${bg}/cosmic-blue-emblem.jpg"
-grep -q "Path(\"${bg}/cosmic-blue-arcs.jpg\")" \
+test -s "${bg}/celenn.jpg"
+test ! -e "${bg}/celenn-light.jpg"
+test ! -e "${bg}/celenn-orbits-light.jpg"
+test ! -e "${bg}/celenn-constellation.jpg"
+test ! -e "${bg}/celenn-emblem.jpg"
+grep -q "Path(\"${bg}/celenn-arcs.jpg\")" \
     /usr/share/cosmic/com.system76.CosmicBackground/v1/all
 # Per-theme defaults (used by COSMIC releases after 1.11): the same wallpaper
 # for both themes
-grep -q "Path(\"${bg}/cosmic-blue-arcs.jpg\")" \
+grep -q "Path(\"${bg}/celenn-arcs.jpg\")" \
     /usr/share/cosmic/com.system76.CosmicBackground.Dark/v1/all
-grep -q "Path(\"${bg}/cosmic-blue-arcs.jpg\")" \
+grep -q "Path(\"${bg}/celenn-arcs.jpg\")" \
     /usr/share/cosmic/com.system76.CosmicBackground.Light/v1/all
-test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-logo.svg
-# fastfetch: cosmic-blue logo and config instead of Bluefin's, a valid
+test -s /usr/share/icons/hicolor/scalable/apps/celenn-logo.svg
+# fastfetch: Celenn OS logo and config instead of Bluefin's, a valid
 # config, keys in the accent color, and Nerd Font symbols for its icons
 test ! -e /usr/share/ublue-os/bluefin-logos
 test ! -e /etc/ublue-os/fastfetch.json
-test -s /usr/share/ublue-os/fastfetch/cosmic-blue-dark.txt
-test -s /usr/share/ublue-os/fastfetch/cosmic-blue-light.txt
-grep -q 'cosmic-blue-${MODE}.txt' /usr/bin/ublue-fastfetch
+test -s /usr/share/ublue-os/fastfetch/celenn-dark.txt
+test -s /usr/share/ublue-os/fastfetch/celenn-light.txt
+grep -q 'celenn-${MODE}.txt' /usr/bin/ublue-fastfetch
 sed '/^ *\/\//d' /usr/share/ublue-os/fastfetch.jsonc | jq empty
 if grep -qE 'fastfetch-user-count|bazaar' /usr/share/ublue-os/fastfetch.jsonc; then
     echo "Bluefin fastfetch config left in place"; exit 1
@@ -54,41 +54,41 @@ fi
 test "$(HOME=/tmp/fastfetch-test ublue-bling-fastfetch)" = "38;2;79;141;255"
 test "$(HOME=/tmp/fastfetch-test ublue-bling-fastfetch --mode)" = dark
 HOME=/tmp/fastfetch-test fastfetch --config /usr/share/ublue-os/fastfetch.jsonc \
-    --pipe true --structure os:kernel | grep cosmic-blue
+    --pipe true --structure os:kernel | grep 'Celenn OS'
 # (no grep -q: it would end fc-list with SIGPIPE, exit 141 under pipefail)
 fc-list : family | grep 'Symbols Nerd Font' >/dev/null
 # Monospace is still an ordinary font, not the symbols-only one
 fc-match monospace family | grep -v 'Symbols Nerd Font' >/dev/null
 # Logo art: only background colors and upper half blocks (gapless in
 # COSMIC Terminal), and the ff alias
-if LC_ALL=C.UTF-8 grep -q '[▁▂▃▄▅▆▇█▏▎▍▌▋▊▉▐▖▗▘▝▚▞▙▛▜▟]' /usr/share/ublue-os/fastfetch/cosmic-blue-*.txt; then
+if LC_ALL=C.UTF-8 grep -q '[▁▂▃▄▅▆▇█▏▎▍▌▋▊▉▐▖▗▘▝▚▞▙▛▜▟]' /usr/share/ublue-os/fastfetch/celenn-*.txt; then
     echo "fastfetch logo uses glyphs that leave gaps in COSMIC Terminal"; exit 1
 fi
-grep -q "alias ff='ublue-fastfetch'" /etc/profile.d/cosmic-blue-fastfetch.sh
-# Terminal welcome banner (uwelcome): cosmic-blue links and tips, no
+grep -q "alias ff='ublue-fastfetch'" /etc/profile.d/celenn-fastfetch.sh
+# Terminal welcome banner (uwelcome): Celenn OS links and tips, no
 # Bluefin links, launchers or commands left
 # (uwelcome only reads config.toml since projectbluefin/common #1662)
 test ! -e /etc/uwelcome/config.json
 [[ "$(grep -E '^url = ' /etc/uwelcome/config.toml)" == 'url = "https://github.com/cosmic-blue-os/cosmic-blue/issues"
 url = "https://github.com/cosmic-blue-os/cosmic-blue/discussions"
 url = "https://cosmic-blue-os.github.io/cosmic-blue/docs/"' ]]
-grep -qx 'commands = \["cosmic-blue-tips"\]' /etc/uwelcome/config.toml
+grep -qx 'commands = \["celenn-tips"\]' /etc/uwelcome/config.toml
 # The banner's guard is only set in interactive shells (not in the shell
 # that starts the desktop session, whose environment every terminal inherits)
 grep -qx 'case \$- in' /etc/profile.d/uwelcome.sh
 # Tips: every language has all the tips, and the session language picks them
-tips_dir=/usr/share/cosmic-blue/tips
+tips_dir=/usr/share/celenn/tips
 for tips in "${tips_dir}"/*.txt; do
     [[ "$(grep -c . "${tips}")" == "$(grep -c . "${tips_dir}/en.txt")" ]] \
         || { echo "${tips}: not the same number of tips as en.txt"; exit 1; }
 done
 for locale in en_US fr_FR de_DE es_ES it_IT pt_BR ja_JP; do
-    tip="$(env -u LANGUAGE -u LC_ALL -u LC_MESSAGES LANG="${locale}.UTF-8" cosmic-blue-tips)"
+    tip="$(env -u LANGUAGE -u LC_ALL -u LC_MESSAGES LANG="${locale}.UTF-8" celenn-tips)"
     test -n "${tip}"
     file="${tips_dir}/${locale}.txt"
     [[ -f "${file}" ]] || file="${tips_dir}/${locale%%_*}.txt"
     [[ -f "${file}" ]] || file="${tips_dir}/en.txt"
-    grep -qF -- "${tip%%(*}" "${file}" || { echo "cosmic-blue-tips: ${locale} tip not from ${file}"; exit 1; }
+    grep -qF -- "${tip%%(*}" "${file}" || { echo "celenn-tips: ${locale} tip not from ${file}"; exit 1; }
 done
 if grep -rlE 'projectbluefin\.io|bluefin-cli|ujust report([^-]|$)' /etc/uwelcome \
     || grep -rl 'projectbluefin\.io' /usr/share/ublue-os/just /usr/share/applications; then
@@ -96,9 +96,9 @@ if grep -rlE 'projectbluefin\.io|bluefin-cli|ujust report([^-]|$)' /etc/uwelcome
 fi
 test ! -e /usr/share/applications/discourse.desktop
 test ! -e /usr/share/applications/io.projectbluefin.Report.desktop
-grep -q '^Exec=/usr/bin/cosmic-blue-docs$' /usr/share/applications/documentation.desktop
-grep -qx 'Icon=cosmic-blue-docs' /usr/share/applications/documentation.desktop
-test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-docs.svg
+grep -q '^Exec=/usr/bin/celenn-docs$' /usr/share/applications/documentation.desktop
+grep -qx 'Icon=celenn-docs' /usr/share/applications/documentation.desktop
+test -s /usr/share/icons/hicolor/scalable/apps/celenn-docs.svg
 # No ChairLift (Bluefin's Control Center) or its helpers
 if compgen -G '/usr/share/applications/*chairlift*' >/dev/null \
     || compgen -G '/usr/share/polkit-1/actions/*chairlift*' >/dev/null \
@@ -125,17 +125,17 @@ test "$(GSETTINGS_BACKEND=memory gsettings get org.gnome.desktop.interface color
 APP_LIST=/usr/share/cosmic/com.system76.CosmicAppList/v1/favorites
 for app in org.mozilla.firefox org.mozilla.thunderbird; do
     grep -q "\"${app}\"" "${APP_LIST}"
-    grep -q "^\[Flatpak Preinstall ${app}\]" /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall
+    grep -q "^\[Flatpak Preinstall ${app}\]" /usr/share/flatpak/preinstall.d/celenn.preinstall
 done
 for app in $(grep -o '"com\.system76\.[A-Za-z]*"' "${APP_LIST}" | tr -d '"'); do
     test -e "/usr/share/applications/${app}.desktop"
 done
-# App Library: our own apps in a "cosmic-blue" group (and not in COSMIC's
+# App Library: our own apps in a "Celenn OS" group (and not in COSMIC's
 # System/Utilities groups); every visible launcher of ours must be listed
 APP_GROUPS=/usr/share/cosmic/com.system76.CosmicAppLibrary/v1/groups
-grep -q 'name: "cosmic-blue"' "${APP_GROUPS}"
-test -s /usr/share/icons/hicolor/symbolic/apps/cosmic-blue-logo-symbolic.svg
-for desktop in /usr/share/applications/io.github.cosmic_blue_os.*.desktop \
+grep -q 'name: "Celenn OS"' "${APP_GROUPS}"
+test -s /usr/share/icons/hicolor/symbolic/apps/celenn-logo-symbolic.svg
+for desktop in /usr/share/applications/io.github.celenn_os.*.desktop \
     /usr/share/applications/documentation.desktop; do
     if grep -qx 'NoDisplay=true' "${desktop}"; then
         continue
@@ -168,7 +168,7 @@ grep -qx 4 "${PANEL}/margin"
 grep -qx OnOverlap /usr/share/cosmic/com.system76.CosmicPanel.Dock/v1/autohide
 # Firefox defaults (policies), linked into the flatpak's systemconfig
 # extension at boot; Bluefin's prefs and copy hook are gone
-FIREFOX_POLICIES=/usr/share/cosmic-blue/firefox/policies/policies.json
+FIREFOX_POLICIES=/usr/share/celenn/firefox/policies/policies.json
 jq -e '.policies.DisableTelemetry and .policies.DisableAppUpdate
     and .policies.HttpsOnlyMode == "enabled"
     and .policies.ExtensionSettings."uBlock0@raymondhill.net".installation_mode == "normal_installed"' \
@@ -177,57 +177,57 @@ SYSTEMCONFIG=/var/lib/flatpak/extension/org.mozilla.firefox.systemconfig/x86_64/
 # (Fedora 45's systemd-tmpfiles refuses a --root that does not exist yet)
 mkdir -p /tmp/tmpfiles-root
 SYSTEMD_LOG_LEVEL=warning systemd-tmpfiles --create --root=/tmp/tmpfiles-root - \
-    </usr/lib/tmpfiles.d/cosmic-blue-firefox.conf
-test "$(readlink "/tmp/tmpfiles-root${SYSTEMCONFIG}")" = /usr/share/cosmic-blue/firefox
+    </usr/lib/tmpfiles.d/celenn-firefox.conf
+test "$(readlink "/tmp/tmpfiles-root${SYSTEMCONFIG}")" = /usr/share/celenn/firefox
 rm -rf /tmp/tmpfiles-root
 test ! -e /usr/share/ublue-os/firefox-config
 test ! -e /usr/share/ublue-os/privileged-setup.hooks.d/99-flatpaks.sh
-# Terminal: the cosmic-blue color schemes are the defaults, dark and light
+# Terminal: the Celenn OS color schemes are the defaults, dark and light
 TERM_CONFIG=/usr/share/cosmic/com.system76.CosmicTerm/v1
 for kind in dark light; do
-    grep -qx '"cosmic-blue"' "${TERM_CONFIG}/syntax_theme_${kind}"
-    grep -q 'name: "cosmic-blue"' "${TERM_CONFIG}/color_schemes_${kind}"
+    grep -qx '"Celenn"' "${TERM_CONFIG}/syntax_theme_${kind}"
+    grep -q 'name: "Celenn"' "${TERM_CONFIG}/color_schemes_${kind}"
 done
-# Shell prompt: the cosmic-blue Starship config is valid and renders a path
+# Shell prompt: the Celenn OS Starship config is valid and renders a path
 # segment (Starship prints a warning for each config error)
 mkdir -p /tmp/starship-test
 PROMPT_OUT="$(cd /tmp && HOME=/tmp/starship-test \
-    STARSHIP_CONFIG=/usr/share/cosmic-blue/starship.toml starship prompt --status=1 2>&1)"
+    STARSHIP_CONFIG=/usr/share/celenn/starship.toml starship prompt --status=1 2>&1)"
 printf '%s\n' "${PROMPT_OUT}" | cat -v
 if printf '%s' "${PROMPT_OUT}" | grep -qiE 'warn|error'; then exit 1; fi
 printf '%s' "${PROMPT_OUT}" | grep -q '/tmp'
-grep -q 'STARSHIP_CONFIG="${COSMIC_BLUE_STARSHIP}"' /etc/profile.d/90-starship.sh
+grep -q 'STARSHIP_CONFIG="${CELENN_STARSHIP}"' /etc/profile.d/90-starship.sh
 # The prompt's arrows, logo and icons, and the fastfetch logo's half cells,
-# come from the cosmic-blue Prompt font
+# come from the Celenn Prompt font
 for cp in 10cb00 10cb01 10cb02 10cb03 10cb04 10cb05 10cb06; do
-    fc-list --format '%{file}\n' ":charset=${cp}" | grep -F /cosmic-blue-prompt.ttf >/dev/null
+    fc-list --format '%{file}\n' ":charset=${cp}" | grep -F /celenn-prompt.ttf >/dev/null
 done
-if grep -q 'Fedora\|\\ue0b0' /usr/share/cosmic-blue/starship.toml; then exit 1; fi
+if grep -q 'Fedora\|\\ue0b0' /usr/share/celenn/starship.toml; then exit 1; fi
 # The system monitor is COSMIC Monitor (rpm)
 rpm -q cosmic-monitor
 # Fedora's own wallpapers stay available
 rpm -q "f${FEDORA_MAJOR_VERSION}-backgrounds-base"
 # Each wallpaper is listed once in COSMIC Settings: no aliases, no copies
 test -z "$(find /usr/share/backgrounds -type l)"
-# cosmic-blue's wallpapers come first in COSMIC Settings (folder order)
-test "$(find /usr/share/backgrounds -mindepth 1 -maxdepth 1 -printf '%f\n' | LC_ALL=C sort | head -n1)" = cosmic-blue
+# Celenn OS's wallpapers come first in COSMIC Settings (folder order)
+test "$(find /usr/share/backgrounds -mindepth 1 -maxdepth 1 -printf '%f\n' | LC_ALL=C sort | head -n1)" = celenn
 test ! -e /usr/share/backgrounds/cosmic
 test -z "$(find /usr/share/backgrounds -type f -exec sha256sum {} + | cut -d' ' -f1 | sort | uniq -d)"
-grep -q '^LOGO=cosmic-blue-logo$' /usr/lib/os-release
+grep -q '^LOGO=celenn-logo$' /usr/lib/os-release
 # Links to the repository, also from cosmic-blue-nvidia
 grep -qx 'HOME_URL="https://github.com/cosmic-blue-os/cosmic-blue"' /usr/lib/os-release
 grep -qx 'BUG_REPORT_URL="https://github.com/cosmic-blue-os/cosmic-blue/issues"' /usr/lib/os-release
 # The live ISO installer matches its profile on VARIANT_ID
 grep -qE '^VARIANT_ID=cosmic-blue(-nvidia)?$' /usr/lib/os-release
-# Boot screen (Plymouth): cosmic-blue theme by default, with our logo images,
+# Boot screen (Plymouth): Celenn OS theme by default, with our logo images,
 # the blue spinner and Fedora's other images, and included in the initramfs
-test "$(plymouth-set-default-theme)" = cosmic-blue
-PLYMOUTH_THEME=/usr/share/plymouth/themes/cosmic-blue
-grep -qx "ImageDir=${PLYMOUTH_THEME}" "${PLYMOUTH_THEME}/cosmic-blue.plymouth"
-grep -qx 'ModuleName=two-step' "${PLYMOUTH_THEME}/cosmic-blue.plymouth"
-grep -qx 'UseFirmwareBackground=true' "${PLYMOUTH_THEME}/cosmic-blue.plymouth"
+test "$(plymouth-set-default-theme)" = celenn
+PLYMOUTH_THEME=/usr/share/plymouth/themes/celenn
+grep -qx "ImageDir=${PLYMOUTH_THEME}" "${PLYMOUTH_THEME}/celenn.plymouth"
+grep -qx 'ModuleName=two-step' "${PLYMOUTH_THEME}/celenn.plymouth"
+grep -qx 'UseFirmwareBackground=true' "${PLYMOUTH_THEME}/celenn.plymouth"
 for image in watermark.png bgrt-fallback.png; do
-    cmp "/ctx/system_files/cosmic-blue/usr/share/plymouth/themes/cosmic-blue/${image}" "${PLYMOUTH_THEME}/${image}"
+    cmp "/ctx/system_files/celenn/usr/share/plymouth/themes/celenn/${image}" "${PLYMOUTH_THEME}/${image}"
 done
 compgen -G "${PLYMOUTH_THEME}/throbber-*.png" >/dev/null
 test -e "${PLYMOUTH_THEME}/lock.png"
@@ -235,22 +235,22 @@ test -e "${PLYMOUTH_THEME}/entry.png"
 # Clean graphical boot: systemd status lines hidden, GRUB menu hidden after a
 # good boot (needs bootupd's static GRUB configuration and Fedora's
 # boot-success flag)
-grep -q '"systemd.show_status=error"' /usr/lib/bootc/kargs.d/10-cosmic-blue-quiet-boot.toml
-grep -q '"rd.systemd.show_status=error"' /usr/lib/bootc/kargs.d/10-cosmic-blue-quiet-boot.toml
+grep -q '"systemd.show_status=error"' /usr/lib/bootc/kargs.d/10-celenn-quiet-boot.toml
+grep -q '"rd.systemd.show_status=error"' /usr/lib/bootc/kargs.d/10-celenn-quiet-boot.toml
 test -f /usr/lib/bootupd/grub2-static/grub-static-pre.cfg
-test -f /usr/lib/bootupd/grub2-static/configs.d/12_cosmic-blue-menu-auto-hide.cfg
+test -f /usr/lib/bootupd/grub2-static/configs.d/12_celenn-menu-auto-hide.cfg
 test -x /usr/sbin/grub2-set-bootflag
 test -f /usr/lib/systemd/user/grub-boot-success.timer
 systemctl --global is-enabled grub-boot-success.timer
 KVER="$(rpm -q --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' kernel-core | head -n1)"
 lsinitrd "/usr/lib/modules/${KVER}/initramfs.img" > /tmp/initramfs.txt
-grep -q 'plymouth/themes/cosmic-blue/bgrt-fallback.png' /tmp/initramfs.txt
-grep -q 'plymouth/themes/cosmic-blue/cosmic-blue.plymouth' /tmp/initramfs.txt
+grep -q 'plymouth/themes/celenn/bgrt-fallback.png' /tmp/initramfs.txt
+grep -q 'plymouth/themes/celenn/celenn.plymouth' /tmp/initramfs.txt
 # TPM2 disk unlock (`ujust toggle-tpm2`): the recipe, our checks wrapping
 # common's script, and TPM2 support in the initramfs (systemd-cryptsetup token)
 grep -q '^toggle-tpm2:' /usr/share/ublue-os/just/shared.just
 grep -q '/usr/bin/luks-tpm2-autounlock' /usr/share/ublue-os/just/shared.just
-cmp /ctx/system_files/cosmic-blue/usr/bin/luks-tpm2-autounlock /usr/bin/luks-tpm2-autounlock
+cmp /ctx/system_files/celenn/usr/bin/luks-tpm2-autounlock /usr/bin/luks-tpm2-autounlock
 test -x /usr/libexec/ublue-luks-tpm2-autounlock
 grep -q '^get_luks_uuid()' /usr/libexec/ublue-luks-tpm2-autounlock
 grep -q 'BASH_SOURCE' /usr/libexec/ublue-luks-tpm2-autounlock
@@ -258,11 +258,11 @@ for cmd in systemd-cryptenroll cryptsetup gum mokutil; do command -v "${cmd}"; d
 grep -q 'libcryptsetup-token-systemd-tpm2.so' /tmp/initramfs.txt
 grep -q 'libtss2-esys' /tmp/initramfs.txt
 
-# cosmic-blue signing key and policy, and the signed image reference
+# Celenn OS signing key and policy, and the signed image reference
 test -s /etc/pki/containers/cosmic-blue.pub
 jq -e '.transports.docker."ghcr.io/cosmic-blue-os"[0].keyPath == "/etc/pki/containers/cosmic-blue.pub"' \
     /etc/containers/policy.json >/dev/null
-grep -q 'use-sigstore-attachments: true' /etc/containers/registries.d/cosmic-blue.yaml
+grep -q 'use-sigstore-attachments: true' /etc/containers/registries.d/celenn.yaml
 jq -e '."image-ref" | startswith("ostree-image-signed:")' /usr/share/ublue-os/image-info.json >/dev/null
 
 # ujust and its recipes
@@ -270,7 +270,7 @@ for f in bin/ujust share/ublue-os/just/00-entry.just share/ublue-os/just/apps.ju
          share/ublue-os/just/default.just share/ublue-os/just/update.just; do
     test -e "/usr/${f}"
 done
-# cosmic-blue recipes (60-custom.just) parse and are listed by ujust
+# Celenn OS recipes (60-custom.just) parse and are listed by ujust
 recipes="$(just --justfile /usr/share/ublue-os/just/00-entry.just --summary)"
 for recipe in toggle-dark-mode reset-cosmic-theme reset-cosmic-config export-cosmic-config \
               install-microsoft-fonts install-cli-tools report-bug enroll-secure-boot-key \
@@ -280,8 +280,8 @@ done
 
 # `ujust report-bug`: the system details script runs anywhere (here without
 # deployments) and prints the image name
-test -x /usr/libexec/cosmic-blue-system-info
-/usr/libexec/cosmic-blue-system-info | grep "^Image: ${IMAGE_NAME} " >/dev/null
+test -x /usr/libexec/celenn-system-info
+/usr/libexec/celenn-system-info | grep "^Image: ${IMAGE_NAME} " >/dev/null
 
 test ! -e /usr/share/flatpak/preinstall.d/bazaar.preinstall
 # FlatPark (Bluefin's second Flatpak remote) is offered but off: not in
@@ -289,7 +289,7 @@ test ! -e /usr/share/flatpak/preinstall.d/bazaar.preinstall
 # also on Flathub only come from Flathub) ready for `ujust toggle-flatpark`
 test ! -e /usr/share/flatpak/remotes.d/flatpark.flatpakrepo
 if flatpak remotes --system --columns=name | grep -qx flatpark; then echo "FlatPark is on"; exit 1; fi
-FLATPARK=/usr/share/cosmic-blue/flatpak/flatpark.flatpakrepo
+FLATPARK=/usr/share/celenn/flatpak/flatpark.flatpakrepo
 grep -q '^\[Flatpak Repo\]' "${FLATPARK}"
 filter="$(sed -n 's/^Filter=//p' "${FLATPARK}")"
 test "${filter}" = /usr/share/flatpak/flatpark.filter
@@ -297,7 +297,7 @@ grep -q '^deny ' "${filter}"
 grep -qw toggle-flatpark <<<"${recipes}"
 test ! -e /usr/lib/systemd/system/flatpark-filter-copy.path
 if grep -q flatpark /usr/lib/systemd/system-preset/*.preset; then exit 1; fi
-systemctl is-enabled --quiet cosmic-blue-flatpark-off.service
+systemctl is-enabled --quiet celenn-flatpark-off.service
 # Bluefin leftovers removed in 10-system-files.sh
 for path in /etc/bazaar \
     /usr/lib/systemd/user/bazaar.service /usr/libexec/projectbluefin-countme \
@@ -314,7 +314,7 @@ done
 # renames Bluefin's that do not), and every install-<thing> has its
 # remove-<thing>; the earlier names and Bluefin's own installers still run,
 # unlisted
-# Developer tools: cosmic-blue's own menu, Bluefin's developer mode is gone
+# Developer tools: Celenn OS's own menu, Bluefin's developer mode is gone
 if grep -q '^toggle-devmode:' /usr/share/ublue-os/just/system.just; then echo "Bluefin's toggle-devmode left in place"; exit 1; fi
 grep -q '"Antigravity|cask|antigravity-ide-linux"' /usr/share/ublue-os/just/60-custom.just
 for recipe in $(tr ' ' '\n' <<<"${recipes}" | grep '^install-'); do
@@ -350,50 +350,50 @@ while IFS='=' read -r type apps; do
     app="${apps%%;*}"
     if [[ ! -f "/usr/share/applications/${app}" ]] \
         && ! grep -qx "\[Flatpak Preinstall ${app%.desktop}\]" \
-            /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall; then
+            /usr/share/flatpak/preinstall.d/celenn.preinstall; then
         echo "mimeapps.list: ${type} opens in ${app}, which is not installed"; exit 1
     fi
 done < <(sed -n '/^\[Default Applications\]/,/^\[/{/^[a-z].*=/p}' /etc/xdg/mimeapps.list)
 test ! -e /usr/share/applications/system-update.desktop
-test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-update.svg
-test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-tour-store.svg
+test -s /usr/share/icons/hicolor/scalable/apps/celenn-update.svg
+test -s /usr/share/icons/hicolor/scalable/apps/celenn-tour-store.svg
 test ! -e /usr/share/icons/hicolor/scalable/places/ublue-update.svg
-test -s /usr/share/icons/cosmic-blue/layer/apps/system-software-update.svg
+test -s /usr/share/icons/celenn/layer/apps/system-software-update.svg
 for icon in help-browser org.gnome.Terminal cs-tiling; do
-    test -s "/usr/share/icons/cosmic-blue/layer/apps/${icon}.svg"
+    test -s "/usr/share/icons/celenn/layer/apps/${icon}.svg"
 done
 if grep -q Bazaar /usr/share/ublue-os/homebrew/system-flatpaks.Brewfile; then exit 1; fi
 for remote in flathub cosmic; do
     grep -q '^\[Flatpak Repo\]' "/usr/share/flatpak/remotes.d/${remote}.flatpakrepo"
     flatpak remotes --system --columns=name | grep -qx "${remote}"
 done
-test -f /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall
+test -f /usr/share/flatpak/preinstall.d/celenn.preinstall
 # First-boot flatpaks and `ujust reset-default-apps` install the same apps
-diff <(sed -n 's/^\[Flatpak Preinstall \(.*\)\]$/\1/p' /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall | sort) \
+diff <(sed -n 's/^\[Flatpak Preinstall \(.*\)\]$/\1/p' /usr/share/flatpak/preinstall.d/celenn.preinstall | sort) \
      <(sed -n 's/^flatpak "\(.*\)"$/\1/p' /usr/share/ublue-os/homebrew/system-flatpaks.Brewfile | sort)
 # No flatpak that duplicates a COSMIC app (Mission Center: COSMIC Monitor) or
 # needs GNOME
 for app in io.github.flattool.Ignition org.gnome.FileRoller org.gnome.Showtime \
            org.gnome.Decibels page.tesk.Refine org.gnome.Calendar org.gnome.Contacts \
            io.missioncenter.MissionCenter; do
-    if grep -q "${app}" /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall; then exit 1; fi
+    if grep -q "${app}" /usr/share/flatpak/preinstall.d/celenn.preinstall; then exit 1; fi
 done
 test ! -e /usr/lib/systemd/system/flatpak-add-fedora-repos.service
 # AppImages: Gear Lever on first boot, and the host can run both AppImage
 # runtimes (older ones load libfuse.so.2, newer static ones need fusermount3)
-grep -q '^\[Flatpak Preinstall it.mijorus.gearlever\]' /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall
+grep -q '^\[Flatpak Preinstall it.mijorus.gearlever\]' /usr/share/flatpak/preinstall.d/celenn.preinstall
 test -e /usr/lib64/libfuse.so.2
 command -v fusermount >/dev/null
 command -v fusermount3 >/dev/null
-systemctl --global is-enabled cosmic-blue-appimage-update.timer
-systemctl --global is-enabled cosmic-blue-housekeeping.timer
+systemctl --global is-enabled celenn-appimage-update.timer
+systemctl --global is-enabled celenn-housekeeping.timer
 # Its warning and the Maintenance page's "Empty" (gio trash --empty)
 command -v notify-send >/dev/null
 command -v gio >/dev/null
 # LocalSend: first-boot app, its port open, the tour's QR code
-grep -q '^\[Flatpak Preinstall org.localsend.localsend_app\]' /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall
+grep -q '^\[Flatpak Preinstall org.localsend.localsend_app\]' /usr/share/flatpak/preinstall.d/celenn.preinstall
 firewall-offline-cmd --zone=public --query-service=localsend >/dev/null
-test -s /usr/share/cosmic-blue/localsend-qr.svg
+test -s /usr/share/celenn/localsend-qr.svg
 # No Bluefin GNOME dconf settings (the folder itself may come from Fedora)
 if compgen -G '/etc/dconf/db/distro.d/*bluefin*' >/dev/null; then
     echo "Bluefin (GNOME) dconf settings present"; exit 1
@@ -488,18 +488,18 @@ test -f /usr/lib/tuned/profiles/balanced-battery/tuned.conf ||
     test -f /usr/lib/tuned/balanced-battery/tuned.conf
 
 # The avatar a user picks shows on the login screen too
-test -x /usr/libexec/cosmic-blue-login-pictures
-systemctl is-enabled cosmic-blue-login-pictures.path cosmic-blue-login-pictures.service
+test -x /usr/libexec/celenn-login-pictures
+systemctl is-enabled celenn-login-pictures.path celenn-login-pictures.service
 
 # Installer keyboard layout and clock format copied to COSMIC user settings
-test -x /usr/libexec/cosmic-blue-user-defaults
-systemctl is-enabled cosmic-blue-user-defaults.service
+test -x /usr/libexec/celenn-user-defaults
+systemctl is-enabled celenn-user-defaults.service
 
 # COSMIC's first-run assistant is skipped for new accounts (our tour opens
 # instead, with its welcome illustration); VM agent
 test -f /etc/skel/.config/cosmic-initial-setup-done
-test -f /usr/share/cosmic-blue/tour-welcome.svg
-test -f /usr/share/cosmic-blue/tour-banner.svg
+test -f /usr/share/celenn/tour-welcome.svg
+test -f /usr/share/celenn/tour-banner.svg
 rpm -q spice-vdagent
 
 # Backups (Déjà Dup, build_files/30-packages.sh): the package starts its
@@ -513,162 +513,163 @@ fi
 
 # First steps tour: opened once for new accounts, at the first login;
 # it runs and every text has its French translation
-test -f /etc/skel/.config/cosmic-blue/first-steps-pending
-test -x /usr/libexec/cosmic-blue-tour
-test -x /usr/libexec/cosmic-blue-first-steps-autostart
-grep -qx 'Exec=/usr/libexec/cosmic-blue-first-steps-autostart' \
-    /etc/xdg/autostart/io.github.cosmic_blue_os.FirstSteps.desktop
-test -f /usr/share/applications/io.github.cosmic_blue_os.FirstSteps.desktop
-test -f /usr/share/icons/hicolor/scalable/apps/cosmic-blue-welcome.svg
+test -f /etc/skel/.config/celenn/first-steps-pending
+test -x /usr/libexec/celenn-tour
+test -x /usr/libexec/celenn-first-steps-autostart
+grep -qx 'Exec=/usr/libexec/celenn-first-steps-autostart' \
+    /etc/xdg/autostart/io.github.celenn_os.FirstSteps.desktop
+test -f /usr/share/applications/io.github.celenn_os.FirstSteps.desktop
+test -f /usr/share/icons/hicolor/scalable/apps/celenn-welcome.svg
 # Color icons of the tour pages (build_files/first_steps/src/main.rs), found
-# in the cosmic-blue icon theme (its layer, Tela) or hicolor
-for icon in cosmic-blue-welcome cosmic-blue-tour-store cosmic-blue-tour-computer \
-    cosmic-blue-tour-keyboard cosmic-blue-tour-bearings cosmic-blue-tour-try cosmic-blue-tour-tips \
-    cosmic-blue-tour-files cosmic-blue-tour-accessibility cosmic-blue-tour-passwords org.gnome.DejaDup; do
-    [[ -n "$(find /usr/share/icons/cosmic-blue /usr/share/icons/Tela-circle-4f8dff \
+# in the Celenn OS icon theme (its layer, Tela) or hicolor
+for icon in celenn-welcome celenn-tour-store celenn-tour-computer \
+    celenn-tour-keyboard celenn-tour-bearings celenn-tour-try celenn-tour-tips \
+    celenn-tour-files celenn-tour-accessibility celenn-tour-passwords org.gnome.DejaDup; do
+    [[ -n "$(find /usr/share/icons/celenn /usr/share/icons/Tela-circle-4f8dff \
         /usr/share/icons/hicolor -name "${icon}.svg" -print -quit)" ]] \
         || { echo "Tour icon ${icon} not found" >&2; exit 1; }
 done
 # Wallpaper choice: each wallpaper has its small thumbnail (branding/tour/thumbnails.py)
-for wallpaper in /usr/share/backgrounds/cosmic-blue/*.jpg; do
-    test -s "/usr/share/cosmic-blue/wallpapers/${wallpaper##*/}" \
+for wallpaper in /usr/share/backgrounds/celenn/*.jpg; do
+    test -s "/usr/share/celenn/wallpapers/${wallpaper##*/}" \
         || { echo "No tour thumbnail for ${wallpaper##*/}" >&2; exit 1; }
 done
 # Keyboard shortcuts sheet, and the dialog that explains Windows and other
 # distributions' packages, opened by default for them
-grep -qx 'Exec=/usr/libexec/cosmic-blue-tour --shortcuts' \
-    /usr/share/applications/io.github.cosmic_blue_os.Shortcuts.desktop
-grep -qx 'Exec=/usr/libexec/cosmic-blue-tour --open %f' \
-    /usr/share/applications/io.github.cosmic_blue_os.OpenPackage.desktop
-grep -qx 'Exec=/usr/libexec/cosmic-blue-tour --phone' \
-    /usr/share/applications/io.github.cosmic_blue_os.PhoneTransfer.desktop
-grep -qx 'Exec=/usr/libexec/cosmic-blue-tour --belongings' \
-    /usr/share/applications/io.github.cosmic_blue_os.Belongings.desktop
+grep -qx 'Exec=/usr/libexec/celenn-tour --shortcuts' \
+    /usr/share/applications/io.github.celenn_os.Shortcuts.desktop
+grep -qx 'Exec=/usr/libexec/celenn-tour --open %f' \
+    /usr/share/applications/io.github.celenn_os.OpenPackage.desktop
+grep -qx 'Exec=/usr/libexec/celenn-tour --phone' \
+    /usr/share/applications/io.github.celenn_os.PhoneTransfer.desktop
+grep -qx 'Exec=/usr/libexec/celenn-tour --belongings' \
+    /usr/share/applications/io.github.celenn_os.Belongings.desktop
 for type in application/x-ms-dos-executable application/x-msi application/vnd.debian.binary-package \
     application/x-rpm; do
-    grep -qx "${type}=io.github.cosmic_blue_os.OpenPackage.desktop" /etc/xdg/mimeapps.list \
+    grep -qx "${type}=io.github.celenn_os.OpenPackage.desktop" /etc/xdg/mimeapps.list \
         || { echo "${type} does not open the package dialog" >&2; exit 1; }
 done
 # (libcosmic binary: its libraries resolve, and the check needs no display)
-if ldd /usr/libexec/cosmic-blue-tour | grep 'not found'; then
-    echo "cosmic-blue-tour: missing libraries"; exit 1
+if ldd /usr/libexec/celenn-tour | grep 'not found'; then
+    echo "celenn-tour: missing libraries"; exit 1
 fi
-/usr/libexec/cosmic-blue-tour --check
+/usr/libexec/celenn-tour --check
 
-# cosmic-blue Tools: its launchers (the Updates one opens its Updates page;
+# Celenn OS Tools: its launchers (the Updates one opens its Updates page;
 # the earlier program name still does), its translations, the root helpers
 # it runs with pkexec (polkit actions, limited to those programs), the
 # scripts it shares with `ujust clean-system` and `ujust report-bug`, and
 # uupd going through the bootc wrapper that keeps a version left behind from
 # coming back
-grep -qx 'Exec=/usr/libexec/cosmic-blue-tools' \
-    /usr/share/applications/io.github.cosmic_blue_os.Tools.desktop
-grep -qx 'Icon=cosmic-blue-tools' /usr/share/applications/io.github.cosmic_blue_os.Tools.desktop
-test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-tools.svg
-grep -qx 'Exec=/usr/libexec/cosmic-blue-tools --updates' \
-    /usr/share/applications/io.github.cosmic_blue_os.Updates.desktop
-grep -qx 'Icon=cosmic-blue-update' /usr/share/applications/io.github.cosmic_blue_os.Updates.desktop
-test "$(readlink /usr/libexec/cosmic-blue-updates)" = cosmic-blue-tools
-if ldd /usr/libexec/cosmic-blue-tools | grep 'not found'; then
-    echo "cosmic-blue-tools: missing libraries"; exit 1
+grep -qx 'Exec=/usr/libexec/celenn-tools' \
+    /usr/share/applications/io.github.celenn_os.Tools.desktop
+grep -qx 'Icon=celenn-tools' /usr/share/applications/io.github.celenn_os.Tools.desktop
+test -s /usr/share/icons/hicolor/scalable/apps/celenn-tools.svg
+grep -qx 'Exec=/usr/libexec/celenn-tools --updates' \
+    /usr/share/applications/io.github.celenn_os.Updates.desktop
+grep -qx 'Icon=celenn-update' /usr/share/applications/io.github.celenn_os.Updates.desktop
+test "$(readlink /usr/libexec/celenn-updates)" = celenn-tools
+if ldd /usr/libexec/celenn-tools | grep 'not found'; then
+    echo "celenn-tools: missing libraries"; exit 1
 fi
-/usr/libexec/cosmic-blue-tools --check
-for script in cosmic-blue-clean cosmic-blue-tools-helper cosmic-blue-report-bug; do
+/usr/libexec/celenn-tools --check
+for script in celenn-clean celenn-tools-helper celenn-report-bug; do
     test -x "/usr/libexec/${script}"
 done
-grep -q '<annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/cosmic-blue-tools-helper</annotate>' \
-    /usr/share/polkit-1/actions/io.github.cosmic_blue_os.tools.policy
-if /usr/libexec/cosmic-blue-tools-helper clean everything 2>/dev/null; then
-    echo "cosmic-blue-tools-helper accepted unknown arguments"; exit 1
+grep -q '<annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/celenn-tools-helper</annotate>' \
+    /usr/share/polkit-1/actions/io.github.celenn_os.tools.policy
+if /usr/libexec/celenn-tools-helper clean everything 2>/dev/null; then
+    echo "celenn-tools-helper accepted unknown arguments"; exit 1
 fi
 # Other disks (Tools, Other disks): only "UUID=on|off" changes; NTFS disks are
 # opened with the kernel's ntfs3 driver, exFAT with its exfat driver
 for args in "disks" "disks /dev/sda1=on" "disks 1234-ABCD=maybe" "disks 1234-ABCD=on;reboot"; do
     # shellcheck disable=SC2086 # each case is split into its arguments
-    if /usr/libexec/cosmic-blue-tools-helper ${args} 2>/dev/null; then
-        echo "cosmic-blue-tools-helper accepted: ${args}"; exit 1
+    if /usr/libexec/celenn-tools-helper ${args} 2>/dev/null; then
+        echo "celenn-tools-helper accepted: ${args}"; exit 1
     fi
 done
 for module in ntfs3 exfat; do
     find "/usr/lib/modules/${KVER}/kernel/fs" -name "${module}.ko*" | grep -q . \
         || { echo "Kernel module ${module} missing (Other disks in Tools)"; exit 1; }
 done
-grep -q '/usr/libexec/cosmic-blue-clean' /usr/share/ublue-os/just/60-custom.just
-grep -q '/usr/libexec/cosmic-blue-report-bug open' /usr/share/ublue-os/just/60-custom.just
-# Only cosmic-blue's own `ujust clean-system` (Bluefin's is dropped)
+grep -q '/usr/libexec/celenn-clean' /usr/share/ublue-os/just/60-custom.just
+grep -q '/usr/libexec/celenn-report-bug open' /usr/share/ublue-os/just/60-custom.just
+# Only Celenn OS's own `ujust clean-system` (Bluefin's is dropped)
 test "$(grep -h '^clean-system' /usr/share/ublue-os/just/*.just | wc -l)" -eq 1
-/usr/libexec/cosmic-blue-report-bug url | grep -q '^https://github.com/cosmic-blue-os/cosmic-blue/issues/new?template=bug_report.yml&system-info=Image'
-test -x /usr/libexec/cosmic-blue-updates-helper
-test -x /usr/libexec/cosmic-blue-bootc
-grep -q '<annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/cosmic-blue-updates-helper</annotate>' \
-    /usr/share/polkit-1/actions/io.github.cosmic_blue_os.updates.policy
+/usr/libexec/celenn-report-bug url | grep -q '^https://github.com/cosmic-blue-os/cosmic-blue/issues/new?template=bug_report.yml&system-info=Image'
+test -x /usr/libexec/celenn-updates-helper
+test -x /usr/libexec/celenn-bootc
+grep -q '<annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/celenn-updates-helper</annotate>' \
+    /usr/share/polkit-1/actions/io.github.celenn_os.updates.policy
 command -v pkexec >/dev/null
 # "Check now" starts uupd-manual.service, which uupd's polkit rule lets any
 # user start without a password
 test -f /usr/lib/systemd/system/uupd-manual.service
 grep -q 'uupd-manual.service' /usr/share/polkit-1/rules.d/uupd.rules
 for unit in uupd.service uupd-manual.service; do
-    systemctl cat "${unit}" | grep -qx 'Environment=UUPD_BOOTC_BINARY=/usr/libexec/cosmic-blue-bootc' \
-        || { echo "${unit} does not run bootc through cosmic-blue-bootc"; exit 1; }
+    systemctl cat "${unit}" | grep -qx 'Environment=UUPD_BOOTC_BINARY=/usr/libexec/celenn-bootc' \
+        || { echo "${unit} does not run bootc through celenn-bootc"; exit 1; }
 done
 # Wrong arguments are refused before anything runs
-if /usr/libexec/cosmic-blue-updates-helper channel dev 2>/dev/null; then
-    echo "cosmic-blue-updates-helper accepted the dev channel"; exit 1
+if /usr/libexec/celenn-updates-helper channel dev 2>/dev/null; then
+    echo "celenn-updates-helper accepted the dev channel"; exit 1
 fi
-if /usr/libexec/cosmic-blue-updates-helper edition amd 2>/dev/null; then
-    echo "cosmic-blue-updates-helper accepted an unknown edition"; exit 1
+if /usr/libexec/celenn-updates-helper edition amd 2>/dev/null; then
+    echo "celenn-updates-helper accepted an unknown edition"; exit 1
 fi
 
 # Parental controls: the app (launcher, translations, warnings agent), its
 # root helpers run with pkexec (polkit actions limited to those programs, more
 # time asked every time), the service and its web filter, and the login check
 # (PAM), which lets in accounts without rules
-grep -qx 'Exec=/usr/libexec/cosmic-blue-parental-controls' \
-    /usr/share/applications/io.github.cosmic_blue_os.ParentalControls.desktop
-test -s /usr/share/icons/hicolor/scalable/apps/cosmic-blue-parental-controls.svg
-grep -qx 'Exec=/usr/libexec/cosmic-blue-parental-controls --agent' \
-    /etc/xdg/autostart/io.github.cosmic_blue_os.ParentalControlsAgent.desktop
-for program in cosmic-blue-parental-controls cosmic-blue-parental-daemon; do
+grep -qx 'Exec=/usr/libexec/celenn-parental-controls' \
+    /usr/share/applications/io.github.celenn_os.ParentalControls.desktop
+test -s /usr/share/icons/hicolor/scalable/apps/celenn-parental-controls.svg
+grep -qx 'Exec=/usr/libexec/celenn-parental-controls --agent' \
+    /etc/xdg/autostart/io.github.celenn_os.ParentalControlsAgent.desktop
+for program in celenn-parental-controls celenn-parental-daemon; do
     if ldd "/usr/libexec/${program}" | grep 'not found'; then
         echo "${program}: missing libraries"; exit 1
     fi
 done
-/usr/libexec/cosmic-blue-parental-controls --check
-for helper in cosmic-blue-parental-helper cosmic-blue-parental-extend; do
+/usr/libexec/celenn-parental-controls --check
+for helper in celenn-parental-helper celenn-parental-extend; do
     test -x "/usr/libexec/${helper}"
     grep -q "<annotate key=\"org.freedesktop.policykit.exec.path\">/usr/libexec/${helper}</annotate>" \
-        /usr/share/polkit-1/actions/io.github.cosmic_blue_os.parental.policy
+        /usr/share/polkit-1/actions/io.github.celenn_os.parental.policy
 done
-grep -q '<allow_active>auth_admin</allow_active>' /usr/share/polkit-1/actions/io.github.cosmic_blue_os.parental.policy
-systemctl is-enabled cosmic-blue-parental-controls.service
+grep -q '<allow_active>auth_admin</allow_active>' /usr/share/polkit-1/actions/io.github.celenn_os.parental.policy
+systemctl is-enabled celenn-parental-controls.service
 command -v dnsmasq nft setfacl notify-send >/dev/null
 for service in cosmic-greeter greetd; do
-    grep -qE '^account +required +pam_cosmic_blue_parental\.so$' \
+    grep -qE '^account +required +pam_celenn_parental\.so$' \
         "/etc/pam.d/${service}"
 done
 # The login screen's PAM module loads (no symbol missing from libpam: a
 # module that does not load refuses every login)
-python3 -c "import ctypes; ctypes.CDLL('libpam.so.0', mode=ctypes.RTLD_GLOBAL); ctypes.CDLL('/usr/lib64/security/pam_cosmic_blue_parental.so').pam_sm_acct_mgmt" \
-    || { echo "pam_cosmic_blue_parental.so does not load"; exit 1; }
-/usr/libexec/cosmic-blue-parental-daemon refusal | grep -q .
-PAM_USER=root /usr/libexec/cosmic-blue-parental-daemon login-check \
+python3 -c "import ctypes; ctypes.CDLL('libpam.so.0', mode=ctypes.RTLD_GLOBAL); ctypes.CDLL('/usr/lib64/security/pam_celenn_parental.so').pam_sm_acct_mgmt" \
+    || { echo "pam_celenn_parental.so does not load"; exit 1; }
+test "$(readlink /usr/lib64/security/pam_cosmic_blue_parental.so)" = pam_celenn_parental.so
+/usr/libexec/celenn-parental-daemon refusal | grep -q .
+PAM_USER=root /usr/libexec/celenn-parental-daemon login-check \
     || { echo "The parental controls login check refuses root"; exit 1; }
 # Wrong arguments are refused before anything runs
-if /usr/libexec/cosmic-blue-parental-helper set root </dev/null 2>/dev/null; then
-    echo "cosmic-blue-parental-helper gave rules to root"; exit 1
+if /usr/libexec/celenn-parental-helper set root </dev/null 2>/dev/null; then
+    echo "celenn-parental-helper gave rules to root"; exit 1
 fi
-if /usr/libexec/cosmic-blue-parental-extend root 600 2>/dev/null; then
-    echo "cosmic-blue-parental-extend accepted 600 minutes"; exit 1
+if /usr/libexec/celenn-parental-extend root 600 2>/dev/null; then
+    echo "celenn-parental-extend accepted 600 minutes"; exit 1
 fi
-test ! -e /etc/cosmic-blue/parental-controls
+test ! -e /etc/celenn/parental-controls
 # The child accounts' group and what it restricts: polkit (no VPN of their
 # own, no time zone change) and D-Bus (no lookups around the filter)
-grep -qx 'g cosmic-blue-children -' /usr/lib/sysusers.d/cosmic-blue-parental.conf
-grep -q 'isInGroup("cosmic-blue-children")' /usr/share/polkit-1/rules.d/10-cosmic-blue-parental.rules
+grep -qx 'g celenn-children -' /usr/lib/sysusers.d/celenn-parental.conf
+grep -q 'isInGroup("celenn-children")' /usr/share/polkit-1/rules.d/10-celenn-parental.rules
 python3 -c "import xml.dom.minidom, sys; xml.dom.minidom.parse(sys.argv[1])" \
-    /usr/share/dbus-1/system.d/cosmic-blue-parental.conf
+    /usr/share/dbus-1/system.d/celenn-parental.conf
 
-# Login and lock screens: our rebuild, with the cosmic-blue wallpaper as the
+# Login and lock screens: our rebuild, with the Celenn OS wallpaper as the
 # background shown before a user has a saved one
 cmp /ctx/greeter/cosmic-greeter /usr/bin/cosmic-greeter
 
@@ -677,7 +678,7 @@ cmp /ctx/greeter/cosmic-greeter /usr/bin/cosmic-greeter
 if grep -q 'plymouth-quit-wait' /usr/lib/systemd/system/cosmic-greeter.service; then exit 1; fi
 grep -q '^After=' /usr/lib/systemd/system/cosmic-greeter.service
 grep -qx 'ExecStartPost=-/usr/bin/plymouth quit --retain-splash' \
-    /usr/lib/systemd/system/cosmic-greeter.service.d/10-cosmic-blue-boot-screen.conf
+    /usr/lib/systemd/system/cosmic-greeter.service.d/10-celenn-boot-screen.conf
 
 # COSMIC compositor: our rebuild, black until the wallpaper is drawn
 # (build_files/compositor/build.sh)
@@ -686,7 +687,7 @@ cmp /ctx/compositor/cosmic-comp /usr/bin/cosmic-comp
 # COSMIC Store: our rebuild, with FlatPark as a recommended source (off) read
 # from the descriptor that `ujust toggle-flatpark` uses too
 cmp /ctx/store/cosmic-store /usr/bin/cosmic-store
-grep -q /usr/share/cosmic-blue/flatpak/flatpark.flatpakrepo /usr/bin/cosmic-store
+grep -q /usr/share/celenn/flatpak/flatpark.flatpakrepo /usr/bin/cosmic-store
 
 # COSMIC Files: our rebuild, which gives the user folders their own icons
 # under /var/home (build_files/filemanager/patch.py)
@@ -714,7 +715,7 @@ for theme in Dark Light; do
     for dir in "${theme}" "${theme}.Builder"; do
         grep -q '160' "/usr/share/cosmic/com.system76.CosmicTheme.${dir}/v2/corner_radii"
         # Our icon theme, which apps read from the theme since COSMIC 1.12
-        grep -qx '"cosmic-blue"' "/usr/share/cosmic/com.system76.CosmicTheme.${dir}/v2/icon_theme"
+        grep -qx '"celenn"' "/usr/share/cosmic/com.system76.CosmicTheme.${dir}/v2/icon_theme"
     done
 done
 
@@ -722,42 +723,42 @@ done
 test -s /usr/share/icons/Tela-circle-4f8dff-dark/index.theme
 test -s /usr/share/icons/Tela-circle-4f8dff/scalable/places/default-folder.svg
 grep -q '4f8dff' /usr/share/icons/Tela-circle-4f8dff/scalable/places/default-folder.svg
-test -s /usr/share/icons/cosmic-blue/index.theme
-grep -qx 'Inherits=Tela-circle-4f8dff-dark,Cosmic,Pop,Adwaita,hicolor' /usr/share/icons/cosmic-blue/index.theme
-grep -qx '"cosmic-blue"' /usr/share/cosmic/com.system76.CosmicTk/v1/icon_theme
-test "$(GSETTINGS_BACKEND=memory gsettings get org.gnome.desktop.interface icon-theme)" = "'cosmic-blue'"
-test -n "$(find /usr/share/icons/cosmic-blue/tela/symbolic -name 'audio-volume-high-symbolic.svg' -print -quit)"
-test -n "$(find /usr/share/icons/cosmic-blue/cosmic -name '*-symbolic.svg' -print -quit)"
-test -n "$(find /usr/share/icons/cosmic-blue/tela -name 'com.system76.CosmicEdit.svg' -print -quit)"
-# cosmic-blue layer (branding/icons/build.py) in front of Tela, with Tela's aliases
-grep -q '^\[layer/places\]' /usr/share/icons/cosmic-blue/index.theme
-grep -q '^\[layer/mimetypes\]' /usr/share/icons/cosmic-blue/index.theme
-grep -q '^\[layer/apps\]' /usr/share/icons/cosmic-blue/index.theme
+test -s /usr/share/icons/celenn/index.theme
+grep -qx 'Inherits=Tela-circle-4f8dff-dark,Cosmic,Pop,Adwaita,hicolor' /usr/share/icons/celenn/index.theme
+grep -qx '"celenn"' /usr/share/cosmic/com.system76.CosmicTk/v1/icon_theme
+test "$(GSETTINGS_BACKEND=memory gsettings get org.gnome.desktop.interface icon-theme)" = "'celenn'"
+test -n "$(find /usr/share/icons/celenn/tela/symbolic -name 'audio-volume-high-symbolic.svg' -print -quit)"
+test -n "$(find /usr/share/icons/celenn/cosmic -name '*-symbolic.svg' -print -quit)"
+test -n "$(find /usr/share/icons/celenn/tela -name 'com.system76.CosmicEdit.svg' -print -quit)"
+# Celenn OS layer (branding/icons/build.py) in front of Tela, with Tela's aliases
+grep -q '^\[layer/places\]' /usr/share/icons/celenn/index.theme
+grep -q '^\[layer/mimetypes\]' /usr/share/icons/celenn/index.theme
+grep -q '^\[layer/apps\]' /usr/share/icons/celenn/index.theme
 for icon in apps/com.system76.CosmicPanelAppButton apps/com.system76.CosmicPanelWorkspacesButton \
     apps/com.system76.CosmicPanelLauncherButton apps/com.system76.CosmicAppLibrary \
     apps/com.system76.CosmicStore apps/com.system76.CosmicSettings apps/com.system76.CosmicFiles \
     places/default-folder places/folder places/folder-download places/inode-directory \
     places/user-home places/user-trash mimetypes/text-plain mimetypes/image-jpeg mimetypes/application-zip; do
-    test -s "/usr/share/icons/cosmic-blue/layer/${icon}.svg"
+    test -s "/usr/share/icons/celenn/layer/${icon}.svg"
 done
 # Every app the tour and Tools offer has an icon in the theme's style
 python3 /ctx/build_files/icon_theme/check_app_icons.py \
-    /ctx/build_files/first_steps/src /usr/share/flatpak/preinstall.d/cosmic-blue.preinstall \
-    /usr/share/icons/cosmic-blue /usr/share/icons/Tela-circle-4f8dff-dark /usr/share/icons/Tela-circle-4f8dff
-test -s /usr/share/icons/cosmic-blue/layer/apps/org.kde.kalzium.svg
+    /ctx/build_files/first_steps/src /usr/share/flatpak/preinstall.d/celenn.preinstall \
+    /usr/share/icons/celenn /usr/share/icons/Tela-circle-4f8dff-dark /usr/share/icons/Tela-circle-4f8dff
+test -s /usr/share/icons/celenn/layer/apps/org.kde.kalzium.svg
 # Every link of the theme points to an existing icon
-broken="$(find /usr/share/icons/cosmic-blue -xtype l)"
+broken="$(find /usr/share/icons/celenn -xtype l)"
 [[ -z "${broken}" ]] || { echo "Broken icon links:"; echo "${broken}"; exit 1; }
-# Cursor theme: Bibata Modern in the cosmic-blue colors, the system default
+# Cursor theme: Bibata Modern in the Celenn OS colors, the system default
 # (COSMIC, login screen, X11 apps) and the GTK setting
-CURSORS=/usr/share/icons/Bibata-Modern-cosmic-blue
-grep -qx 'Name=Bibata Modern cosmic-blue' "${CURSORS}/index.theme"
+CURSORS=/usr/share/icons/Bibata-Modern-celenn
+grep -qx 'Name=Bibata Modern Celenn' "${CURSORS}/index.theme"
 for cursor in default pointer text wait progress grabbing not-allowed nwse-resize; do
     test -s "${CURSORS}/cursors/${cursor}"
 done
 test -z "$(find "${CURSORS}" -xtype l)"
-grep -qx 'Inherits=Bibata-Modern-cosmic-blue' /usr/share/icons/default/index.theme
-test "$(GSETTINGS_BACKEND=memory gsettings get org.gnome.desktop.interface cursor-theme)" = "'Bibata-Modern-cosmic-blue'"
+grep -qx 'Inherits=Bibata-Modern-celenn' /usr/share/icons/default/index.theme
+test "$(GSETTINGS_BACKEND=memory gsettings get org.gnome.desktop.interface cursor-theme)" = "'Bibata-Modern-celenn'"
 
 # Theme colors built around the logo blue (see build_files/theme/src/main.rs).
 # Prints the first color of a COSMIC config file as #rrggbb
@@ -780,13 +781,13 @@ check_color "${builder}.Light.Builder/v2/bg_color" '#d3d8e0'
 grep -qx None "${builder}.Dark.Builder/v2/window_hint"
 grep -qx None "${builder}.Light.Builder/v2/window_hint"
 
-# New image defaults reach existing accounts (cosmic-blue-migrate-defaults):
+# New image defaults reach existing accounts (celenn-migrate-defaults):
 # the list of defaults covers COSMIC and GSettings, earlier defaults are known
 # (Fedora's packaged ones, COSMIC's teal theme, COSMIC's icon theme), and the
 # migration keeps the users' own choices
-DEFAULTS_LIST=/usr/share/cosmic-blue/defaults.list
-PREVIOUS_LIST=/usr/share/cosmic-blue/previous-defaults.list
-MIGRATE=/usr/libexec/cosmic-blue-migrate-defaults
+DEFAULTS_LIST=/usr/share/celenn/defaults.list
+PREVIOUS_LIST=/usr/share/celenn/previous-defaults.list
+MIGRATE=/usr/libexec/celenn-migrate-defaults
 grep -q ' com.system76.CosmicTk/v1/icon_theme$' "${DEFAULTS_LIST}"
 grep -q ' com.system76.CosmicTheme.Dark.Builder/v2/accent$' "${DEFAULTS_LIST}"
 grep -q ' gsettings/org.gnome.desktop.interface/icon-theme$' "${DEFAULTS_LIST}"
@@ -800,8 +801,13 @@ for variant in /ctx/previous_defaults/theme/stock/cosmic /ctx/previous_defaults/
     missing="$(comm -23 <("${MIGRATE}" --hash-tree "${variant}" | sort) <(sort "${PREVIOUS_LIST}"))"
     [[ -z "${missing}" ]] || { echo "Not in ${PREVIOUS_LIST}:"; echo "${missing}"; exit 1; }
 done
-test -L /etc/systemd/system/multi-user.target.wants/cosmic-blue-migrate-defaults.service
+test -L /etc/systemd/system/multi-user.target.wants/celenn-migrate-defaults.service
 /ctx/build_files/migrate-defaults-test.sh "${MIGRATE}"
+
+# Systems installed as cosmic-blue: their settings move to the new names
+test -x /usr/libexec/celenn-migrate-names
+test -L /etc/systemd/system/multi-user.target.wants/celenn-migrate-names.service
+/ctx/build_files/migrate-names-test.sh /usr/libexec/celenn-migrate-names
 
 # Secure Boot: the Universal Blue akmods key (enrolled with
 # `ujust enroll-secure-boot-key`) is in every image, so it can be enrolled
@@ -853,7 +859,7 @@ if [[ "${IMAGE_NAME}" == *-nvidia ]]; then
     grep -q 'nvidia-drm' /tmp/initramfs.txt
     grep -q 'nvidia-drm.modeset=1' /usr/lib/bootc/kargs.d/00-nvidia.toml
     grep -q 'modprobe.blacklist=nouveau' /usr/lib/bootc/kargs.d/00-nvidia.toml
-    systemctl is-enabled cosmic-blue-nvidia-flatpak-gl.service
+    systemctl is-enabled celenn-nvidia-flatpak-gl.service
     # The NVIDIA repositories used for the install are disabled again
     if dnf5 repolist --enabled | grep -i nvidia; then
         echo "NVIDIA repositories left enabled"; exit 1
@@ -876,24 +882,24 @@ fi
 # (50-services.sh)
 [[ "$(readlink /etc/systemd/system-generators/systemd-gpt-auto-generator)" == /dev/null ]]
 
-# Signature check turned on for systems switched to cosmic-blue without it
-test -x /usr/libexec/cosmic-blue-signed-updates
-systemctl is-enabled cosmic-blue-signed-updates.timer
+# Signature check turned on for systems switched to Celenn OS without it
+test -x /usr/libexec/celenn-signed-updates
+systemctl is-enabled celenn-signed-updates.timer
 # Move to the renamed images (Celenn OS): same key for the new namespace
 test -x /usr/libexec/cosmic-blue-move-to-celenn
 systemctl is-enabled cosmic-blue-move-to-celenn.timer
 jq -e '.transports.docker."ghcr.io/celenn-os"[0].keyPath == "/etc/pki/containers/cosmic-blue.pub"' \
     /etc/containers/policy.json
-grep -q 'ghcr.io/celenn-os:' /etc/containers/registries.d/cosmic-blue.yaml
+grep -q 'ghcr.io/celenn-os:' /etc/containers/registries.d/celenn.yaml
 
 # Repair of the bootc aleph of early installs (bootloader-update.service)
-test -x /usr/libexec/cosmic-blue-fix-aleph
-grep -q cosmic-blue-fix-aleph /usr/lib/systemd/system/bootloader-update.service.d/10-cosmic-blue-aleph.conf
+test -x /usr/libexec/celenn-fix-aleph
+grep -q celenn-fix-aleph /usr/lib/systemd/system/bootloader-update.service.d/10-celenn-aleph.conf
 # ISO installs: no systemd-remount-fs on the composefs root (fstab "/" line)
-grep -q "ConditionPathExists=!/run/ostree-booted" /usr/lib/systemd/system/systemd-remount-fs.service.d/10-cosmic-blue-ostree.conf
+grep -q "ConditionPathExists=!/run/ostree-booted" /usr/lib/systemd/system/systemd-remount-fs.service.d/10-celenn-ostree.conf
 # ...whose btrfs options (compression) are applied to the root btrfs
-test -x /usr/libexec/cosmic-blue-root-mount-options
-systemctl is-enabled cosmic-blue-root-mount-options.service
+test -x /usr/libexec/celenn-root-mount-options
+systemctl is-enabled celenn-root-mount-options.service
 
 # System tuning shared with Bluefin and Aurora (most of it comes from Fedora,
 # ublue-os/main and projectbluefin/common; tests/vm-lib.sh vm_check_tuning

@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# Rebuilds Fedora's cosmic-store package with the cosmic-blue patch (see
+# Rebuilds Fedora's cosmic-store package with the Celenn OS patch (see
 # patch.py), from the same source package and build flags as Fedora. Runs in a
 # Fedora container of the same release as the image; the binary is written to
 # /out and installed by build_files/24-store.sh.
@@ -48,7 +48,7 @@ rpmbuild --define "_topdir ${TOPDIR}" -bc --short-circuit "${SPEC}"
 bin="$(find "${src}/target/" -type f -newer /tmp/build-start -name cosmic-store -perm -u+x | head -n1)"
 test -n "${bin}"
 # The patch is in the binary (FlatPark, translations)
-grep -q /usr/share/cosmic-blue/flatpak/flatpark.flatpakrepo "${bin}"
+grep -q /usr/share/celenn/flatpak/flatpark.flatpakrepo "${bin}"
 for text in "Mise à jour du système" "Auf Version" "Actualización del sistema" \
     "Aggiornamento del sistema" "Atualização do sistema"; do
     grep -q "${text}" "${bin}"

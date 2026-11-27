@@ -1,0 +1,12 @@
+[Unit]
+Description=Apply new Celenn OS defaults to settings users never changed
+Documentation=file:///usr/libexec/celenn-migrate-defaults
+After=local-fs.target systemd-user-sessions.service celenn-user-defaults.service celenn-migrate-names.service
+Before=cosmic-greeter.service display-manager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/celenn-migrate-defaults
+
+[Install]
+WantedBy=multi-user.target

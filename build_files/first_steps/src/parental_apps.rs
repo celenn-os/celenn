@@ -22,9 +22,9 @@ pub const APP_DIRS: &[&str] = &[
 /// Launchers never listed: the parental controls themselves (the child asks
 /// for more time with them)
 const NEVER_LISTED: &[&str] = &[
-    "io.github.cosmic_blue_os.ParentalControls",
-    "io.github.cosmic_blue_os.ParentalControls.MoreTime",
-    "io.github.cosmic_blue_os.ParentalControlsAgent",
+    "io.github.celenn_os.ParentalControls",
+    "io.github.celenn_os.ParentalControls.MoreTime",
+    "io.github.celenn_os.ParentalControlsAgent",
 ];
 
 /// Categories left unticked when a parent turns the option on (the rest of
@@ -353,7 +353,9 @@ pub fn processes(uid: u32) -> Vec<(u32, Option<PathBuf>, String)> {
 }
 
 /// The line that marks the launchers hiding an application from a child
-const MARK: &str = "X-CosmicBlue-Parental=true";
+const MARK: &str = "X-Celenn-Parental=true";
+/// The same line, written before the project was renamed
+const MARK_BEFORE_RENAME: &str = "X-CosmicBlue-Parental=true";
 
 /// Hides from a child's launcher the applications not allowed (None: all
 /// shown), with launchers of the same id in its own applications
@@ -405,7 +407,10 @@ pub fn hide(dir: &Path, apps: &[App], allowed: Option<&BTreeSet<String>>) {
 }
 
 fn is_ours(path: &Path) -> bool {
-    std::fs::read_to_string(path).is_ok_and(|text| text.lines().any(|line| line.trim() == MARK))
+    std::fs::read_to_string(path).is_ok_and(|text| {
+        text.lines()
+            .any(|line| matches!(line.trim(), MARK | MARK_BEFORE_RENAME))
+    })
 }
 
 /// True for a program a child must not run: one in a place it can write to

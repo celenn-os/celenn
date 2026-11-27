@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Build Bibata Modern as an X cursor theme, recolored for cosmic-blue.
+"""Build Bibata Modern as an X cursor theme, recolored for Celenn OS.
 
 Usage: bibata.py SOURCE_DIR OUTPUT_DIR VERSION
 
@@ -20,7 +20,7 @@ import tempfile
 import tomllib
 from pathlib import Path
 
-# Placeholder colors of the Bibata SVGs -> cosmic-blue colors.
+# Placeholder colors of the Bibata SVGs -> Celenn OS colors.
 # Body: the dark blue of the logo (light accent of build_files/theme/src/main.rs).
 # Outline: white, for contrast on dark and light surfaces alike. Wait spinner
 # ring: the dark accent.
@@ -29,7 +29,7 @@ COLORS = {
     "#0000FF": "#FFFFFF",  # outline
     "#FF0000": "#4F8DFF",  # wait spinner
 }
-NAME = "Bibata Modern cosmic-blue"
+NAME = "Bibata Modern Celenn"
 CANVAS = 256  # size of the Bibata SVGs, the unit of the hotspots
 
 
@@ -102,7 +102,7 @@ def main() -> None:
     (out / "index.theme").write_text(
         "[Icon Theme]\n"
         f"Name={NAME}\n"
-        f"Comment=Bibata Modern {version} by Abdulkaiz Khatri, in the cosmic-blue colors\n"
+        f"Comment=Bibata Modern {version} by Abdulkaiz Khatri, in the Celenn OS colors\n"
     )
     shutil.copy(src / "LICENSE", out / "LICENSE")
 

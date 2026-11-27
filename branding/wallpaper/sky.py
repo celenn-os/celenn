@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Background layer of the cosmic-blue wallpaper: sky gradient, a procedural
+"""Background layer of the Celenn OS wallpaper: sky gradient, a procedural
 Milky Way (domain-warped fractal noise, ridged-noise dust lanes) and stars.
 Writes sky.png, 5120x2880.
 Needs numpy, pillow and scipy.

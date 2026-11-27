@@ -1,6 +1,6 @@
-# Contributing to cosmic-blue
+# Contributing to Celenn OS
 
-Thanks for helping. cosmic-blue is a small independent project: the image is
+Thanks for helping. Celenn OS is a small independent project: the image is
 built, tested and published by CI from this repository.
 
 ## Reporting
@@ -32,7 +32,7 @@ Where things are:
 
 ## Translations
 
-The texts cosmic-blue adds to the system are in English, French, German,
+The texts Celenn OS adds to the system are in English, French, German,
 Spanish, Italian and Brazilian Portuguese. Any change to one of them goes in
 every language. To add a language:
 
@@ -40,17 +40,17 @@ every language. To add a language:
   `<language>.po` in the same folder (for example `nl.po`, or `pt_BR.po` for
   a regional variant), translate every `msgstr`, and add the file to
   `LANGUAGES` in the program's source:
-  - tours, first steps and live ISO welcome: `po/cosmic-blue-tour.pot`,
+  - tours, first steps and live ISO welcome: `po/celenn-tour.pot`,
     `src/main.rs`;
-  - cosmic-blue Tools (with Updates): `po/tools/cosmic-blue-tools.pot`,
+  - Celenn OS Tools (with Updates): `po/tools/celenn-tools.pot`,
     `src/tools.rs`;
   - Parental controls (the app and the login screen's message):
-    `po/parental/cosmic-blue-parental-controls.pot`, `src/parental.rs` and
+    `po/parental/celenn-parental-controls.pot`, `src/parental.rs` and
     `src/parental_daemon.rs`.
 - Password prompts of the apps: add a `<description xml:lang="…">` and a
   `<message xml:lang="…">` to each action of
-  `system_files/usr/share/polkit-1/actions/io.github.cosmic_blue_os.*.policy`.
-- Terminal tips: copy `system_files/usr/share/cosmic-blue/tips/en.txt` to
+  `system_files/usr/share/polkit-1/actions/io.github.celenn_os.*.policy`.
+- Terminal tips: copy `system_files/usr/share/celenn/tips/en.txt` to
   `<language>.txt`, one tip per line, in the same order.
 - Launchers: add `Name[<language>]` and `Comment[<language>]` (and
   `Keywords[<language>]`) to the `.desktop` files of `system_files/` and

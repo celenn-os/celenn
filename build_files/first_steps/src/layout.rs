@@ -1,8 +1,8 @@
-// The desktop's layout, shared by the tour (main.rs) and cosmic-blue Tools
+// The desktop's layout, shared by the tour (main.rs) and Celenn OS Tools
 // (more.rs, with the dock's setting), like the layout page of COSMIC's own
 // first-run assistant:
 //
-//   - Top bar and dock: cosmic-blue's default (the system defaults in
+//   - Top bar and dock: Celenn OS's default (the system defaults in
 //     /usr/share/cosmic), close to the Mac.
 //   - One bar at the bottom: the bar holds the app library and launcher on
 //     the left, the open windows, then the status icons and the clock on the
@@ -59,7 +59,7 @@ fn setting(id: &str, key: &str) -> PathBuf {
         .join(key)
 }
 
-/// Dock always visible, or hidden when a window covers it (cosmic-blue's
+/// Dock always visible, or hidden when a window covers it (Celenn OS's
 /// default, as COSMIC Settings' "Automatically hide dock"). Tools only.
 #[allow(dead_code)]
 pub fn dock_always_visible() -> bool {

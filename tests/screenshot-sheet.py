@@ -48,7 +48,7 @@ WIDTH = 1280
 MARGIN = 24
 BACKGROUND = (12, 18, 38)
 TEXT = (230, 236, 255)
-ACCENT = (79, 141, 255)  # #4f8dff, the cosmic-blue accent
+ACCENT = (79, 141, 255)  # #4f8dff, the Celenn OS accent
 
 
 def font(size):
@@ -124,7 +124,7 @@ def terminal_zoom(src):
 
 def main():
     src, out = Path(sys.argv[1]), Path(sys.argv[2])
-    title = sys.argv[3] if len(sys.argv) > 3 else "cosmic-blue"
+    title = sys.argv[3] if len(sys.argv) > 3 else "Celenn OS"
     try:
         zoom = terminal_zoom(src)
         if zoom:

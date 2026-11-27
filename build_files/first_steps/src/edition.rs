@@ -1,11 +1,11 @@
-// Which cosmic-blue image runs, and whether it suits the computer's graphics
+// Which Celenn OS image runs, and whether it suits the computer's graphics
 // card: shared by the tour (system.rs) and Tools (more.rs)
 
 use std::path::Path;
 
 const IMAGE_INFO: &str = "/usr/share/ublue-os/image-info.json";
 
-/// "cosmic-blue" or "cosmic-blue-nvidia" (empty when unknown)
+/// "cosmic-blue" or "cosmic-blue-nvidia", the image names (empty when unknown)
 pub fn image_name() -> String {
     std::fs::read_to_string(IMAGE_INFO)
         .ok()

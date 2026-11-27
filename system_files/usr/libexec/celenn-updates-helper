@@ -1,0 +1,98 @@
+#!/usr/bin/bash
+# The changes the Updates app (/usr/libexec/celenn-updates) makes to the
+# system, run as root through pkexec after an administrator password (polkit
+# action io.github.celenn_os.updates.manage). Only these:
+#
+#   rollback          start the previous version at the next restart
+#                     (bootc rollback), and set aside the version left behind
+#                     so that the automatic updates do not install it again
+#                     (see /usr/libexec/celenn-bootc)
+#   channel <name>    follow the stable (weekly) or testing (daily) image of
+#                     the same Celenn OS image, signature checked; the new
+#                     image starts at the next restart
+#   pin stable-YYYYMMDD
+#                     stay on the stable image of a past week (its dated tag,
+#                     which never moves: no updates until `channel stable`)
+#   edition nvidia    follow the NVIDIA image of the same channel (asked by the
+#                     first steps tour when an NVIDIA graphics card is found);
+#                     with Secure Boot on, the driver key is queued for
+#                     enrollment (password "celennos", see
+#                     `ujust enroll-secure-boot-key`)
+#
+# dev and pinned versions stay with `ujust switch-channel` and bootc.
+# Switches go through celenn-bootc, which records the download progress
+# for the app's progress bar.
+set -euo pipefail
+
+VENDOR="ghcr.io/cosmic-blue-os/"
+HOLD=/var/lib/celenn/update-hold
+
+usage() {
+    echo "Usage: ${0##*/} rollback | channel stable|testing | pin stable-YYYYMMDD | edition nvidia" >&2
+    exit 2
+}
+
+case "${1:-} ${2:-} $#" in
+    "rollback  1" | "channel stable 2" | "channel testing 2" | "edition nvidia 2") ;;
+    "pin stable-"[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]" 2") ;;
+    *) usage ;;
+esac
+status="$(bootc status --json)"
+
+case "$1" in
+    rollback)
+        if [[ "$(jq -r '.status.rollbackQueued // false' <<<"${status}")" == true ]]; then
+            echo "The previous version already starts at the next restart."
+            exit 0
+        fi
+        if [[ "$(jq -r '.status.rollback // empty | .image.imageDigest // empty' <<<"${status}")" == "" ]]; then
+            echo "There is no previous version to go back to." >&2
+            exit 1
+        fi
+        digest="$(jq -r '.status.booted.image.imageDigest // empty' <<<"${status}")"
+        version="$(jq -r '.status.booted.image.version // "unknown"' <<<"${status}")"
+        bootc rollback
+        if [[ -n "${digest}" ]]; then
+            mkdir -p "${HOLD%/*}"
+            printf '%s %s\n' "${digest}" "${version}" > "${HOLD}"
+            echo "Version ${version} is set aside: updates start again with the next one."
+        fi
+        ;;
+    channel | pin)
+        tag="$2"
+        image="$(jq -r '.spec.image.image // empty' <<<"${status}")"
+        repo="${image%:*}"
+        if [[ "${image}" != "${VENDOR}"* || "${repo}" == "${image}" || "${image}" == *@* ]]; then
+            echo "This system does not follow a Celenn OS image (${image:-none})." >&2
+            exit 1
+        fi
+        /usr/libexec/celenn-bootc switch --enforce-container-sigpolicy "${repo}:${tag}"
+        # Another image to follow: nothing set aside any more
+        rm -f "${HOLD}"
+        ;;
+    edition)
+        image="$(jq -r '.spec.image.image // empty' <<<"${status}")"
+        repo="${image%:*}"
+        tag="${image##*:}"
+        if [[ "${image}" != "${VENDOR}"* || "${repo}" == "${image}" || "${image}" == *@* ]]; then
+            echo "This system does not follow a Celenn OS image (${image:-none})." >&2
+            exit 1
+        fi
+        if [[ "${repo}" == *-nvidia ]]; then
+            echo "This system already follows the NVIDIA edition."
+            exit 0
+        fi
+        /usr/libexec/celenn-bootc switch --enforce-container-sigpolicy "${repo}-nvidia:${tag}"
+        rm -f "${HOLD}"
+        # The driver is signed with this key: without it, Secure Boot refuses
+        # to load the driver. The password is not a secret (see the ujust
+        # recipe): the firmware asks for it once, at the machine itself.
+        key=/etc/pki/akmods/certs/akmods-ublue.der
+        if [[ -f "${key}" ]] && mokutil --sb-state 2>/dev/null | grep -q 'SecureBoot enabled' \
+            && ! mokutil --test-key "${key}" 2>/dev/null | grep -q 'already enrolled'; then
+            mokutil --timeout -1 || :
+            printf '%s\n%s\n' celennos celennos | mokutil --import "${key}"
+            echo "Driver key queued: at the next restart, choose \"Enroll MOK\" and type celennos."
+        fi
+        ;;
+esac

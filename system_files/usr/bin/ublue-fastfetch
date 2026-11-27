@@ -1,6 +1,6 @@
 #!/usr/bin/bash
-# cosmic-blue fastfetch (`fastfetch`, `neofetch` are aliases of this command):
-# the cosmic-blue logo and config, in place of projectbluefin/common's
+# Celenn OS fastfetch (`fastfetch`, `neofetch` are aliases of this command):
+# the Celenn OS logo and config, in place of projectbluefin/common's
 # Bluefin version. The logo follows the COSMIC dark/light mode, and keys the
 # COSMIC accent color (ublue-bling-fastfetch).
 # A user's own config (~/.config/fastfetch/config.jsonc) is used instead when
@@ -18,6 +18,6 @@ fi
 MODE="$(ublue-bling-fastfetch --mode)"
 exec fastfetch \
     --config /usr/share/ublue-os/fastfetch.jsonc \
-    --logo "/usr/share/ublue-os/fastfetch/cosmic-blue-${MODE}.txt" \
+    --logo "/usr/share/ublue-os/fastfetch/celenn-${MODE}.txt" \
     --color "$(ublue-bling-fastfetch)" \
     "$@"

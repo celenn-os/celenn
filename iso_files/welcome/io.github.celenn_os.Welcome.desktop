@@ -1,0 +1,19 @@
+[Desktop Entry]
+Type=Application
+Name=Welcome to Celenn OS
+Name[fr]=Bienvenue dans Celenn OS
+Name[de]=Willkommen bei Celenn OS
+Name[es]=Te damos la bienvenida a Celenn OS
+Name[it]=Ti diamo il benvenuto in Celenn OS
+Name[pt_BR]=Boas-vindas ao Celenn OS
+Comment=Discover Celenn OS and install it
+Comment[fr]=Découvrir Celenn OS et l'installer
+Comment[de]=Celenn OS entdecken und installieren
+Comment[es]=Descubre Celenn OS e instálalo
+Comment[it]=Scopri Celenn OS e installalo
+Comment[pt_BR]=Conheça o Celenn OS e instale-o
+Icon=celenn-welcome
+Exec=/usr/libexec/celenn-welcome
+Terminal=false
+StartupNotify=true
+Categories=System;

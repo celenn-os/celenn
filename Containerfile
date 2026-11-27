@@ -1,4 +1,4 @@
-# cosmic-blue: an independent Fedora Atomic image with the COSMIC desktop, built
+# Celenn OS: an independent Fedora Atomic image with the COSMIC desktop, built
 # on Universal Blue base images (not affiliated with Universal Blue or Bluefin).
 
 # Fedora release: the one of Bluefin's stable tag. check-cosmic-version.yml
@@ -28,25 +28,25 @@ COPY --from=common /system_files/shared /system_files/common
 COPY --from=common /system_files/bluefin /system_files/common-bluefin
 COPY --from=brew /system_files /system_files/brew
 # Our own files, applied last so they take precedence
-COPY system_files /system_files/cosmic-blue
+COPY system_files /system_files/celenn
 # Outputs of Containerfile.helpers (build context "helpers", see `just build`)
-COPY --from=helpers /theme/cosmic /system_files/cosmic-blue/usr/share/cosmic
+COPY --from=helpers /theme/cosmic /system_files/celenn/usr/share/cosmic
 COPY --from=helpers /theme/previous /previous_defaults/theme
-COPY --from=helpers /tour/cosmic-blue-tour /system_files/cosmic-blue/usr/libexec/cosmic-blue-tour
-COPY --from=helpers /tour/cosmic-blue-tools /system_files/cosmic-blue/usr/libexec/cosmic-blue-tools
-COPY --from=helpers /tour/cosmic-blue-parental-controls /system_files/cosmic-blue/usr/libexec/cosmic-blue-parental-controls
-COPY --from=helpers /tour/cosmic-blue-parental-daemon /system_files/cosmic-blue/usr/libexec/cosmic-blue-parental-daemon
-COPY --from=helpers /tour/pam_cosmic_blue_parental.so /system_files/cosmic-blue/usr/lib64/security/pam_cosmic_blue_parental.so
+COPY --from=helpers /tour/celenn-tour /system_files/celenn/usr/libexec/celenn-tour
+COPY --from=helpers /tour/celenn-tools /system_files/celenn/usr/libexec/celenn-tools
+COPY --from=helpers /tour/celenn-parental-controls /system_files/celenn/usr/libexec/celenn-parental-controls
+COPY --from=helpers /tour/celenn-parental-daemon /system_files/celenn/usr/libexec/celenn-parental-daemon
+COPY --from=helpers /tour/pam_celenn_parental.so /system_files/celenn/usr/lib64/security/pam_celenn_parental.so
 COPY --from=helpers /greeter /greeter
 COPY --from=helpers /compositor /compositor
 COPY --from=helpers /store /store
 COPY --from=helpers /filemanager /filemanager
-COPY --from=helpers /plymouth /system_files/cosmic-blue/usr/share/plymouth/themes/cosmic-blue
+COPY --from=helpers /plymouth /system_files/celenn/usr/share/plymouth/themes/celenn
 COPY --from=helpers /icons /icons
-COPY --from=helpers /cursors /system_files/cosmic-blue/usr/share/icons
+COPY --from=helpers /cursors /system_files/celenn/usr/share/icons
 COPY --from=helpers /uupd /uupd
 # Public key used to verify the image signature on update
-COPY cosign.pub /system_files/cosmic-blue/etc/pki/containers/cosmic-blue.pub
+COPY cosign.pub /system_files/celenn/etc/pki/containers/cosmic-blue.pub
 
 FROM ${BASE_IMAGE}
 

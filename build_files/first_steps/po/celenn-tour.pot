@@ -1,0 +1,919 @@
+# Texts of the Celenn OS tours (build_files/first_steps/src/main.rs).
+# To add a language: copy this file to po/<language>.po (pt_BR for a
+# regional variant), fill in every msgstr and list the file in LANGUAGES
+# (src/main.rs). The image build fails when a text has no translation.
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Back"
+msgstr ""
+
+msgid "Next"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Later"
+msgstr ""
+
+msgid "Step {} of {}"
+msgstr ""
+
+msgid "Welcome to Celenn OS"
+msgstr ""
+
+msgid "Accessibility"
+msgstr ""
+
+msgid "Screen reader: Super + Alt + S\nZoom: Super + = and Super + -"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "First steps"
+msgstr ""
+
+msgid "Open COSMIC Store"
+msgstr ""
+
+msgid "Protect your files"
+msgstr ""
+
+msgid "Tile your windows"
+msgstr ""
+
+msgid "Turn tiling on or off"
+msgstr ""
+
+
+
+
+msgid "Documentation"
+msgstr ""
+
+msgid "Updates, software, commands and tips"
+msgstr ""
+
+msgid "Open"
+msgstr ""
+
+msgid "Get started"
+msgstr ""
+
+msgid "Celenn OS is Fedora Atomic with the COSMIC desktop, made in the spirit of Bluefin: a desktop that stays out of your way and keeps itself up to date."
+msgstr ""
+
+msgid "Is this computer ready?"
+msgstr ""
+
+msgid "Celenn OS runs from the USB drive, without touching your disk. Here is what it found."
+msgstr ""
+
+msgid "Wi-Fi"
+msgstr ""
+
+msgid "{}: works."
+msgstr ""
+
+msgid "Wi-Fi works."
+msgstr ""
+
+msgid "{} has no free driver. Plug in a network cable, or a small USB Wi-Fi adapter: everything else works."
+msgstr ""
+
+msgid "{} was found but does not start. Its driver may need firmware that is missing."
+msgstr ""
+
+msgid "No Wi-Fi card found. A network cable works."
+msgstr ""
+
+msgid "Sound"
+msgstr ""
+
+msgid "Sound card found."
+msgstr ""
+
+msgid "No sound card was recognized. USB or Bluetooth headphones may still work."
+msgstr ""
+
+msgid "Graphics card"
+msgstr ""
+
+msgid "{}: the driver is already in the system."
+msgstr ""
+
+msgid "{}: the NVIDIA driver is ready."
+msgstr ""
+
+msgid "{}. For games, switch to the NVIDIA edition after installing: one click in Celenn OS Tools → NVIDIA driver."
+msgstr ""
+
+msgid "{}: no driver, the picture may be slow."
+msgstr ""
+
+msgid "Memory"
+msgstr ""
+
+msgid "{} GB: too little, 4 GB is the minimum."
+msgstr ""
+
+msgid "{} GB: it works, but 8 GB are recommended for a browser with many tabs."
+msgstr ""
+
+msgid "{} GB of memory."
+msgstr ""
+
+msgid "Disk"
+msgstr ""
+
+msgid "No internal disk found. If this computer has one, its firmware may hide it: in its settings, set the storage mode to AHCI instead of RAID or Intel RST."
+msgstr ""
+
+msgid "{} GB disk: 64 GB is the minimum."
+msgstr ""
+
+msgid "{} GB disk, empty."
+msgstr ""
+
+msgid "{} GB disk."
+msgstr ""
+
+msgid "{} GB disk. Windows is on it: you can keep both."
+msgstr ""
+
+msgid "{} GB disk. Windows is on it, encrypted with BitLocker: before installing, turn BitLocker off in Windows, or at least write down its recovery key."
+msgstr ""
+
+msgid "Could not be checked."
+msgstr ""
+
+msgid "Checking this computer…"
+msgstr ""
+
+msgid "Test the sound"
+msgstr ""
+
+msgid "How to do it"
+msgstr ""
+
+msgid "Copy the report"
+msgstr ""
+
+msgid "Copied"
+msgstr ""
+
+msgid "A printer or a game controller: plug it in to check it."
+msgstr ""
+
+msgid "One thing to look at before installing"
+msgstr ""
+
+msgid "{} things to look at before installing"
+msgstr ""
+
+msgid "Review"
+msgstr ""
+
+msgid "Installation guide"
+msgstr ""
+
+msgid "Keep Windows next to it, choose where to install, the NVIDIA key."
+msgstr ""
+
+msgid "What you get"
+msgstr ""
+
+msgid "Automatic updates"
+msgstr ""
+
+msgid "The whole system updates in the background and applies at the next restart. If something goes wrong, boot the previous version."
+msgstr ""
+
+msgid "Apps from Flathub and COSMIC"
+msgstr ""
+
+msgid "Install apps with COSMIC Store, from Flathub and the COSMIC repository. They run sandboxed and update on their own."
+msgstr ""
+
+msgid "Ready for the terminal"
+msgstr ""
+
+msgid "Homebrew for command line tools, distrobox for other distributions, and ujust for common tasks."
+msgstr ""
+
+msgid "Ready to install?"
+msgstr ""
+
+msgid "The installer copies Celenn OS to your disk. After that, it updates itself from the Celenn OS image registry."
+msgstr ""
+
+msgid "Install Celenn OS"
+msgstr ""
+
+msgid "Keep trying"
+msgstr ""
+
+msgid "Installing your apps: {} of {}"
+msgstr ""
+
+msgid "They show up in the app library as they arrive."
+msgstr ""
+
+msgid "Theme"
+msgstr ""
+
+msgid "Dark"
+msgstr ""
+
+msgid "Light"
+msgstr ""
+
+msgid "Wallpaper"
+msgstr ""
+
+msgid "Your picture"
+msgstr ""
+
+msgid "Send without a cable"
+msgstr ""
+
+msgid "With LocalSend, already on this computer. The files go straight through your Wi-Fi, encrypted, not through the internet."
+msgstr ""
+
+msgid "On the phone, scan this code and install LocalSend (Play Store or App Store)."
+msgstr ""
+
+msgid "Open LocalSend here and on the phone, on the same Wi-Fi."
+msgstr ""
+
+msgid "On the phone, pick the photos, then this computer. They arrive in Downloads. It works the other way too."
+msgstr ""
+
+msgid "Open LocalSend"
+msgstr ""
+
+msgid "Without a cable, with LocalSend. Or plug it in and allow file transfer on the phone: it shows up in Files."
+msgstr ""
+
+msgid "Without a cable"
+msgstr ""
+
+msgid "Layout"
+msgstr ""
+
+msgid "Top bar and dock: like the Mac. One bar at the bottom: like Windows."
+msgstr ""
+
+msgid "Top bar and dock"
+msgstr ""
+
+msgid "Bar at the bottom"
+msgstr ""
+
+msgid "This did not work."
+msgstr ""
+
+msgid "Development"
+msgstr ""
+
+msgid "Installing: {} of {}"
+msgstr ""
+
+msgid "No internet connection"
+msgstr ""
+
+msgid "Apps and updates need it."
+msgstr ""
+
+msgid "Network settings"
+msgstr ""
+
+msgid "NVIDIA graphics card"
+msgstr ""
+
+msgid "The NVIDIA edition of Celenn OS has its driver: about 4 GB to download, then it starts at the next restart."
+msgstr ""
+
+msgid "Switch"
+msgstr ""
+
+msgid "Downloading the NVIDIA edition… This can take a while."
+msgstr ""
+
+msgid "The NVIDIA edition starts at the next restart."
+msgstr ""
+
+msgid "At the restart, a blue screen asks to enroll a key: choose Enroll MOK, Continue, Yes, then type the password celennos (the keyboard is QWERTY there)."
+msgstr ""
+
+msgid "Firmware updates are available"
+msgstr ""
+
+msgid "Open Firmware"
+msgstr ""
+
+msgid "Take care of the battery"
+msgstr ""
+
+msgid "Stop charging at 80 % when the laptop stays plugged in: the battery lasts longer."
+msgstr ""
+
+msgid "Screen scale"
+msgstr ""
+
+msgid "Text and windows too small or too big? Change the scale of the screen."
+msgstr ""
+
+msgid "Display settings"
+msgstr ""
+
+msgid "Try"
+msgstr ""
+
+msgid "Turn on"
+msgstr ""
+
+msgid "Turn off"
+msgstr ""
+
+msgid "Your look is set"
+msgstr ""
+
+msgid "Your apps are installed"
+msgstr ""
+
+msgid "Plug in a USB drive and turn on automatic backups: Déjà Dup keeps a copy of your home folder."
+msgstr ""
+
+msgid "Set up backups"
+msgstr ""
+
+msgid "This tour and the Keyboard shortcuts app stay in the app library."
+msgstr ""
+
+msgid "“{}” does not install here"
+msgstr ""
+
+msgid "This is a Windows program. On Celenn OS, apps come from COSMIC Store: most well-known apps are there, or a good alternative."
+msgstr ""
+
+msgid "This is a package for Debian and Ubuntu. On Celenn OS, apps come from COSMIC Store: most well-known apps are there, or a good alternative."
+msgstr ""
+
+msgid "This is a package for Fedora. Celenn OS's system is a read-only image: apps come from COSMIC Store instead. Most well-known apps are there, or a good alternative."
+msgstr ""
+
+msgid "Search for “{}” in COSMIC Store"
+msgstr ""
+
+msgid "A Windows program with no equivalent? Bottles, in COSMIC Store, runs some of them."
+msgstr ""
+
+msgid "Open with Bottles"
+msgstr ""
+
+msgid "See the equivalents of Windows programs"
+msgstr ""
+
+msgid "For advanced users: distrobox installs it in a container of another distribution."
+msgstr ""
+
+msgid "Keyboard shortcuts"
+msgstr ""
+
+msgid "Super is the key with the Windows logo on most keyboards."
+msgstr ""
+
+msgid "Change them in Settings"
+msgstr ""
+
+msgid "Your bearings from Windows"
+msgstr ""
+
+msgid "Your bearings from the Mac"
+msgstr ""
+
+msgid "Office"
+msgstr ""
+
+msgid "Games"
+msgstr ""
+
+msgid "Open the launcher"
+msgstr ""
+
+msgid "Press Super, type the name of an app, then Enter."
+msgstr ""
+
+msgid "See all your apps"
+msgstr ""
+
+msgid "Super + A"
+msgstr ""
+
+msgid "See your workspaces"
+msgstr ""
+
+msgid "Super + W: one desktop per activity. Super + Ctrl + arrows goes from one to the next."
+msgstr ""
+
+msgid "Windows side by side, without overlap. Super + Y turns it on or off."
+msgstr ""
+
+msgid "Take a screenshot"
+msgstr ""
+
+msgid "Super + Shift + S, or the Print Screen key"
+msgstr ""
+
+msgid "Desktop"
+msgstr ""
+
+msgid "See your windows and workspaces"
+msgstr ""
+
+msgid "Lock the screen"
+msgstr ""
+
+msgid "Windows"
+msgstr ""
+
+msgid "Go from one window to the next"
+msgstr ""
+
+msgid "Close the window"
+msgstr ""
+
+msgid "Maximize the window"
+msgstr ""
+
+msgid "Workspaces"
+msgstr ""
+
+
+msgid "Go to a workspace"
+msgstr ""
+
+
+msgid "Apps"
+msgstr ""
+
+msgid "Terminal"
+msgstr ""
+
+msgid "Files"
+msgstr ""
+
+msgid "System monitor"
+msgstr ""
+
+
+msgid "Zoom in and out"
+msgstr ""
+
+msgid "Your system is installed and ready. Where do you come from? The tour adapts to you."
+msgstr ""
+
+msgid "Make it yours"
+msgstr ""
+
+msgid "Thousands of other apps are in COSMIC Store."
+msgstr ""
+
+msgid "Try it, it is safe"
+msgstr ""
+
+msgid "Each button does the real thing."
+msgstr ""
+
+msgid "Bring your things"
+msgstr ""
+
+msgid "Files from an old disk"
+msgstr ""
+
+msgid "Plug it in: it shows up in Files, on the left. A Windows partition of this computer too."
+msgstr ""
+
+msgid "Open Files"
+msgstr ""
+
+msgid "Photos from a phone"
+msgstr ""
+
+msgid "Bookmarks and passwords"
+msgstr ""
+
+msgid "Export them from your old browser (an HTML file for bookmarks, a CSV file for passwords), then import them in Firefox."
+msgstr ""
+
+msgid "Open Firefox"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "Thunderbird sets up your account with just your address and password."
+msgstr ""
+
+msgid "Open Thunderbird"
+msgstr ""
+
+msgid "Updates"
+msgstr ""
+
+msgid "An app cannot see a folder or a USB drive?"
+msgstr ""
+
+msgid "Apps run apart from the system and only see what they need. Flatseal gives them access to more."
+msgstr ""
+
+msgid "Open Flatseal"
+msgstr ""
+
+msgid "You are ready"
+msgstr ""
+
+msgid "Windows key → the Super key"
+msgstr ""
+
+msgid "It opens the launcher, like the Start menu: type the name of an app"
+msgstr ""
+
+msgid "Microsoft Store → COSMIC Store"
+msgstr ""
+
+msgid "Apps install and update from there"
+msgstr ""
+
+msgid "File Explorer → Files"
+msgstr ""
+
+msgid "Super + E opens it, as on Windows"
+msgstr ""
+
+msgid "Office → LibreOffice"
+msgstr ""
+
+msgid "It opens and saves Word, Excel and PowerPoint files"
+msgstr ""
+
+msgid "Same as on Windows"
+msgstr ""
+
+msgid "Alt + Tab, Ctrl + C and Ctrl + V, Super + Shift + S for a screenshot, Ctrl + Shift + Esc for the task manager"
+msgstr ""
+
+msgid "Command key → Ctrl, most of the time"
+msgstr ""
+
+msgid "Copy, paste, save: Ctrl + C, Ctrl + V, Ctrl + S"
+msgstr ""
+
+msgid "Spotlight → the Super key"
+msgstr ""
+
+msgid "Super opens the launcher: type the name of an app"
+msgstr ""
+
+msgid "App Store → COSMIC Store"
+msgstr ""
+
+msgid "Finder → Files"
+msgstr ""
+
+msgid "Super + E opens it"
+msgstr ""
+
+msgid "Mission Control → Super + W"
+msgstr ""
+
+msgid "Your windows and workspaces at a glance"
+msgstr ""
+
+msgid "System Settings → Settings"
+msgstr ""
+
+msgid "Everything in one place, Settings → Desktop for the look"
+msgstr ""
+
+msgid "Chosen: {}"
+msgstr ""
+
+msgid "Install and continue"
+msgstr ""
+
+msgid "Containers"
+msgstr ""
+
+msgid "Code editors"
+msgstr ""
+
+msgid "In the terminal"
+msgstr ""
+
+msgid "Other tools"
+msgstr ""
+
+msgid "Homebrew is still being set up: the code editors and terminal tools can be chosen in a few minutes."
+msgstr ""
+
+msgid "Back to the list"
+msgstr ""
+
+msgid "What is different from your distribution"
+msgstr ""
+
+msgid "Videos and streaming"
+msgstr ""
+
+msgid "What is different here"
+msgstr ""
+
+msgid "Another Linux, with its own habits, and an app for each of them."
+msgstr ""
+
+msgid "The system is an image"
+msgstr ""
+
+msgid "Signed and read-only, it updates as a whole: no dnf on the system, and the previous version is one click away."
+msgstr ""
+
+msgid "Apps → COSMIC Store"
+msgstr ""
+
+msgid "Flatpak apps from Flathub, kept apart from the system"
+msgstr ""
+
+msgid "Packages from other distributions → DistroShelf"
+msgstr ""
+
+msgid "Arch, Debian, Ubuntu… in a container that shares your home folder, set up in a few clicks"
+msgstr ""
+
+msgid "Open DistroShelf"
+msgstr ""
+
+msgid "If you like the terminal"
+msgstr ""
+
+msgid "ujust lists the system's recipes, brew installs command line tools: the documentation has them all."
+msgstr ""
+
+msgid "“{}” did not work"
+msgstr ""
+
+msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
+msgstr ""
+
+msgid "The disk is full ({} free). Free up space with Celenn OS Tools, then try again."
+msgstr ""
+
+msgid "The server does not answer. Try again in a few minutes."
+msgstr ""
+
+msgid "Something unexpected went wrong. Nothing was changed."
+msgstr ""
+
+msgid "Try again"
+msgstr ""
+
+msgid "Report the problem"
+msgstr ""
+
+msgid "Technical details"
+msgstr ""
+
+msgid "The report opens in your browser, filled in: the Celenn OS version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
+msgstr ""
+
+msgid "Open the report"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Only on this computer"
+msgstr ""
+
+msgid "Linux and you"
+msgstr ""
+
+msgid "I am new to it"
+msgstr ""
+
+msgid "I know it well"
+msgstr ""
+
+msgid "I know it well: a shorter tour, in three steps."
+msgstr ""
+
+msgid "Passwords"
+msgstr ""
+
+msgid "Installed: {}"
+msgstr ""
+
+msgid "Everything updates by itself"
+msgstr ""
+
+msgid "In the background, applied at the next restart. The previous version stays one click away."
+msgstr ""
+
+msgid "Files, photos from a phone, bookmarks and email from before"
+msgstr ""
+
+msgid "Show me how"
+msgstr ""
+
+msgid "Your apps"
+msgstr ""
+
+msgid "Every shortcut, tiling included: Super + F1."
+msgstr ""
+
+msgid "What is done, and what is left for when you want."
+msgstr ""
+
+msgid "What changes, and what stays the same. Try it, it is safe."
+msgstr ""
+
+msgid "Task View → Super + W"
+msgstr ""
+
+msgid "The essentials"
+msgstr ""
+
+msgid "What is different here, and your tools."
+msgstr ""
+
+msgid "Office, games, graphics and more: COSMIC Store, or Celenn OS Tools → Install apps."
+msgstr ""
+
+msgid "From another Celenn OS computer"
+msgstr ""
+
+msgid "Your settings and the list of your apps, with the file saved there in Celenn OS Tools → Change computers."
+msgstr ""
+
+msgid "Restore…"
+msgstr ""
+
+msgid "Ticked and grey: already installed."
+msgstr ""
+
+msgid "Homebrew is not set up yet: only the apps from Flathub can be installed now."
+msgstr ""
+
+msgid "LibreOffice, OnlyOffice…"
+msgstr ""
+
+msgid "Your office apps are ready."
+msgstr ""
+
+msgid "LibreOffice and OnlyOffice open and save Word, Excel and PowerPoint files."
+msgstr ""
+
+msgid "Office suites"
+msgstr ""
+
+msgid "PDF files"
+msgstr ""
+
+msgid "Messaging and video calls"
+msgstr ""
+
+msgid "Signal, Telegram, Element, Zoom…"
+msgstr ""
+
+msgid "Your messaging apps are ready."
+msgstr ""
+
+msgid "Messaging"
+msgstr ""
+
+msgid "Video calls"
+msgstr ""
+
+msgid "Bitwarden, Secrets, KeePassXC"
+msgstr ""
+
+msgid "Your password manager is ready."
+msgstr ""
+
+msgid "Bitwarden: a free account, on this computer, your phone and in Firefox. Secrets and KeePassXC: an encrypted file, no account."
+msgstr ""
+
+msgid "Synced with your phone"
+msgstr ""
+
+msgid "Graphics and photos"
+msgstr ""
+
+msgid "GIMP, Inkscape, Krita, darktable…"
+msgstr ""
+
+msgid "Your graphics apps are ready."
+msgstr ""
+
+msgid "Drawing and editing"
+msgstr ""
+
+msgid "Photos"
+msgstr ""
+
+msgid "And also"
+msgstr ""
+
+msgid "OBS Studio, Kdenlive, Audacity…"
+msgstr ""
+
+msgid "Your video apps are ready."
+msgstr ""
+
+msgid "Video"
+msgstr ""
+
+msgid "Steam, Heroic, Lutris, Discord…"
+msgstr ""
+
+msgid "Your game apps are ready."
+msgstr ""
+
+msgid "Removing an app keeps your games and saves."
+msgstr ""
+
+msgid "Stores"
+msgstr ""
+
+msgid "Windows games"
+msgstr ""
+
+msgid "School and science"
+msgstr ""
+
+msgid "GCompris, Stellarium, GeoGebra…"
+msgstr ""
+
+msgid "Your school apps are ready."
+msgstr ""
+
+msgid "For children"
+msgstr ""
+
+msgid "Science"
+msgstr ""
+
+msgid "Studying"
+msgstr ""
+
+msgid "VS Code, Docker, Zed, Neovim…"
+msgstr ""
+
+msgid "The developer tools are ready."
+msgstr ""
+
+msgid "Lima: ujust install-dev-tools, in a terminal."
+msgstr ""
+
+msgid "Pick what concerns you. In each list, the apps most used on Linux are already ticked, all free. Nothing installs without your OK."
+msgstr ""
+
+msgid "These keyboard shortcuts"
+msgstr ""
+
+msgid "Let the window float"
+msgstr ""
+
+msgid "Go to a nearby window"
+msgstr ""
+
+msgid "Move the window"
+msgstr ""
+
+msgid "Move the window there"
+msgstr ""
+
+msgid "Next or previous workspace"
+msgstr ""
+
+msgid "Web browser"
+msgstr ""
+
+msgid "Screen reader"
+msgstr ""
+
+msgid "Escape closes this window."
+msgstr ""
+
+msgid "Shift"
+msgstr ""
+
+msgid "Escape"
+msgstr ""
+
+msgid "Space"
+msgstr ""

@@ -1,10 +1,10 @@
 #!/usr/bin/python3
-"""Patches COSMIC Files for cosmic-blue: special folder icons under /var/home.
+"""Patches COSMIC Files for Celenn OS: special folder icons under /var/home.
 
 COSMIC Files gives the XDG user folders (Documents, Downloads, Music, ...)
 their own icons (folder-documents, folder-download, ...) by looking up each
 folder's path in a table built from the user's folders ($HOME/Documents...).
-But it opens every location by its canonical path, and on cosmic-blue, as on
+But it opens every location by its canonical path, and on Celenn OS, as on
 every Fedora Atomic system, $HOME is /home/<user> while /home is a link to
 /var/home: the folders are shown as /var/home/<user>/Documents, never found in
 the table, and all get the plain folder icon.
@@ -43,7 +43,7 @@ replace(
 """,
     """        special_dirs.insert(dir, "user-home");
     }
-    // cosmic-blue: locations are opened by their canonical path (/home is a
+    // Celenn OS: locations are opened by their canonical path (/home is a
     // link to /var/home on Fedora Atomic systems), so find them by it too
     let canonical: Vec<_> = special_dirs
         .iter()

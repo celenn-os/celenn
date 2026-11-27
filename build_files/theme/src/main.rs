@@ -1,4 +1,4 @@
-//! Writes the cosmic-blue default COSMIC themes (dark and light) with the
+//! Writes the Celenn OS default COSMIC themes (dark and light) with the
 //! frosted glass effect turned on, to $XDG_CONFIG_HOME/cosmic.
 //!
 //! COSMIC apps read the computed theme (com.system76.CosmicTheme.*), not the
@@ -97,10 +97,10 @@ fn frosted_glass(mut builder: ThemeBuilder, thickness: BlurStrength, glass: f32)
     builder
 }
 
-/// The cosmic-blue dark and light themes with the given dark accent and
+/// The Celenn OS dark and light themes with the given dark accent and
 /// frosted glass (thickness, glass opacity of the dark theme, of the light
 /// theme).
-fn cosmic_blue(accent_dark: Srgb<u8>, thickness: BlurStrength, glass_dark: f32, glass_light: f32) {
+fn celenn(accent_dark: Srgb<u8>, thickness: BlurStrength, glass_dark: f32, glass_light: f32) {
     write(
         frosted_glass(
             colors(frosted(ThemeBuilder::dark()), accent_dark, BG_DARK),
@@ -121,7 +121,7 @@ fn cosmic_blue(accent_dark: Srgb<u8>, thickness: BlurStrength, glass_dark: f32, 
 /// 1.12 from the theme (libcosmic 4c853eb), which would otherwise say
 /// "Cosmic". It is set as a config key rather than a ThemeBuilder field, so
 /// that this builds with both libcosmic versions (1.11 ignores the key).
-const ICON_THEME: &str = "cosmic-blue";
+const ICON_THEME: &str = "celenn";
 
 fn icon_theme() {
     for config in [
@@ -154,30 +154,30 @@ fn write(dark: ThemeBuilder, light: ThemeBuilder) {
         .expect("write light theme");
 }
 
-/// Without an argument: the cosmic-blue themes. With "stock", "frosted",
+/// Without an argument: the Celenn OS themes. With "stock", "frosted",
 /// "glass-0.8", "glass-0.65" or "accent-3a9dff": themes from earlier images,
 /// which accounts may still hold as a copy (COSMIC's own default, written by
 /// the first-run assistant, the same with frosted glass, the default before
 /// the blue colors, the blue themes with earlier frosted glass settings, and
 /// the short-lived cyan accent). They go into
-/// /usr/share/cosmic-blue/previous-defaults.list, so that
-/// cosmic-blue-migrate-defaults can tell them from a user's own choice.
+/// /usr/share/celenn/previous-defaults.list, so that
+/// celenn-migrate-defaults can tell them from a user's own choice.
 fn main() {
     match std::env::args().nth(1).as_deref() {
-        None => cosmic_blue(
+        None => celenn(
             ACCENT_DARK,
             THICKNESS,
             GLASS_OPACITY_DARK,
             GLASS_OPACITY_LIGHT,
         ),
-        Some("accent-3a9dff") => cosmic_blue(
+        Some("accent-3a9dff") => celenn(
             ACCENT_DARK_3A9DFF,
             THICKNESS,
             GLASS_OPACITY_DARK,
             GLASS_OPACITY_LIGHT,
         ),
-        Some("glass-0.8") => cosmic_blue(ACCENT_DARK, GLASS_0_8.0, GLASS_0_8.1, GLASS_0_8.1),
-        Some("glass-0.65") => cosmic_blue(ACCENT_DARK, GLASS_0_65.0, GLASS_0_65.1, GLASS_0_65.1),
+        Some("glass-0.8") => celenn(ACCENT_DARK, GLASS_0_8.0, GLASS_0_8.1, GLASS_0_8.1),
+        Some("glass-0.65") => celenn(ACCENT_DARK, GLASS_0_65.0, GLASS_0_65.1, GLASS_0_65.1),
         Some("stock") => write(ThemeBuilder::dark(), ThemeBuilder::light()),
         Some("frosted") => write(
             frosted(ThemeBuilder::dark()),

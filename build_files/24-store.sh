@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # Replaces Fedora's cosmic-store binary with the one rebuilt from the same
-# source package with the cosmic-blue patch (build_files/store): FlatPark is
+# source package with the Celenn OS patch (build_files/store): FlatPark is
 # listed as a recommended Flatpak source, off until the user adds it.
 set -euox pipefail
 

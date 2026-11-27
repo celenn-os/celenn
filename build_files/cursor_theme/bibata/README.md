@@ -8,7 +8,7 @@ under the GPL-3.0 (see LICENSE):
   drawings copied in place of the upstream symbolic links)
 - `configs/normal/x.build.toml`: sizes, hotspots, frame delays and alias names
 
-`../bibata.py` recolors them with the cosmic-blue colors and builds the cursor
+`../bibata.py` recolors them with the Celenn OS colors and builds the cursor
 theme. Keeping them here means the build no longer depends on an upstream that
 publishes no new versions. Renovate still watches it and opens a pull request
 on a new release: copy the new sources here as described in `../bibata.sh`.

@@ -1,0 +1,53 @@
+#!/usr/bin/bash
+# More screen time for a child account, given by a parent with their password
+# from the child's session ("Ask for more time", run through pkexec: polkit
+# action io.github.celenn_os.parental.extend, asked every time).
+#
+#   celenn-parental-extend <user> MINUTES [bedtime|late]
+#   celenn-parental-extend <user> day
+#
+# MINUTES: 5 to 240 (4 h), added to today's limit; with "late", given during
+# bedtime or just before, they also allow that long past it ("bedtime", the
+# default: the session closes at bedtime all the same). day: no limit for the
+# rest of the day, bedtime included (see
+# build_files/first_steps/src/parental_rules.rs).
+set -euo pipefail
+
+STATE_DIR=/var/lib/celenn/parental-controls
+
+usage() {
+    echo "Usage: ${0##*/} <user> 5-240 [bedtime|late] | ${0##*/} <user> day" >&2
+    exit 2
+}
+if [[ $# -eq 2 && "${2:-}" == day ]]; then
+    grant=0
+elif [[ ($# -eq 2 || $# -eq 3) && "$2" =~ ^[1-9][0-9]{0,2}$ ]] \
+    && (("$2" >= 5 && "$2" <= 240)) && [[ "${3:-bedtime}" =~ ^(bedtime|late)$ ]]; then
+    grant="$2 ${3:-bedtime}"
+else
+    usage
+fi
+user="$1"
+if [[ ! "${user}" =~ ^[a-z_][a-z0-9_-]{0,31}$ || ! -f "/etc/celenn/parental-controls/${user}.json" ]]; then
+    echo "${user} has no parental controls." >&2
+    exit 1
+fi
+install -d -m 0755 "${STATE_DIR}"
+file="${STATE_DIR}/${user}.extra"
+now="$(date +%s)"
+# Keep only the last two days
+{
+    if [[ -f "${file}" ]]; then
+        awk -v since="$((now - 2 * 86400))" '$1 >= since' "${file}"
+    fi
+    # 0 minutes: no screen time limit for the rest of the day, and no
+    # bedtime until it ends the next morning
+    printf '%s %s\n' "${now}" "${grant}"
+} > "${file}.tmp"
+chmod 0644 "${file}.tmp"
+mv -f "${file}.tmp" "${file}"
+if [[ "$2" == day ]]; then
+    echo "${user}: no limit today."
+else
+    echo "${user}: $2 more minutes."
+fi
