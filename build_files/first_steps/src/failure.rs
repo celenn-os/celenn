@@ -247,32 +247,21 @@ impl<J: Clone> Card<J> {
             Cause::Server => tr("The server does not answer. Try again in a few minutes.").to_owned(),
             Cause::Other => tr("Something unexpected went wrong. Nothing was changed.").to_owned(),
         };
-        let title = widget::row::with_capacity(3)
-            .spacing(space.space_s)
-            .align_y(Alignment::Center)
-            .push(
-                widget::icon::from_name("dialog-warning-symbolic")
-                    .size(24)
-                    .apply(widget::container)
-                    .class(theme::Container::custom(|theme| {
-                        cosmic::iced::widget::container::Style {
-                            icon_color: Some(theme.cosmic().warning_color().into()),
-                            ..Default::default()
-                        }
-                    })),
-            )
-            .push(
-                text::heading(tr("“{}” did not work").replacen("{}", &self.title, 1))
-                    .wrapping(Wrapping::Word)
-                    .width(Length::Fill),
-            )
-            .push(
-                widget::button::icon(widget::icon::from_name("window-close-symbolic"))
-                    .tooltip(tr("Close"))
-                    .on_press(map(CardMessage::Close)),
-            );
+        // As short as it can be, so that the pages still fit without
+        // scrolling: the icon, then the title with the technical details
+        // and Close at its end, the reason and the buttons
+        let icon = widget::icon::from_name("dialog-warning-symbolic")
+            .size(24)
+            .apply(widget::container)
+            .class(theme::Container::custom(|theme| {
+                cosmic::iced::widget::container::Style {
+                    icon_color: Some(theme.cosmic().warning_color().into()),
+                    ..Default::default()
+                }
+            }));
         let mut buttons = widget::row::with_capacity(3)
             .spacing(space.space_xs)
+            .align_y(Alignment::Center)
             .push(widget::button::suggested(tr("Try again")).on_press(map(CardMessage::Retry)));
         if self.failure.cause == Cause::Offline {
             buttons = buttons.push(
@@ -287,8 +276,33 @@ impl<J: Clone> Card<J> {
                     .on_press(map(CardMessage::Report)),
             );
         }
-        let mut column = widget::column::with_capacity(5)
+        let mut title = widget::row::with_capacity(3)
             .spacing(space.space_xs)
+            .align_y(Alignment::Center)
+            .push(
+                text::heading(tr("“{}” did not work").replacen("{}", &self.title, 1))
+                    .wrapping(Wrapping::Word)
+                    .width(Length::Fill),
+            );
+        if !self.failure.details.is_empty() {
+            title = title.push(
+                widget::button::text(tr("Technical details"))
+                    .trailing_icon(widget::icon::from_name(if self.details {
+                        "go-up-symbolic"
+                    } else {
+                        "go-down-symbolic"
+                    }))
+                    .on_press(map(CardMessage::Details)),
+            );
+        }
+        title = title.push(
+            widget::button::icon(widget::icon::from_name("window-close-symbolic"))
+                .tooltip(tr("Close"))
+                .on_press(map(CardMessage::Close)),
+        );
+        let mut column = widget::column::with_capacity(5)
+            .spacing(space.space_xxs)
+            .width(Length::Fill)
             .push(title)
             .push(text::body(reason).wrapping(Wrapping::Word));
         if self.reporting {
@@ -319,24 +333,17 @@ impl<J: Clone> Card<J> {
         } else {
             column = column.push(buttons);
         }
-        if !self.failure.details.is_empty() {
+        if self.details && !self.failure.details.is_empty() {
             column = column.push(
-                widget::button::text(tr("Technical details"))
-                    .trailing_icon(widget::icon::from_name(if self.details {
-                        "go-up-symbolic"
-                    } else {
-                        "go-down-symbolic"
-                    }))
-                    .on_press(map(CardMessage::Details)),
+                text::monotext(self.failure.details.as_str())
+                    .size(12)
+                    .wrapping(Wrapping::WordOrGlyph),
             );
-            if self.details {
-                column = column.push(
-                    text::monotext(self.failure.details.as_str())
-                        .size(12)
-                        .wrapping(Wrapping::WordOrGlyph),
-                );
-            }
         }
+        let column = widget::row::with_capacity(2)
+            .spacing(space.space_s)
+            .push(widget::container(icon).padding([4, 0, 0, 0]))
+            .push(column);
         column
             .padding(space.space_s)
             .width(Length::Fill)

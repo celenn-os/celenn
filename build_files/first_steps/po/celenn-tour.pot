@@ -912,6 +912,9 @@ msgstr ""
 msgid "Shift"
 msgstr ""
 
+msgid "Ctrl"
+msgstr ""
+
 msgid "Escape"
 msgstr ""
 

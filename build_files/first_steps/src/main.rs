@@ -686,7 +686,7 @@ const SHORTCUTS: &[(&str, &[(&str, &str)])] = &[
 const SHORTCUT_COLUMNS: [&[usize]; 3] = [&[0, 4], &[1], &[2, 3]];
 
 /// Key names drawn translated on the keys ("Shift" is "Maj" in French)
-const KEY_LABELS: &[&str] = &["Shift", "Escape", "Space"];
+const KEY_LABELS: &[&str] = &["Shift", "Ctrl", "Escape", "Space"];
 
 /// Texts that are not in a page (buttons, states, the other windows)
 const TEXTS: &[&str] = &[
