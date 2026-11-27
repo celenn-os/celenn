@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 # Moves systems that follow a cosmic-blue image to the same image under its
-# new name, Cyanova, once that image is published.
+# new name, Celenn OS, once that image is published.
 #
 # The project is renamed: the images move from ghcr.io/cosmic-blue-os/cosmic-blue
-# (and cosmic-blue-nvidia) to ghcr.io/cyanova-os/cyanova (and cyanova-nvidia).
+# (and cosmic-blue-nvidia) to ghcr.io/celenn-os/celenn (and celenn-nvidia).
 # An installed system keeps following the old name, which gets no new builds
 # after the rename. This switches it to the new image, on the same channel
 # (stable, testing, latest or dev), with the signature check on: the new
@@ -11,11 +11,11 @@
 # image is downloaded and checked like an update and applies at the next
 # reboot. Until the new image exists, it does nothing.
 #
-# Usage: cosmic-blue-move-to-cyanova [--dry-run]
+# Usage: cosmic-blue-move-to-celenn [--dry-run]
 set -euo pipefail
 
 OLD_VENDOR="ghcr.io/cosmic-blue-os"
-NEW_VENDOR="ghcr.io/cyanova-os"
+NEW_VENDOR="ghcr.io/celenn-os"
 dry_run=false
 [[ "${1:-}" == --dry-run ]] && dry_run=true
 
@@ -28,13 +28,13 @@ if [[ "${transport}" != registry || "${image,,}" != "${OLD_VENDOR}/"* ]]; then
     exit 0
 fi
 
-# ghcr.io/cosmic-blue-os/cosmic-blue-nvidia:stable -> ghcr.io/cyanova-os/cyanova-nvidia:stable
+# ghcr.io/cosmic-blue-os/cosmic-blue-nvidia:stable -> ghcr.io/celenn-os/celenn-nvidia:stable
 name_tag="${image#*/*/}"
 name="${name_tag%%[:@]*}"
 suffix="${name_tag#"${name}"}"
 case "${name}" in
-    cosmic-blue) new_name=cyanova ;;
-    cosmic-blue-nvidia) new_name=cyanova-nvidia ;;
+    cosmic-blue) new_name=celenn ;;
+    cosmic-blue-nvidia) new_name=celenn-nvidia ;;
     *)
         echo "${image}: unknown image name, leaving it as it is" >&2
         exit 0
