@@ -149,7 +149,8 @@ SHORTCUTS=/usr/share/cosmic/com.system76.CosmicSettings.Shortcuts/v1
 test -s "${SHORTCUTS}/defaults"
 grep -q 'System(Terminal)' "${SHORTCUTS}/custom"
 for combo in '\[Ctrl, Alt\], key: "t"' '\[Super\], key: "e"' \
-             '\[Super, Shift\], key: "s"' '\[Ctrl, Shift\], key: "Escape"'; do
+             '\[Super, Shift\], key: "s"' '\[Ctrl, Shift\], key: "Escape"' \
+             '\[Super\], key: "F1"'; do
     grep -q "${combo}" "${SHORTCUTS}/custom"
     if grep -q "${combo}" "${SHORTCUTS}/defaults"; then exit 1; fi
 done
