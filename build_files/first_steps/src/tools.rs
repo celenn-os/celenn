@@ -8,8 +8,9 @@
 // follow the first steps tour's words: what the tour shows once, the
 // toolbox keeps, under the same name.
 //
-//   Every day              Update, Install apps, Free up space, Protect
-//                          your files, Print and scan, Change computers
+//   Every day              Update, Install apps, Web apps (webapps.rs),
+//                          Free up space, Protect your files, Print and
+//                          scan, Change computers
 //   My computer            What's inside, Spare the battery, Other disks,
 //                          Make it yours, NVIDIA driver, Microsoft fonts
 //   When something is wrong  Go back, Repair, Get help
@@ -80,6 +81,7 @@ mod system;
 mod transfer;
 mod update_progress;
 mod updates_page;
+mod webapps;
 use i18n::tr;
 
 pub(crate) const LANGUAGES: &[(&str, &str)] = &[
@@ -112,6 +114,9 @@ const TEXTS: &[&str] = &[
     "Install apps",
     "Ready in one click. In each list, the apps most used on Linux are already ticked.",
     "Office, games, school, development…",
+    "Web apps",
+    "Your favourite sites in their own window, with their icon in your apps and the dock.",
+    "WhatsApp, Netflix, Gmail…",
     "Free up space",
     "Remove what nothing uses any more. Your files stay as they are.",
     "Disk space and the trash",
@@ -161,6 +166,7 @@ const TEXTS: &[&str] = &[
 pub enum Tool {
     Update,
     Apps,
+    WebApps,
     Space,
     Backup,
     Print,
@@ -184,6 +190,7 @@ pub const GROUPS: &[(&str, &[Tool])] = &[
         &[
             Tool::Update,
             Tool::Apps,
+            Tool::WebApps,
             Tool::Space,
             Tool::Backup,
             Tool::Print,
@@ -208,9 +215,10 @@ pub const GROUPS: &[(&str, &[Tool])] = &[
 ];
 
 impl Tool {
-    pub const ALL: [Tool; 16] = [
+    pub const ALL: [Tool; 17] = [
         Tool::Update,
         Tool::Apps,
+        Tool::WebApps,
         Tool::Space,
         Tool::Backup,
         Tool::Print,
@@ -232,6 +240,7 @@ impl Tool {
         match self {
             Tool::Update => "update",
             Tool::Apps => "apps",
+            Tool::WebApps => "web-apps",
             Tool::Space => "space",
             Tool::Backup => "backup",
             Tool::Print => "print",
@@ -263,6 +272,11 @@ impl Tool {
                 "Install apps",
                 "Ready in one click. In each list, the apps most used on Linux are already ticked.",
                 "Office, games, school, development…",
+            ),
+            Tool::WebApps => (
+                "Web apps",
+                "Your favourite sites in their own window, with their icon in your apps and the dock.",
+                "WhatsApp, Netflix, Gmail…",
             ),
             Tool::Space => (
                 "Free up space",
@@ -346,6 +360,7 @@ impl Tool {
         match self {
             Tool::Update => "software-update-available-symbolic",
             Tool::Apps => "system-software-install-symbolic",
+            Tool::WebApps => "web-browser-symbolic",
             Tool::Space => "edit-clear-all-symbolic",
             Tool::Backup => "document-save-symbolic",
             Tool::Print => "printer-symbolic",
@@ -368,7 +383,7 @@ impl Tool {
         match self {
             Tool::Update => "docs/#updates",
             Tool::Rollback => "docs/troubleshooting/#bad-update",
-            Tool::Apps | Tool::Fonts => "docs/#apps",
+            Tool::Apps | Tool::WebApps | Tool::Fonts => "docs/#apps",
             Tool::Space => "docs/#tools",
             Tool::Repair => "docs/troubleshooting/#settings",
             Tool::Backup | Tool::Transfer => "docs/#data",
@@ -414,6 +429,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             overview::TEXTS,
             transfer::TEXTS,
             disks::TEXTS,
+            webapps::TEXTS,
         ]
         .concat();
         let mut sorted = texts.clone();
@@ -472,6 +488,7 @@ pub enum Message {
     Maintenance(maintenance::Message),
     More(more::Message),
     Help(help::Message),
+    WebApps(webapps::Message),
     /// A tool, or the toolbox (None)
     Open(Option<Tool>),
     /// The documentation of a tool, or of the toolbox (None)
@@ -494,6 +511,7 @@ struct App {
     maintenance: maintenance::Page,
     more: more::Page,
     help: help::Page,
+    webapps: webapps::Page,
     toasts: Toasts<Message>,
 }
 
@@ -510,6 +528,10 @@ impl App {
                 .more
                 .opened(more::Part::Apps)
                 .map(|action| action.map(Message::More)),
+            Some(Tool::WebApps) => {
+                self.webapps.opened();
+                Task::none()
+            }
             Some(_) => Task::none(),
         };
         // From the top
@@ -557,6 +579,10 @@ impl App {
                     &count.to_string(),
                 )),
             },
+            Tool::WebApps => self
+                .webapps
+                .summary()
+                .map_or(Summary::Unknown, Summary::Says),
             Tool::Help | Tool::Advanced => Summary::Unknown,
             _ => self.more.summary(more_part(tool)),
         }
@@ -600,6 +626,7 @@ impl App {
                 more(more::Part::Repair),
             ],
             Tool::Help => vec![self.help.view().map(Message::Help)],
+            Tool::WebApps => vec![self.webapps.view().map(Message::WebApps)],
             Tool::Advanced => vec![
                 self.updates
                     .view(updates_page::Part::Advanced)
@@ -632,7 +659,7 @@ impl App {
         // that have such changes
         let asks_root = !matches!(
             tool,
-            Tool::Backup | Tool::Transfer | Tool::Inside | Tool::Look | Tool::Help
+            Tool::Backup | Tool::Transfer | Tool::Inside | Tool::Look | Tool::Help | Tool::WebApps
         );
         let lead = if common::is_admin() || !asks_root {
             tr(lead).to_owned()
@@ -685,9 +712,14 @@ impl App {
                         .on_press(Message::CopyCommand(command)),
                 );
         }
-        frame(body.into(), footer.into(), 640.0)
+        // Web apps: its tiles as wide as the toolbox's
+        let width = if tool == Tool::WebApps { WIDE } else { 640.0 };
+        frame(body.into(), footer.into(), width)
     }
 }
+
+/// The width of the toolbox (and of the pages with tiles)
+const WIDE: f32 = 880.0;
 
 /// The scroll area of the pages (back to the top when one opens)
 const SCROLL: &str = "page";
@@ -767,6 +799,7 @@ impl Application for App {
             maintenance,
             more,
             help,
+            webapps: webapps::Page::new(),
             toasts: Toasts::new(Message::CloseToast),
         };
         let title = match app.core.main_window_id() {
@@ -820,6 +853,11 @@ impl Application for App {
                 self.toast(ask, Message::Maintenance)
             }
             Message::More(more::Message::Toast(ask)) => self.toast(ask, Message::More),
+            Message::WebApps(webapps::Message::Toast(ask)) => self.toast(ask, Message::WebApps),
+            Message::WebApps(message) => self
+                .webapps
+                .update(message)
+                .map(|action| action.map(Message::WebApps)),
             Message::Overview(message) => self
                 .overview
                 .update(message)
@@ -865,7 +903,7 @@ impl Application for App {
                 frame(
                     body.map(Message::Overview),
                     footer.map(Message::Overview),
-                    880.0,
+                    WIDE,
                 )
             }
         };

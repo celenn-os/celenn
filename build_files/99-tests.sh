@@ -571,6 +571,10 @@ if ldd /usr/libexec/cosmic-blue-tools | grep 'not found'; then
     echo "cosmic-blue-tools: missing libraries"; exit 1
 fi
 /usr/libexec/cosmic-blue-tools --check
+# Web apps (webapps.rs): the programs that make them and open them
+for program in curl gio update-desktop-database; do
+    command -v "${program}"
+done
 for script in cosmic-blue-clean cosmic-blue-tools-helper cosmic-blue-report-bug; do
     test -x "/usr/libexec/${script}"
 done

@@ -38,9 +38,10 @@ path = "src/pam_parental.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-# Account pictures cut as smooth disks (style.rs); already in the tree
-# through libcosmic
-image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
+# Account pictures cut as smooth disks (style.rs), and the icons of web
+# apps (webapps.rs: sites' PNG and ICO icons); already in the tree through
+# libcosmic
+image = { version = "0.25", default-features = false, features = ["ico", "jpeg", "png"] }
 serde_json = "1"
 tokio = { version = "1", features = ["io-util", "process", "rt"] }
 
