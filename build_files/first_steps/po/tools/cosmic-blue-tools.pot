@@ -1190,6 +1190,9 @@ msgstr ""
 msgid "Your photos"
 msgstr ""
 
+msgid "Photos and stories"
+msgstr ""
+
 msgid "{} could not be added. Is this computer connected to the internet?"
 msgstr ""
 

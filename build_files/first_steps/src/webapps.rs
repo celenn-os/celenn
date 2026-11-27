@@ -41,11 +41,17 @@ const PER_LINE: usize = 4;
 pub const SITES: &[(&str, &str, &str)] = &[
     ("WhatsApp", "https://web.whatsapp.com/", "Messages"),
     ("Messenger", "https://www.messenger.com/", "Messages"),
+    (
+        "Instagram",
+        "https://www.instagram.com/",
+        "Photos and stories",
+    ),
     ("Gmail", "https://mail.google.com/", "Email"),
     ("Outlook", "https://outlook.live.com/mail/", "Email"),
     ("Netflix", "https://www.netflix.com/", "Films and series"),
     ("Disney+", "https://www.disneyplus.com/", "Films and series"),
     ("YouTube", "https://www.youtube.com/", "Videos"),
+    ("Spotify", "https://open.spotify.com/", "Music"),
     ("Deezer", "https://www.deezer.com/", "Music"),
     (
         "Microsoft 365",
@@ -71,6 +77,7 @@ pub const TEXTS: &[&str] = &[
     "Documents and sheets",
     "Posters and cards",
     "Your photos",
+    "Photos and stories",
     "Added",
     "Adding…",
     "Another site",

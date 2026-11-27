@@ -1192,6 +1192,9 @@ msgstr "Ihre Lieblingsseiten in einem eigenen Fenster, mit ihrem Symbol in Ihren
 msgid "Your photos"
 msgstr "Ihre Fotos"
 
+msgid "Photos and stories"
+msgstr "Fotos und Storys"
+
 msgid "{} could not be added. Is this computer connected to the internet?"
 msgstr "{} konnte nicht hinzugefügt werden. Ist dieser Computer mit dem Internet verbunden?"
 
