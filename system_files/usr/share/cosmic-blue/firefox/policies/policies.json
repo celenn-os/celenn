@@ -4,6 +4,7 @@
     "DisableTelemetry": true,
     "DisableFirefoxStudies": true,
     "DontCheckDefaultBrowser": true,
+    "HttpsOnlyMode": "enabled",
     "ExtensionSettings": {
       "uBlock0@raymondhill.net": {
         "installation_mode": "normal_installed",
@@ -32,6 +33,10 @@
     "Preferences": {
       "privacy.globalprivacycontrol.enabled": {
         "Value": true,
+        "Status": "default"
+      },
+      "dom.private-attribution.submission.enabled": {
+        "Value": false,
         "Status": "default"
       }
     }
