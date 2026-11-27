@@ -496,37 +496,41 @@ impl Page {
         }
         content = content.push(disk);
 
-        // What happens by itself (housekeeping.rs)
-        content = content.push(
-            settings::section()
-                .title(tr("Automatically"))
-                .add(
-                    settings::item_row(vec![
-                        label(
-                            tr("Delete files that stayed in the trash for more than 30 days"),
-                            tr("Like on Windows and the Mac. Newer ones can still be put back.")
-                                .to_owned(),
-                        ),
-                        widget::toggler(state.trash_auto)
-                            .on_toggle(Message::TrashAuto)
-                            .into(),
-                    ])
-                    .spacing(space_s),
-                )
-                .add(
-                    settings::item_row(vec![
-                        label(
-                            tr("Warn when the disk is almost full"),
-                            tr("A notification when less than 10 % is free (20 GB at most).")
-                                .to_owned(),
-                        ),
-                        widget::toggler(state.disk_warning)
-                            .on_toggle(Message::DiskWarning)
-                            .into(),
-                    ])
-                    .spacing(space_s),
-                ),
-        );
+        // What happens by itself (housekeeping.rs): set aside while an
+        // error card is shown, so that the page still fits without
+        // scrolling (it comes back when the card closes)
+        if failed.is_none() {
+            content = content.push(
+                settings::section()
+                    .title(tr("Automatically"))
+                    .add(
+                        settings::item_row(vec![
+                            label(
+                                tr("Delete files that stayed in the trash for more than 30 days"),
+                                tr("Like on Windows and the Mac. Newer ones can still be put back.")
+                                    .to_owned(),
+                            ),
+                            widget::toggler(state.trash_auto)
+                                .on_toggle(Message::TrashAuto)
+                                .into(),
+                        ])
+                        .spacing(space_s),
+                    )
+                    .add(
+                        settings::item_row(vec![
+                            label(
+                                tr("Warn when the disk is almost full"),
+                                tr("A notification when less than 10 % is free (20 GB at most).")
+                                    .to_owned(),
+                            ),
+                            widget::toggler(state.disk_warning)
+                                .on_toggle(Message::DiskWarning)
+                                .into(),
+                        ])
+                        .spacing(space_s),
+                    ),
+            );
+        }
 
         content.into()
     }
