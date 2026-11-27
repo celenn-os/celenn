@@ -1,5 +1,5 @@
 name: Bug report
-description: Something does not work as it should on cosmic-blue
+description: Something does not work as it should on Celenn OS
 labels: [bug]
 body:
   - type: markdown
@@ -7,9 +7,9 @@ body:
       value: |
         Thanks for taking the time to report a problem.
 
-        - Please check first that it is not [already reported](https://github.com/cosmic-blue-os/cosmic-blue/issues?q=is%3Aissue).
-        - For questions and help, use [Discussions](https://github.com/cosmic-blue-os/cosmic-blue/discussions) instead.
-        - cosmic-blue is an independent project: please do not report its problems to Universal Blue or Bluefin.
+        - Please check first that it is not [already reported](https://github.com/celenn-os/celenn/issues?q=is%3Aissue).
+        - For questions and help, use [Discussions](https://github.com/celenn-os/celenn/discussions) instead.
+        - Celenn OS is an independent project: please do not report its problems to Universal Blue or Bluefin.
   - type: textarea
     id: what-happened
     attributes:

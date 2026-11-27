@@ -29,12 +29,12 @@ desc = "cli_pkg"
 
 [[links]]
 name = "issues"
-url = "https://github.com/cosmic-blue-os/cosmic-blue/issues"
+url = "https://github.com/celenn-os/celenn/issues"
 
 [[links]]
 name = "discuss"
-url = "https://github.com/cosmic-blue-os/cosmic-blue/discussions"
+url = "https://github.com/celenn-os/celenn/discussions"
 
 [[links]]
 name = "docs"
-url = "https://cosmic-blue-os.github.io/cosmic-blue/docs/"
+url = "https://celenn-os.github.io/celenn/docs/"

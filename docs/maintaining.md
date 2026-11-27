@@ -122,7 +122,7 @@ every `msgid` still has its `msgstr` and that no text appears twice.
 
 - Images are signed with cosign at build time. The public key is
   `cosign.pub` in this repository, and installed systems check it before any
-  update (`policy.json`, scoped to `ghcr.io/cosmic-blue-os`).
+  update (`policy.json`, scoped to `ghcr.io/celenn-os`).
 - The private key (`SIGNING_SECRET`) and the R2 keys (`R2_ACCESS_KEY_ID`,
   `R2_SECRET_ACCESS_KEY`, `R2_ACCOUNT_ID`) are only in the GitHub environment
   `release`, which only `main` can use. Pull requests never see them.

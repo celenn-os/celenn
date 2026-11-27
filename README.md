@@ -9,11 +9,11 @@ or Bluefin.
 It is an atomic (bootc) system: updates are applied in the background, take
 effect on the next reboot, and can be rolled back.
 
-[![cosmic-blue desktop with a terminal open](https://cosmic-blue-os.github.io/cosmic-blue/img/screenshots/terminal.webp?v=45.20261126)](https://cosmic-blue-os.github.io/cosmic-blue/screenshots/)
+[![cosmic-blue desktop with a terminal open](https://celenn-os.github.io/celenn/img/screenshots/terminal.webp?v=45.20261126)](https://celenn-os.github.io/celenn/screenshots/)
 
 It comes with its own apps: a guided tour at first login, parental controls,
 cosmic-blue Tools (system tools and extra software, without a terminal) and
-Updates. See [why cosmic-blue](https://cosmic-blue-os.github.io/cosmic-blue/why/).
+Updates. See [why cosmic-blue](https://celenn-os.github.io/celenn/why/).
 
 ## Versions
 
@@ -28,19 +28,19 @@ In the current `stable` image (cosmic-blue 45.20261126):
 <!-- versions:end -->
 
 What changed in each `stable` version (packages, COSMIC, cosmic-blue):
-[Releases](https://github.com/cosmic-blue-os/cosmic-blue/releases).
+[Releases](https://github.com/celenn-os/celenn/releases).
 
 ## Install
 
 **New install:** download the live ISO from the
-[website](https://cosmic-blue-os.github.io/cosmic-blue/), write it to a USB
+[website](https://celenn-os.github.io/celenn/), write it to a USB
 stick with [Fedora Media Writer](https://fedoraproject.org/workstation/download),
 boot it and start the installer from the desktop icon.
 
 **From another bootc system** (Bluefin, Aurora, Bazzite, Fedora Atomic...):
 
 ```bash
-sudo bootc switch ghcr.io/cosmic-blue-os/cosmic-blue:stable
+sudo bootc switch ghcr.io/celenn-os/celenn:stable
 sudo systemctl reboot
 ```
 
@@ -52,12 +52,12 @@ itself (`bootc switch --enforce-container-sigpolicy`).
 `ujust switch-channel testing` (or `dev`) to get changes sooner.
 
 **NVIDIA graphics cards** (GTX 16xx, RTX 20xx and newer): use the
-`cosmic-blue-nvidia` image, which ships NVIDIA's driver. For a new install,
+`celenn-nvidia` image, which ships NVIDIA's driver. For a new install,
 choose NVIDIA on the website. From an installed system:
 
 ```bash
 ujust enroll-secure-boot-key   # only if Secure Boot is on
-sudo bootc switch ghcr.io/cosmic-blue-os/cosmic-blue-nvidia:stable
+sudo bootc switch ghcr.io/celenn-os/celenn-nvidia:stable
 sudo systemctl reboot
 ```
 
@@ -91,7 +91,7 @@ installed systems refuse unsigned updates. To check by hand with
 [`cosign.pub`](cosign.pub):
 
 ```bash
-cosign verify --key cosign.pub ghcr.io/cosmic-blue-os/cosmic-blue:stable
+cosign verify --key cosign.pub ghcr.io/celenn-os/celenn:stable
 ```
 
 ## Credits

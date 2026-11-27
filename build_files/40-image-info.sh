@@ -3,8 +3,8 @@
 set -euox pipefail
 
 IMAGE_PRETTY_NAME="Celenn OS"
-# One repository for all the images (cosmic-blue-nvidia included)
-HOME_URL="https://github.com/${IMAGE_VENDOR}/cosmic-blue"
+# One repository for all the images (celenn-nvidia included)
+HOME_URL="https://github.com/${IMAGE_VENDOR}/celenn"
 VERSION="${VERSION:-${FEDORA_MAJOR_VERSION}.$(date +%Y%m%d)}"
 
 # The image is verified with cosign.pub (see 10-system-files.sh); without it,

@@ -868,7 +868,7 @@ switch-channel channel="status":
     image="${image#ostree-unverified-registry:}"
     repo="${image%:*}"
     tag="${image##*:}"
-    if [[ "${repo}" != ghcr.io/cosmic-blue-os/* || "${repo}" == "${image}" ]]; then
+    if [[ "${repo}" != ghcr.io/celenn-os/* || "${repo}" == "${image}" ]]; then
         echo "This system does not follow a Celenn OS image (${ref:-none}): nothing to switch." >&2
         exit 1
     fi
@@ -1055,7 +1055,7 @@ report-bug mode="open":
     # into the "System details" field of the bug report form through its
     # URL (celenn-report-bug, also run by "Report a problem" in
     # Celenn OS Tools): nothing is sent until the report is submitted.
-    form="https://github.com/cosmic-blue-os/cosmic-blue/issues/new?template=bug_report.yml"
+    form="https://github.com/celenn-os/celenn/issues/new?template=bug_report.yml"
     info="$(/usr/libexec/celenn-system-info)"
     case "{{ mode }}" in
         open) ;;

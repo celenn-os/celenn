@@ -15,7 +15,7 @@ const setGpu = (gpu) => {
   for (const el of document.querySelectorAll("[data-nvidia-only]")) el.hidden = !nvidia;
   for (const el of document.querySelectorAll("[data-main-only]")) el.hidden = nvidia;
   for (const el of document.querySelectorAll("[data-image]")) {
-    el.textContent = nvidia ? "cosmic-blue-nvidia" : "cosmic-blue";
+    el.textContent = nvidia ? "celenn-nvidia" : "celenn";
   }
   document.querySelector(`input[name="gpu"][value="${nvidia ? "nvidia" : "main"}"]`).checked = true;
 };

@@ -13,7 +13,7 @@ use cosmic::widget::{self, settings, text};
 use cosmic::{Element, cosmic_theme, theme};
 
 const DOCS: &str = "/usr/bin/celenn-docs";
-const QUESTIONS: &str = "https://github.com/cosmic-blue-os/cosmic-blue/discussions/categories/q-a";
+const QUESTIONS: &str = "https://github.com/celenn-os/celenn/discussions/categories/q-a";
 const REPORT: &str = "/usr/libexec/celenn-report-bug";
 const SYSTEM_INFO: &str = "/usr/libexec/celenn-system-info";
 

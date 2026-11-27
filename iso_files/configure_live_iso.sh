@@ -66,8 +66,8 @@ dnf install -y \
 mkdir -p /etc/firefox/policies
 ln -sf /usr/share/celenn/firefox/policies/policies.json /etc/firefox/policies/policies.json
 
-# Profile matched on os-release (ID=fedora, VARIANT_ID=cosmic-blue or
-# cosmic-blue-nvidia, the image name)
+# Profile matched on os-release (ID=fedora, VARIANT_ID=celenn or
+# celenn-nvidia, the image name)
 . /etc/os-release
 # Images built before VARIANT_ID was set (such as stable until its next
 # promotion) lack the line, and the installer then used Fedora's profile.

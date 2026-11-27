@@ -236,7 +236,7 @@ sed -i '/^export LC_[A-Z_]*=en_US/d' "${STAGE}/etc/zsh/zprofile"
 
 # `ujust` with no recipe prints a link to Bluefin's documentation first:
 # point it to the Celenn OS guide.
-sed -i 's|https://docs.projectbluefin.io/[^"]*|https://cosmic-blue-os.github.io/cosmic-blue/docs/|' \
+sed -i 's|https://docs.projectbluefin.io/[^"]*|https://celenn-os.github.io/celenn/docs/|' \
     "${STAGE}/usr/share/ublue-os/just/00-entry.just"
 
 # `ujust toggle-tpm2` (projectbluefin/common) runs /usr/bin/luks-tpm2-autounlock:
@@ -258,27 +258,26 @@ grep -qsx 'HOMEBREW_NO_ANALYTICS=1' /etc/homebrew/brew.env \
     || echo 'HOMEBREW_NO_ANALYTICS=1' >>/etc/homebrew/brew.env
 
 # Only accept key-signed Celenn OS images (cosign.pub, signed by build.yml).
-# The scope is the whole namespace, so that switching between Celenn OS and
-# cosmic-blue-nvidia is verified too.
-# The project is being renamed to Celenn OS: the images move to
-# ghcr.io/celenn-os, signed with the same key, so that namespace is trusted
-# too (cosmic-blue-move-to-celenn switches installed systems to it).
+# The scope is the whole namespace, so that switching between celenn and
+# celenn-nvidia is verified too.
+# The namespace of the project's old name, ghcr.io/cosmic-blue-os, stays
+# trusted with the same key until the cleanup after the rename.
 IMAGE="ghcr.io/${IMAGE_VENDOR}"
-NEW_IMAGE="ghcr.io/celenn-os"
-jq --arg image "$IMAGE" --arg new "$NEW_IMAGE" 'del(.transports.docker[$image + "/celenn"])
+OLD_IMAGE="ghcr.io/cosmic-blue-os"
+jq --arg image "$IMAGE" --arg old "$OLD_IMAGE" 'del(.transports.docker[$image + "/celenn"])
     | .transports.docker[$image] = [{
     "type": "sigstoreSigned",
     "keyPath": "/etc/pki/containers/cosmic-blue.pub",
     "signedIdentity": {"type": "matchRepository"}
 }]
-    | .transports.docker[$new] = .transports.docker[$image]' /etc/containers/policy.json > /tmp/policy.json
+    | .transports.docker[$old] = .transports.docker[$image]' /etc/containers/policy.json > /tmp/policy.json
 mv /tmp/policy.json /etc/containers/policy.json
 mkdir -p /etc/containers/registries.d
 cat > /etc/containers/registries.d/celenn.yaml <<EOF
 docker:
   ${IMAGE}:
     use-sigstore-attachments: true
-  ${NEW_IMAGE}:
+  ${OLD_IMAGE}:
     use-sigstore-attachments: true
 EOF
 

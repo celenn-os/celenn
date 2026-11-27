@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [cosmic-blue, cosmic-blue-nvidia]
+        image: [celenn, celenn-nvidia]
     permissions:
       packages: write
     steps:
