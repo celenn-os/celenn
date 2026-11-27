@@ -14,7 +14,7 @@
 set -uo pipefail
 
 out="$1"
-repo="${GITHUB_REPOSITORY:-cosmic-blue-os/cosmic-blue}"
+repo="${GITHUB_REPOSITORY:-celenn-os/celenn}"
 image="docker://ghcr.io/${repo,,}:stable"
 tmp="$(mktemp -d)"
 trap 'rm -rf "${tmp}"' EXIT
@@ -48,7 +48,7 @@ else
         pushed="$(gh api "repos/${repo}/actions/runs/${id}/jobs?per_page=100" \
             --jq '.jobs[] | select(.name == "Build and push image") | .steps[] | select(.name == "Push the version tag") | .conclusion')"
         [[ "${pushed}" == success ]] || continue
-        gh run download "${id}" -R "${repo}" -n boot-test-cosmic-blue -D "${tmp}" >/dev/null 2>&1 || continue
+        gh run download "${id}" -R "${repo}" -n boot-test-celenn -D "${tmp}" >/dev/null 2>&1 || continue
         run="${id}" created="${when}"
         break
     done < <(gh api "repos/${repo}/actions/workflows/build.yml/runs?head_sha=${revision}&status=completed&per_page=20" \

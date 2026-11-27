@@ -60,7 +60,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Same images as build.yml: cosmic-blue and cosmic-blue-nvidia
+        # Same images as build.yml: celenn and celenn-nvidia
         image_suffix: ["", "nvidia"]
     env:
       # output of build.yml, keep in sync
@@ -68,7 +68,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    # Written by the cosmic-blue instance only (the nvidia one writes none of
+    # Written by the celenn instance only (the nvidia one writes none of
     # these, so they are not overwritten): release notes and the live ISO
     # follow the main image.
     outputs:

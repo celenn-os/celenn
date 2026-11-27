@@ -10,7 +10,7 @@
 #
 # Usage: tests/vm-update-test.sh <from image> <to image> <output dir>
 #   Both images are registry references, e.g.
-#   ghcr.io/cosmic-blue-os/cosmic-blue:stable ghcr.io/cosmic-blue-os/cosmic-blue:20261106
+#   ghcr.io/celenn-os/celenn:stable ghcr.io/celenn-os/celenn:20261106
 # Needs: podman, skopeo, qemu-system-x86_64, OVMF, socat, openssh-client, jq, KVM.
 set -euo pipefail
 trap 'echo "::error::Command failed at line ${LINENO}: ${BASH_COMMAND}"' ERR

@@ -24,7 +24,7 @@
 # for the app's progress bar.
 set -euo pipefail
 
-VENDOR="ghcr.io/cosmic-blue-os/"
+VENDOR="ghcr.io/celenn-os/"
 HOLD=/var/lib/celenn/update-hold
 
 usage() {

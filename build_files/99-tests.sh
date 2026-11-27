@@ -69,9 +69,9 @@ grep -q "alias ff='ublue-fastfetch'" /etc/profile.d/celenn-fastfetch.sh
 # Bluefin links, launchers or commands left
 # (uwelcome only reads config.toml since projectbluefin/common #1662)
 test ! -e /etc/uwelcome/config.json
-[[ "$(grep -E '^url = ' /etc/uwelcome/config.toml)" == 'url = "https://github.com/cosmic-blue-os/cosmic-blue/issues"
-url = "https://github.com/cosmic-blue-os/cosmic-blue/discussions"
-url = "https://cosmic-blue-os.github.io/cosmic-blue/docs/"' ]]
+[[ "$(grep -E '^url = ' /etc/uwelcome/config.toml)" == 'url = "https://github.com/celenn-os/celenn/issues"
+url = "https://github.com/celenn-os/celenn/discussions"
+url = "https://celenn-os.github.io/celenn/docs/"' ]]
 grep -qx 'commands = \["celenn-tips"\]' /etc/uwelcome/config.toml
 # The banner's guard is only set in interactive shells (not in the shell
 # that starts the desktop session, whose environment every terminal inherits)
@@ -214,11 +214,11 @@ test "$(find /usr/share/backgrounds -mindepth 1 -maxdepth 1 -printf '%f\n' | LC_
 test ! -e /usr/share/backgrounds/cosmic
 test -z "$(find /usr/share/backgrounds -type f -exec sha256sum {} + | cut -d' ' -f1 | sort | uniq -d)"
 grep -q '^LOGO=celenn-logo$' /usr/lib/os-release
-# Links to the repository, also from cosmic-blue-nvidia
-grep -qx 'HOME_URL="https://github.com/cosmic-blue-os/cosmic-blue"' /usr/lib/os-release
-grep -qx 'BUG_REPORT_URL="https://github.com/cosmic-blue-os/cosmic-blue/issues"' /usr/lib/os-release
+# Links to the repository, also from celenn-nvidia
+grep -qx 'HOME_URL="https://github.com/celenn-os/celenn"' /usr/lib/os-release
+grep -qx 'BUG_REPORT_URL="https://github.com/celenn-os/celenn/issues"' /usr/lib/os-release
 # The live ISO installer matches its profile on VARIANT_ID
-grep -qE '^VARIANT_ID=cosmic-blue(-nvidia)?$' /usr/lib/os-release
+grep -qE '^VARIANT_ID=celenn(-nvidia)?$' /usr/lib/os-release
 # Boot screen (Plymouth): Celenn OS theme by default, with our logo images,
 # the blue spinner and Fedora's other images, and included in the initramfs
 test "$(plymouth-set-default-theme)" = celenn
@@ -597,7 +597,7 @@ grep -q '/usr/libexec/celenn-clean' /usr/share/ublue-os/just/60-custom.just
 grep -q '/usr/libexec/celenn-report-bug open' /usr/share/ublue-os/just/60-custom.just
 # Only Celenn OS's own `ujust clean-system` (Bluefin's is dropped)
 test "$(grep -h '^clean-system' /usr/share/ublue-os/just/*.just | wc -l)" -eq 1
-/usr/libexec/celenn-report-bug url | grep -q '^https://github.com/cosmic-blue-os/cosmic-blue/issues/new?template=bug_report.yml&system-info=Image'
+/usr/libexec/celenn-report-bug url | grep -q '^https://github.com/celenn-os/celenn/issues/new?template=bug_report.yml&system-info=Image'
 test -x /usr/libexec/celenn-updates-helper
 test -x /usr/libexec/celenn-bootc
 grep -q '<annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/celenn-updates-helper</annotate>' \
@@ -811,7 +811,7 @@ test -L /etc/systemd/system/multi-user.target.wants/celenn-migrate-names.service
 
 # Secure Boot: the Universal Blue akmods key (enrolled with
 # `ujust enroll-secure-boot-key`) is in every image, so it can be enrolled
-# before switching to cosmic-blue-nvidia
+# before switching to celenn-nvidia
 AKMODS_CERT=/etc/pki/akmods/certs/akmods-ublue.der
 test -s "${AKMODS_CERT}"
 grep -q '^enroll-secure-boot-key:' /usr/share/ublue-os/just/60-custom.just
@@ -885,7 +885,7 @@ fi
 # Signature check turned on for systems switched to Celenn OS without it
 test -x /usr/libexec/celenn-signed-updates
 systemctl is-enabled celenn-signed-updates.timer
-# Move to the renamed images (Celenn OS): same key for the new namespace
+# Systems still on the images of the old name move to Celenn OS: same key
 test -x /usr/libexec/cosmic-blue-move-to-celenn
 systemctl is-enabled cosmic-blue-move-to-celenn.timer
 jq -e '.transports.docker."ghcr.io/celenn-os"[0].keyPath == "/etc/pki/containers/cosmic-blue.pub"' \

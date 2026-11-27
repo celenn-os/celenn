@@ -11,7 +11,7 @@
 set -euo pipefail
 
 dir="${CELENN_TIPS_DIR:-/usr/share/celenn/tips}"
-site="https://cosmic-blue-os.github.io/cosmic-blue/"
+site="https://celenn-os.github.io/celenn/"
 
 # The file of a locale name (de_CH.UTF-8): same language and region, else
 # same language, else another region of that language

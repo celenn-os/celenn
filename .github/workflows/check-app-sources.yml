@@ -25,7 +25,7 @@ permissions:
 env:
   # The testing image (the daily build): most recipes and Brewfiles come from
   # projectbluefin/common and ublue-os/brew, not from this repository
-  IMAGE: ghcr.io/cosmic-blue-os/cosmic-blue:testing
+  IMAGE: ghcr.io/celenn-os/celenn:testing
 
 jobs:
   check:

@@ -1,7 +1,7 @@
 name: Pick the images to test
 description: >-
   Outputs the image suffixes to build or test, as a JSON list for a matrix:
-  "" is cosmic-blue, "nvidia" is cosmic-blue-nvidia. Pull requests only test
+  "" is celenn, "nvidia" is celenn-nvidia. Pull requests only test
   the NVIDIA image when their diff mentions NVIDIA (file names or content) or
   when they come from Renovate (base image updates can change the kernel the
   NVIDIA modules are built for) or move to another Fedora release (BASE_TAG).
@@ -43,11 +43,11 @@ runs:
              && ! grep -qi nvidia "${diff}" \
              && ! grep -q '^+ARG BASE_TAG=' "${diff}"; then
             suffixes='[""]'
-            echo "::notice::The pull request does not touch NVIDIA: cosmic-blue-nvidia is tested by the main build only"
+            echo "::notice::The pull request does not touch NVIDIA: celenn-nvidia is tested by the main build only"
           fi
         elif [[ "${GITHUB_EVENT_NAME}" == "pull_request" && "${RENOVATE}" == standard ]]; then
           suffixes='[""]'
-          echo "::notice::Renovate update: cosmic-blue only, cosmic-blue-nvidia is built the same way"
+          echo "::notice::Renovate update: celenn only, celenn-nvidia is built the same way"
         fi
         echo "Images: ${suffixes}"
         echo "suffixes=${suffixes}" >> "${GITHUB_OUTPUT}"

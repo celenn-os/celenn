@@ -8,7 +8,7 @@
      password every time, so that the child cannot ask again on its own. -->
 <policyconfig>
   <vendor>Celenn OS</vendor>
-  <vendor_url>https://cosmic-blue-os.github.io/cosmic-blue/</vendor_url>
+  <vendor_url>https://celenn-os.github.io/celenn/</vendor_url>
   <action id="io.github.celenn_os.parental.manage">
     <description>Change the parental controls</description>
     <description xml:lang="fr">Modifier le contrôle parental</description>

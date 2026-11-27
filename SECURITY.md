@@ -2,15 +2,15 @@
 
 ## Supported versions
 
-Only the current images get security fixes: `ghcr.io/cosmic-blue-os/cosmic-blue`
-and `ghcr.io/cosmic-blue-os/cosmic-blue-nvidia`, tags `stable`, `testing` (also `latest`) and `dev`.
+Only the current images get security fixes: `ghcr.io/celenn-os/celenn`
+and `ghcr.io/celenn-os/celenn-nvidia`, tags `stable`, `testing` (also `latest`) and `dev`.
 Older tags are not updated: `sudo bootc upgrade` (or the automatic updates)
 moves an installed system to the current image.
 
 ## Reporting a vulnerability
 
 Please do not open a public issue. Report it privately with GitHub's
-[private vulnerability reporting](https://github.com/cosmic-blue-os/cosmic-blue/security/advisories/new)
+[private vulnerability reporting](https://github.com/celenn-os/celenn/security/advisories/new)
 (Security tab, "Report a vulnerability"). Say what is affected, how to
 reproduce it and the image version (`sudo bootc status`).
 

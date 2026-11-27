@@ -1,6 +1,6 @@
 ---
 # Publishes the release notes of a stable image as a GitHub Release: the
-# cosmic-blue commits between the two builds (sorted by what they change),
+# Celenn OS commits between the two builds (sorted by what they change),
 # the main packages and every package change since the previous stable
 # image, and how to get it. No file is attached (the live
 # ISO is too big for a release). It then updates the "Versions" block of
@@ -220,13 +220,13 @@ jobs:
             title="Preview: testing${VERSION:+ (${VERSION})} compared with stable"
             ref="${image}:testing"
           else
-            # stable-20261117 -> cosmic-blue 44.20261110 (stable 2026-11-17)
+            # stable-20261117 -> Celenn OS 44.20261110 (stable 2026-11-17)
             date="${RELEASE_TAG#stable-}"
             date="${date:0:4}-${date:4:2}-${date:6:2}"
             if [[ -n "${VERSION}" ]]; then
-              title="cosmic-blue ${VERSION} (stable ${date})"
+              title="Celenn OS ${VERSION} (stable ${date})"
             else
-              title="cosmic-blue stable ${date}"
+              title="Celenn OS stable ${date}"
             fi
             ref="${image}:${RELEASE_TAG}"
           fi

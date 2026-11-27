@@ -250,11 +250,11 @@ jobs:
             fi
             {
               if [ "${TARGET_TAG}" != "${BASE_TAG}" ]; then
-                echo "\`${REFERENCE_IMAGE}\` is now based on Fedora ${TARGET_TAG}: move cosmic-blue from Fedora ${BASE_TAG} to Fedora ${TARGET_TAG}."
+                echo "\`${REFERENCE_IMAGE}\` is now based on Fedora ${TARGET_TAG}: move Celenn OS from Fedora ${BASE_TAG} to Fedora ${TARGET_TAG}."
                 echo
                 echo "- \`Containerfile\`: \`BASE_TAG\` ${TARGET_TAG}, \`BASE_IMAGE\` \`ghcr.io/ublue-os/base-main:${TARGET_TAG}\`."
               fi
-              echo "- Fedora ${TARGET_TAG} ships COSMIC ${CURRENT} (cosmic-blue was pinned to ${PINNED})."
+              echo "- Fedora ${TARGET_TAG} ships COSMIC ${CURRENT} (Celenn OS was pinned to ${PINNED})."
               echo "- \`build_files/theme/Cargo.toml\` and \`Cargo.lock\`: libcosmic revision and crate versions locked by cosmic-settings ${CURRENT}."
               echo "- \`build_files/first_steps/Cargo.lock\`: crate versions locked by cosmic-initial-setup ${CURRENT}."
               echo "- \`build_files/cosmic-version\`: ${CURRENT}."

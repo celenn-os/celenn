@@ -105,7 +105,7 @@ build $target_image=image_name $tag=default_tag $version="":
         version="$(just fedora-version).$(date -u +%Y%m%d)"
     fi
 
-    # The image name selects the variant (e.g. cosmic-blue-nvidia)
+    # The image name selects the variant (e.g. celenn-nvidia)
     BUILD_ARGS=("--build-arg" "IMAGE_NAME=${target_image}" "--build-arg" "VERSION=${version}")
     # Read by bootc (bootc status) and written to the aleph file by bootc install
     LABELS=("--label" "org.opencontainers.image.version=${version}")

@@ -152,7 +152,7 @@ jobs:
         with:
           persist-credentials: false
 
-      # Pull requests that do not touch NVIDIA only build cosmic-blue
+      # Pull requests that do not touch NVIDIA only build celenn
       - name: Pick the images
         id: images
         uses: ./.github/actions/pr-images
@@ -221,8 +221,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # cosmic-blue, and cosmic-blue-nvidia with the NVIDIA driver
-        # (build_files/35-nvidia.sh); only cosmic-blue for pull requests that
+        # celenn, and celenn-nvidia with the NVIDIA driver
+        # (build_files/35-nvidia.sh); only celenn for pull requests that
         # do not touch NVIDIA (.github/actions/pr-images)
         image_suffix: ${{ fromJSON(needs.version.outputs.suffixes) }}
 

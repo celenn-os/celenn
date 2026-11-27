@@ -10,7 +10,7 @@
 #
 # Usage: tests/vm-iso-install-test.sh <iso> <image ref> <output dir>
 #   <image ref>: the image installed systems should follow, e.g.
-#   ghcr.io/cosmic-blue-os/cosmic-blue:stable
+#   ghcr.io/celenn-os/celenn:stable
 # Needs: qemu-system-x86_64, OVMF, xorriso, mtools, sfdisk, socat, openssh-client, jq, KVM.
 set -euo pipefail
 trap 'echo "::error::Command failed at line ${LINENO}: ${BASH_COMMAND}"' ERR

@@ -1,5 +1,5 @@
 ---
-# Project website on GitHub Pages: https://cosmic-blue-os.github.io/cosmic-blue/
+# Project website on GitHub Pages: https://celenn-os.github.io/celenn/
 # Needs Settings > Pages > Source set to "GitHub Actions".
 # Also rebuilt after each stable promotion, so every screenshot on the site
 # comes from the stable image (website/fetch-screenshots.sh); the site build
