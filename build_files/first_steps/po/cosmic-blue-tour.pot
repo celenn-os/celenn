@@ -48,14 +48,8 @@ msgstr ""
 msgid "Turn tiling on or off"
 msgstr ""
 
-msgid "Go to the window on the left, right, above or below"
-msgstr ""
 
-msgid "Move the window to the left, right, up or down"
-msgstr ""
 
-msgid "Let a window float above the others"
-msgstr ""
 
 msgid "Documentation"
 msgstr ""
@@ -459,14 +453,10 @@ msgstr ""
 msgid "Workspaces"
 msgstr ""
 
-msgid "Go to the next or previous workspace"
-msgstr ""
 
 msgid "Go to a workspace"
 msgstr ""
 
-msgid "Move the window to a workspace"
-msgstr ""
 
 msgid "Apps"
 msgstr ""
@@ -480,8 +470,6 @@ msgstr ""
 msgid "System monitor"
 msgstr ""
 
-msgid "Turn the screen reader on or off"
-msgstr ""
 
 msgid "Zoom in and out"
 msgstr ""
@@ -741,7 +729,7 @@ msgstr ""
 msgid "Your apps"
 msgstr ""
 
-msgid "Every shortcut, tiling included: the Keyboard shortcuts app."
+msgid "Every shortcut, tiling included: Super + F1."
 msgstr ""
 
 msgid "What is done, and what is left for when you want."
@@ -889,4 +877,40 @@ msgid "Lima: ujust install-dev-tools, in a terminal."
 msgstr ""
 
 msgid "Pick what concerns you. In each list, the apps most used on Linux are already ticked, all free. Nothing installs without your OK."
+msgstr ""
+
+msgid "These keyboard shortcuts"
+msgstr ""
+
+msgid "Let the window float"
+msgstr ""
+
+msgid "Go to a nearby window"
+msgstr ""
+
+msgid "Move the window"
+msgstr ""
+
+msgid "Move the window there"
+msgstr ""
+
+msgid "Next or previous workspace"
+msgstr ""
+
+msgid "Web browser"
+msgstr ""
+
+msgid "Screen reader"
+msgstr ""
+
+msgid "Escape closes this window."
+msgstr ""
+
+msgid "Shift"
+msgstr ""
+
+msgid "Escape"
+msgstr ""
+
+msgid "Space"
 msgstr ""

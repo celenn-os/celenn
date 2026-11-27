@@ -47,14 +47,8 @@ msgstr "Fenster kacheln"
 msgid "Turn tiling on or off"
 msgstr "Kacheln ein- oder ausschalten"
 
-msgid "Go to the window on the left, right, above or below"
-msgstr "Zum Fenster links, rechts, oben oder unten wechseln"
 
-msgid "Move the window to the left, right, up or down"
-msgstr "Das Fenster nach links, rechts, oben oder unten verschieben"
 
-msgid "Let a window float above the others"
-msgstr "Ein Fenster über den anderen schweben lassen"
 
 msgid "Documentation"
 msgstr "Dokumentation"
@@ -458,14 +452,10 @@ msgstr "Das Fenster maximieren"
 msgid "Workspaces"
 msgstr "Arbeitsflächen"
 
-msgid "Go to the next or previous workspace"
-msgstr "Zur nächsten oder vorherigen Arbeitsfläche"
 
 msgid "Go to a workspace"
 msgstr "Zu einer Arbeitsfläche wechseln"
 
-msgid "Move the window to a workspace"
-msgstr "Das Fenster auf eine Arbeitsfläche verschieben"
 
 msgid "Apps"
 msgstr "Apps"
@@ -479,8 +469,6 @@ msgstr "Dateien"
 msgid "System monitor"
 msgstr "Systemmonitor"
 
-msgid "Turn the screen reader on or off"
-msgstr "Den Bildschirmleser ein- oder ausschalten"
 
 msgid "Zoom in and out"
 msgstr "Vergrößern und verkleinern"
@@ -740,8 +728,8 @@ msgstr "Zeig mir, wie"
 msgid "Your apps"
 msgstr "Ihre Apps"
 
-msgid "Every shortcut, tiling included: the Keyboard shortcuts app."
-msgstr "Alle Tastenkürzel, auch für die Kachelung: die App Tastenkürzel."
+msgid "Every shortcut, tiling included: Super + F1."
+msgstr "Alle Tastenkürzel, auch für die Kachelung: Super + F1."
 
 msgid "What is done, and what is left for when you want."
 msgstr "Was erledigt ist, und was bleibt, wann immer Sie möchten."
@@ -889,3 +877,39 @@ msgstr "Lima: ujust install-dev-tools in einem Terminal."
 
 msgid "Pick what concerns you. In each list, the apps most used on Linux are already ticked, all free. Nothing installs without your OK."
 msgstr "Wählen Sie, was Sie betrifft. In jeder Liste sind die unter Linux meistgenutzten Apps bereits angehakt, alle kostenlos. Nichts wird ohne Ihr Okay installiert."
+
+msgid "These keyboard shortcuts"
+msgstr "Diese Tastenkürzel"
+
+msgid "Let the window float"
+msgstr "Fenster schweben lassen"
+
+msgid "Go to a nearby window"
+msgstr "Zum benachbarten Fenster wechseln"
+
+msgid "Move the window"
+msgstr "Fenster verschieben"
+
+msgid "Move the window there"
+msgstr "Fenster dorthin verschieben"
+
+msgid "Next or previous workspace"
+msgstr "Nächste oder vorherige Arbeitsfläche"
+
+msgid "Web browser"
+msgstr "Webbrowser"
+
+msgid "Screen reader"
+msgstr "Bildschirmleser"
+
+msgid "Escape closes this window."
+msgstr "Esc schließt dieses Fenster."
+
+msgid "Shift"
+msgstr "Umschalt"
+
+msgid "Escape"
+msgstr "Esc"
+
+msgid "Space"
+msgstr "Leertaste"

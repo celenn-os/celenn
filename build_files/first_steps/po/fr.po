@@ -47,14 +47,8 @@ msgstr "Disposez vos fenêtres en mosaïque"
 msgid "Turn tiling on or off"
 msgstr "Activer ou désactiver la mosaïque"
 
-msgid "Go to the window on the left, right, above or below"
-msgstr "Aller à la fenêtre de gauche, de droite, du dessus ou du dessous"
 
-msgid "Move the window to the left, right, up or down"
-msgstr "Déplacer la fenêtre à gauche, à droite, en haut ou en bas"
 
-msgid "Let a window float above the others"
-msgstr "Laisser une fenêtre flotter au-dessus des autres"
 
 msgid "Documentation"
 msgstr "Documentation"
@@ -458,14 +452,10 @@ msgstr "Agrandir la fenêtre"
 msgid "Workspaces"
 msgstr "Espaces de travail"
 
-msgid "Go to the next or previous workspace"
-msgstr "Aller à l’espace de travail suivant ou précédent"
 
 msgid "Go to a workspace"
 msgstr "Aller à un espace de travail"
 
-msgid "Move the window to a workspace"
-msgstr "Déplacer la fenêtre vers un espace de travail"
 
 msgid "Apps"
 msgstr "Applications"
@@ -479,8 +469,6 @@ msgstr "Fichiers"
 msgid "System monitor"
 msgstr "Moniteur système"
 
-msgid "Turn the screen reader on or off"
-msgstr "Activer ou désactiver le lecteur d’écran"
 
 msgid "Zoom in and out"
 msgstr "Zoomer et dézoomer"
@@ -740,8 +728,8 @@ msgstr "Voir comment"
 msgid "Your apps"
 msgstr "Vos applications"
 
-msgid "Every shortcut, tiling included: the Keyboard shortcuts app."
-msgstr "Tous les raccourcis, mosaïque comprise : l’application Raccourcis clavier."
+msgid "Every shortcut, tiling included: Super + F1."
+msgstr "Tous les raccourcis, mosaïque comprise : Super + F1."
 
 msgid "What is done, and what is left for when you want."
 msgstr "Ce qui est fait, et ce qui reste pour quand vous voulez."
@@ -889,3 +877,39 @@ msgstr "Lima : ujust install-dev-tools, dans un terminal."
 
 msgid "Pick what concerns you. In each list, the apps most used on Linux are already ticked, all free. Nothing installs without your OK."
 msgstr "Choisissez ce qui vous concerne. Dans chaque liste, les applications les plus utilisées sous Linux sont déjà cochées, toutes gratuites. Rien ne s’installe sans votre accord."
+
+msgid "These keyboard shortcuts"
+msgstr "Ces raccourcis clavier"
+
+msgid "Let the window float"
+msgstr "Faire flotter la fenêtre"
+
+msgid "Go to a nearby window"
+msgstr "Aller à la fenêtre voisine"
+
+msgid "Move the window"
+msgstr "Déplacer la fenêtre"
+
+msgid "Move the window there"
+msgstr "Y envoyer la fenêtre"
+
+msgid "Next or previous workspace"
+msgstr "Espace de travail suivant ou précédent"
+
+msgid "Web browser"
+msgstr "Navigateur web"
+
+msgid "Screen reader"
+msgstr "Lecteur d’écran"
+
+msgid "Escape closes this window."
+msgstr "Échap ferme cette fenêtre."
+
+msgid "Shift"
+msgstr "Maj"
+
+msgid "Escape"
+msgstr "Échap"
+
+msgid "Space"
+msgstr "Espace"

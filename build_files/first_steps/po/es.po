@@ -47,14 +47,8 @@ msgstr "Organiza tus ventanas en mosaico"
 msgid "Turn tiling on or off"
 msgstr "Activar o desactivar el mosaico"
 
-msgid "Go to the window on the left, right, above or below"
-msgstr "Ir a la ventana de la izquierda, derecha, arriba o abajo"
 
-msgid "Move the window to the left, right, up or down"
-msgstr "Mover la ventana a la izquierda, derecha, arriba o abajo"
 
-msgid "Let a window float above the others"
-msgstr "Dejar una ventana flotando sobre las demás"
 
 msgid "Documentation"
 msgstr "Documentación"
@@ -458,14 +452,10 @@ msgstr "Maximizar la ventana"
 msgid "Workspaces"
 msgstr "Espacios de trabajo"
 
-msgid "Go to the next or previous workspace"
-msgstr "Ir al espacio de trabajo siguiente o anterior"
 
 msgid "Go to a workspace"
 msgstr "Ir a un espacio de trabajo"
 
-msgid "Move the window to a workspace"
-msgstr "Mover la ventana a un espacio de trabajo"
 
 msgid "Apps"
 msgstr "Aplicaciones"
@@ -479,8 +469,6 @@ msgstr "Archivos"
 msgid "System monitor"
 msgstr "Monitor del sistema"
 
-msgid "Turn the screen reader on or off"
-msgstr "Activar o desactivar el lector de pantalla"
 
 msgid "Zoom in and out"
 msgstr "Acercar y alejar"
@@ -740,8 +728,8 @@ msgstr "Ver cómo"
 msgid "Your apps"
 msgstr "Tus aplicaciones"
 
-msgid "Every shortcut, tiling included: the Keyboard shortcuts app."
-msgstr "Todos los atajos, incluido el mosaico: la aplicación Atajos de teclado."
+msgid "Every shortcut, tiling included: Super + F1."
+msgstr "Todos los atajos, incluido el mosaico: Super + F1."
 
 msgid "What is done, and what is left for when you want."
 msgstr "Lo que ya está hecho, y lo que queda para cuando quieras."
@@ -889,3 +877,39 @@ msgstr "Lima: ujust install-dev-tools, en una terminal."
 
 msgid "Pick what concerns you. In each list, the apps most used on Linux are already ticked, all free. Nothing installs without your OK."
 msgstr "Elige lo que te interesa. En cada lista, las aplicaciones más usadas en Linux ya están marcadas, todas gratuitas. Nada se instala sin tu permiso."
+
+msgid "These keyboard shortcuts"
+msgstr "Estos atajos de teclado"
+
+msgid "Let the window float"
+msgstr "Dejar la ventana flotando"
+
+msgid "Go to a nearby window"
+msgstr "Ir a la ventana de al lado"
+
+msgid "Move the window"
+msgstr "Mover la ventana"
+
+msgid "Move the window there"
+msgstr "Mover la ventana allí"
+
+msgid "Next or previous workspace"
+msgstr "Espacio de trabajo siguiente o anterior"
+
+msgid "Web browser"
+msgstr "Navegador web"
+
+msgid "Screen reader"
+msgstr "Lector de pantalla"
+
+msgid "Escape closes this window."
+msgstr "Esc cierra esta ventana."
+
+msgid "Shift"
+msgstr "Mayús"
+
+msgid "Escape"
+msgstr "Esc"
+
+msgid "Space"
+msgstr "Espacio"

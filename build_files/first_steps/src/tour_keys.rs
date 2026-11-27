@@ -157,22 +157,6 @@ pub(super) fn title_line<'a>(title: &'a str) -> Element<'a, Message> {
     }
 }
 
-/// The keys of a shortcut, as keys, at the end of a row
-pub(super) fn with_keys_end<'a>(keys: &'a str) -> Element<'a, Message> {
-    pieces(keys)
-        .into_iter()
-        .fold(
-            widget::row::with_capacity(3)
-                .spacing(6)
-                .align_y(Alignment::Center),
-            |row, piece| match piece {
-                Piece::Word(word) => row.push(dim_caption(word)),
-                Piece::Keys(keys) => row.push(key_combo(&keys)),
-            },
-        )
-        .into()
-}
-
 /// A caption where key combinations show as keys; each line of the text is
 /// a line on screen, and long lines wrap between words
 pub(super) fn with_keys<'a>(caption: &'a str) -> Element<'a, Message> {
