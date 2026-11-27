@@ -259,11 +259,11 @@ grep -qsx 'HOMEBREW_NO_ANALYTICS=1' /etc/homebrew/brew.env \
 # Only accept key-signed cosmic-blue images (cosign.pub, signed by build.yml).
 # The scope is the whole namespace, so that switching between cosmic-blue and
 # cosmic-blue-nvidia is verified too.
-# The project is being renamed to Cyanova: the images move to
-# ghcr.io/cyanova-os, signed with the same key, so that namespace is trusted
-# too (cosmic-blue-move-to-cyanova switches installed systems to it).
+# The project is being renamed to Celenn OS: the images move to
+# ghcr.io/celenn-os, signed with the same key, so that namespace is trusted
+# too (cosmic-blue-move-to-celenn switches installed systems to it).
 IMAGE="ghcr.io/${IMAGE_VENDOR}"
-NEW_IMAGE="ghcr.io/cyanova-os"
+NEW_IMAGE="ghcr.io/celenn-os"
 jq --arg image "$IMAGE" --arg new "$NEW_IMAGE" 'del(.transports.docker[$image + "/cosmic-blue"])
     | .transports.docker[$image] = [{
     "type": "sigstoreSigned",

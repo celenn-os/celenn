@@ -876,12 +876,12 @@ fi
 # Signature check turned on for systems switched to cosmic-blue without it
 test -x /usr/libexec/cosmic-blue-signed-updates
 systemctl is-enabled cosmic-blue-signed-updates.timer
-# Move to the renamed images (Cyanova): same key for the new namespace
-test -x /usr/libexec/cosmic-blue-move-to-cyanova
-systemctl is-enabled cosmic-blue-move-to-cyanova.timer
-jq -e '.transports.docker."ghcr.io/cyanova-os"[0].keyPath == "/etc/pki/containers/cosmic-blue.pub"' \
+# Move to the renamed images (Celenn OS): same key for the new namespace
+test -x /usr/libexec/cosmic-blue-move-to-celenn
+systemctl is-enabled cosmic-blue-move-to-celenn.timer
+jq -e '.transports.docker."ghcr.io/celenn-os"[0].keyPath == "/etc/pki/containers/cosmic-blue.pub"' \
     /etc/containers/policy.json
-grep -q 'ghcr.io/cyanova-os:' /etc/containers/registries.d/cosmic-blue.yaml
+grep -q 'ghcr.io/celenn-os:' /etc/containers/registries.d/cosmic-blue.yaml
 
 # Repair of the bootc aleph of early installs (bootloader-update.service)
 test -x /usr/libexec/cosmic-blue-fix-aleph
