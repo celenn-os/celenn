@@ -89,15 +89,30 @@ jobs:
         run: |
           set -euo pipefail
           image="${IMAGE_REGISTRY,,}/${IMAGE_NAME,,}"
-          echo "image=${image}" >> "${GITHUB_OUTPUT}"
-          for tag in "${FROM_TAG}" "${TO_TAG}"; do
-            if ! skopeo inspect --format '{{.Digest}}' "docker://${image}:${tag}" >/dev/null 2>&1; then
+          exists() { skopeo inspect --format '{{.Digest}}' "docker://$1" >/dev/null 2>&1; }
+          from="${image}:${FROM_TAG}"
+          # Before the first build of that tag under the new name, the same
+          # tag of the project's old name (ghcr.io/celenn-os/cosmic-blue), as
+          # promote-stable.yml does: the test then checks the move to Celenn
+          # OS. Remove in the cleanup after the rename.
+          if ! exists "${from}"; then
+            old_image="${image/%\/celenn/\/cosmic-blue}"
+            old_image="${old_image/%\/celenn-nvidia/\/cosmic-blue-nvidia}"
+            if exists "${old_image}:${FROM_TAG}"; then
+              from="${old_image}:${FROM_TAG}"
+              echo "::notice::No ${image}:${FROM_TAG} yet: the update test starts from ${from}"
+            fi
+          fi
+          for ref in "${from}" "${image}:${TO_TAG}"; do
+            if ! exists "${ref}"; then
               # e.g. no stable celenn-nvidia yet
-              echo "::notice::${image}:${tag} does not exist, skipping"
+              echo "::notice::${ref} does not exist, skipping"
               echo "skip=true" >> "${GITHUB_OUTPUT}"
               exit 0
             fi
           done
+          echo "image=${image}" >> "${GITHUB_OUTPUT}"
+          echo "from=${from}" >> "${GITHUB_OUTPUT}"
           echo "skip=false" >> "${GITHUB_OUTPUT}"
 
       - name: Maximize build space
@@ -113,10 +128,11 @@ jobs:
         timeout-minutes: 90
         env:
           IMAGE: ${{ steps.tags.outputs.image }}
+          FROM: ${{ steps.tags.outputs.from }}
           # The virtual machine has no NVIDIA GPU for these to work with
           EXTRA_IGNORED_UNITS: ${{ matrix.image_suffix == 'nvidia' && 'nvidia-persistenced|nvidia-cdi-refresh' || '' }}
         run: |
-          tests/vm-update-test.sh "${IMAGE}:${FROM_TAG}" "${IMAGE}:${TO_TAG}" "${RUNNER_TEMP}/update-test"
+          tests/vm-update-test.sh "${FROM}" "${IMAGE}:${TO_TAG}" "${RUNNER_TEMP}/update-test"
 
       - name: Publish the update test results
         if: always() && steps.tags.outputs.skip == 'false'
