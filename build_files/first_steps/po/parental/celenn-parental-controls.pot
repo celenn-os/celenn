@@ -352,3 +352,24 @@ msgstr ""
 
 msgid "Bedtime ({}) does not apply to this time."
 msgstr ""
+
+msgid "B"
+msgstr ""
+
+msgid "kB"
+msgstr ""
+
+msgid "MB"
+msgstr ""
+
+msgid "GB"
+msgstr ""
+
+msgid "TB"
+msgstr ""
+
+msgid "Less time"
+msgstr ""
+
+msgid "More time"
+msgstr ""

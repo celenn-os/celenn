@@ -19,6 +19,7 @@ use crate::common::{ToastAsk, dim_caption, fill, label, row_title, spawn, state_
 use crate::failure::{self, Card, CardAction, CardMessage, Outcome};
 use crate::housekeeping;
 use crate::i18n::tr;
+use crate::units::size;
 use cosmic::app::Task;
 use cosmic::iced::{Alignment, Length};
 use cosmic::widget::{self, settings, text};
@@ -41,11 +42,6 @@ pub const TEXTS: &[&str] = &[
     "Clean up",
     "Cleaning up…",
     "{} freed",
-    "B",
-    "kB",
-    "MB",
-    "GB",
-    "TB",
     "Everything was already tidy.",
     "Trash",
     "{} in the trash",
@@ -211,30 +207,6 @@ pub fn read_state() -> State {
         disk_usage_app: installed.contains(DISK_USAGE),
         firmware_app: installed.contains(FIRMWARE),
     }
-}
-
-/// Bytes as the file manager shows them: "12.3 GB" (powers of 1000), with
-/// the units and the decimal comma of the session language
-pub fn size(bytes: u64) -> String {
-    let units = ["B", "kB", "MB", "GB", "TB"].map(tr);
-    let mut value = bytes as f64;
-    let mut unit = 0;
-    while value >= 1000.0 && unit + 1 < units.len() {
-        value /= 1000.0;
-        unit += 1;
-    }
-    let number = if unit == 0 || value >= 100.0 {
-        format!("{value:.0}")
-    } else {
-        format!("{value:.1}")
-    };
-    // Every translated language writes 1,5 (English 1.5)
-    let number = if crate::i18n::language().is_some() {
-        number.replace('.', ",")
-    } else {
-        number
-    };
-    format!("{number} {}", units[unit])
 }
 
 fn refresh() -> Task<Message> {
@@ -616,18 +588,5 @@ impl Page {
             );
         }
         system.into()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn sizes() {
-        assert_eq!(size(0), "0 B");
-        assert_eq!(size(9_400_000_000), "9.4 GB");
-        assert_eq!(size(238_000_000_000), "238 GB");
-        assert_eq!(size(1_500_000_000_000), "1.5 TB");
     }
 }

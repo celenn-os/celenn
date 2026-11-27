@@ -38,7 +38,7 @@ use cosmic::iced::{Alignment, Length};
 use cosmic::widget::{self, settings, text};
 use cosmic::{Element, cosmic_theme, theme};
 use std::collections::BTreeSet;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::{Command, Stdio};
 
 #[path = "more_transfer.rs"]
@@ -465,10 +465,6 @@ fn info_row<'a>(icon: &'static str, title: &'static str, value: String) -> Eleme
         .into()
 }
 
-fn home() -> PathBuf {
-    std::env::var_os("HOME").map_or_else(|| PathBuf::from("."), PathBuf::from)
-}
-
 /// With Secure Boot on, whether the key that signs NVIDIA's driver is
 /// enrolled (mokutil reads the firmware's lists, no root needed)
 fn driver_key() -> Option<DriverKey> {
@@ -499,8 +495,7 @@ fn driver_key() -> Option<DriverKey> {
 /// The COSMIC dark theme setting: the person's, else the system default
 fn dark() -> bool {
     let key = "cosmic/com.system76.CosmicTheme.Mode/v1/is_dark";
-    let config =
-        std::env::var_os("XDG_CONFIG_HOME").map_or_else(|| home().join(".config"), PathBuf::from);
+    let config = crate::housekeeping::xdg("XDG_CONFIG_HOME", ".config");
     std::fs::read_to_string(config.join(key))
         .or_else(|_| std::fs::read_to_string(Path::new("/usr/share").join(key)))
         .map_or(true, |value| value.trim() == "true")
@@ -522,8 +517,7 @@ pub fn read_state() -> State {
         &["list", "--system", "--app", "--columns=application"],
     );
     let has = |id: &str| apps.lines().any(|line| line.trim() == id);
-    let data = std::env::var_os("XDG_DATA_HOME")
-        .map_or_else(|| home().join(".local/share"), PathBuf::from);
+    let data = crate::housekeeping::xdg("XDG_DATA_HOME", ".local/share");
     let nvidia = crate::edition::nvidia();
     State {
         printers: printers(),

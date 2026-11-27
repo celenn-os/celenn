@@ -154,6 +154,8 @@ for combo in '\[Ctrl, Alt\], key: "t"' '\[Super\], key: "e"' \
     grep -q "${combo}" "${SHORTCUTS}/custom"
     if grep -q "${combo}" "${SHORTCUTS}/defaults"; then exit 1; fi
 done
+# The keyboard shortcuts sheet (Super + F1) only shows shortcuts COSMIC has
+/usr/libexec/celenn-tour --check-shortcuts "${SHORTCUTS}/defaults" "${SHORTCUTS}/custom"
 # Each program a custom shortcut starts is installed
 for program in $(grep -o 'Spawn("[^" ]*' "${SHORTCUTS}/custom" | cut -d'"' -f2); do
     command -v "${program}"

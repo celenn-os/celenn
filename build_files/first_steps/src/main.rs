@@ -37,7 +37,6 @@ use cosmic::widget::{self, settings, text, toaster::Toasts};
 use cosmic::{Application, ApplicationExt, Apply, Element, cosmic_theme, executor, theme};
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 use std::time::Duration;
 
 mod apps;
@@ -51,17 +50,22 @@ mod hardware;
 mod i18n;
 mod layout;
 mod network;
+mod process;
 mod readiness;
+mod shortcuts;
 mod style;
 mod system;
 mod tour_keys;
 mod tour_view;
+mod units;
 use apps::{CATEGORIES, DEVELOPMENT};
 use devtools::{
     BITWARDEN, BITWARDEN_EXTENSION, DevTool, ToolKind, brew_install, brew_installed, dev_tools,
 };
 use failure::{Card, CardAction, CardMessage, Failure, Outcome};
 use i18n::{fill, language, tr};
+use process::spawn;
+use shortcuts::{KEY_LABELS, SHORTCUT_COLUMNS, SHORTCUTS, close_open_sheet};
 use style::dim_caption;
 use system::{Computer, Package};
 use tour_keys::*;
@@ -631,63 +635,6 @@ fn pages(mode: &Mode, origin: Option<Origin>, experienced: bool) -> Vec<Page> {
     }
 }
 
-/// The keyboard shortcuts app: (heading, [(keys, what they do)])
-const SHORTCUTS: &[(&str, &[(&str, &str)])] = &[
-    (
-        "Desktop",
-        &[
-            ("Super", "Open the launcher"),
-            ("Super + A", "See all your apps"),
-            ("Super + W", "See your windows and workspaces"),
-            ("Super + Shift + S", "Take a screenshot"),
-            ("Super + Escape", "Lock the screen"),
-            ("Super + F1", "These keyboard shortcuts"),
-        ],
-    ),
-    (
-        "Windows",
-        &[
-            ("Alt + Tab", "Go from one window to the next"),
-            ("Super + Q", "Close the window"),
-            ("Super + M", "Maximize the window"),
-            ("Super + G", "Let the window float"),
-            ("Super + Y", "Turn tiling on or off"),
-            ("Super + ←↑↓→", "Go to a nearby window"),
-            ("Super + Shift + ←↑↓→", "Move the window"),
-        ],
-    ),
-    (
-        "Workspaces",
-        &[
-            ("Super + 1 … 9", "Go to a workspace"),
-            ("Super + Shift + 1 … 9", "Move the window there"),
-            ("Super + Ctrl + ←→", "Next or previous workspace"),
-        ],
-    ),
-    (
-        "Apps",
-        &[
-            ("Super + B", "Web browser"),
-            ("Super + E", "Files"),
-            ("Ctrl + Alt + T", "Terminal"),
-            ("Ctrl + Shift + Escape", "System monitor"),
-        ],
-    ),
-    (
-        "Accessibility",
-        &[
-            ("Super + Alt + S", "Screen reader"),
-            ("Super + = / Super + -", "Zoom in and out"),
-        ],
-    ),
-];
-
-/// The columns of the shortcuts sheet: numbers of SHORTCUTS' sections
-const SHORTCUT_COLUMNS: [&[usize]; 3] = [&[0, 4], &[1], &[2, 3]];
-
-/// Key names drawn translated on the keys ("Shift" is "Maj" in French)
-const KEY_LABELS: &[&str] = &["Shift", "Escape", "Space"];
-
 /// Texts that are not in a page (buttons, states, the other windows)
 const TEXTS: &[&str] = &[
     "Back",
@@ -791,6 +738,7 @@ const TEXTS: &[&str] = &[
 fn all_texts() -> Vec<&'static str> {
     let mut texts: Vec<&'static str> = TEXTS.to_vec();
     texts.extend(failure::TEXTS);
+    texts.extend(units::TEXTS);
     texts.extend(readiness::TEXTS);
     for origin in Origin::ALL {
         // (names of operating systems are not translated)
@@ -858,6 +806,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if args.iter().any(|arg| arg == "--check") {
         std::process::exit(if i18n::check(&all_texts()) { 0 } else { 1 });
     }
+    // The image's tests: every shortcut of the sheet is one COSMIC has
+    // (its defaults and our custom shortcuts, the files given)
+    if args.first().map(String::as_str) == Some("--check-shortcuts") {
+        std::process::exit(if shortcuts::check(&args[1..]) { 0 } else { 1 });
+    }
     // As wide as cosmic-initial-setup, a little taller, so that every
     // page fits without scrolling (the page scrolls on smaller screens)
     let tour = Settings::default()
@@ -897,38 +850,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         _ => cosmic::app::run::<App<FirstStepsTour>>(tour, Mode::FirstSteps)?,
     }
     Ok(())
-}
-
-/// The shortcuts sheet already open (its process number in the runtime
-/// folder, still running with --shortcuts): close it and say so; otherwise
-/// note this one
-fn close_open_sheet() -> bool {
-    let Some(runtime) = std::env::var_os("XDG_RUNTIME_DIR") else {
-        return false;
-    };
-    let file = PathBuf::from(runtime).join("celenn-shortcuts.pid");
-    let open = std::fs::read_to_string(&file)
-        .ok()
-        .and_then(|pid| pid.trim().parse::<u32>().ok())
-        .filter(|pid| {
-            *pid != std::process::id()
-                && std::fs::read(format!("/proc/{pid}/cmdline")).is_ok_and(|cmdline| {
-                    cmdline
-                        .split(|byte| *byte == 0)
-                        .any(|arg| arg == b"--shortcuts")
-                })
-        });
-    if let Some(pid) = open {
-        let closed = std::process::Command::new("kill")
-            .arg(pid.to_string())
-            .status()
-            .is_ok_and(|status| status.success());
-        if closed {
-            return true;
-        }
-    }
-    let _ = std::fs::write(&file, std::process::id().to_string());
-    false
 }
 
 /// The state of the profile installation
@@ -1885,12 +1806,6 @@ fn in_path(program: &str) -> bool {
 
 fn installer() -> Option<&'static str> {
     INSTALLERS.into_iter().find(|path| Path::new(path).exists())
-}
-
-fn spawn(program: &str, args: &[&str]) {
-    if let Err(error) = Command::new(program).args(args).spawn() {
-        eprintln!("Could not start {program}: {error}");
-    }
 }
 
 fn run(action: &Action) {

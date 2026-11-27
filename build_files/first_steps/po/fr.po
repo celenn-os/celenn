@@ -916,3 +916,18 @@ msgstr "Échap"
 
 msgid "Space"
 msgstr "Espace"
+
+msgid "B"
+msgstr "o"
+
+msgid "kB"
+msgstr "ko"
+
+msgid "MB"
+msgstr "Mo"
+
+msgid "GB"
+msgstr "Go"
+
+msgid "TB"
+msgstr "To"

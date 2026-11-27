@@ -359,10 +359,10 @@ impl Page {
                 Some(disk) if disk.total > 0 && disk.used as f32 / disk.total as f32 >= 0.9 => {
                     Summary::Warns(fill(
                         tr("Almost full: {} free."),
-                        &maintenance::size(disk.free),
+                        &crate::units::size(disk.free),
                     ))
                 }
-                Some(disk) => Summary::Says(fill(tr("{} free"), &maintenance::size(disk.free))),
+                Some(disk) => Summary::Says(fill(tr("{} free"), &crate::units::size(disk.free))),
                 None => Summary::Unknown,
             },
             _ => Summary::Unknown,
