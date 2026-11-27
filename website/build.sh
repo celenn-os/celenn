@@ -12,10 +12,10 @@ mkdir -p "${out}/img"
 
 # Live ISO download: ISO_BASE_URL is the public URL of the R2 bucket. Until
 # it is set, link to the live ISO workflow runs (needs a GitHub login).
-# One ISO per image: cosmic-blue, and cosmic-blue-nvidia for NVIDIA cards.
-iso_name="cosmic-blue-live-amd64.iso"
-iso_nvidia_name="cosmic-blue-nvidia-live-amd64.iso"
-runs="https://github.com/cosmic-blue-os/cosmic-blue/actions/workflows/build-live-iso.yml?query=branch%3Amain+is%3Asuccess"
+# One ISO per image: celenn, and celenn-nvidia for NVIDIA cards.
+iso_name="celenn-live-amd64.iso"
+iso_nvidia_name="celenn-nvidia-live-amd64.iso"
+runs="https://github.com/celenn-os/celenn/actions/workflows/build-live-iso.yml?query=branch%3Amain+is%3Asuccess"
 
 # Size of each ISO online (Content-Length), shown next to the download button
 declare -A iso_sizes=()
@@ -249,10 +249,10 @@ for page in "${all_pages[@]}"; do
   # Absolute addresses of this site (og:image) are checked too
   while read -r ref; do
     ref="${ref%%\?*}"
-    [[ -f "${out}/${ref#https://cosmic-blue-os.github.io/cosmic-blue/}" ]] && continue
+    [[ -f "${out}/${ref#https://celenn-os.github.io/celenn/}" ]] && continue
     echo "::error file=website/${page}::image ${ref} is not in the site"
     broken=1
-  done < <(grep -oE 'https://cosmic-blue-os\.github\.io/cosmic-blue/[^" ]+\.(webp|png|jpe?g|svg|gif)' "${out}/${page}" || true)
+  done < <(grep -oE 'https://celenn-os\.github\.io/celenn/[^" ]+\.(webp|png|jpe?g|svg|gif)' "${out}/${page}" || true)
 done
 (( broken == 0 )) || exit 1
 

@@ -4,8 +4,8 @@
 set -euo pipefail
 
 locale="${LC_ALL:-${LC_MESSAGES:-${LANG:-}}}"
-url="https://cosmic-blue-os.github.io/cosmic-blue/docs/"
+url="https://celenn-os.github.io/celenn/docs/"
 if [[ "${locale}" == fr* ]]; then
-    url="https://cosmic-blue-os.github.io/cosmic-blue/fr/docs/"
+    url="https://celenn-os.github.io/celenn/fr/docs/"
 fi
 exec xdg-open "${url}"

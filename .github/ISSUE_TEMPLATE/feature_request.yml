@@ -1,13 +1,13 @@
 name: Feature request
-description: Suggest a change or something cosmic-blue should include
+description: Suggest a change or something Celenn OS should include
 labels: [enhancement]
 body:
   - type: markdown
     attributes:
       value: |
-        Please check first that it is not [already suggested](https://github.com/cosmic-blue-os/cosmic-blue/issues?q=is%3Aissue). Ideas still taking shape are welcome in [Discussions](https://github.com/cosmic-blue-os/cosmic-blue/discussions).
+        Please check first that it is not [already suggested](https://github.com/celenn-os/celenn/issues?q=is%3Aissue). Ideas still taking shape are welcome in [Discussions](https://github.com/celenn-os/celenn/discussions).
 
-        cosmic-blue ships the COSMIC desktop as Fedora packages it. Changes to COSMIC itself (its apps, settings, panel...) belong to the [COSMIC project](https://github.com/pop-os/cosmic-epoch/issues).
+        Celenn OS ships the COSMIC desktop as Fedora packages it. Changes to COSMIC itself (its apps, settings, panel...) belong to the [COSMIC project](https://github.com/pop-os/cosmic-epoch/issues).
   - type: textarea
     id: problem
     attributes:

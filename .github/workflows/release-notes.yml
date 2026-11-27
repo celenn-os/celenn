@@ -1,6 +1,6 @@
 ---
 # Publishes the release notes of a stable image as a GitHub Release: the
-# cosmic-blue commits between the two builds (sorted by what they change),
+# Celenn OS commits between the two builds (sorted by what they change),
 # the main packages and every package change since the previous stable
 # image, and how to get it. No file is attached (the live
 # ISO is too big for a release). It then updates the "Versions" block of
@@ -97,8 +97,26 @@ jobs:
           out="${RUNNER_TEMP}/notes"
           mkdir -p "${out}"
 
+          # Images from before the rename to Celenn OS are under the old
+          # name: the previous stable, and testing or stable until the first
+          # builds under the new name. Remove in the cleanup after the rename.
+          old_image="${IMAGE_REGISTRY,,}/cosmic-blue"
+          found_ref() {
+            local new="$1" old="$2"
+            if ! skopeo inspect --raw "docker://${new}" >/dev/null 2>&1 \
+              && skopeo inspect --raw "docker://${old}" >/dev/null 2>&1; then
+              echo "::notice::${new} not found, using ${old}" >&2
+              new="${old}"
+            fi
+            echo "${new}"
+          }
+
           ref_of() {
-            if [[ "$1" == sha256:* ]]; then echo "${image}@$1"; else echo "${image}:$1"; fi
+            if [[ "$1" == sha256:* ]]; then
+              found_ref "${image}@$1" "${old_image}@$1"
+            else
+              found_ref "${image}:$1" "${old_image}:$1"
+            fi
           }
 
           # Git commit an image was built from, empty if unknown: its
@@ -124,7 +142,8 @@ jobs:
           # if not found: from its signed SBOM (a few MB, see build.yml),
           # else from the image itself for the images built without one
           nvidia_of() {
-            local nv="${image}-nvidia:$1" evr
+            local nv evr
+            nv="$(found_ref "${image}-nvidia:$1" "${old_image}-nvidia:$1")"
             evr="$(cosign verify-attestation --key cosign.pub --type spdxjson \
                      --insecure-ignore-tlog=true "${nv}" 2>/dev/null \
                    | head -n 1 \
@@ -220,13 +239,13 @@ jobs:
             title="Preview: testing${VERSION:+ (${VERSION})} compared with stable"
             ref="${image}:testing"
           else
-            # stable-20261117 -> cosmic-blue 44.20261110 (stable 2026-11-17)
+            # stable-20261117 -> Celenn OS 44.20261110 (stable 2026-11-17)
             date="${RELEASE_TAG#stable-}"
             date="${date:0:4}-${date:4:2}-${date:6:2}"
             if [[ -n "${VERSION}" ]]; then
-              title="cosmic-blue ${VERSION} (stable ${date})"
+              title="Celenn OS ${VERSION} (stable ${date})"
             else
-              title="cosmic-blue stable ${date}"
+              title="Celenn OS stable ${date}"
             fi
             ref="${image}:${RELEASE_TAG}"
           fi

@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # Installs the Flatpak NVIDIA GL extensions matching the running driver
-# (cosmic-blue-nvidia only, celenn-nvidia-flatpak-gl.service).
+# (celenn-nvidia only, celenn-nvidia-flatpak-gl.service).
 #
 # Flatpak apps (Steam, games, browsers) only get hardware acceleration on
 # NVIDIA through org.freedesktop.Platform.GL.nvidia-<driver version> (and

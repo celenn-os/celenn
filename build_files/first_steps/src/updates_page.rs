@@ -45,8 +45,8 @@ use cosmic::{Apply, Element, cosmic_theme, theme};
 const HELPER: &str = "/usr/libexec/celenn-updates-helper";
 /// The version left behind by the last rollback: "<digest> <version>"
 const HOLD: &str = "/var/lib/celenn/update-hold";
-const RELEASES: &str = "https://github.com/cosmic-blue-os/cosmic-blue/releases";
-const VENDOR: &str = "ghcr.io/cosmic-blue-os/";
+const RELEASES: &str = "https://github.com/celenn-os/celenn/releases";
+const VENDOR: &str = "ghcr.io/celenn-os/";
 
 /// Every text, for the translation check
 pub const TEXTS: &[&str] = &[
@@ -119,7 +119,7 @@ pub fn command_line(args: &[String]) -> Option<i32> {
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Deployment {
     version: String,
-    /// "ostree-image-signed:docker://ghcr.io/cosmic-blue-os/cosmic-blue:stable"
+    /// "ostree-image-signed:docker://ghcr.io/celenn-os/celenn:stable"
     reference: String,
     booted: bool,
     staged: bool,

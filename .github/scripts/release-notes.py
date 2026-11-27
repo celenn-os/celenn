@@ -3,7 +3,7 @@
 
 Compares the package lists of the previous and the new stable image
 (`rpm -qa --qf '%{NAME}\t%{EVR}\t%{SOURCERPM}\n'`, one file each) and lists
-the cosmic-blue commits between the two builds, sorted by what they change:
+the Celenn OS commits between the two builds, sorted by what they change:
 the image (or the live ISO), the website and documentation, or only the
 build and tests.
 
@@ -92,7 +92,7 @@ def upstream(evr):
 
 
 def badge(label, value):
-    """shields.io badge in the cosmic-blue accent color."""
+    """shields.io badge in the Celenn OS accent color."""
     def escape(text):
         return quote(text.replace("-", "--").replace("_", "__"), safe="")
     return (f"![{label} {value}](https://img.shields.io/badge/"
@@ -177,7 +177,7 @@ def main():
     parser.add_argument("--nvidia", help="EVR of the NVIDIA driver in the NVIDIA image")
     parser.add_argument("--nvidia-old", help="EVR of the NVIDIA driver before")
     parser.add_argument("--versions-block", help="Write the README versions block here")
-    parser.add_argument("--version", help="cosmic-blue version, for the versions block")
+    parser.add_argument("--version", help="Celenn OS version, for the versions block")
     args = parser.parse_args()
 
     new = read_packages(args.new)
@@ -190,7 +190,7 @@ def main():
     badges = " ".join(badge(label, value) for label, value in versions if value)
 
     if args.versions_block:
-        about = f" (cosmic-blue {args.version})" if args.version else ""
+        about = f" (Celenn OS {args.version})" if args.version else ""
         block = [f"In the current `stable` image{about}:", "",
                  # No badge for a version not found (e.g. no NVIDIA image)
                  "\n".join(badge(label, value) for label, value in versions if value)]
@@ -199,7 +199,7 @@ def main():
 
     out = [f"# {args.title}", "", badges, ""]
     since = f" since `{args.previous_release}`" if args.previous_release else ""
-    out += [f"The weekly stable update of cosmic-blue{since}. Installed systems "
+    out += [f"The weekly stable update of Celenn OS{since}. Installed systems "
             "download it on their own: it is used after the next reboot.", ""]
 
     commits = []
@@ -216,7 +216,7 @@ def main():
         if image:
             out += [commit_line(*c) for c in image]
         else:
-            out.append("No change to cosmic-blue itself this week: "
+            out.append("No change to Celenn OS itself this week: "
                        "only the Fedora updates below.")
         out.append("")
         if site:
