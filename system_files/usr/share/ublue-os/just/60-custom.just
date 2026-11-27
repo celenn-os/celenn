@@ -380,8 +380,9 @@ _gaming action:
             ;;
     esac
 
-# Bluefin's installers (projectbluefin/common), renamed _bluefin-* at build
-# time (build_files/10-system-files.sh): these commands run them to install,
+# Developer tools are cosmic-blue's own list. Then Bluefin's installers
+# (projectbluefin/common), renamed _bluefin-* at build time
+# (build_files/10-system-files.sh): the commands below run them to install,
 # and add the removal they lack (remove-*). Removing never deletes your own files
 # (projects, virtual machine disks are only removed after a question).
 
@@ -397,45 +398,139 @@ remove-dev-tools: (_dev-tools "remove")
 _dev-tools action:
     #!/usr/bin/bash
     set -euo pipefail
-    case "{{ action }}" in
-        install) exec ujust _bluefin-dev-tools ;;
-        remove) ;;
-        *) echo "Usage: ujust install-dev-tools or ujust remove-dev-tools" >&2; exit 1 ;;
-    esac
-    # What the menu installs: "Label|kind|names" (kind: formula, cask, flatpak, ujust)
+    # The same tools, in the same groups, as the developer tools list of the
+    # tour and Tools (build_files/first_steps/src/devtools.rs, checked by
+    # tests/check-dev-tools.py), plus Lima, whose setup stays in a terminal.
+    # A group heading, then its tools: "Label|kind|names" (kind: formula,
+    # cask, flatpak, ujust). Casks come from Homebrew or the ublue-os tap.
     tools=(
-        "devcontainer CLI|formula|devcontainer"
+        "Containers"
         "Docker|formula|docker docker-compose lazydocker dive"
         "Podman Desktop|flatpak|io.podman_desktop.PodmanDesktop"
-        "Lima|ujust|lima"
+        "Code editors"
         "VS Code|cask|visual-studio-code-linux"
         "VSCodium|cask|vscodium-linux"
-        "Antigravity IDE|cask|antigravity-ide-linux"
         "Zed|cask|zed"
-        "JetBrains Toolbox|ujust|jetbrains-toolbox"
+        "JetBrains Toolbox|cask|jetbrains-toolbox-linux"
+        "Antigravity|cask|antigravity-ide-linux"
+        "In the terminal"
         "Neovim|formula|neovim"
         "Helix|formula|helix"
         "vim|formula|vim"
         "micro|formula|micro"
+        "Other tools"
+        "Bruno|flatpak|com.usebruno.Bruno"
+        "Dev Toolbox|flatpak|me.iepure.devtoolbox"
+        "DBeaver|flatpak|io.dbeaver.DBeaverCommunity"
+        "Virtual machine"
+        "Lima|ujust|lima"
     )
+    # Ticked when the menu opens, as in the tour and Tools
+    recommended=("Docker" "Podman Desktop" "VS Code")
     present() { # kind names
         case "$1" in
-            formula) brew list --formula "${2%% *}" >/dev/null 2>&1 ;;
-            cask) brew list --cask "$2" >/dev/null 2>&1 ;;
+            formula) command -v brew >/dev/null && brew list --formula "${2%% *}" >/dev/null 2>&1 ;;
+            cask) command -v brew >/dev/null && brew list --cask "$2" >/dev/null 2>&1 ;;
             flatpak) flatpak info --system "$2" >/dev/null 2>&1 ;;
-            ujust)
-                case "$2" in
-                    lima) brew list --formula lima >/dev/null 2>&1 ;;
-                    jetbrains-toolbox) brew list --cask jetbrains-toolbox-linux >/dev/null 2>&1 ;;
-                esac
-                ;;
+            ujust) command -v brew >/dev/null && brew list --formula "$2" >/dev/null 2>&1 ;;
         esac
     }
     installed=()
     for tool in "${tools[@]}"; do
+        [[ "${tool}" == *"|"* ]] || continue
         IFS='|' read -r label kind names <<<"${tool}"
         if present "${kind}" "${names}"; then installed+=("${label}"); fi
     done
+
+    if [[ "{{ action }}" == install ]]; then
+        if [[ ! -t 0 ]]; then
+            echo "Run ujust install-dev-tools in a terminal (or use the Tools app)." >&2
+            exit 1
+        fi
+        # The menu: headings, then the tools; the installed ones are marked
+        # and cannot be picked again
+        items=()
+        selected=()
+        for tool in "${tools[@]}"; do
+            if [[ "${tool}" != *"|"* ]]; then
+                items+=("── ${tool} ──")
+                continue
+            fi
+            IFS='|' read -r label kind names <<<"${tool}"
+            if printf '%s\n' "${installed[@]}" | grep -qxF -- "${label}"; then
+                items+=("   ${label} (installed)")
+            else
+                items+=("   ${label}")
+                if printf '%s\n' "${recommended[@]}" | grep -qxF -- "${label}"; then
+                    selected+=("   ${label}")
+                fi
+            fi
+        done
+        selected_list="$(IFS=,; echo "${selected[*]}")"
+        chosen="$(gum choose --no-limit --height 25 \
+            --header "Which tools do you want? (space to tick, enter to install)" \
+            --selected "${selected_list}" "${items[@]}" || true)"
+        formulas=()
+        casks=()
+        flatpaks=()
+        lima=0
+        for tool in "${tools[@]}"; do
+            [[ "${tool}" == *"|"* ]] || continue
+            IFS='|' read -r label kind names <<<"${tool}"
+            grep -qxF -- "   ${label}" <<<"${chosen}" || continue
+            case "${kind}" in
+                formula) read -ra more <<<"${names}"; formulas+=("${more[@]}") ;;
+                cask) casks+=("${names}") ;;
+                flatpak) flatpaks+=("${names}") ;;
+                ujust) lima=1 ;;
+            esac
+        done
+        if [[ "${#formulas[@]}" -eq 0 && "${#casks[@]}" -eq 0 && "${#flatpaks[@]}" -eq 0 && "${lima}" -eq 0 ]]; then
+            echo "Nothing to install."
+            exit 0
+        fi
+        if [[ "${#formulas[@]}" -gt 0 || "${#casks[@]}" -gt 0 || "${lima}" -eq 1 ]] && ! command -v brew >/dev/null; then
+            echo "Homebrew is not set up yet: wait a few minutes after the first start, then try again." >&2
+            exit 1
+        fi
+        failed=0
+        if [[ "${#formulas[@]}" -gt 0 || "${#casks[@]}" -gt 0 ]]; then
+            # The devcontainer CLI comes with them, as in Bluefin: every
+            # editor can use it
+            echo "Installing ${formulas[*]} ${casks[*]} and the devcontainer CLI..."
+            brew install devcontainer "${formulas[@]}" || failed=1
+            if [[ "${#casks[@]}" -gt 0 ]]; then
+                brew tap ublue-os/tap >/dev/null 2>&1 || true
+                for cask in "${casks[@]}"; do
+                    brew install --cask "${cask}" || failed=1
+                done
+            fi
+        fi
+        if [[ "${#flatpaks[@]}" -gt 0 ]]; then
+            echo "Installing ${flatpaks[*]} from Flathub..."
+            flatpak install --system --noninteractive flathub "${flatpaks[@]}" || failed=1
+        fi
+        # Serial ports (boards like Arduino), as Bluefin's developer mode does
+        if ! id -nG | tr ' ' '\n' | grep -qx dialout; then
+            user="$(id -un)"
+            pkexec bash -c 'grep -q "^dialout:" /etc/group || grep "^dialout:" /usr/lib/group >> /etc/group; usermod -aG dialout "$1"' _ "${user}" \
+                && echo "Serial ports allowed from your next login." || true
+        fi
+        if [[ "${lima}" -eq 1 ]]; then
+            ujust _bluefin-lima || failed=1
+        fi
+        if [[ "${failed}" -eq 1 ]]; then
+            echo "Some tools could not be installed: see the messages above." >&2
+            exit 1
+        fi
+        echo "Done."
+        exit 0
+    fi
+
+    if [[ "{{ action }}" != remove ]]; then
+        echo "Usage: ujust install-dev-tools or ujust remove-dev-tools" >&2
+        exit 1
+    fi
     if [[ "${#installed[@]}" -eq 0 ]]; then
         echo "No tools from ujust install-dev-tools are installed."
         exit 0
@@ -443,6 +538,7 @@ _dev-tools action:
     chosen="$(gum choose --no-limit --header "Which tools do you want to remove? (space to select)" "${installed[@]}" || true)"
     [[ -n "${chosen}" ]] || { echo "Nothing removed."; exit 0; }
     for tool in "${tools[@]}"; do
+        [[ "${tool}" == *"|"* ]] || continue
         IFS='|' read -r label kind names <<<"${tool}"
         grep -qxF -- "${label}" <<<"${chosen}" || continue
         echo "Removing ${label}..."
@@ -453,6 +549,7 @@ _dev-tools action:
             ujust) ujust "remove-${names}" ;;
         esac
     done
+    # Bluefin's developer mode marker, from earlier installs
     if [[ "${#installed[@]}" -eq "$(grep -c . <<<"${chosen}")" ]]; then
         rm -f "${HOME}/.config/bluefin/devmode"
     fi
