@@ -460,6 +460,8 @@ desktop_tour() {
             continue
         fi
         sleep 12
+        # (Web apps: its sites' icons come from the internet)
+        [[ "${name}" == 06-tools-web-apps ]] && sleep 18
         screenshot "${SHOTS}/${name}"
         vm "pkill -u ${DEMO_USER} -f '^(/usr/bin/)?${program}'" || true
         sleep 3

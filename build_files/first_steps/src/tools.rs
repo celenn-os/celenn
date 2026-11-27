@@ -791,6 +791,13 @@ impl Application for App {
         let (maintenance, maintenance_task) = maintenance::Page::new();
         let (more, more_task) = more::Page::new();
         let (help, help_task) = help::Page::new();
+        // (opened on Web apps: its sites' icons are fetched now)
+        let mut webapps = webapps::Page::new();
+        let webapps_task = if first == Some(Tool::WebApps) {
+            webapps.opened()
+        } else {
+            Task::none()
+        };
         let mut app = App {
             core,
             tool: first,
@@ -799,7 +806,7 @@ impl Application for App {
             maintenance,
             more,
             help,
-            webapps: webapps::Page::new(),
+            webapps,
             toasts: Toasts::new(Message::CloseToast),
         };
         let title = match app.core.main_window_id() {
@@ -815,6 +822,7 @@ impl Application for App {
                 maintenance_task.map(|action| action.map(Message::Maintenance)),
                 more_task.map(|action| action.map(Message::More)),
                 help_task.map(|action| action.map(Message::Help)),
+                webapps_task.map(|action| action.map(Message::WebApps)),
             ]),
         )
     }
