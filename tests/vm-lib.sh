@@ -441,6 +441,7 @@ desktop_tour() {
         "06-tools-failure|COSMIC_BLUE_TOOLS_PREVIEW=failure /usr/libexec/cosmic-blue-tools --tool space" \
         "06-tools-developer|COSMIC_BLUE_TOOLS_PREVIEW=developer-tools /usr/libexec/cosmic-blue-tools --tool apps" \
         "06-tools-disks|/usr/libexec/cosmic-blue-tools --tool disks" \
+        "06-tools-web-apps|/usr/libexec/cosmic-blue-tools --tool web-apps" \
         "06-shortcuts|/usr/libexec/cosmic-blue-tour --shortcuts"; do
         name="${entry%%|*}"
         cmd="${entry#*|}"
