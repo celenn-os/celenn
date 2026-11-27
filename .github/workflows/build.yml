@@ -140,6 +140,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
+      packages: read  # just version reads the tags taken
       pull-requests: read  # pr-images
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -192,6 +193,7 @@ jobs:
         id: version
         env:
           INPUT_CHANNEL: ${{ inputs.channel }}
+          GHCR_CREDS: ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           case "${GITHUB_EVENT_NAME}" in
