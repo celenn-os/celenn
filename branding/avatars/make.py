@@ -1,4 +1,4 @@
-"""Profile pictures (avatars) of cosmic-blue: a white drawing on a coloured
+"""Profile pictures (avatars) of Celenn OS: a white drawing on a coloured
 gradient with a few faint stars, in the style of the dock icons.
 
 Writes svg/<name>.svg. export.js renders them to the 512x512 PNGs of

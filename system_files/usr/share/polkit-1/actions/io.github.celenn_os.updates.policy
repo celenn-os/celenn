@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<!-- The Updates app (/usr/libexec/celenn-updates) runs its helper as
+     root with pkexec: going back to the previous version, or switching
+     between the stable and testing images. An administrator password,
+     remembered for a few minutes. -->
+<policyconfig>
+  <vendor>Celenn OS</vendor>
+  <vendor_url>https://celenn-os.github.io/celenn/</vendor_url>
+  <action id="io.github.celenn_os.updates.manage">
+    <description>Change the version of the system</description>
+    <description xml:lang="fr">Changer la version du système</description>
+    <description xml:lang="de">Die Systemversion ändern</description>
+    <description xml:lang="es">Cambiar la versión del sistema</description>
+    <description xml:lang="it">Cambiare la versione del sistema</description>
+    <description xml:lang="pt_BR">Alterar a versão do sistema</description>
+    <message>Authentication is required to change the version of the system</message>
+    <message xml:lang="fr">Une authentification est nécessaire pour changer la version du système</message>
+    <message xml:lang="de">Zum Ändern der Systemversion ist eine Authentifizierung erforderlich</message>
+    <message xml:lang="es">Se necesita autenticación para cambiar la versión del sistema</message>
+    <message xml:lang="it">È necessario autenticarsi per cambiare la versione del sistema</message>
+    <message xml:lang="pt_BR">É necessário se autenticar para alterar a versão do sistema</message>
+    <icon_name>celenn-update</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/celenn-updates-helper</annotate>
+  </action>
+</policyconfig>

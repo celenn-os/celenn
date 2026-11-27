@@ -3,17 +3,17 @@
 // the app that shows and changes them (parental.rs).
 //
 // Files (JSON, readable by everyone, written by root only):
-//   /etc/cosmic-blue/parental-controls/<user>.json      the rules, set by a
-//       parent in the app (through cosmic-blue-parental-helper):
+//   /etc/celenn/parental-controls/<user>.json      the rules, set by a
+//       parent in the app (through celenn-parental-helper):
 //       {"limit": {"enabled": true, "weekdays": 120, "weekend": 180},
 //        "bedtime": {"enabled": true, "start": 1230, "end": 420},
 //        "web_filter": true,
 //        "apps": {"enabled": false, "allowed": ["org.mozilla.firefox"]}}
 //       (minutes a day; start and end in minutes after midnight; apps:
 //       only the applications allowed can be used, see parental_apps.rs)
-//   /var/lib/cosmic-blue/parental-controls/<user>.json  the time used, kept
+//   /var/lib/celenn/parental-controls/<user>.json  the time used, kept
 //       by the service: today's, and the days before for the weekly chart
-//   /var/lib/cosmic-blue/parental-controls/<user>.extra more time granted
+//   /var/lib/celenn/parental-controls/<user>.extra more time granted
 //       by a parent: one "<unix time> <minutes>" line per grant
 //
 // An account without a rules file has no limits.
@@ -25,8 +25,8 @@ use serde_json::{Value, json};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 
-pub const CONFIG_DIR: &str = "/etc/cosmic-blue/parental-controls";
-pub const STATE_DIR: &str = "/var/lib/cosmic-blue/parental-controls";
+pub const CONFIG_DIR: &str = "/etc/celenn/parental-controls";
+pub const STATE_DIR: &str = "/var/lib/celenn/parental-controls";
 /// Days kept for the weekly chart, today included
 pub const HISTORY_DAYS: usize = 7;
 
@@ -249,7 +249,7 @@ pub struct Day {
 /// In a child's home: the app id of the window in front, written by the
 /// session's agent every few seconds, read by the service (as root: no
 /// links, a few bytes; see focused_app)
-pub const FOCUS: &str = ".local/state/cosmic-blue/parental-focus";
+pub const FOCUS: &str = ".local/state/celenn/parental-focus";
 /// A focus file older than this is no longer true (the agent stopped)
 pub const FOCUS_FRESH: u64 = 30;
 
@@ -402,7 +402,7 @@ impl Grant {
     }
 }
 
-/// More time granted by a parent (cosmic-blue-parental-extend)
+/// More time granted by a parent (celenn-parental-extend)
 pub fn load_extra(user: &str) -> Vec<Grant> {
     std::fs::read_to_string(extra_path(user))
         .unwrap_or_default()

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Titanoboa post-rootfs hook: turns the cosmic-blue image into a live session
+# Titanoboa post-rootfs hook: turns the Celenn OS image into a live session
 # with the Anaconda installer. It runs inside the live root filesystem only;
 # the installed system is the unmodified ghcr.io image embedded in the ISO.
 # Adapted from projectbluefin/iso (iso_files/configure_iso_anaconda.sh).
@@ -16,8 +16,8 @@ IMAGE_NAME="$(jq -c -r '."image-name"' <<<"$IMAGE_INFO")"
 # The tag the ISO was built from (stable, or testing for PR test builds) is the
 # one embedded in the ISO and followed by installed systems. The workflow
 # writes it into the titanoboa checkout, mounted at /app.
-if [[ -s /app/cosmic-blue-image-tag ]]; then
-    IMAGE_TAG="$(< /app/cosmic-blue-image-tag)"
+if [[ -s /app/celenn-image-tag ]]; then
+    IMAGE_TAG="$(< /app/celenn-image-tag)"
 fi
 
 ### Live session
@@ -64,10 +64,10 @@ dnf install -y \
     libblockdev-lvm
 # Same Firefox defaults as the installed system's flatpak
 mkdir -p /etc/firefox/policies
-ln -sf /usr/share/cosmic-blue/firefox/policies/policies.json /etc/firefox/policies/policies.json
+ln -sf /usr/share/celenn/firefox/policies/policies.json /etc/firefox/policies/policies.json
 
-# Profile matched on os-release (ID=fedora, VARIANT_ID=cosmic-blue or
-# cosmic-blue-nvidia, the image name)
+# Profile matched on os-release (ID=fedora, VARIANT_ID=celenn or
+# celenn-nvidia, the image name)
 . /etc/os-release
 # Images built before VARIANT_ID was set (such as stable until its next
 # promotion) lack the line, and the installer then used Fedora's profile.
@@ -76,11 +76,11 @@ if ! grep -q '^VARIANT_ID=' /usr/lib/os-release; then
     echo "VARIANT_ID=${IMAGE_NAME}" >> /usr/lib/os-release
 fi
 mkdir -p /etc/anaconda/profile.d
-tee /etc/anaconda/profile.d/cosmic-blue.conf <<EOF
-# Anaconda configuration file for cosmic-blue
+tee /etc/anaconda/profile.d/celenn.conf <<EOF
+# Anaconda configuration file for Celenn OS
 
 [Profile]
-profile_id = cosmic-blue
+profile_id = celenn
 
 [Profile Detection]
 os_id = fedora
@@ -110,17 +110,17 @@ hidden_spokes =
 use_geolocation = False
 EOF
 
-echo "cosmic-blue release $VERSION_ID" >/etc/system-release
+echo "Celenn OS release $VERSION_ID" >/etc/system-release
 sed -i 's/ANACONDA_PRODUCTVERSION=.*/ANACONDA_PRODUCTVERSION=""/' /usr/{,s}bin/liveinst || true
 
 # Installer shortcut: on the live user's desktop and first in the COSMIC dock.
 # The installer is not started automatically.
-sed -i 's/^Name=.*/Name=Install cosmic-blue/' /usr/share/applications/liveinst.desktop
-# cosmic-blue icon (branding/icons/build.py) instead of Anaconda's
-install -D -m 0644 /app/cosmic-blue-welcome/cosmic-blue-installer.svg \
-    /usr/share/icons/hicolor/scalable/apps/cosmic-blue-installer.svg
-sed -i 's/^Icon=.*/Icon=cosmic-blue-installer/' /usr/share/applications/liveinst.desktop
-grep -qx 'Icon=cosmic-blue-installer' /usr/share/applications/liveinst.desktop
+sed -i 's/^Name=.*/Name=Install celenn/' /usr/share/applications/liveinst.desktop
+# Celenn OS icon (branding/icons/build.py) instead of Anaconda's
+install -D -m 0644 /app/celenn-welcome/celenn-installer.svg \
+    /usr/share/icons/hicolor/scalable/apps/celenn-installer.svg
+sed -i 's/^Icon=.*/Icon=celenn-installer/' /usr/share/applications/liveinst.desktop
+grep -qx 'Icon=celenn-installer' /usr/share/applications/liveinst.desktop
 mkdir -p /etc/skel/Desktop
 install -m 0755 /usr/share/applications/liveinst.desktop /etc/skel/Desktop/liveinst.desktop
 dock=()
@@ -159,14 +159,14 @@ EOF
 
 # NVIDIA image: queue the Universal Blue akmods key (it signs the NVIDIA
 # modules) for enrollment. With Secure Boot on, the firmware's MOK manager asks
-# to confirm it on the first reboot (password "cosmicblue", the same as
+# to confirm it on the first reboot (password "celennos", the same as
 # `ujust enroll-secure-boot-key`); with Secure Boot off, nothing is queued
 # and no blue screen shows up. The password is not a secret: it only
 # confirms, once, at the machine itself, that the key was queued on purpose.
 tee /usr/share/anaconda/post-scripts/secureboot-enroll-key.ks <<'EOF'
 %post --erroronfail --nochroot
 set -eu
-readonly ENROLLMENT_PASSWORD="cosmicblue"
+readonly ENROLLMENT_PASSWORD="celennos"
 readonly SECUREBOOT_KEY="/etc/pki/akmods/certs/akmods-ublue.der"
 if [[ ! -d /sys/firmware/efi ]]; then
     echo "EFI mode not detected. Skipping key enrollment."
@@ -190,28 +190,28 @@ EOF
 
 ### Welcome tour
 
-# A short tour that opens with the live session: what cosmic-blue is, trying
+# A short tour that opens with the live session: what Celenn OS is, trying
 # it live, highlights, and a button for the installer. It is the image's
-# libcosmic tour (/usr/libexec/cosmic-blue-tour --live), like the installed
+# libcosmic tour (/usr/libexec/celenn-tour --live), like the installed
 # system's first steps, so both look like COSMIC's own first-run assistant.
 # The workflow copies iso_files/welcome into the titanoboa checkout, mounted
 # at /app: its launcher, and the GJS tour used for images built before
-# cosmic-blue-tour (remove it once every published image has the tour).
+# celenn-tour (remove it once every published image has the tour).
 welcome_desktops=(
-    /usr/share/applications/io.github.cosmic_blue_os.Welcome.desktop
-    /etc/xdg/autostart/io.github.cosmic_blue_os.Welcome.desktop
+    /usr/share/applications/io.github.celenn_os.Welcome.desktop
+    /etc/xdg/autostart/io.github.celenn_os.Welcome.desktop
 )
 for desktop in "${welcome_desktops[@]}"; do
-    install -D -m 0644 /app/cosmic-blue-welcome/io.github.cosmic_blue_os.Welcome.desktop "${desktop}"
+    install -D -m 0644 /app/celenn-welcome/io.github.celenn_os.Welcome.desktop "${desktop}"
 done
-if [[ -x /usr/libexec/cosmic-blue-tour ]]; then
-    sed -i 's|^Exec=.*|Exec=/usr/libexec/cosmic-blue-tour --live|' "${welcome_desktops[@]}"
+if [[ -x /usr/libexec/celenn-tour ]]; then
+    sed -i 's|^Exec=.*|Exec=/usr/libexec/celenn-tour --live|' "${welcome_desktops[@]}"
 else
     dnf install -y gjs gtk4 libadwaita
-    install -D -m 0755 /app/cosmic-blue-welcome/cosmic-blue-welcome.js /usr/libexec/cosmic-blue-welcome
+    install -D -m 0755 /app/celenn-welcome/celenn-welcome.js /usr/libexec/celenn-welcome
 fi
-install -D -m 0644 /app/cosmic-blue-welcome/cosmic-blue-welcome.svg \
-    /usr/share/icons/hicolor/scalable/apps/cosmic-blue-welcome.svg
+install -D -m 0644 /app/celenn-welcome/celenn-welcome.svg \
+    /usr/share/icons/hicolor/scalable/apps/celenn-welcome.svg
 gtk-update-icon-cache --force /usr/share/icons/hicolor || :
 # COSMIC's first-run assistant is skipped in the live session too. Newer
 # images already give new accounts ~/.config/cosmic-initial-setup-done
@@ -221,10 +221,10 @@ mkdir -p /etc/skel/.config
 touch /etc/skel/.config/cosmic-initial-setup-done
 # The installed system's first steps tour (updates, rollback, ujust...) is not
 # for the live session either: the welcome tour above takes its place.
-rm -f /etc/xdg/autostart/io.github.cosmic_blue_os.FirstSteps.desktop \
-    /usr/share/applications/io.github.cosmic_blue_os.FirstSteps.desktop
-rm -rf /etc/skel/.config/cosmic-blue/first-steps-pending
-# Nothing to update, roll back or clean up in a live session: no cosmic-blue
+rm -f /etc/xdg/autostart/io.github.celenn_os.FirstSteps.desktop \
+    /usr/share/applications/io.github.celenn_os.FirstSteps.desktop
+rm -rf /etc/skel/.config/celenn/first-steps-pending
+# Nothing to update, roll back or clean up in a live session: no Celenn OS
 # Tools, nor its Updates launcher
-rm -f /usr/share/applications/io.github.cosmic_blue_os.Updates.desktop \
-    /usr/share/applications/io.github.cosmic_blue_os.Tools.desktop
+rm -f /usr/share/applications/io.github.celenn_os.Updates.desktop \
+    /usr/share/applications/io.github.celenn_os.Tools.desktop

@@ -20,7 +20,7 @@ if [[ ! -e "${DOCKER_DIR}/config.json" ]] || ! jq -e '.currentContext' "${DOCKER
     mkdir -p "${META_DIR}"
     jq -n --arg name "${CONTEXT}" --arg host "${SOCKET}" '{
         Name: $name,
-        Metadata: {Description: "Rootless Podman (cosmic-blue)"},
+        Metadata: {Description: "Rootless Podman (Celenn OS)"},
         Endpoints: {docker: {Host: $host, SkipTLSVerify: false}}
     }' > "${META_DIR}/meta.json"
     if [[ -e "${DOCKER_DIR}/config.json" ]]; then

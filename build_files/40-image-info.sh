@@ -2,9 +2,9 @@
 # Image identity: image-info.json (used by ujust, uupd...) and os-release.
 set -euox pipefail
 
-IMAGE_PRETTY_NAME="cosmic-blue"
-# One repository for all the images (cosmic-blue-nvidia included)
-HOME_URL="https://github.com/${IMAGE_VENDOR}/cosmic-blue"
+IMAGE_PRETTY_NAME="Celenn OS"
+# One repository for all the images (celenn-nvidia included)
+HOME_URL="https://github.com/${IMAGE_VENDOR}/celenn"
 VERSION="${VERSION:-${FEDORA_MAJOR_VERSION}.$(date +%Y%m%d)}"
 
 # The image is verified with cosign.pub (see 10-system-files.sh); without it,
@@ -38,7 +38,7 @@ JSON
 sed -i "s|^NAME=.*|NAME=\"${IMAGE_PRETTY_NAME}\"|" /usr/lib/os-release
 sed -i "s|^PRETTY_NAME=.*|PRETTY_NAME=\"${IMAGE_PRETTY_NAME} ${VERSION}\"|" /usr/lib/os-release
 # Fedora's base os-release has no VARIANT_ID line to replace: add it. The
-# live ISO's installer finds its cosmic-blue profile with it.
+# live ISO's installer finds its Celenn OS profile with it.
 sed -i "/^VARIANT_ID=/d" /usr/lib/os-release
 echo "VARIANT_ID=${IMAGE_NAME}" >> /usr/lib/os-release
 sed -i "s|^HOME_URL=.*|HOME_URL=\"${HOME_URL}\"|" /usr/lib/os-release
@@ -46,7 +46,7 @@ sed -i "s|^SUPPORT_URL=.*|SUPPORT_URL=\"${HOME_URL}/issues\"|" /usr/lib/os-relea
 sed -i "s|^BUG_REPORT_URL=.*|BUG_REPORT_URL=\"${HOME_URL}/issues\"|" /usr/lib/os-release
 # Logo shown by COSMIC Settings (About) and fetch tools: an icon name
 sed -i "/^LOGO=/d" /usr/lib/os-release
-echo "LOGO=cosmic-blue-logo" >> /usr/lib/os-release
+echo "LOGO=celenn-logo" >> /usr/lib/os-release
 sed -i "/^IMAGE_ID=/d; /^IMAGE_VERSION=/d" /usr/lib/os-release
 echo "IMAGE_ID=\"${IMAGE_NAME}\"" >> /usr/lib/os-release
 echo "IMAGE_VERSION=\"${VERSION}\"" >> /usr/lib/os-release

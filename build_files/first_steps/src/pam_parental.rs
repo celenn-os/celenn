@@ -1,7 +1,7 @@
-// pam_cosmic_blue_parental.so: the parental controls' login check, as a
+// pam_celenn_parental.so: the parental controls' login check, as a
 // PAM account module of the login screen (see build_files/26-parental-controls.sh).
 //
-// It runs `cosmic-blue-parental-daemon login-check` for the account logging
+// It runs `celenn-parental-daemon login-check` for the account logging
 // in. When the rules refuse it (bedtime, or the day's screen time used up),
 // the login screen shows the reason, in the system's language, as a PAM
 // error message (pam_exec could only show its own "... failed: exit code 1",
@@ -21,7 +21,7 @@ const PAM_IGNORE: c_int = 25;
 const PAM_ERROR_MSG: c_int = 3;
 const LOG_NOTICE: c_int = 5;
 
-const CHECK: &str = "/usr/libexec/cosmic-blue-parental-daemon";
+const CHECK: &str = "/usr/libexec/celenn-parental-daemon";
 /// The check only reads a few small files: it answers at once
 const CHECK_TIMEOUT: Duration = Duration::from_secs(5);
 

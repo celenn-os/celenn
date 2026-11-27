@@ -1,16 +1,16 @@
-// "Other disks" on the Computer page of cosmic-blue Tools: the internal
+// "Other disks" on the Computer page of Celenn OS Tools: the internal
 // data disks (a second disk, Windows' D:, a games disk) that can open at
 // every startup, so Files, Steam and other apps always find them at the
 // same place. Reading is done here, without root: lsblk, /etc/fstab. The
-// change is made by /usr/libexec/cosmic-blue-tools-helper `disks UUID=on`
+// change is made by /usr/libexec/celenn-tools-helper `disks UUID=on`
 // through pkexec, which checks everything again and has the last word (an
-// fstab line marked x-cosmic-blue-disk, at /var/mnt/<name>, nofail).
+// fstab line marked x-celenn-disk, at /var/mnt/<name>, nofail).
 //
 // Never offered: the system's own partitions, removable and USB disks,
 // partitions that are not data (EFI, Microsoft reserved, recovery). Shown
 // without a switch: encrypted disks (BitLocker, LUKS: they need a key),
 // the partition Windows runs from (the helper refuses it; remembered in
-// ~/.local/state/cosmic-blue/windows-disks), and disks set up by hand in
+// ~/.local/state/celenn/windows-disks), and disks set up by hand in
 // /etc/fstab.
 
 use crate::i18n::{fill, tr};
@@ -18,9 +18,9 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-pub const HELPER: &str = "/usr/libexec/cosmic-blue-tools-helper";
+pub const HELPER: &str = "/usr/libexec/celenn-tools-helper";
 /// The fstab option that marks the lines Tools manages
-const MARK: &str = "x-cosmic-blue-disk";
+const MARK: &str = "x-celenn-disk";
 const LSBLK_COLUMNS: &str = "NAME,TYPE,FSTYPE,LABEL,UUID,SIZE,RM,ROTA,TRAN,PARTTYPE,MOUNTPOINTS";
 /// Partition types that are never data: EFI system, Microsoft reserved,
 /// Windows recovery, BIOS boot (GPT); EFI and Windows recovery (MBR)
@@ -177,7 +177,7 @@ pub fn size_text(bytes: u64) -> String {
         let number = if tenths.is_multiple_of(10) {
             (tenths / 10).to_string()
         } else {
-            // "1.5 TB" in English, "1,5 To" in cosmic-blue's other languages
+            // "1.5 TB" in English, "1,5 To" in Celenn OS's other languages
             let point = if crate::i18n::language().is_some() {
                 ","
             } else {
@@ -344,7 +344,7 @@ fn state_file() -> PathBuf {
         .map(PathBuf::from)
         .or_else(|| std::env::var_os("HOME").map(|home| Path::new(&home).join(".local/state")))
         .unwrap_or_else(|| PathBuf::from("."))
-        .join("cosmic-blue/windows-disks")
+        .join("celenn/windows-disks")
 }
 
 fn windows_disks() -> BTreeSet<String> {
@@ -468,7 +468,7 @@ mod tests {
     const FSTAB: &str = "# /etc/fstab\n\
         UUID=root-uuid / btrfs subvol=root,compress=zstd:1,ro 0 0\n\
         UUID=boot-uuid /boot ext4 defaults 1 2\n\
-        UUID=games-uuid /var/mnt/Jeux ext4 defaults,nofail,x-systemd.device-timeout=10s,x-gvfs-show,x-cosmic-blue-disk 0 2\n";
+        UUID=games-uuid /var/mnt/Jeux ext4 defaults,nofail,x-systemd.device-timeout=10s,x-gvfs-show,x-celenn-disk 0 2\n";
 
     fn disks(windows: &[&str]) -> Vec<Disk> {
         let windows = windows.iter().map(|uuid| (*uuid).to_owned()).collect();

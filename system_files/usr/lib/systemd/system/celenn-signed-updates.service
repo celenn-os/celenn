@@ -1,0 +1,10 @@
+[Unit]
+Description=Turn on the signature check of Celenn OS updates
+Documentation=file:///usr/libexec/celenn-signed-updates
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=/run/ostree-booted
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/celenn-signed-updates

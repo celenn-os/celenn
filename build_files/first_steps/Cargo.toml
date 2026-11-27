@@ -1,5 +1,5 @@
 [package]
-name = "cosmic-blue-tour"
+name = "celenn-tour"
 version = "0.1.0"
 edition = "2024"
 publish = false
@@ -9,31 +9,31 @@ publish = false
 # cosmic-initial-setup's epoch-<COSMIC version> Cargo.lock, trimmed by cargo to
 # our dependencies (Containerfile.helpers builds with --locked);
 # check-cosmic-version.yml refreshes it with each COSMIC version.
-# cosmic-blue-tour (src/main.rs) is the package's own program; Tools (with
+# celenn-tour (src/main.rs) is the package's own program; Tools (with
 # its Updates page) is a second one, and Parental controls a third, sharing
 # the translation code (src/i18n.rs) and the look
 [[bin]]
-name = "cosmic-blue-tour"
+name = "celenn-tour"
 path = "src/main.rs"
 
 [[bin]]
-name = "cosmic-blue-tools"
+name = "celenn-tools"
 path = "src/tools.rs"
 
 # Parental controls: the app (window, warnings in a child's session) and the
 # service that applies the rules as root (src/parental_daemon.rs, without
 # libcosmic), sharing src/parental_rules.rs
 [[bin]]
-name = "cosmic-blue-parental-controls"
+name = "celenn-parental-controls"
 path = "src/parental.rs"
 
 [[bin]]
-name = "cosmic-blue-parental-daemon"
+name = "celenn-parental-daemon"
 path = "src/parental_daemon.rs"
 
-# The login screen's check (PAM module pam_cosmic_blue_parental.so)
+# The login screen's check (PAM module pam_celenn_parental.so)
 [lib]
-name = "pam_cosmic_blue_parental"
+name = "pam_celenn_parental"
 path = "src/pam_parental.rs"
 crate-type = ["cdylib"]
 

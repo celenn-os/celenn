@@ -1,0 +1,11 @@
+#!/usr/bin/bash
+# Open the Celenn OS documentation in the browser, in French when the
+# messages locale is French (used by the Documentation launcher).
+set -euo pipefail
+
+locale="${LC_ALL:-${LC_MESSAGES:-${LANG:-}}}"
+url="https://celenn-os.github.io/celenn/docs/"
+if [[ "${locale}" == fr* ]]; then
+    url="https://celenn-os.github.io/celenn/fr/docs/"
+fi
+exec xdg-open "${url}"

@@ -13,7 +13,7 @@ import sys
 
 START = "<!-- versions:start"
 END = "<!-- versions:end -->"
-SHOT = re.compile(r"(https://cosmic-blue-os\.github\.io/cosmic-blue/img/screenshots/[a-z0-9-]+\.webp)(\?v=[A-Za-z0-9._-]*)?")
+SHOT = re.compile(r"(https://celenn-os\.github\.io/celenn/img/screenshots/[a-z0-9-]+\.webp)(\?v=[A-Za-z0-9._-]*)?")
 
 
 def main():

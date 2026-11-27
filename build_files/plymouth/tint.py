@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tint Fedora's boot spinner frames with the cosmic-blue logo blue.
+"""Tint Fedora's boot spinner frames with the Celenn OS logo blue.
 
 The frames of the spinner Plymouth theme are grey or white on transparency.
 Each pixel keeps its alpha and its brightness, and takes the hue of the logo:

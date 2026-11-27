@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# NVIDIA proprietary driver, only for the cosmic-blue-nvidia image.
+# NVIDIA proprietary driver, only for the celenn-nvidia image.
 #
 # Same method as Bluefin (ublue-os/bluefin build_files/base/03-install-kernel-akmods.sh):
 # the open kernel modules (Turing / GTX 16xx and newer) come prebuilt from
@@ -63,6 +63,6 @@ kargs = ["rd.driver.blacklist=nouveau", "modprobe.blacklist=nouveau", "nvidia-dr
 EOF
 
 # Flatpak NVIDIA GL extensions matching the driver, installed at boot
-systemctl enable cosmic-blue-nvidia-flatpak-gl.service
+systemctl enable celenn-nvidia-flatpak-gl.service
 
 rm -rf /tmp/akmods-nvidia /tmp/akmods-nvidia-layer

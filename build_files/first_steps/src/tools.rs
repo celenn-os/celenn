@@ -1,4 +1,4 @@
-// cosmic-blue Tools: what people would otherwise do with commands (`ujust`,
+// Celenn OS Tools: what people would otherwise do with commands (`ujust`,
 // bootc...), as a toolbox. The first page shows where things stand in one
 // line, a search, and the tools as tiles named after what people want to
 // do, each saying how things are (overview.rs). A tile opens its tool: a
@@ -29,21 +29,21 @@
 // for when people want to look or act. The one notification is a disk almost
 // full (housekeeping.rs), which people have to act on.
 //
-//   cosmic-blue-tools               the window, on the toolbox
-//   cosmic-blue-tools --tool NAME   the window, on a tool (Tool::name)
-//   cosmic-blue-tools --updates     the window, on Update (also when run as
-//                                   /usr/libexec/cosmic-blue-updates)
-//   cosmic-blue-tools --maintenance / --computer / --software /
+//   celenn-tools               the window, on the toolbox
+//   celenn-tools --tool NAME   the window, on a tool (Tool::name)
+//   celenn-tools --updates     the window, on Update (also when run as
+//                                   /usr/libexec/celenn-updates)
+//   celenn-tools --maintenance / --computer / --software /
 //                     --appearance / --help-page   the tools that replace
 //                                   the pages of the same names
-//   cosmic-blue-tools --restore     the window, on Change computers,
+//   celenn-tools --restore     the window, on Change computers,
 //                                   choosing a settings file to take back
 //                                   (transfer.rs)
-//   cosmic-blue-tools --housekeeping  empties the old trash, warns when the
+//   celenn-tools --housekeeping  empties the old trash, warns when the
 //                                   disk is almost full (no window; run by
-//                                   cosmic-blue-housekeeping.timer)
-//   cosmic-blue-tools --status / --older   see updates_page.rs (tests)
-//   cosmic-blue-tools --check       image build test: every text has its
+//                                   celenn-housekeeping.timer)
+//   celenn-tools --status / --older   see updates_page.rs (tests)
+//   celenn-tools --check       image build test: every text has its
 //                                   translations (no window)
 //
 // Text is in English, translated from the PO files of po/tools/.
@@ -56,7 +56,7 @@ use cosmic::widget::{self, text, toaster::Toasts};
 use cosmic::{Application, ApplicationExt, Apply, Element, cosmic_theme, executor, theme};
 
 /// The first steps tour, opened again from the toolbox
-const TOUR: &str = "/usr/libexec/cosmic-blue-tour";
+const TOUR: &str = "/usr/libexec/celenn-tour";
 
 mod apps;
 mod common;
@@ -73,12 +73,14 @@ mod maintenance;
 mod more;
 mod network;
 mod overview;
+mod process;
 mod style;
 // What the tour reads from the system; Tools uses the settings folder and
 // the first-boot apps (transfer.rs)
 #[allow(dead_code)]
 mod system;
 mod transfer;
+mod units;
 mod update_progress;
 mod updates_page;
 mod webapps;
@@ -91,13 +93,13 @@ pub(crate) const LANGUAGES: &[(&str, &str)] = &[
     ("it", include_str!("../po/tools/it.po")),
     ("pt_BR", include_str!("../po/tools/pt_BR.po")),
 ];
-pub(crate) const TEMPLATE: &str = include_str!("../po/tools/cosmic-blue-tools.pot");
+pub(crate) const TEMPLATE: &str = include_str!("../po/tools/celenn-tools.pot");
 pub(crate) const PO_DIR: &str = "po/tools";
-pub(crate) const TEMPLATE_NAME: &str = "cosmic-blue-tools.pot";
+pub(crate) const TEMPLATE_NAME: &str = "celenn-tools.pot";
 
 /// The window's own texts and the tools'; each page lists its own
 const TEXTS: &[&str] = &[
-    "cosmic-blue Tools",
+    "Celenn OS Tools",
     "Some changes ask for the password of a parent or an administrator.",
     "Toolbox",
     "Every day",
@@ -109,7 +111,7 @@ const TEXTS: &[&str] = &[
     "In a terminal:",
     "Copy",
     "Update",
-    "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you.",
+    "Celenn OS updates itself in the background. A new version starts at the next restart, without interrupting you.",
     "The system, the apps and the devices",
     "Install apps",
     "Ready in one click. In each list, the apps most used on Linux are already ticked.",
@@ -127,7 +129,7 @@ const TEXTS: &[&str] = &[
     "Printers on the network or plugged in by USB show up by themselves. Add one or set it up here.",
     "Printers and scanners",
     "Change computers",
-    "Your settings and the list of your apps in a file, to take back on another cosmic-blue computer.",
+    "Your settings and the list of your apps in a file, to take back on another Celenn OS computer.",
     "Your settings and apps, in one file.",
     "What's inside",
     "What this computer is made of, and how it starts.",
@@ -142,7 +144,7 @@ const TEXTS: &[&str] = &[
     "Dark or light, and the layout of the desktop.",
     "Theme and layout",
     "NVIDIA driver",
-    "Use the NVIDIA edition of cosmic-blue, with NVIDIA's own driver, for games and graphics apps.",
+    "Use the NVIDIA edition of Celenn OS, with NVIDIA's own driver, for games and graphics apps.",
     "The graphics card's driver",
     "Microsoft fonts",
     "Arial, Times New Roman, Verdana… for documents made on Windows.",
@@ -151,7 +153,7 @@ const TEXTS: &[&str] = &[
     "Something wrong since the last update? Go back to the previous version. Your files and settings stay as they are.",
     "To the previous version",
     "Repair",
-    "Put back what is missing: the apps that come with cosmic-blue, the cosmic-blue look, your COSMIC settings.",
+    "Put back what is missing: the apps that come with Celenn OS, the Celenn OS look, your COSMIC settings.",
     "Apps, look, settings",
     "Get help",
     "Find answers, ask a question, or tell us what goes wrong.",
@@ -265,7 +267,7 @@ impl Tool {
         match self {
             Tool::Update => (
                 "Update",
-                "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you.",
+                "Celenn OS updates itself in the background. A new version starts at the next restart, without interrupting you.",
                 "The system, the apps and the devices",
             ),
             Tool::Apps => (
@@ -295,7 +297,7 @@ impl Tool {
             ),
             Tool::Transfer => (
                 "Change computers",
-                "Your settings and the list of your apps in a file, to take back on another cosmic-blue computer.",
+                "Your settings and the list of your apps in a file, to take back on another Celenn OS computer.",
                 "Your settings and apps, in one file.",
             ),
             Tool::Inside => (
@@ -320,7 +322,7 @@ impl Tool {
             ),
             Tool::Nvidia => (
                 "NVIDIA driver",
-                "Use the NVIDIA edition of cosmic-blue, with NVIDIA's own driver, for games and graphics apps.",
+                "Use the NVIDIA edition of Celenn OS, with NVIDIA's own driver, for games and graphics apps.",
                 "The graphics card's driver",
             ),
             Tool::Fonts => (
@@ -335,7 +337,7 @@ impl Tool {
             ),
             Tool::Repair => (
                 "Repair",
-                "Put back what is missing: the apps that come with cosmic-blue, the cosmic-blue look, your COSMIC settings.",
+                "Put back what is missing: the apps that come with Celenn OS, the Celenn OS look, your COSMIC settings.",
                 "Apps, look, settings",
             ),
             Tool::Help => (
@@ -421,6 +423,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             TEXTS,
             updates_page::TEXTS,
             update_progress::TEXTS,
+            units::TEXTS,
             maintenance::TEXTS,
             more::TEXTS,
             help::TEXTS,
@@ -453,10 +456,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 /// The tool the window opens on (None: the toolbox), from its options
 fn first_tool(args: &[String]) -> Option<Tool> {
-    // Run as /usr/libexec/cosmic-blue-updates (a link): Update
+    // Run as /usr/libexec/celenn-updates (a link): Update
     if args
         .first()
-        .is_some_and(|name| name.ends_with("cosmic-blue-updates"))
+        .is_some_and(|name| name.ends_with("celenn-updates"))
     {
         return Some(Tool::Update);
     }
@@ -775,7 +778,7 @@ impl Application for App {
     type Executor = executor::Default;
     type Flags = Option<Tool>;
     type Message = Message;
-    const APP_ID: &'static str = "io.github.cosmic_blue_os.Tools";
+    const APP_ID: &'static str = "io.github.celenn_os.Tools";
 
     fn core(&self) -> &Core {
         &self.core
@@ -810,7 +813,7 @@ impl Application for App {
             toasts: Toasts::new(Message::CloseToast),
         };
         let title = match app.core.main_window_id() {
-            Some(id) => app.set_window_title(tr("cosmic-blue Tools").to_owned(), id),
+            Some(id) => app.set_window_title(tr("Celenn OS Tools").to_owned(), id),
             None => Task::none(),
         };
         (

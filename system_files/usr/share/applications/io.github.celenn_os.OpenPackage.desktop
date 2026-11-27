@@ -1,0 +1,19 @@
+[Desktop Entry]
+Type=Application
+Name=Install a program
+Name[fr]=Installer un programme
+Name[de]=Ein Programm installieren
+Name[es]=Instalar un programa
+Name[it]=Installare un programma
+Name[pt_BR]=Instalar um programa
+Comment=Explains how to get the program of a Windows installer or of another Linux distribution's package
+Comment[fr]=Explique comment obtenir le programme d'un installateur Windows ou d'un paquet d'une autre distribution Linux
+Comment[de]=Erklärt, wie Sie das Programm eines Windows-Installers oder eines Pakets einer anderen Linux-Distribution bekommen
+Comment[es]=Explica cómo conseguir el programa de un instalador de Windows o de un paquete de otra distribución Linux
+Comment[it]=Spiega come ottenere il programma di un installer Windows o di un pacchetto di un'altra distribuzione Linux
+Comment[pt_BR]=Explica como obter o programa de um instalador do Windows ou de um pacote de outra distribuição Linux
+Icon=celenn-tour-store
+Exec=/usr/libexec/celenn-tour --open %f
+Terminal=false
+NoDisplay=true
+MimeType=application/x-ms-dos-executable;application/x-msdownload;application/vnd.microsoft.portable-executable;application/x-msi;application/x-msdos-program;application/vnd.debian.binary-package;application/x-deb;application/x-debian-package;application/x-rpm;

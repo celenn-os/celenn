@@ -1,4 +1,4 @@
-// cosmic-blue Updates: the system version in one window, without jargon.
+// Celenn OS Updates: the system version in one window, without jargon.
 //
 //   - the current version, a "Check now" button (uupd-manual.service, the
 //     same update as the daily timer: system, flatpaks, Homebrew), a
@@ -16,20 +16,20 @@
 //     back to.
 //
 // Changing the version needs root: the app runs
-// /usr/libexec/cosmic-blue-updates-helper through pkexec, which asks for an
-// administrator password (polkit action io.github.cosmic_blue_os.updates.manage)
+// /usr/libexec/celenn-updates-helper through pkexec, which asks for an
+// administrator password (polkit action io.github.celenn_os.updates.manage)
 // and only accepts those changes. After going back, that helper records
-// the version left behind (/var/lib/cosmic-blue/update-hold), so that the
-// automatic updates do not install it again (/usr/libexec/cosmic-blue-bootc);
+// the version left behind (/var/lib/celenn/update-hold), so that the
+// automatic updates do not install it again (/usr/libexec/celenn-bootc);
 // they start again with the next version.
 // No notifications: the system updates by itself, this is for when people
 // want to look or act.
 //
-// This is the first page of cosmic-blue Tools (tools.rs), which the Updates
-// launcher opens directly (`cosmic-blue-tools --updates`, and
-// /usr/libexec/cosmic-blue-updates, a link to it). From the command line:
-//   cosmic-blue-tools --status   what the page would show, as text (tests)
-//   cosmic-blue-tools --older    the older stable versions it would list
+// This is the first page of Celenn OS Tools (tools.rs), which the Updates
+// launcher opens directly (`celenn-tools --updates`, and
+// /usr/libexec/celenn-updates, a link to it). From the command line:
+//   celenn-tools --status   what the page would show, as text (tests)
+//   celenn-tools --older    the older stable versions it would list
 //
 // The look is the tours' (main.rs): same banner, title, rows and buttons.
 
@@ -42,11 +42,11 @@ use cosmic::iced::{Alignment, Length, Subscription};
 use cosmic::widget::{self, settings, text};
 use cosmic::{Apply, Element, cosmic_theme, theme};
 
-const HELPER: &str = "/usr/libexec/cosmic-blue-updates-helper";
+const HELPER: &str = "/usr/libexec/celenn-updates-helper";
 /// The version left behind by the last rollback: "<digest> <version>"
-const HOLD: &str = "/var/lib/cosmic-blue/update-hold";
-const RELEASES: &str = "https://github.com/cosmic-blue-os/cosmic-blue/releases";
-const VENDOR: &str = "ghcr.io/cosmic-blue-os/";
+const HOLD: &str = "/var/lib/celenn/update-hold";
+const RELEASES: &str = "https://github.com/celenn-os/celenn/releases";
+const VENDOR: &str = "ghcr.io/celenn-os/";
 
 /// Every text, for the translation check
 pub const TEXTS: &[&str] = &[
@@ -73,7 +73,7 @@ pub const TEXTS: &[&str] = &[
     "Off (recommended): one tested update a week.\nOn: an update every day, sooner but less tested.",
     "You follow the dev channel, chosen in a terminal. Turn this off to go back to one tested update a week.",
     "Downloading the new version… This can take a few minutes.",
-    "The system version could not be read: is this computer installed with cosmic-blue?",
+    "The system version could not be read: is this computer installed with Celenn OS?",
     "Apps from COSMIC Store update by themselves too.",
     "What's new",
     "An older version",
@@ -119,7 +119,7 @@ pub fn command_line(args: &[String]) -> Option<i32> {
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Deployment {
     version: String,
-    /// "ostree-image-signed:docker://ghcr.io/cosmic-blue-os/cosmic-blue:stable"
+    /// "ostree-image-signed:docker://ghcr.io/celenn-os/celenn:stable"
     reference: String,
     booted: bool,
     staged: bool,
@@ -227,9 +227,9 @@ pub fn summary() -> Result<Summary, String> {
 }
 
 /// The deployments from `rpm-ostree status --json` (readable without root),
-/// or from the file named by COSMIC_BLUE_UPDATES_STATUS_JSON (previews)
+/// or from the file named by CELENN_UPDATES_STATUS_JSON (previews)
 fn read_status() -> Result<Status, String> {
-    let json = match std::env::var_os("COSMIC_BLUE_UPDATES_STATUS_JSON") {
+    let json = match std::env::var_os("CELENN_UPDATES_STATUS_JSON") {
         Some(path) => std::fs::read_to_string(path).map_err(|error| error.to_string())?,
         None => {
             let output = std::process::Command::new("rpm-ostree")
@@ -582,7 +582,7 @@ impl Page {
                 content = content.push(
                     settings::section().add(settings::item_row(vec![two_lines(
                         row_title(tr(
-                            "The system version could not be read: is this computer installed with cosmic-blue?",
+                            "The system version could not be read: is this computer installed with Celenn OS?",
                         ))
                         .into(),
                         error.clone(),

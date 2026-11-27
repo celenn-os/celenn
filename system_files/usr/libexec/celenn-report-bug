@@ -1,0 +1,46 @@
+#!/usr/bin/bash
+# Report a Celenn OS bug: the system details (celenn-system-info, no
+# personal data) go into the "System details" field of the bug report form
+# through its URL. Nothing is sent until the report is submitted on GitHub.
+# Run by `ujust report-bug` and by "Report a problem" in Celenn OS Tools.
+#
+#   celenn-report-bug open    open the form in the browser
+#   celenn-report-bug url     print the form's address with the details
+#
+# CELENN_REPORT_ERROR: an error to add to the details (the "Report the
+# problem" button of an error in Celenn OS Tools or Parental controls).
+set -euo pipefail
+
+form="https://github.com/celenn-os/celenn/issues/new?template=bug_report.yml"
+
+case "${1:-} $#" in
+    "open 1" | "url 1") ;;
+    *)
+        echo "Usage: ${0##*/} open|url" >&2
+        exit 2
+        ;;
+esac
+
+info="$(/usr/libexec/celenn-system-info)"
+if [[ -n "${CELENN_REPORT_ERROR:-}" ]]; then
+    # The error may name the home folder or the account: hide them, the
+    # report is public
+    error="${CELENN_REPORT_ERROR//"${HOME:-/nonexistent}"/'~'}"
+    user="$(id -un)"
+    if [[ ${#user} -ge 3 ]]; then
+        error="${error//"${user}"/<user>}"
+    fi
+    info+=$'\n\nError:\n'"${error}"
+fi
+url="${form}&system-info=$(printf '%s\n' "${info}" | jq -sRr @uri)"
+# Browsers and GitHub refuse very long addresses: then the details are pasted
+if [[ "${#url}" -gt 7000 ]]; then
+    url="${form}"
+fi
+case "$1" in
+    url) printf '%s\n' "${url}" ;;
+    open)
+        xdg-open "${url}" >/dev/null 2>&1 &
+        disown
+        ;;
+esac

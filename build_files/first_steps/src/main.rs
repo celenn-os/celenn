@@ -1,21 +1,21 @@
-// cosmic-blue tours, built with libcosmic so they look exactly like COSMIC's
+// Celenn OS tours, built with libcosmic so they look exactly like COSMIC's
 // own first-run assistant (cosmic-initial-setup): same window, title, text,
 // lists and buttons, frosted glass and accent color from the COSMIC theme.
 //
-//   cosmic-blue-tour             "First steps": the installed system, opened once
+//   celenn-tour             "First steps": the installed system, opened once
 //                                at the first login of each new account
-//                                (/usr/libexec/cosmic-blue-first-steps-autostart)
+//                                (/usr/libexec/celenn-first-steps-autostart)
 //                                and from the "First steps" launcher
-//   cosmic-blue-tour --live      Welcome tour of the live ISO, with a button
+//   celenn-tour --live      Welcome tour of the live ISO, with a button
 //                                that starts the installer
-//   cosmic-blue-tour --open FILE What a downloaded .exe, .msi, .deb or .rpm
+//   celenn-tour --open FILE What a downloaded .exe, .msi, .deb or .rpm
 //                                file opens: why it does not install here, and
 //                                a search for the app in COSMIC Store
-//   cosmic-blue-tour --shortcuts The "Keyboard shortcuts" app: COSMIC's main
+//   celenn-tour --shortcuts The "Keyboard shortcuts" app: COSMIC's main
 //                                shortcuts on one page
-//   cosmic-blue-tour --belongings "Bring your things": files, photos,
+//   celenn-tour --belongings "Bring your things": files, photos,
 //                                bookmarks and email from the old computer
-//   cosmic-blue-tour --check     Image build test: every text has its
+//   celenn-tour --check     Image build test: every text has its
 //                                translations (no window)
 //
 // The first steps tour adapts to the person. Its first page asks where they
@@ -37,7 +37,6 @@ use cosmic::widget::{self, settings, text, toaster::Toasts};
 use cosmic::{Application, ApplicationExt, Apply, Element, cosmic_theme, executor, theme};
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 use std::time::Duration;
 
 mod apps;
@@ -45,54 +44,61 @@ mod devtools;
 mod edition;
 mod failure;
 // The live session's hardware check reads the same details as Tools'
-// Computer page (cosmic-blue-tools), not all of them
+// Computer page (celenn-tools), not all of them
 #[allow(dead_code)]
 mod hardware;
 mod i18n;
 mod layout;
 mod network;
+mod process;
 mod readiness;
+mod shortcuts;
 mod style;
 mod system;
 mod tour_keys;
+mod tour_pages;
 mod tour_view;
+mod units;
 use apps::{CATEGORIES, DEVELOPMENT};
 use devtools::{
     BITWARDEN, BITWARDEN_EXTENSION, DevTool, ToolKind, brew_install, brew_installed, dev_tools,
 };
 use failure::{Card, CardAction, CardMessage, Failure, Outcome};
 use i18n::{fill, language, tr};
+use process::spawn;
+use shortcuts::{KEY_LABELS, SHORTCUTS, close_open_sheet};
 use style::dim_caption;
 use system::{Computer, Package};
 use tour_keys::*;
+use tour_pages::*;
 use tour_view::*;
 
-const SITE: &str = "https://cosmic-blue-os.github.io/cosmic-blue/";
-const LOGO: &str = "/usr/share/icons/hicolor/scalable/apps/cosmic-blue-logo.svg";
+const SITE: &str = "https://celenn-os.github.io/celenn/";
+const LOGO: &str = "/usr/share/icons/hicolor/scalable/apps/celenn-logo.svg";
 /// Welcome page illustration of the live tour: the default wallpaper in
 /// miniature
-const HERO: &str = "/usr/share/cosmic-blue/tour-welcome.svg";
+const HERO: &str = "/usr/share/celenn/tour-welcome.svg";
 /// The same sky (600 x 100), behind the icon of the other pages
 /// (both from branding/tour/build.py)
-const BANNER: &str = "/usr/share/cosmic-blue/tour-banner.svg";
+const BANNER: &str = "/usr/share/celenn/tour-banner.svg";
 const INSTALLERS: [&str; 2] = [
     "/usr/share/applications/liveinst.desktop",
     "/usr/share/applications/anaconda.desktop",
 ];
-const UPDATES_APP: &str = "/usr/libexec/cosmic-blue-updates";
+const UPDATES_APP: &str = "/usr/libexec/celenn-updates";
 /// This program, for the windows it opens (--phone)
-const TOUR: &str = "/usr/libexec/cosmic-blue-tour";
-const TOOLS: &str = "/usr/libexec/cosmic-blue-tools";
+const TOUR: &str = "/usr/libexec/celenn-tour";
+const TOOLS: &str = "/usr/libexec/celenn-tools";
 /// LocalSend (first-boot app): files between phones and computers
 const LOCALSEND: &[&str] = &["flatpak", "run", "org.localsend.localsend_app"];
 /// A QR code of LocalSend's download page, for the phone
-const LOCALSEND_QR: &str = "/usr/share/cosmic-blue/localsend-qr.svg";
+const LOCALSEND_QR: &str = "/usr/share/celenn/localsend-qr.svg";
 
 /// One shortcut per line (the Settings button next to it opens the rest)
 const ACCESSIBILITY: &str = "Screen reader: Super + Alt + S\nZoom: Super + = and Super + -";
 
 /// Translations, one gettext PO file per language in po/ (copies of
-/// po/cosmic-blue-tour.pot). To add a language, add its file here: pt_BR is
+/// po/celenn-tour.pot). To add a language, add its file here: pt_BR is
 /// a regional variant, also used for the other variants of its language when
 /// they have no file of their own.
 pub(crate) const LANGUAGES: &[(&str, &str)] = &[
@@ -102,204 +108,11 @@ pub(crate) const LANGUAGES: &[(&str, &str)] = &[
     ("it", include_str!("../po/it.po")),
     ("pt_BR", include_str!("../po/pt_BR.po")),
 ];
-pub(crate) const TEMPLATE: &str = include_str!("../po/cosmic-blue-tour.pot");
+pub(crate) const TEMPLATE: &str = include_str!("../po/celenn-tour.pot");
 
 /// Where the PO files are, for the messages of the translation check
 pub(crate) const PO_DIR: &str = "po";
-pub(crate) const TEMPLATE_NAME: &str = "cosmic-blue-tour.pot";
-
-/// Where the person comes from (first page of the first steps tour), kept
-/// in ~/.config/cosmic-blue/tour-origin for the next time
-#[derive(Clone, Copy, Debug, PartialEq)]
-enum Origin {
-    Windows,
-    Mac,
-    Linux,
-}
-
-impl Origin {
-    const ALL: [Origin; 3] = [Origin::Windows, Origin::Mac, Origin::Linux];
-
-    fn key(self) -> &'static str {
-        match self {
-            Origin::Windows => "windows",
-            Origin::Mac => "macos",
-            Origin::Linux => "linux",
-        }
-    }
-
-    fn from_key(key: &str) -> Option<Self> {
-        Self::ALL.into_iter().find(|origin| origin.key() == key)
-    }
-
-    /// Icon, name and what the tour does for them
-    fn card(self) -> (&'static str, &'static str, &'static str) {
-        match self {
-            Origin::Windows => ("computer-symbolic", "Windows", "Your bearings from Windows"),
-            Origin::Mac => (
-                "computer-laptop-symbolic",
-                "macOS",
-                "Your bearings from the Mac",
-            ),
-            Origin::Linux => (
-                "utilities-terminal-symbolic",
-                "Linux",
-                "What is different from your distribution",
-            ),
-        }
-    }
-}
-
-/// tour-level's value for the short tour
-const EXPERIENCED: &str = "experienced";
-
-/// Things to try on the "Try it" page: each button does the real thing
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-enum Try {
-    Launcher,
-    AppLibrary,
-    Workspaces,
-    Tiling,
-    Screenshot,
-}
-
-impl Try {
-    const ALL: [Try; 5] = [
-        Try::Launcher,
-        Try::AppLibrary,
-        Try::Workspaces,
-        Try::Tiling,
-        Try::Screenshot,
-    ];
-
-    fn texts(self) -> (&'static str, &'static str) {
-        match self {
-            Try::Launcher => (
-                "Open the launcher",
-                "Press Super, type the name of an app, then Enter.",
-            ),
-            Try::AppLibrary => ("See all your apps", "Super + A"),
-            Try::Workspaces => (
-                "See your workspaces",
-                "Super + W: one desktop per activity. Super + Ctrl + arrows goes from one to the next.",
-            ),
-            Try::Tiling => (
-                "Tile your windows",
-                "Windows side by side, without overlap. Super + Y turns it on or off.",
-            ),
-            Try::Screenshot => (
-                "Take a screenshot",
-                "Super + Shift + S, or the Print Screen key",
-            ),
-        }
-    }
-
-    /// The COSMIC program behind the shortcut (cosmic-settings-daemon's
-    /// system actions)
-    fn program(self) -> Option<&'static str> {
-        match self {
-            Try::Launcher => Some("cosmic-launcher"),
-            Try::AppLibrary => Some("cosmic-app-library"),
-            Try::Workspaces => Some("cosmic-workspaces"),
-            Try::Screenshot => Some("cosmic-screenshot"),
-            Try::Tiling => None,
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-enum Action {
-    /// A program and its arguments
-    Launch(&'static [&'static str]),
-    OpenUri(String),
-    Install,
-    /// A "Try it" button in a row: does the real thing (Message::Try)
-    Try(Try),
-}
-
-/// A row: title, caption and maybe a button
-struct Row {
-    title: &'static str,
-    caption: &'static str,
-    button: Option<(&'static str, Action)>,
-}
-
-const fn row(title: &'static str, caption: &'static str) -> Row {
-    Row {
-        title,
-        caption,
-        button: None,
-    }
-}
-
-fn row_button(
-    title: &'static str,
-    caption: &'static str,
-    label: &'static str,
-    action: Action,
-) -> Row {
-    Row {
-        title,
-        caption,
-        button: Some((label, action)),
-    }
-}
-
-/// What a page shows under its description
-enum Body {
-    /// The welcome illustration (HERO, or the logo when it is missing),
-    /// with the accessibility row under it (live tour)
-    Welcome,
-    /// Where the person comes from, the accessibility row and the progress
-    /// of the first-boot apps (first steps tour)
-    Origin,
-    /// Theme, wallpaper, avatar, dock: applied at once
-    Look,
-    /// The kinds of apps, as tiles that open a list to tick (apps.rs)
-    Profiles,
-    /// The experienced tour's page: what is different here (rows), then
-    /// the password managers and developer tools tiles
-    Essentials(Vec<Row>),
-    /// Buttons that do the real thing
-    Try,
-    /// What was done, what the computer needs, backups and help
-    Ready,
-    /// Title and subtitle rows, without action
-    Features(Vec<(&'static str, &'static str)>),
-    /// Title and subtitle rows, some with a button
-    Rows(Vec<Row>),
-    /// Live session: what this computer has, checked (readiness.rs)
-    Readiness,
-    /// Live session's last page: the checks to look at before installing,
-    /// and the install guide
-    Install,
-}
-
-struct Page {
-    /// Icon of the icon theme shown above the title on the BANNER sky, in
-    /// color like the app icons (cosmic-blue's Tela circle theme)
-    icon: Option<&'static str>,
-    title: &'static str,
-    description: Option<&'static str>,
-    body: Body,
-    /// Button under the rows
-    button_after: Option<(&'static str, Action)>,
-    /// Short dimmed line at the bottom
-    note: Option<&'static str>,
-}
-
-impl Page {
-    fn new(title: &'static str, description: Option<&'static str>, body: Body) -> Self {
-        Self {
-            icon: None,
-            title,
-            description,
-            body,
-            button_after: None,
-            note: None,
-        }
-    }
-}
+pub(crate) const TEMPLATE_NAME: &str = "celenn-tour.pot";
 
 #[derive(Clone, Debug, PartialEq)]
 enum Mode {
@@ -313,484 +126,11 @@ enum Mode {
     Belongings,
 }
 
-/// The cosmic-blue site in the session language
-/// The website's folder of the session language ("" for English)
-fn site_language() -> &'static str {
-    match language() {
-        Some("pt_BR") => "pt-br/",
-        Some("fr") => "fr/",
-        Some("de") => "de/",
-        Some("es") => "es/",
-        Some("it") => "it/",
-        _ => "",
-    }
-}
-
-fn docs_url() -> String {
-    format!("{SITE}{}docs/", site_language())
-}
-
-/// The install guide, at one of its steps ("disk") or at the top ("")
-fn install_url(step: &str) -> String {
-    let anchor = if step.is_empty() {
-        String::new()
-    } else {
-        format!("#{step}")
-    };
-    format!("{SITE}{}install/{anchor}", site_language())
-}
-
-const DISTROSHELF: &[&str] = &["flatpak", "run", "com.ranfdev.DistroShelf"];
-const FLATSEAL: &[&str] = &["flatpak", "run", "com.github.tchx84.Flatseal"];
-const FIREFOX: &[&str] = &["flatpak", "run", "org.mozilla.firefox"];
-const THUNDERBIRD: &[&str] = &["flatpak", "run", "org.mozilla.thunderbird"];
-const FIRMWARE: &[&str] = &["flatpak", "run", "org.gnome.Firmware"];
-
-/// What is different on cosmic-blue for someone who knows Linux: the
-/// Linux bearings, and the first rows of the experienced tour
-fn linux_rows() -> Vec<Row> {
-    vec![
-        row_button(
-            "The system is an image",
-            "Signed and read-only, it updates as a whole: no dnf on the system, and the previous version is one click away.",
-            "Updates",
-            Action::Launch(&[UPDATES_APP]),
-        ),
-        row_button(
-            "Apps → COSMIC Store",
-            "Flatpak apps from Flathub, kept apart from the system",
-            "Open COSMIC Store",
-            Action::Launch(&["cosmic-store"]),
-        ),
-        row_button(
-            "Packages from other distributions → DistroShelf",
-            "Arch, Debian, Ubuntu… in a container that shares your home folder, set up in a few clicks",
-            "Open DistroShelf",
-            Action::Launch(DISTROSHELF),
-        ),
-        row_button(
-            "If you like the terminal",
-            "ujust lists the system's recipes, brew installs command line tools: the documentation has them all.",
-            "Documentation",
-            Action::OpenUri(docs_url()),
-        ),
-    ]
-}
-
-/// Where everything is, for someone new: each row has its "Try" button
-/// when there is something to try (the "Try it" page of the tour when
-/// nobody said where they come from)
-fn bearings(origin: Origin) -> Page {
-    let rows = match origin {
-        Origin::Linux => linux_rows(),
-        Origin::Mac => vec![
-            row(
-                "Command key → Ctrl, most of the time",
-                "Copy, paste, save: Ctrl + C, Ctrl + V, Ctrl + S",
-            ),
-            row_button(
-                "Spotlight → the Super key",
-                "Super opens the launcher: type the name of an app",
-                "Try",
-                Action::Try(Try::Launcher),
-            ),
-            row_button(
-                "App Store → COSMIC Store",
-                "Apps install and update from there",
-                "Open",
-                Action::Launch(&["cosmic-store"]),
-            ),
-            row_button(
-                "Finder → Files",
-                "Super + E opens it",
-                "Try",
-                Action::Launch(&["cosmic-files"]),
-            ),
-            row_button(
-                "Mission Control → Super + W",
-                "Your windows and workspaces at a glance",
-                "Try",
-                Action::Try(Try::Workspaces),
-            ),
-            row(
-                "System Settings → Settings",
-                "Everything in one place, Settings → Desktop for the look",
-            ),
-        ],
-        Origin::Windows => vec![
-            row_button(
-                "Windows key → the Super key",
-                "It opens the launcher, like the Start menu: type the name of an app",
-                "Try",
-                Action::Try(Try::Launcher),
-            ),
-            row_button(
-                "Task View → Super + W",
-                "Your windows and workspaces at a glance",
-                "Try",
-                Action::Try(Try::Workspaces),
-            ),
-            row_button(
-                "Microsoft Store → COSMIC Store",
-                "Apps install and update from there",
-                "Open",
-                Action::Launch(&["cosmic-store"]),
-            ),
-            row_button(
-                "File Explorer → Files",
-                "Super + E opens it, as on Windows",
-                "Try",
-                Action::Launch(&["cosmic-files"]),
-            ),
-            row(
-                "Office → LibreOffice",
-                "It opens and saves Word, Excel and PowerPoint files",
-            ),
-            row_button(
-                "Same as on Windows",
-                "Alt + Tab, Ctrl + C and Ctrl + V, Super + Shift + S for a screenshot, Ctrl + Shift + Esc for the task manager",
-                "Try",
-                Action::Try(Try::Screenshot),
-            ),
-        ],
-    };
-    // No banner, like the Look page: six rows and a note need the room
-    Page {
-        note: Some(SHORTCUTS_NOTE),
-        ..Page::new(
-            match origin {
-                Origin::Mac => "Your bearings from the Mac",
-                Origin::Windows => "Your bearings from Windows",
-                Origin::Linux => "What is different here",
-            },
-            Some(match origin {
-                Origin::Linux => "Another Linux, with its own habits, and an app for each of them.",
-                _ => "What changes, and what stays the same. Try it, it is safe.",
-            }),
-            Body::Rows(rows),
-        )
-    }
-}
-
-/// Under the bearings: where the other shortcuts are
-const SHORTCUTS_NOTE: &str = "Every shortcut, tiling included: Super + F1.";
-
-/// The page of the experienced Linux user's tour: what is different here,
-/// then the developer tools and the password managers (Body::Essentials
-/// adds them)
-fn essentials() -> Page {
-    // No banner: the rows need the room
-    Page {
-        note: Some(
-            "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Install apps.",
-        ),
-        ..Page::new(
-            "The essentials",
-            Some("What is different here, and your tools."),
-            Body::Essentials(linux_rows()),
-        )
-    }
-}
-
-/// The rows of the "Bring your things" window, made once
-static BELONGINGS: std::sync::LazyLock<Vec<Row>> = std::sync::LazyLock::new(belongings_rows);
-
-/// "Bring your things" (--belongings, from the last page of the tour)
-fn belongings_rows() -> Vec<Row> {
-    vec![
-        row_button(
-            "Files from an old disk",
-            "Plug it in: it shows up in Files, on the left. A Windows partition of this computer too.",
-            "Open Files",
-            Action::Launch(&["cosmic-files"]),
-        ),
-        row_button(
-            "Photos from a phone",
-            "Without a cable, with LocalSend. Or plug it in and allow file transfer on the phone: it shows up in Files.",
-            "Without a cable",
-            Action::Launch(&[TOUR, "--phone"]),
-        ),
-        row_button(
-            "From another cosmic-blue computer",
-            "Your settings and the list of your apps, with the file saved there in cosmic-blue Tools → Change computers.",
-            "Restore…",
-            Action::Launch(&[TOOLS, "--restore"]),
-        ),
-        row_button(
-            "Bookmarks and passwords",
-            "Export them from your old browser (an HTML file for bookmarks, a CSV file for passwords), then import them in Firefox.",
-            "Open Firefox",
-            Action::Launch(FIREFOX),
-        ),
-        row_button(
-            "Email",
-            "Thunderbird sets up your account with just your address and password.",
-            "Open Thunderbird",
-            Action::Launch(THUNDERBIRD),
-        ),
-        row_button(
-            "An app cannot see a folder or a USB drive?",
-            "Apps run apart from the system and only see what they need. Flatseal gives them access to more.",
-            "Open Flatseal",
-            Action::Launch(FLATSEAL),
-        ),
-    ]
-}
-
-fn pages(mode: &Mode, origin: Option<Origin>, experienced: bool) -> Vec<Page> {
-    match mode {
-        Mode::FirstSteps => {
-            let welcome = Page::new(
-                "Welcome to cosmic-blue",
-                Some(
-                    "Your system is installed and ready. Where do you come from? The tour adapts to you.",
-                ),
-                Body::Origin,
-            );
-            let ready = Page::new(
-                "You are ready",
-                Some("What is done, and what is left for when you want."),
-                Body::Ready,
-            );
-            // The short tour, for those who know Linux well (the choice
-            // shows under the Linux card)
-            if experienced && origin == Some(Origin::Linux) {
-                return vec![welcome, essentials(), ready];
-            }
-            // No banner nor description: the wallpapers and pictures need
-            // the room (each choice applies at once, which says it all)
-            let look = Page::new("Make it yours", None, Body::Look);
-            // No banner: the six rows need the room
-            let apps = Page {
-                note: Some("Thousands of other apps are in COSMIC Store."),
-                ..Page::new(
-                    "Your apps",
-                    Some(
-                        "Pick what concerns you. In each list, the apps most used on Linux are already ticked, all free. Nothing installs without your OK.",
-                    ),
-                    Body::Profiles,
-                )
-            };
-            // Nobody said where they come from: the shortcuts to try
-            let bearings = match origin {
-                Some(origin) => bearings(origin),
-                None => Page {
-                    icon: Some("cosmic-blue-tour-try"),
-                    note: Some(SHORTCUTS_NOTE),
-                    ..Page::new(
-                        "Try it, it is safe",
-                        Some("Each button does the real thing."),
-                        Body::Try,
-                    )
-                },
-            };
-            vec![welcome, look, apps, bearings, ready]
-        }
-        Mode::Live => vec![
-            Page::new(
-                "Welcome to cosmic-blue",
-                Some(
-                    "cosmic-blue is Fedora Atomic with the COSMIC desktop, made in the spirit of Bluefin: a desktop that stays out of your way and keeps itself up to date.",
-                ),
-                Body::Welcome,
-            ),
-            Page::new(
-                "Is this computer ready?",
-                Some(
-                    "cosmic-blue runs from the USB drive, without touching your disk. Here is what it found.",
-                ),
-                Body::Readiness,
-            ),
-            Page::new(
-                "What you get",
-                None,
-                Body::Features(vec![
-                    (
-                        "Automatic updates",
-                        "The whole system updates in the background and applies at the next restart. If something goes wrong, boot the previous version.",
-                    ),
-                    (
-                        "Apps from Flathub and COSMIC",
-                        "Install apps with COSMIC Store, from Flathub and the COSMIC repository. They run sandboxed and update on their own.",
-                    ),
-                    (
-                        "Ready for the terminal",
-                        "Homebrew for command line tools, distrobox for other distributions, and ujust for common tasks.",
-                    ),
-                ]),
-            ),
-            Page::new(
-                "Ready to install?",
-                Some(
-                    "The installer copies cosmic-blue to your disk. After that, it updates itself from the cosmic-blue image registry.",
-                ),
-                Body::Install,
-            ),
-        ],
-        Mode::Open(_) | Mode::Shortcuts | Mode::Phone | Mode::Belongings => Vec::new(),
-    }
-}
-
-/// The keyboard shortcuts app: (heading, [(keys, what they do)])
-const SHORTCUTS: &[(&str, &[(&str, &str)])] = &[
-    (
-        "Desktop",
-        &[
-            ("Super", "Open the launcher"),
-            ("Super + A", "See all your apps"),
-            ("Super + W", "See your windows and workspaces"),
-            ("Super + Shift + S", "Take a screenshot"),
-            ("Super + Escape", "Lock the screen"),
-            ("Super + F1", "These keyboard shortcuts"),
-        ],
-    ),
-    (
-        "Windows",
-        &[
-            ("Alt + Tab", "Go from one window to the next"),
-            ("Super + Q", "Close the window"),
-            ("Super + M", "Maximize the window"),
-            ("Super + G", "Let the window float"),
-            ("Super + Y", "Turn tiling on or off"),
-            ("Super + ←↑↓→", "Go to a nearby window"),
-            ("Super + Shift + ←↑↓→", "Move the window"),
-        ],
-    ),
-    (
-        "Workspaces",
-        &[
-            ("Super + 1 … 9", "Go to a workspace"),
-            ("Super + Shift + 1 … 9", "Move the window there"),
-            ("Super + Ctrl + ←→", "Next or previous workspace"),
-        ],
-    ),
-    (
-        "Apps",
-        &[
-            ("Super + B", "Web browser"),
-            ("Super + E", "Files"),
-            ("Ctrl + Alt + T", "Terminal"),
-            ("Ctrl + Shift + Escape", "System monitor"),
-        ],
-    ),
-    (
-        "Accessibility",
-        &[
-            ("Super + Alt + S", "Screen reader"),
-            ("Super + = / Super + -", "Zoom in and out"),
-        ],
-    ),
-];
-
-/// The columns of the shortcuts sheet: numbers of SHORTCUTS' sections
-const SHORTCUT_COLUMNS: [&[usize]; 3] = [&[0, 4], &[1], &[2, 3]];
-
-/// Key names drawn translated on the keys ("Shift" is "Maj" in French)
-const KEY_LABELS: &[&str] = &["Shift", "Escape", "Space"];
-
-/// Texts that are not in a page (buttons, states, the other windows)
-const TEXTS: &[&str] = &[
-    "Back",
-    "Next",
-    "Close",
-    "Later",
-    "Step {} of {}",
-    "First steps",
-    "Open",
-    "Get started",
-    "Install cosmic-blue",
-    "Keep trying",
-    "Accessibility",
-    ACCESSIBILITY,
-    "Settings",
-    // First page
-    "Linux and you",
-    "I am new to it",
-    "I know it well",
-    "I know it well: a shorter tour, in three steps.",
-    "Installing your apps: {} of {}",
-    "They show up in the app library as they arrive.",
-    // Look
-    "Theme",
-    "Dark",
-    "Light",
-    "Wallpaper",
-    "Your picture",
-    "Layout",
-    "Top bar and dock: like the Mac. One bar at the bottom: like Windows.",
-    "Top bar and dock",
-    "Bar at the bottom",
-    "This did not work.",
-    // Send without a cable (--phone)
-    "Send without a cable",
-    "With LocalSend, already on this computer. The files go straight through your Wi-Fi, encrypted, not through the internet.",
-    "On the phone, scan this code and install LocalSend (Play Store or App Store).",
-    "Open LocalSend here and on the phone, on the same Wi-Fi.",
-    "On the phone, pick the photos, then this computer. They arrive in Downloads. It works the other way too.",
-    "Open LocalSend",
-    // Your apps (the categories: apps.rs)
-    "Install and continue",
-    "Installing: {} of {}",
-    "Ticked and grey: already installed.",
-    "Homebrew is still being set up: the code editors and terminal tools can be chosen in a few minutes.",
-    "Back to the list",
-    // What the computer needs (last page)
-    "No internet connection",
-    "Apps and updates need it.",
-    "Network settings",
-    "NVIDIA graphics card",
-    "The NVIDIA edition of cosmic-blue has its driver: about 4 GB to download, then it starts at the next restart.",
-    "Switch",
-    "Downloading the NVIDIA edition… This can take a while.",
-    "The NVIDIA edition starts at the next restart.",
-    "At the restart, a blue screen asks to enroll a key: choose Enroll MOK, Continue, Yes, then type the password cosmicblue (the keyboard is QWERTY there).",
-    "Firmware updates are available",
-    "Open Firmware",
-    "Take care of the battery",
-    "Stop charging at 80 % when the laptop stays plugged in: the battery lasts longer.",
-    "Screen scale",
-    "Text and windows too small or too big? Change the scale of the screen.",
-    "Display settings",
-    // Try
-    "Try",
-    "Turn on",
-    "Turn off",
-    // Ready
-    "Your look is set",
-    "Your apps are installed",
-    "Everything updates by itself",
-    "In the background, applied at the next restart. The previous version stays one click away.",
-    "Bring your things",
-    "Files, photos from a phone, bookmarks and email from before",
-    "Show me how",
-    "Protect your files",
-    "Plug in a USB drive and turn on automatic backups: Déjà Dup keeps a copy of your home folder.",
-    "Set up backups",
-    "Documentation",
-    "Updates, software, commands and tips",
-    "This tour and the Keyboard shortcuts app stay in the app library.",
-    // Files that do not install here
-    "“{}” does not install here",
-    "This is a Windows program. On cosmic-blue, apps come from COSMIC Store: most well-known apps are there, or a good alternative.",
-    "This is a package for Debian and Ubuntu. On cosmic-blue, apps come from COSMIC Store: most well-known apps are there, or a good alternative.",
-    "This is a package for Fedora. cosmic-blue's system is a read-only image: apps come from COSMIC Store instead. Most well-known apps are there, or a good alternative.",
-    "Search for “{}” in COSMIC Store",
-    "Open COSMIC Store",
-    "A Windows program with no equivalent? Bottles, in COSMIC Store, runs some of them.",
-    "Open with Bottles",
-    "See the equivalents of Windows programs",
-    "For advanced users: distrobox installs it in a container of another distribution.",
-    // Keyboard shortcuts
-    "Keyboard shortcuts",
-    "Super is the key with the Windows logo on most keyboards.",
-    "Change them in Settings",
-    "Escape closes this window.",
-];
-
 /// Every text of the tours and windows, for the translation check
 fn all_texts() -> Vec<&'static str> {
     let mut texts: Vec<&'static str> = TEXTS.to_vec();
     texts.extend(failure::TEXTS);
+    texts.extend(units::TEXTS);
     texts.extend(readiness::TEXTS);
     for origin in Origin::ALL {
         // (names of operating systems are not translated)
@@ -858,6 +198,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if args.iter().any(|arg| arg == "--check") {
         std::process::exit(if i18n::check(&all_texts()) { 0 } else { 1 });
     }
+    // The image's tests: every shortcut of the sheet is one COSMIC has
+    // (its defaults and our custom shortcuts, the files given)
+    if args.first().map(String::as_str) == Some("--check-shortcuts") {
+        std::process::exit(if shortcuts::check(&args[1..]) { 0 } else { 1 });
+    }
     // As wide as cosmic-initial-setup, a little taller, so that every
     // page fits without scrolling (the page scrolls on smaller screens)
     let tour = Settings::default()
@@ -897,38 +242,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         _ => cosmic::app::run::<App<FirstStepsTour>>(tour, Mode::FirstSteps)?,
     }
     Ok(())
-}
-
-/// The shortcuts sheet already open (its process number in the runtime
-/// folder, still running with --shortcuts): close it and say so; otherwise
-/// note this one
-fn close_open_sheet() -> bool {
-    let Some(runtime) = std::env::var_os("XDG_RUNTIME_DIR") else {
-        return false;
-    };
-    let file = PathBuf::from(runtime).join("cosmic-blue-shortcuts.pid");
-    let open = std::fs::read_to_string(&file)
-        .ok()
-        .and_then(|pid| pid.trim().parse::<u32>().ok())
-        .filter(|pid| {
-            *pid != std::process::id()
-                && std::fs::read(format!("/proc/{pid}/cmdline")).is_ok_and(|cmdline| {
-                    cmdline
-                        .split(|byte| *byte == 0)
-                        .any(|arg| arg == b"--shortcuts")
-                })
-        });
-    if let Some(pid) = open {
-        let closed = std::process::Command::new("kill")
-            .arg(pid.to_string())
-            .status()
-            .is_ok_and(|status| status.success());
-        if closed {
-            return true;
-        }
-    }
-    let _ = std::fs::write(&file, std::process::id().to_string());
-    false
 }
 
 /// The state of the profile installation
@@ -1010,27 +323,27 @@ trait Tour: 'static {
 }
 struct FirstStepsTour;
 impl Tour for FirstStepsTour {
-    const APP_ID: &'static str = "io.github.cosmic_blue_os.FirstSteps";
+    const APP_ID: &'static str = "io.github.celenn_os.FirstSteps";
 }
 struct LiveTour;
 impl Tour for LiveTour {
-    const APP_ID: &'static str = "io.github.cosmic_blue_os.Welcome";
+    const APP_ID: &'static str = "io.github.celenn_os.Welcome";
 }
 struct OpenDialog;
 impl Tour for OpenDialog {
-    const APP_ID: &'static str = "io.github.cosmic_blue_os.OpenPackage";
+    const APP_ID: &'static str = "io.github.celenn_os.OpenPackage";
 }
 struct PhoneDialog;
 impl Tour for PhoneDialog {
-    const APP_ID: &'static str = "io.github.cosmic_blue_os.PhoneTransfer";
+    const APP_ID: &'static str = "io.github.celenn_os.PhoneTransfer";
 }
 struct BelongingsDialog;
 impl Tour for BelongingsDialog {
-    const APP_ID: &'static str = "io.github.cosmic_blue_os.Belongings";
+    const APP_ID: &'static str = "io.github.celenn_os.Belongings";
 }
 struct ShortcutsApp;
 impl Tour for ShortcutsApp {
-    const APP_ID: &'static str = "io.github.cosmic_blue_os.Shortcuts";
+    const APP_ID: &'static str = "io.github.celenn_os.Shortcuts";
 }
 
 struct App<T: Tour> {
@@ -1038,7 +351,7 @@ struct App<T: Tour> {
     core: Core,
     mode: Mode,
     origin: Option<Origin>,
-    /// The short tour (kept in ~/.config/cosmic-blue/tour-level)
+    /// The short tour (kept in ~/.config/celenn/tour-level)
     experienced: bool,
     pages: Vec<Page>,
     page_i: usize,
@@ -1345,7 +658,7 @@ impl<T: Tour> Application for App<T> {
             tiling: system::tiling(),
         };
         let title = match &mode {
-            Mode::Live => tr("Welcome to cosmic-blue").to_owned(),
+            Mode::Live => tr("Welcome to Celenn OS").to_owned(),
             Mode::FirstSteps => tr("First steps").to_owned(),
             Mode::Shortcuts => tr("Keyboard shortcuts").to_owned(),
             Mode::Phone => tr("Send without a cable").to_owned(),
@@ -1732,7 +1045,7 @@ impl<T: Tour> Application for App<T> {
             };
             widget::button::suggested(tr(label)).on_press_maybe(self.next_message())
         } else if self.mode == Mode::Live {
-            let install = widget::button::suggested(tr("Install cosmic-blue"));
+            let install = widget::button::suggested(tr("Install Celenn OS"));
             if installer().is_some() {
                 install.on_press(Message::Run(Action::Install))
             } else {
@@ -1885,12 +1198,6 @@ fn in_path(program: &str) -> bool {
 
 fn installer() -> Option<&'static str> {
     INSTALLERS.into_iter().find(|path| Path::new(path).exists())
-}
-
-fn spawn(program: &str, args: &[&str]) {
-    if let Err(error) = Command::new(program).args(args).spawn() {
-        eprintln!("Could not start {program}: {error}");
-    }
 }
 
 fn run(action: &Action) {

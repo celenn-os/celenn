@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<!-- Parental controls (/usr/libexec/celenn-parental-controls) runs its
+     helpers as root with pkexec. Changing the rules: an administrator
+     password, remembered for a few minutes (one per change would be too
+     many). More time, asked from a child's session: an administrator
+     password every time, so that the child cannot ask again on its own. -->
+<policyconfig>
+  <vendor>Celenn OS</vendor>
+  <vendor_url>https://celenn-os.github.io/celenn/</vendor_url>
+  <action id="io.github.celenn_os.parental.manage">
+    <description>Change the parental controls</description>
+    <description xml:lang="fr">Modifier le contrôle parental</description>
+    <description xml:lang="de">Den Jugendschutz ändern</description>
+    <description xml:lang="es">Cambiar el control parental</description>
+    <description xml:lang="it">Modificare il controllo parentale</description>
+    <description xml:lang="pt_BR">Alterar o controle parental</description>
+    <message>Authentication is required to change the parental controls</message>
+    <message xml:lang="fr">Une authentification est nécessaire pour modifier le contrôle parental</message>
+    <message xml:lang="de">Zum Ändern des Jugendschutzes ist eine Authentifizierung erforderlich</message>
+    <message xml:lang="es">Se necesita autenticación para cambiar el control parental</message>
+    <message xml:lang="it">È necessario autenticarsi per modificare il controllo parentale</message>
+    <message xml:lang="pt_BR">É necessário se autenticar para alterar o controle parental</message>
+    <icon_name>celenn-parental-controls</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/celenn-parental-helper</annotate>
+  </action>
+  <action id="io.github.celenn_os.parental.extend">
+    <description>Give more screen time</description>
+    <description xml:lang="fr">Accorder plus de temps d'écran</description>
+    <description xml:lang="de">Mehr Bildschirmzeit gewähren</description>
+    <description xml:lang="es">Conceder más tiempo de pantalla</description>
+    <description xml:lang="it">Concedere più tempo di utilizzo</description>
+    <description xml:lang="pt_BR">Conceder mais tempo de tela</description>
+    <message>A parent's password is required to give more screen time</message>
+    <message xml:lang="fr">Le mot de passe d'un parent est nécessaire pour accorder plus de temps d'écran</message>
+    <message xml:lang="de">Für mehr Bildschirmzeit ist das Passwort eines Elternteils erforderlich</message>
+    <message xml:lang="es">Se necesita la contraseña de un padre o una madre para conceder más tiempo de pantalla</message>
+    <message xml:lang="it">Serve la password di un genitore per concedere più tempo di utilizzo</message>
+    <message xml:lang="pt_BR">É necessária a senha de um responsável para conceder mais tempo de tela</message>
+    <icon_name>celenn-parental-controls</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/celenn-parental-extend</annotate>
+  </action>
+</policyconfig>

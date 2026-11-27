@@ -42,7 +42,7 @@ python3 - "${src}/src/backend/render/mod.rs" <<'PY'
 import sys
 path = sys.argv[1]
 before = "pub static CLEAR_COLOR: Color32F = Color32F::new(0.153, 0.161, 0.165, 1.0);"
-after = ("// cosmic-blue: black, as the boot screen, until the wallpaper is drawn\n"
+after = ("// Celenn OS: black, as the boot screen, until the wallpaper is drawn\n"
          "pub static CLEAR_COLOR: Color32F = Color32F::new(0.0, 0.0, 0.0, 1.0);")
 text = open(path, encoding="utf-8").read()
 if text.count(before) != 1:

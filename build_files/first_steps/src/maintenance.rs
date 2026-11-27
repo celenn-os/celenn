@@ -1,8 +1,8 @@
-// The Maintenance page of cosmic-blue Tools (tools.rs): what `ujust` offers
+// The Maintenance page of Celenn OS Tools (tools.rs): what `ujust` offers
 // to keep the computer in shape, as buttons.
 //
 //   - Disk space: how full the disk is (the Disk Usage Analyzer shows the
-//     details) and "Clean up", which runs /usr/libexec/cosmic-blue-clean, the
+//     details) and "Clean up", which runs /usr/libexec/celenn-clean, the
 //     same script as `ujust clean-system`: app parts no app uses any more,
 //     unused container images, old Homebrew downloads, then (administrator
 //     password) the same for everyone's apps and the system's caches. The
@@ -10,7 +10,7 @@
 //   - The trash: how much it holds, "Empty". Files in it for more than 30
 //     days go by themselves, and a notification warns when the disk is
 //     almost full (housekeeping.rs); two switches turn these off.
-//   - The apps that come with cosmic-blue (/usr/share/flatpak/preinstall.d):
+//   - The apps that come with Celenn OS (/usr/share/flatpak/preinstall.d):
 //     when some were removed, "Reinstall" puts them back, as the first boot
 //     installed them.
 //   - Firmware updates: opens GNOME Firmware.
@@ -19,6 +19,7 @@ use crate::common::{ToastAsk, dim_caption, fill, label, row_title, spawn, state_
 use crate::failure::{self, Card, CardAction, CardMessage, Outcome};
 use crate::housekeeping;
 use crate::i18n::tr;
+use crate::units::size;
 use cosmic::app::Task;
 use cosmic::iced::{Alignment, Length};
 use cosmic::widget::{self, settings, text};
@@ -26,7 +27,7 @@ use cosmic::{Element, cosmic_theme, theme};
 use std::collections::BTreeSet;
 use std::process::{Command, Stdio};
 
-const CLEAN: &str = "/usr/libexec/cosmic-blue-clean";
+const CLEAN: &str = "/usr/libexec/celenn-clean";
 const PREINSTALL_DIR: &str = "/usr/share/flatpak/preinstall.d";
 const DISK_USAGE: &str = "org.gnome.baobab";
 const FIRMWARE: &str = "org.gnome.Firmware";
@@ -37,15 +38,10 @@ pub const TEXTS: &[&str] = &[
     "{} free",
     "See what takes space",
     "Free up space",
-    "Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of tools. Your files stay as they are.",
+    "Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of tools.",
     "Clean up",
     "Cleaning up…",
     "{} freed",
-    "B",
-    "kB",
-    "MB",
-    "GB",
-    "TB",
     "Everything was already tidy.",
     "Trash",
     "{} in the trash",
@@ -57,7 +53,7 @@ pub const TEXTS: &[&str] = &[
     "Like on Windows and the Mac. Newer ones can still be put back.",
     "Warn when the disk is almost full",
     "A notification when less than 10 % is free (20 GB at most).",
-    "Apps that come with cosmic-blue",
+    "Apps that come with Celenn OS",
     "All of them are installed.",
     "One of them was removed. Put it back?",
     "{} of them were removed. Put them back?",
@@ -124,7 +120,7 @@ pub struct Page {
 }
 
 /// The parts of the page, each in its own tool (tools.rs): disk space and
-/// the trash; putting back the apps that come with cosmic-blue; firmware
+/// the trash; putting back the apps that come with Celenn OS; firmware
 /// updates
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Part {
@@ -211,30 +207,6 @@ pub fn read_state() -> State {
         disk_usage_app: installed.contains(DISK_USAGE),
         firmware_app: installed.contains(FIRMWARE),
     }
-}
-
-/// Bytes as the file manager shows them: "12.3 GB" (powers of 1000), with
-/// the units and the decimal comma of the session language
-pub fn size(bytes: u64) -> String {
-    let units = ["B", "kB", "MB", "GB", "TB"].map(tr);
-    let mut value = bytes as f64;
-    let mut unit = 0;
-    while value >= 1000.0 && unit + 1 < units.len() {
-        value /= 1000.0;
-        unit += 1;
-    }
-    let number = if unit == 0 || value >= 100.0 {
-        format!("{value:.0}")
-    } else {
-        format!("{value:.1}")
-    };
-    // Every translated language writes 1,5 (English 1.5)
-    let number = if crate::i18n::language().is_some() {
-        number.replace('.', ",")
-    } else {
-        number
-    };
-    format!("{number} {}", units[unit])
 }
 
 fn refresh() -> Task<Message> {
@@ -390,7 +362,7 @@ impl Page {
         self.state.as_ref().is_some_and(|state| state.firmware_app)
     }
 
-    /// How many of the apps that come with cosmic-blue were removed
+    /// How many of the apps that come with Celenn OS were removed
     pub fn missing(&self) -> usize {
         self.state.as_ref().map_or(0, |state| state.missing.len())
     }
@@ -475,17 +447,23 @@ impl Page {
                 .on_press_maybe(idle.then_some(Message::CleanUp))
                 .into()
         };
-        disk = disk.add(
+        // The error card above stands for the change that did not work
+        // (its Try again does it again): its row makes room for it, so that
+        // the page still fits without scrolling
+        let failed = self.card.as_ref().map(|card| card.job);
+        if failed != Some(Busy::Cleaning) {
+            disk = disk.add(
             settings::item_row(vec![
                 state_icon("edit-clear-all-symbolic", false),
                 label(
                     tr("Clean up the system"),
-                    tr("Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of tools. Your files stay as they are.").to_owned(),
+                    tr("Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of tools.").to_owned(),
                 ),
                 clean,
             ])
             .spacing(space_s),
-        );
+            );
+        }
 
         // Trash
         let trash_caption = if state.trash == 0 {
@@ -513,52 +491,58 @@ impl Page {
                     .into(),
             );
         }
-        disk = disk.add(settings::item_row(trash_row).spacing(space_s));
+        if failed != Some(Busy::Emptying) {
+            disk = disk.add(settings::item_row(trash_row).spacing(space_s));
+        }
         content = content.push(disk);
 
-        // What happens by itself (housekeeping.rs)
-        content = content.push(
-            settings::section()
-                .title(tr("Automatically"))
-                .add(
-                    settings::item_row(vec![
-                        label(
-                            tr("Delete files that stayed in the trash for more than 30 days"),
-                            tr("Like on Windows and the Mac. Newer ones can still be put back.")
-                                .to_owned(),
-                        ),
-                        widget::toggler(state.trash_auto)
-                            .on_toggle(Message::TrashAuto)
-                            .into(),
-                    ])
-                    .spacing(space_s),
-                )
-                .add(
-                    settings::item_row(vec![
-                        label(
-                            tr("Warn when the disk is almost full"),
-                            tr("A notification when less than 10 % is free (20 GB at most).")
-                                .to_owned(),
-                        ),
-                        widget::toggler(state.disk_warning)
-                            .on_toggle(Message::DiskWarning)
-                            .into(),
-                    ])
-                    .spacing(space_s),
-                ),
-        );
+        // What happens by itself (housekeeping.rs): set aside while an
+        // error card is shown, so that the page still fits without
+        // scrolling (it comes back when the card closes)
+        if failed.is_none() {
+            content = content.push(
+                settings::section()
+                    .title(tr("Automatically"))
+                    .add(
+                        settings::item_row(vec![
+                            label(
+                                tr("Delete files that stayed in the trash for more than 30 days"),
+                                tr("Like on Windows and the Mac. Newer ones can still be put back.")
+                                    .to_owned(),
+                            ),
+                            widget::toggler(state.trash_auto)
+                                .on_toggle(Message::TrashAuto)
+                                .into(),
+                        ])
+                        .spacing(space_s),
+                    )
+                    .add(
+                        settings::item_row(vec![
+                            label(
+                                tr("Warn when the disk is almost full"),
+                                tr("A notification when less than 10 % is free (20 GB at most).")
+                                    .to_owned(),
+                            ),
+                            widget::toggler(state.disk_warning)
+                                .on_toggle(Message::DiskWarning)
+                                .into(),
+                        ])
+                        .spacing(space_s),
+                    ),
+            );
+        }
 
         content.into()
     }
 
-    /// The apps that come with cosmic-blue, and the button that puts back
+    /// The apps that come with Celenn OS, and the button that puts back
     /// the ones removed
     fn apps(&self, state: &State) -> Element<'_, Message> {
         let cosmic_theme::Spacing {
             space_xxs, space_s, ..
         } = theme::spacing();
         let idle = self.busy.is_none();
-        // Apps that come with cosmic-blue
+        // Apps that come with Celenn OS
         let caption = if state.missing.is_empty() {
             tr("All of them are installed.").to_owned()
         } else {
@@ -572,7 +556,7 @@ impl Page {
         };
         let mut apps_row = vec![
             state_icon("view-app-grid-symbolic", false),
-            label(tr("Apps that come with cosmic-blue"), caption),
+            label(tr("Apps that come with Celenn OS"), caption),
         ];
         if self.busy == Some(Busy::Reinstalling) {
             apps_row.push(
@@ -616,18 +600,5 @@ impl Page {
             );
         }
         system.into()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn sizes() {
-        assert_eq!(size(0), "0 B");
-        assert_eq!(size(9_400_000_000), "9.4 GB");
-        assert_eq!(size(238_000_000_000), "238 GB");
-        assert_eq!(size(1_500_000_000_000), "1.5 TB");
     }
 }

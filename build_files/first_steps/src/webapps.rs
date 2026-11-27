@@ -1,9 +1,9 @@
-// Web apps, a tool of cosmic-blue Tools (tools.rs): a site in its own
+// Web apps, a tool of Celenn OS Tools (tools.rs): a site in its own
 // window, with its icon in the app list and in the dock, as on a phone.
 //
-// A web app is Firefox (the Flatpak that comes with cosmic-blue) with a
+// A web app is Firefox (the Flatpak that comes with Celenn OS) with a
 // profile of its own and without its toolbars:
-//   ~/.local/share/applications/io.github.cosmic_blue_os.WebApp_<host>.desktop
+//   ~/.local/share/applications/io.github.celenn_os.WebApp_<host>.desktop
 //       the launcher: `flatpak run org.mozilla.firefox --name <id>
 //       --profile <profile> <address>`; --name gives the window the
 //       launcher's id (its Wayland app_id), so the dock shows it as its own
@@ -11,10 +11,10 @@
 //   ~/.local/share/icons/hicolor/{256x256,scalable}/apps/<id>.{png,svg}
 //       the site's icon (its "apple-touch-icon" or favicon), or a round
 //       letter when the site has none
-//   ~/.var/app/org.mozilla.firefox/data/cosmic-blue-web-apps/<host>/
+//   ~/.var/app/org.mozilla.firefox/data/celenn-web-apps/<host>/
 //       the profile (Firefox's folder, so the Flatpak can use it): its
 //       user.js hides the tabs and the address bar (chrome/userChrome.css)
-// Firefox's system policies (/usr/share/cosmic-blue/firefox: uBlock Origin,
+// Firefox's system policies (/usr/share/celenn/firefox: uBlock Origin,
 // no telemetry, HTTPS-Only...) apply to every profile, and so do the
 // parental controls (the DNS filter, Firefox allowed or not for a child).
 // People sign in once in each web app: each has its own cookies.
@@ -30,7 +30,7 @@ use cosmic::{Apply, Element, cosmic_theme, theme};
 use std::path::{Path, PathBuf};
 
 /// What launchers of web apps start with
-const ID_PREFIX: &str = "io.github.cosmic_blue_os.WebApp_";
+const ID_PREFIX: &str = "io.github.celenn_os.WebApp_";
 /// The launcher's key that keeps the web app's address
 const URL_KEY: &str = "X-CosmicBlue-WebApp-Url";
 const FIREFOX: &str = "org.mozilla.firefox";
@@ -508,7 +508,7 @@ fn cache_paths(url: &str) -> Option<[PathBuf; 3]> {
         .map(PathBuf::from)
         .filter(|path| path.is_absolute())
         .unwrap_or_else(|| home().join(".cache"))
-        .join("cosmic-blue/web-app-icons");
+        .join("celenn/web-app-icons");
     Some([
         cache.join(format!("{name}.png")),
         cache.join(format!("{name}.svg")),
@@ -589,9 +589,7 @@ fn cache_icon(url: &str) {
 /// Its Firefox profile (in Firefox's own folder, which the Flatpak sees)
 fn profile(id: &str) -> PathBuf {
     let name = id.strip_prefix(ID_PREFIX).unwrap_or(id);
-    home().join(format!(
-        ".var/app/{FIREFOX}/data/cosmic-blue-web-apps/{name}"
-    ))
+    home().join(format!(".var/app/{FIREFOX}/data/celenn-web-apps/{name}"))
 }
 
 fn firefox_installed() -> bool {
@@ -618,7 +616,7 @@ fn host(url: &str) -> Option<&str> {
 }
 
 /// The launcher id of a site: one per host ("web.whatsapp.com" →
-/// io.github.cosmic_blue_os.WebApp_web_whatsapp_com)
+/// io.github.celenn_os.WebApp_web_whatsapp_com)
 fn app_id(url: &str) -> Option<String> {
     let host = host(url)?;
     Some(format!("{ID_PREFIX}{}", host.replace(['.', '-'], "_")))
@@ -786,7 +784,7 @@ fn write_profile(profile: &Path) -> std::io::Result<()> {
     std::fs::create_dir_all(profile.join("chrome"))?;
     std::fs::write(
         profile.join("user.js"),
-        "// cosmic-blue web app (cosmic-blue Tools)\n\
+        "// Celenn OS web app (Celenn OS Tools)\n\
          user_pref(\"toolkit.legacyUserProfileCustomizations.stylesheets\", true);\n\
          user_pref(\"browser.tabs.inTitlebar\", 0);\n\
          user_pref(\"browser.toolbars.bookmarks.visibility\", \"never\");\n\
@@ -799,7 +797,7 @@ fn write_profile(profile: &Path) -> std::io::Result<()> {
     )?;
     std::fs::write(
         profile.join("chrome/userChrome.css"),
-        "/* cosmic-blue web app: only the page */\n\
+        "/* Celenn OS web app: only the page */\n\
          #TabsToolbar, #nav-bar, #PersonalToolbar, #sidebar-main, #sidebar-box {\n  \
          visibility: collapse !important;\n}\n",
     )
@@ -1105,7 +1103,7 @@ fn save_png(picture: &image::DynamicImage, path: &Path) -> std::io::Result<()> {
         .map_err(std::io::Error::other)
 }
 
-/// A round icon with the name's first letter, in cosmic-blue's blue
+/// A round icon with the name's first letter, in Celenn OS's blue
 pub fn letter_icon(name: &str) -> String {
     let letter = name
         .chars()
@@ -1181,7 +1179,7 @@ mod tests {
     fn ids_per_host() {
         assert_eq!(
             app_id("https://web.whatsapp.com/").as_deref(),
-            Some("io.github.cosmic_blue_os.WebApp_web_whatsapp_com")
+            Some("io.github.celenn_os.WebApp_web_whatsapp_com")
         );
         assert_eq!(
             app_id("https://www.netflix.com/"),
@@ -1212,15 +1210,15 @@ mod tests {
     #[test]
     fn launcher_runs_firefox() {
         let entry = desktop_entry(
-            "io.github.cosmic_blue_os.WebApp_laposte_fr",
+            "io.github.celenn_os.WebApp_laposte_fr",
             "La Poste",
             "https://laposte.fr/?a=1%20",
-            Path::new("/home/a/.var/app/org.mozilla.firefox/data/cosmic-blue-web-apps/laposte_fr"),
+            Path::new("/home/a/.var/app/org.mozilla.firefox/data/celenn-web-apps/laposte_fr"),
         );
         assert!(entry.contains(
-            "Exec=flatpak run org.mozilla.firefox --name io.github.cosmic_blue_os.WebApp_laposte_fr --profile \"/home/a/.var/app/org.mozilla.firefox/data/cosmic-blue-web-apps/laposte_fr\" \"https://laposte.fr/?a=1%%20\"\n"
+            "Exec=flatpak run org.mozilla.firefox --name io.github.celenn_os.WebApp_laposte_fr --profile \"/home/a/.var/app/org.mozilla.firefox/data/celenn-web-apps/laposte_fr\" \"https://laposte.fr/?a=1%%20\"\n"
         ));
-        assert!(entry.contains("StartupWMClass=io.github.cosmic_blue_os.WebApp_laposte_fr\n"));
+        assert!(entry.contains("StartupWMClass=io.github.celenn_os.WebApp_laposte_fr\n"));
         assert!(letter_icon("la poste").contains(">L</text>"));
     }
 }

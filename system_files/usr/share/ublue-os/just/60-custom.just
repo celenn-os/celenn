@@ -1,5 +1,5 @@
 # vim: set ft=make :
-# cosmic-blue commands, listed by `ujust` under "Desktop", "Apps" and "System".
+# Celenn OS commands, listed by `ujust` under "Desktop", "Apps" and "System".
 # Names are verb-object: install-<thing> and remove-<thing>, toggle-<thing>
 # (on/off), reset-, export-, switch-, report-, enroll-, and for Bluefin's
 # (build_files/10-system-files.sh) check-, show-, run-, reboot-, clean-.
@@ -45,7 +45,7 @@ toggle-dark-mode mode="toggle":
     write_setting is_dark "${is_dark}"
     if [[ "${is_dark}" == true ]]; then echo "Dark theme on."; else echo "Light theme on."; fi
 
-# Bring back the cosmic-blue look
+# Bring back the Celenn OS look
 [group('Desktop')]
 reset-cosmic-theme confirm="ask":
     #!/usr/bin/bash
@@ -62,7 +62,7 @@ reset-cosmic-theme confirm="ask":
         com.system76.CosmicTk
         com.system76.CosmicBackground
     )
-    echo "This restores the cosmic-blue colors, dark theme, icons, fonts and wallpaper."
+    echo "This restores the Celenn OS colors, dark theme, icons, fonts and wallpaper."
     echo "Other COSMIC settings (panel, dock, keyboard, shortcuts...) are kept."
     if [[ "{{ confirm }}" != yes ]] && ! gum confirm "Reset the appearance?"; then
         exit 0
@@ -140,7 +140,7 @@ export-cosmic-config:
     exported=0
     skipped=()
     {
-        echo "# cosmic-blue: COSMIC settings export"
+        echo "# Celenn OS: COSMIC settings export"
         echo "# Date: $(date -u +%Y-%m-%dT%H:%MZ)"
         echo "# Image: $(jq -r '."image-ref" + " " + ."image-tag"' /usr/share/ublue-os/image-info.json 2>/dev/null || echo unknown)"
         echo "# COSMIC: $(rpm -q --qf '%{VERSION}' cosmic-settings 2>/dev/null || echo unknown)"
@@ -235,10 +235,10 @@ _microsoft-fonts action confirm:
     echo "Trebuchet MS, Verdana and Webdings."
     echo "They are covered by Microsoft's End User License Agreement:"
     echo "  https://corefonts.sourceforge.net/eula.htm"
-    echo "Most documents do not need them: cosmic-blue already has look-alike fonts"
+    echo "Most documents do not need them: Celenn OS already has look-alike fonts"
     echo "with the same sizes (Liberation, Carlito, Caladea)."
     # `yes`: the license was accepted already ("Accept and install" in
-    # cosmic-blue Tools, which shows the license link)
+    # Celenn OS Tools, which shows the license link)
     if [[ "{{ confirm }}" != yes ]]; then
         read -r -p "Do you accept the license and want to install them? [y/N] " answer
         [[ "${answer}" =~ ^[YyOo] ]] || { echo "Nothing installed."; exit 0; }
@@ -281,7 +281,7 @@ _cli-tools action:
     esac
     # The tools this recipe installed (not those already there), so that
     # `remove` leaves the user's own Homebrew tools alone
-    added="${XDG_STATE_HOME:-${HOME}/.local/state}/cosmic-blue/cli-tools.list"
+    added="${XDG_STATE_HOME:-${HOME}/.local/state}/celenn/cli-tools.list"
     bling_on() { [[ -f "${rc}" ]] && grep -q "source ${bling_dir}/${script}" "${rc}"; }
     case "{{ action }}" in
         install)
@@ -380,8 +380,9 @@ _gaming action:
             ;;
     esac
 
-# Bluefin's installers (projectbluefin/common), renamed _bluefin-* at build
-# time (build_files/10-system-files.sh): these commands run them to install,
+# Developer tools are Celenn OS's own list. Then Bluefin's installers
+# (projectbluefin/common), renamed _bluefin-* at build time
+# (build_files/10-system-files.sh): the commands below run them to install,
 # and add the removal they lack (remove-*). Removing never deletes your own files
 # (projects, virtual machine disks are only removed after a question).
 
@@ -397,45 +398,139 @@ remove-dev-tools: (_dev-tools "remove")
 _dev-tools action:
     #!/usr/bin/bash
     set -euo pipefail
-    case "{{ action }}" in
-        install) exec ujust _bluefin-dev-tools ;;
-        remove) ;;
-        *) echo "Usage: ujust install-dev-tools or ujust remove-dev-tools" >&2; exit 1 ;;
-    esac
-    # What the menu installs: "Label|kind|names" (kind: formula, cask, flatpak, ujust)
+    # The same tools, in the same groups, as the developer tools list of the
+    # tour and Tools (build_files/first_steps/src/devtools.rs, checked by
+    # tests/check-dev-tools.py), plus Lima, whose setup stays in a terminal.
+    # A group heading, then its tools: "Label|kind|names" (kind: formula,
+    # cask, flatpak, ujust). Casks come from Homebrew or the ublue-os tap.
     tools=(
-        "devcontainer CLI|formula|devcontainer"
+        "Containers"
         "Docker|formula|docker docker-compose lazydocker dive"
         "Podman Desktop|flatpak|io.podman_desktop.PodmanDesktop"
-        "Lima|ujust|lima"
+        "Code editors"
         "VS Code|cask|visual-studio-code-linux"
         "VSCodium|cask|vscodium-linux"
-        "Antigravity IDE|cask|antigravity-ide-linux"
         "Zed|cask|zed"
-        "JetBrains Toolbox|ujust|jetbrains-toolbox"
+        "JetBrains Toolbox|cask|jetbrains-toolbox-linux"
+        "Antigravity|cask|antigravity-ide-linux"
+        "In the terminal"
         "Neovim|formula|neovim"
         "Helix|formula|helix"
         "vim|formula|vim"
         "micro|formula|micro"
+        "Other tools"
+        "Bruno|flatpak|com.usebruno.Bruno"
+        "Dev Toolbox|flatpak|me.iepure.devtoolbox"
+        "DBeaver|flatpak|io.dbeaver.DBeaverCommunity"
+        "Virtual machine"
+        "Lima|ujust|lima"
     )
+    # Ticked when the menu opens, as in the tour and Tools
+    recommended=("Docker" "Podman Desktop" "VS Code")
     present() { # kind names
         case "$1" in
-            formula) brew list --formula "${2%% *}" >/dev/null 2>&1 ;;
-            cask) brew list --cask "$2" >/dev/null 2>&1 ;;
+            formula) command -v brew >/dev/null && brew list --formula "${2%% *}" >/dev/null 2>&1 ;;
+            cask) command -v brew >/dev/null && brew list --cask "$2" >/dev/null 2>&1 ;;
             flatpak) flatpak info --system "$2" >/dev/null 2>&1 ;;
-            ujust)
-                case "$2" in
-                    lima) brew list --formula lima >/dev/null 2>&1 ;;
-                    jetbrains-toolbox) brew list --cask jetbrains-toolbox-linux >/dev/null 2>&1 ;;
-                esac
-                ;;
+            ujust) command -v brew >/dev/null && brew list --formula "$2" >/dev/null 2>&1 ;;
         esac
     }
     installed=()
     for tool in "${tools[@]}"; do
+        [[ "${tool}" == *"|"* ]] || continue
         IFS='|' read -r label kind names <<<"${tool}"
         if present "${kind}" "${names}"; then installed+=("${label}"); fi
     done
+
+    if [[ "{{ action }}" == install ]]; then
+        if [[ ! -t 0 ]]; then
+            echo "Run ujust install-dev-tools in a terminal (or use the Tools app)." >&2
+            exit 1
+        fi
+        # The menu: headings, then the tools; the installed ones are marked
+        # and cannot be picked again
+        items=()
+        selected=()
+        for tool in "${tools[@]}"; do
+            if [[ "${tool}" != *"|"* ]]; then
+                items+=("── ${tool} ──")
+                continue
+            fi
+            IFS='|' read -r label kind names <<<"${tool}"
+            if printf '%s\n' "${installed[@]}" | grep -qxF -- "${label}"; then
+                items+=("   ${label} (installed)")
+            else
+                items+=("   ${label}")
+                if printf '%s\n' "${recommended[@]}" | grep -qxF -- "${label}"; then
+                    selected+=("   ${label}")
+                fi
+            fi
+        done
+        selected_list="$(IFS=,; echo "${selected[*]}")"
+        chosen="$(gum choose --no-limit --height 25 \
+            --header "Which tools do you want? (space to tick, enter to install)" \
+            --selected "${selected_list}" "${items[@]}" || true)"
+        formulas=()
+        casks=()
+        flatpaks=()
+        lima=0
+        for tool in "${tools[@]}"; do
+            [[ "${tool}" == *"|"* ]] || continue
+            IFS='|' read -r label kind names <<<"${tool}"
+            grep -qxF -- "   ${label}" <<<"${chosen}" || continue
+            case "${kind}" in
+                formula) read -ra more <<<"${names}"; formulas+=("${more[@]}") ;;
+                cask) casks+=("${names}") ;;
+                flatpak) flatpaks+=("${names}") ;;
+                ujust) lima=1 ;;
+            esac
+        done
+        if [[ "${#formulas[@]}" -eq 0 && "${#casks[@]}" -eq 0 && "${#flatpaks[@]}" -eq 0 && "${lima}" -eq 0 ]]; then
+            echo "Nothing to install."
+            exit 0
+        fi
+        if [[ "${#formulas[@]}" -gt 0 || "${#casks[@]}" -gt 0 || "${lima}" -eq 1 ]] && ! command -v brew >/dev/null; then
+            echo "Homebrew is not set up yet: wait a few minutes after the first start, then try again." >&2
+            exit 1
+        fi
+        failed=0
+        if [[ "${#formulas[@]}" -gt 0 || "${#casks[@]}" -gt 0 ]]; then
+            # The devcontainer CLI comes with them, as in Bluefin: every
+            # editor can use it
+            echo "Installing ${formulas[*]} ${casks[*]} and the devcontainer CLI..."
+            brew install devcontainer "${formulas[@]}" || failed=1
+            if [[ "${#casks[@]}" -gt 0 ]]; then
+                brew tap ublue-os/tap >/dev/null 2>&1 || true
+                for cask in "${casks[@]}"; do
+                    brew install --cask "${cask}" || failed=1
+                done
+            fi
+        fi
+        if [[ "${#flatpaks[@]}" -gt 0 ]]; then
+            echo "Installing ${flatpaks[*]} from Flathub..."
+            flatpak install --system --noninteractive flathub "${flatpaks[@]}" || failed=1
+        fi
+        # Serial ports (boards like Arduino), as Bluefin's developer mode does
+        if ! id -nG | tr ' ' '\n' | grep -qx dialout; then
+            user="$(id -un)"
+            pkexec bash -c 'grep -q "^dialout:" /etc/group || grep "^dialout:" /usr/lib/group >> /etc/group; usermod -aG dialout "$1"' _ "${user}" \
+                && echo "Serial ports allowed from your next login." || true
+        fi
+        if [[ "${lima}" -eq 1 ]]; then
+            ujust _bluefin-lima || failed=1
+        fi
+        if [[ "${failed}" -eq 1 ]]; then
+            echo "Some tools could not be installed: see the messages above." >&2
+            exit 1
+        fi
+        echo "Done."
+        exit 0
+    fi
+
+    if [[ "{{ action }}" != remove ]]; then
+        echo "Usage: ujust install-dev-tools or ujust remove-dev-tools" >&2
+        exit 1
+    fi
     if [[ "${#installed[@]}" -eq 0 ]]; then
         echo "No tools from ujust install-dev-tools are installed."
         exit 0
@@ -443,6 +538,7 @@ _dev-tools action:
     chosen="$(gum choose --no-limit --header "Which tools do you want to remove? (space to select)" "${installed[@]}" || true)"
     [[ -n "${chosen}" ]] || { echo "Nothing removed."; exit 0; }
     for tool in "${tools[@]}"; do
+        [[ "${tool}" == *"|"* ]] || continue
         IFS='|' read -r label kind names <<<"${tool}"
         grep -qxF -- "${label}" <<<"${chosen}" || continue
         echo "Removing ${label}..."
@@ -453,6 +549,7 @@ _dev-tools action:
             ujust) ujust "remove-${names}" ;;
         esac
     done
+    # Bluefin's developer mode marker, from earlier installs
     if [[ "${#installed[@]}" -eq "$(grep -c . <<<"${chosen}")" ]]; then
         rm -f "${HOME}/.config/bluefin/devmode"
     fi
@@ -690,13 +787,13 @@ toggle-flatpark mode="toggle":
     set -euo pipefail
     # FlatPark (https://flatpark.org) is a Flatpak hub with apps that are not
     # on Flathub. How far its apps can be trusted is not established yet, so
-    # cosmic-blue leaves it off. When on, it has the lowest priority, and its
+    # Celenn OS leaves it off. When on, it has the lowest priority, and its
     # filter hides every app that is also on Flathub: those keep coming from
     # Flathub. It is added to your account's Flatpak installation, the one
     # COSMIC Store manages: FlatPark is listed there under Software
     # repositories (Recommended Flatpak sources) and can be added or removed
     # there too. Ask before every change, unless run without a terminal.
-    repofile=/usr/share/cosmic-blue/flatpak/flatpark.flatpakrepo
+    repofile=/usr/share/celenn/flatpak/flatpark.flatpakrepo
     filter=/usr/share/flatpak/flatpark.filter
     confirm() {
         [[ -t 0 ]] || return 0
@@ -771,8 +868,8 @@ switch-channel channel="status":
     image="${image#ostree-unverified-registry:}"
     repo="${image%:*}"
     tag="${image##*:}"
-    if [[ "${repo}" != ghcr.io/cosmic-blue-os/* || "${repo}" == "${image}" ]]; then
-        echo "This system does not follow a cosmic-blue image (${ref:-none}): nothing to switch." >&2
+    if [[ "${repo}" != ghcr.io/celenn-os/* || "${repo}" == "${image}" ]]; then
+        echo "This system does not follow a Celenn OS image (${ref:-none}): nothing to switch." >&2
         exit 1
     fi
     channel="{{ channel }}"
@@ -905,7 +1002,7 @@ toggle-battery-limit mode="toggle":
         echo "Battery limit off: the battery charges to 100%."
     fi
 
-# Earlier names (cosmic-blue's and Bluefin's, renamed in build_files/10-system-files.sh),
+# Earlier names (Celenn OS's and Bluefin's, renamed in build_files/10-system-files.sh),
 # still accepted but not listed
 [private]
 alias bug-report := report-bug
@@ -954,12 +1051,12 @@ alias powerwash := reset-system
 report-bug mode="open":
     #!/usr/bin/bash
     set -euo pipefail
-    # The details (cosmic-blue-system-info) hold no personal data. They go
+    # The details (celenn-system-info) hold no personal data. They go
     # into the "System details" field of the bug report form through its
-    # URL (cosmic-blue-report-bug, also run by "Report a problem" in
-    # cosmic-blue Tools): nothing is sent until the report is submitted.
-    form="https://github.com/cosmic-blue-os/cosmic-blue/issues/new?template=bug_report.yml"
-    info="$(/usr/libexec/cosmic-blue-system-info)"
+    # URL (celenn-report-bug, also run by "Report a problem" in
+    # Celenn OS Tools): nothing is sent until the report is submitted.
+    form="https://github.com/celenn-os/celenn/issues/new?template=bug_report.yml"
+    info="$(/usr/libexec/celenn-system-info)"
     case "{{ mode }}" in
         open) ;;
         print)
@@ -984,7 +1081,7 @@ report-bug mode="open":
         exit 0
     fi
     if gum confirm "Open the bug report form in the browser?"; then
-        /usr/libexec/cosmic-blue-report-bug open
+        /usr/libexec/celenn-report-bug open
         echo "Describe the problem in the form, then submit it (a GitHub account is needed)."
     else
         echo "Report the bug later at ${form}"
@@ -995,20 +1092,20 @@ report-bug mode="open":
 clean-system confirm="ask":
     #!/usr/bin/bash
     set -euo pipefail
-    # Same script as "Clean up" in cosmic-blue Tools (Free up space).
+    # Same script as "Clean up" in Celenn OS Tools (Free up space).
     # Unused Flatpak runtimes, dangling Podman/Docker images, old Homebrew
     # downloads, update caches. Named images, containers and volumes stay:
     # `podman system prune` removes those when you are sure.
     if [[ "{{ confirm }}" != yes ]]; then
         gum confirm "Remove what nothing uses any more (your files stay)?" || exit 0
     fi
-    /usr/libexec/cosmic-blue-clean
+    /usr/libexec/celenn-clean
 
-# NVIDIA with Secure Boot: enroll the driver key (password "cosmicblue")
+# NVIDIA with Secure Boot: enroll the driver key (password "celennos")
 [group('System')]
 enroll-secure-boot-key:
     #!/usr/bin/bash
     set -euo pipefail
-    # Same as "Allow" in cosmic-blue Tools, NVIDIA driver (password cosmicblue,
+    # Same as "Allow" in Celenn OS Tools, NVIDIA driver (password celennos,
     # see the helper)
-    sudo /usr/libexec/cosmic-blue-tools-helper driver-key
+    sudo /usr/libexec/celenn-tools-helper driver-key

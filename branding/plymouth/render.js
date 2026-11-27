@@ -5,9 +5,9 @@ const fs = require('fs');
 const path = require('path');
 
 const SIZE = 192; // px; the mark fills the square
-const svg = fs.readFileSync(path.join(__dirname, '../logo/cosmic-blue-logo.svg'), 'utf8');
+const svg = fs.readFileSync(path.join(__dirname, '../logo/celenn-logo.svg'), 'utf8');
 const out = path.join(__dirname,
-  '../../system_files/usr/share/plymouth/themes/cosmic-blue/bgrt-fallback.png');
+  '../../system_files/usr/share/plymouth/themes/celenn/bgrt-fallback.png');
 
 (async () => {
   const browser = await chromium.launch();

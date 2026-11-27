@@ -1,4 +1,4 @@
-// Shared helpers for the cosmic-blue wallpaper shaders.
+// Shared helpers for the Celenn OS wallpaper shaders.
 // Palette (sRGB hex -> linear-ish floats are converted with srgb()).
 vec3 srgb(vec3 c) { return pow(c, vec3(2.2)); }
 vec3 hex(int h) { return srgb(vec3(float((h >> 16) & 255), float((h >> 8) & 255), float(h & 255)) / 255.); }

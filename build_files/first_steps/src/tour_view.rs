@@ -4,12 +4,12 @@
 use super::*;
 
 /// A picture's name from its file, for screen readers:
-/// "cosmic-blue-shooting-star.jpg" -> "shooting star"
+/// "celenn-shooting-star.jpg" -> "shooting star"
 pub(super) fn image_name(path: &Path) -> String {
     path.file_stem()
         .map(|stem| stem.to_string_lossy())
         .unwrap_or_default()
-        .trim_start_matches("cosmic-blue-")
+        .trim_start_matches("celenn-")
         .replace(['-', '_'], " ")
 }
 
@@ -30,7 +30,7 @@ pub(super) fn accessibility_row<'a>(space_s: u16) -> Element<'a, Message> {
     // Accessibility, from the first page: what COSMIC's first-run assistant
     // (skipped, see build_files/20-cosmic.sh) offered
     settings::item_row(vec![
-        widget::icon::from_name("cosmic-blue-tour-accessibility")
+        widget::icon::from_name("celenn-tour-accessibility")
             .size(40)
             .into(),
         two_lines(text::heading(tr("Accessibility")).into(), tr(ACCESSIBILITY)),
@@ -269,7 +269,7 @@ impl<T: Tour> App<T> {
             )
         });
         let scale = settings::item_row(vec![
-            widget::icon::from_name("cosmic-blue-tour-computer")
+            widget::icon::from_name("celenn-tour-computer")
                 .size(40)
                 .into(),
             two_lines(
@@ -318,7 +318,7 @@ impl<T: Tour> App<T> {
                 row.push(button.on_press(Message::Dark(dark)))
             },
         );
-        // Top bar and dock (cosmic-blue's own) or one bar at the bottom
+        // Top bar and dock (Celenn OS's own) or one bar at the bottom
         let layout_buttons = [(false, "Top bar and dock"), (true, "Bar at the bottom")]
             .into_iter()
             .fold(
@@ -477,7 +477,7 @@ impl<T: Tour> App<T> {
     }
 
     /// What this computer needs, found by system::computer(): only what
-    /// asks for an action (cosmic-blue Tools has the rest)
+    /// asks for an action (Celenn OS Tools has the rest)
     pub(super) fn computer_rows<'a>(&'a self, space_s: u16) -> Vec<Element<'a, Message>> {
         let Some(computer) = &self.computer else {
             return Vec::new();
@@ -512,7 +512,7 @@ impl<T: Tour> App<T> {
                 let mut caption = tr("The NVIDIA edition starts at the next restart.").to_owned();
                 if computer.secure_boot {
                     caption.push(' ');
-                    caption.push_str(tr("At the restart, a blue screen asks to enroll a key: choose Enroll MOK, Continue, Yes, then type the password cosmicblue (the keyboard is QWERTY there)."));
+                    caption.push_str(tr("At the restart, a blue screen asks to enroll a key: choose Enroll MOK, Continue, Yes, then type the password celennos (the keyboard is QWERTY there)."));
                 }
                 rows.push(item(
                     true,
@@ -529,7 +529,7 @@ impl<T: Tour> App<T> {
                     tr(if switching {
                         "Downloading the NVIDIA edition… This can take a while."
                     } else {
-                        "The NVIDIA edition of cosmic-blue has its driver: about 4 GB to download, then it starts at the next restart."
+                        "The NVIDIA edition of Celenn OS has its driver: about 4 GB to download, then it starts at the next restart."
                     })
                     .to_owned(),
                     Some(
@@ -692,7 +692,7 @@ impl<T: Tour> App<T> {
         widget::column::with_capacity(2)
             .spacing(space_s)
             .push(
-                widget::container(widget::icon::from_name("cosmic-blue-installer").size(128))
+                widget::container(widget::icon::from_name("celenn-installer").size(128))
                     .padding([space_s, 0])
                     .center_x(Length::Fill),
             )
@@ -749,7 +749,7 @@ impl<T: Tour> App<T> {
         ])
         .spacing(space_s);
         let belongings = settings::item_row(vec![
-            row_icon("cosmic-blue-tour-files"),
+            row_icon("celenn-tour-files"),
             two_lines(
                 text::heading(tr("Bring your things")).into(),
                 tr("Files, photos from a phone, bookmarks and email from before"),
@@ -804,13 +804,13 @@ impl<T: Tour> App<T> {
         let term = system::search_term(file);
         let explanation = match kind {
             Package::Windows => {
-                "This is a Windows program. On cosmic-blue, apps come from COSMIC Store: most well-known apps are there, or a good alternative."
+                "This is a Windows program. On Celenn OS, apps come from COSMIC Store: most well-known apps are there, or a good alternative."
             }
             Package::Debian => {
-                "This is a package for Debian and Ubuntu. On cosmic-blue, apps come from COSMIC Store: most well-known apps are there, or a good alternative."
+                "This is a package for Debian and Ubuntu. On Celenn OS, apps come from COSMIC Store: most well-known apps are there, or a good alternative."
             }
             Package::Rpm => {
-                "This is a package for Fedora. cosmic-blue's system is a read-only image: apps come from COSMIC Store instead. Most well-known apps are there, or a good alternative."
+                "This is a package for Fedora. Celenn OS's system is a read-only image: apps come from COSMIC Store instead. Most well-known apps are there, or a good alternative."
             }
         };
         let hint = match kind {
@@ -961,111 +961,6 @@ impl<T: Tour> App<T> {
             .apply(widget::container)
             .into()
     }
-
-    /// The "Keyboard shortcuts" app
-    pub(super) fn shortcuts_view(&self) -> Element<'_, Message> {
-        let cosmic_theme::Spacing {
-            space_xxs,
-            space_s,
-            space_m,
-            space_l,
-            ..
-        } = theme::spacing();
-        // Three columns of sections, so that every shortcut shows at once
-        let columns = SHORTCUT_COLUMNS.iter().map(|sections| {
-            sections
-                .iter()
-                .map(|&i| {
-                    // A compact card per section: every row on screen at once
-                    let (title, rows) = SHORTCUTS[i];
-                    let mut card = widget::column::with_capacity(rows.len() * 2);
-                    for (n, (keys, description)) in rows.iter().enumerate() {
-                        if n > 0 {
-                            card = card.push(widget::divider::horizontal::light());
-                        }
-                        card = card.push(
-                            widget::row::with_capacity(2)
-                                .push(
-                                    text::body(tr(description))
-                                        .wrapping(Wrapping::Word)
-                                        .width(Length::Fill),
-                                )
-                                .push(shortcut_keys(keys))
-                                .spacing(space_s)
-                                .align_y(Alignment::Center)
-                                .padding([space_xxs, space_s]),
-                        );
-                    }
-                    widget::column::with_capacity(2)
-                        .spacing(space_xxs)
-                        .push(text::heading(tr(title)))
-                        .push(
-                            card.apply(widget::container)
-                                .padding([space_xxs, 0])
-                                .class(theme::Container::Card),
-                        )
-                })
-                .fold(
-                    widget::column::with_capacity(2).spacing(space_m),
-                    |column, section| column.push(section),
-                )
-                .width(Length::FillPortion(1))
-                .into()
-        });
-        widget::column::with_capacity(3)
-            .spacing(space_m)
-            .push(
-                text::caption(tr(
-                    "Super is the key with the Windows logo on most keyboards.",
-                ))
-                .width(Length::Fill),
-            )
-            .push(
-                widget::row::with_children(columns.collect::<Vec<Element<'_, Message>>>())
-                    .spacing(space_m),
-            )
-            .push(
-                widget::row::with_capacity(3)
-                    .align_y(Alignment::Center)
-                    .push(text::caption(tr("Escape closes this window.")))
-                    .push(widget::space::horizontal().width(Length::Fill))
-                    .push(
-                        widget::button::standard(tr("Change them in Settings")).on_press_maybe(
-                            in_path("cosmic-settings").then_some(Message::Run(Action::Launch(&[
-                                "cosmic-settings",
-                                "keyboard",
-                            ]))),
-                        ),
-                    ),
-            )
-            .padding([space_s, space_l, space_l, space_l])
-            .apply(widget::scrollable)
-            .into()
-    }
-}
-
-/// The keys of a sheet's shortcut, with their names translated
-fn shortcut_keys(keys: &'static str) -> Element<'static, Message> {
-    let mut row = widget::row::with_capacity(5)
-        .spacing(6)
-        .align_y(Alignment::Center);
-    for (i, combination) in keys.split(" / ").enumerate() {
-        if i > 0 {
-            row = row.push(text::caption("/"));
-        }
-        let names: Vec<&'static str> = combination
-            .split(' ')
-            .filter(|word| !word.is_empty() && *word != "+")
-            .map(|name| {
-                KEY_LABELS
-                    .iter()
-                    .find(|label| **label == name)
-                    .map_or(name, |label| tr(label))
-            })
-            .collect();
-        row = row.push(key_combo(&names));
-    }
-    row.into()
 }
 
 /// The origin cards: a tile, with an accent border when chosen

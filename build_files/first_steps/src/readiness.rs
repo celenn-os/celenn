@@ -1,5 +1,5 @@
 // "Is this computer ready?": the live session's look at the hardware before
-// installing (second page of `cosmic-blue-tour --live`). It only reads:
+// installing (second page of `celenn-tour --live`). It only reads:
 // /sys, /proc, and lspci and lsblk, without root, without the network. Each
 // check says what it found in plain words, and for a problem what to do.
 // A check that cannot run says so: never a false alarm.
@@ -23,7 +23,7 @@ pub const TEXTS: &[&str] = &[
     "Graphics card",
     "{}: the driver is already in the system.",
     "{}: the NVIDIA driver is ready.",
-    "{}. For games, switch to the NVIDIA edition after installing: one click in cosmic-blue Tools → NVIDIA driver.",
+    "{}. For games, switch to the NVIDIA edition after installing: one click in Celenn OS Tools → NVIDIA driver.",
     "{}: no driver, the picture may be slow.",
     "Memory",
     "{} GB: too little, 4 GB is the minimum.",
@@ -104,9 +104,9 @@ pub fn run() -> Vec<Check> {
 }
 
 /// The report the "Copy the report" button copies, for a forum: one line
-/// per check, after the cosmic-blue version. Nothing personal.
+/// per check, after the Celenn OS version. Nothing personal.
 pub fn report(checks: &[Check], version: &str) -> String {
-    let mut text = format!("cosmic-blue {version}, live session\n");
+    let mut text = format!("Celenn OS {version}, live session\n");
     for check in checks {
         let mark = match check.status {
             Status::Good => "OK",
@@ -123,7 +123,7 @@ pub fn report(checks: &[Check], version: &str) -> String {
     text
 }
 
-/// cosmic-blue's version (VERSION of os-release), for the report
+/// Celenn OS's version (VERSION of os-release), for the report
 pub fn os_version() -> String {
     read("/usr/lib/os-release")
         .lines()
@@ -300,7 +300,7 @@ pub fn graphics(pci: &[Pci]) -> Check {
             ("0x10de", Some(_)) => (
                 Status::Info,
                 tr(
-                    "{}. For games, switch to the NVIDIA edition after installing: one click in cosmic-blue Tools → NVIDIA driver.",
+                    "{}. For games, switch to the NVIDIA edition after installing: one click in Celenn OS Tools → NVIDIA driver.",
                 ),
             ),
             _ => (Status::Good, tr("{}: the driver is already in the system.")),
@@ -570,7 +570,7 @@ mod tests {
     #[test]
     fn forum_report() {
         let report = report(&[memory(4), memory(16)], "45.20261125");
-        assert!(report.starts_with("cosmic-blue 45.20261125, live session\n"));
+        assert!(report.starts_with("Celenn OS 45.20261125, live session\n"));
         assert!(report.contains("[Check] Memory: 4 GB"));
         assert!(report.contains("[OK] Memory: 16 GB of memory."));
     }

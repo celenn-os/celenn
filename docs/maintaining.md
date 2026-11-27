@@ -1,6 +1,6 @@
-# Maintaining cosmic-blue
+# Maintaining Celenn OS
 
-The steps that keep cosmic-blue going: what runs on its own, what needs a
+The steps that keep Celenn OS going: what runs on its own, what needs a
 person, and what to do when something breaks. For changes and translations,
 see [CONTRIBUTING.md](../CONTRIBUTING.md).
 
@@ -61,7 +61,7 @@ The COSMIC version is pinned in `build_files/cosmic-version`. When Fedora
 ships a new one, `check-cosmic-version.yml` opens a pull request (label
 `cosmic-update`), builds it and merges it if it is green.
 
-When that pull request fails, the cause is usually one of cosmic-blue's
+When that pull request fails, the cause is usually one of Celenn OS's
 changes to COSMIC no longer fitting the new code:
 
 - **Login screen** (`build_files/greeter/user-switch.patch`, applied with no
@@ -72,7 +72,7 @@ changes to COSMIC no longer fitting the new code:
      user-switch.patch`), fix the rejected parts by hand, and check that it
      builds (`cargo check`).
   3. Write the new patch with `git diff > user-switch.patch`. It must still
-     contain the marker comment `cosmic-blue: with 2 to 6 accounts`.
+     contain the marker comment `Celenn OS: with 2 to 6 accounts`.
 - **COSMIC Store and Files** (`build_files/store/patch.py`,
   `build_files/filemanager/patch.py`). Each replacement must match exactly
   once. The build log names the one that no longer matches: update its
@@ -85,7 +85,7 @@ changes to COSMIC no longer fitting the new code:
   `cargo test` report.
 
 New defaults reach existing accounts by themselves: the default migration
-(`cosmic-blue-migrate-defaults`) runs at each boot.
+(`celenn-migrate-defaults`) runs at each boot.
 
 ## New Fedora release
 
@@ -122,7 +122,7 @@ every `msgid` still has its `msgstr` and that no text appears twice.
 
 - Images are signed with cosign at build time. The public key is
   `cosign.pub` in this repository, and installed systems check it before any
-  update (`policy.json`, scoped to `ghcr.io/cosmic-blue-os`).
+  update (`policy.json`, scoped to `ghcr.io/celenn-os`).
 - The private key (`SIGNING_SECRET`) and the R2 keys (`R2_ACCESS_KEY_ID`,
   `R2_SECRET_ACCESS_KEY`, `R2_ACCOUNT_ID`) are only in the GitHub environment
   `release`, which only `main` can use. Pull requests never see them.
@@ -130,7 +130,7 @@ every `msgid` still has its `msgstr` and that no text appears twice.
   system: a new key would need a release that trusts both keys first.
 - The NVIDIA image's kernel modules are signed with Universal Blue's akmods
   key. Users enroll it once (`ujust enroll-secure-boot-key`, password
-  `cosmicblue`).
+  `celennos`).
 
 ## Old images
 

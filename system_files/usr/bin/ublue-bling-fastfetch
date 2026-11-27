@@ -26,7 +26,7 @@ if [[ "$1" == "--mode" ]]; then
 fi
 
 # Theme builder accent, e.g. Some("#4f8dff"); None when COSMIC's default is
-# used. Fallback: the cosmic-blue accents (build_files/theme).
+# used. Fallback: the Celenn OS accents (build_files/theme).
 DEFAULT_DARK="#4f8dff"
 DEFAULT_LIGHT="#1d47c4"
 if [[ "${MODE}" == light ]]; then

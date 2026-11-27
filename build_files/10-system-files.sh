@@ -54,13 +54,13 @@ GNOME_ONLY+=(
     usr/share/pixmaps/fedora_whitelogo_med.png
     usr/share/pixmaps/system-logo-white.png
 )
-# Bluefin's profile pictures (photos): cosmic-blue ships its own avatars
+# Bluefin's profile pictures (photos): Celenn OS ships its own avatars
 # (system_files/usr/share/pixmaps/faces, made by branding/avatars).
 GNOME_ONLY+=(
     usr/share/pixmaps/faces
 )
 # Bluefin's fastfetch logos (dinosaurs and a chicken), its global config and
-# its Bluefin and Bazaar user counters: cosmic-blue ships its own fastfetch
+# its Bluefin and Bazaar user counters: Celenn OS ships its own fastfetch
 # (system_files/usr/bin/ublue-fastfetch and usr/share/ublue-os/fastfetch*).
 GNOME_ONLY+=(
     etc/ublue-os/fastfetch.json
@@ -76,17 +76,17 @@ GNOME_ONLY+=(
 )
 # Bluefin's Firefox prefs force hardware video decoding past Firefox's GPU
 # blocklist: Firefox's own defaults are safer. Our Firefox defaults are
-# policies (usr/lib/tmpfiles.d/cosmic-blue-firefox.conf).
+# policies (usr/lib/tmpfiles.d/celenn-firefox.conf).
 GNOME_ONLY+=(
     usr/share/ublue-os/firefox-config
 )
-# More Bluefin leftovers that have no use on cosmic-blue:
+# More Bluefin leftovers that have no use on Celenn OS:
 # - the rest of Bazaar (background service, config, flatpak override);
 # - projectbluefin-countme, a usage counter for other Bluefin images that
-#   exits at once on cosmic-blue;
+#   exits at once on Celenn OS;
 # - the AI agent notes about Bluefin's repositories;
 # - get-geoclue-latitude, used only by Bluefin's GNOME dynamic wallpaper;
-# - `ujust changelogs`, which shows Bluefin's release notes (cosmic-blue's
+# - `ujust changelogs`, which shows Bluefin's release notes (Celenn OS's
 #   are on its GitHub releases page);
 # - opt-in Brewfiles for GNOME apps and Bluefin wallpapers, offered by
 #   ChairLift only: Bluefin's "full desktop" GNOME Circle list, Hidamari and
@@ -110,8 +110,8 @@ GNOME_ONLY+=(
     usr/share/ublue-os/homebrew/artwork.Brewfile
 )
 # Bluefin's community and help launchers, and its Report a Problem app, which
-# files issues in Bluefin's repositories. cosmic-blue's own Documentation
-# launcher (system_files) opens the cosmic-blue guide instead. Bluefin's
+# files issues in Bluefin's repositories. Celenn OS's own Documentation
+# launcher (system_files) opens the Celenn OS guide instead. Bluefin's
 # icons of these launchers and of System Update go too: ours have their own.
 GNOME_ONLY+=(
     usr/share/applications/discourse.desktop
@@ -145,14 +145,14 @@ GNOME_ONLY+=(
     usr/share/glib-2.0/schemas/io.projectbluefin.chairlift.printers.gschema.xml
 )
 # FlatPark, the second Flatpak remote of projectbluefin/common: how far its
-# apps can be trusted is not established yet, so cosmic-blue offers it but
+# apps can be trusted is not established yet, so Celenn OS offers it but
 # leaves it off. Its descriptor moves out of remotes.d (which flatpak adds by
 # itself) to where `ujust toggle-flatpark` finds it; its filter, which hides
 # the apps that are also on Flathub, stays in /usr/share/flatpak. The filter
 # copy service is dropped: it only serves Bazaar's sandbox, and `flatpak
 # remote-add --filter` keeps its own copy of the filter in the repository.
-install -d "${STAGE}/usr/share/cosmic-blue/flatpak"
-mv "${STAGE}/usr/share/flatpak/remotes.d/flatpark.flatpakrepo" "${STAGE}/usr/share/cosmic-blue/flatpak/"
+install -d "${STAGE}/usr/share/celenn/flatpak"
+mv "${STAGE}/usr/share/flatpak/remotes.d/flatpark.flatpakrepo" "${STAGE}/usr/share/celenn/flatpak/"
 GNOME_ONLY+=(
     usr/lib/systemd/system/flatpark-filter-copy.path
     usr/lib/systemd/system/flatpark-filter-copy.service
@@ -167,13 +167,15 @@ done
 # `bluefin-apps` (alias of install-system-flatpaks), `bazaar-preview`, and
 # `toggle-testing`, Bluefin's way to its testing tag, which `ujust
 # switch-channel testing` replaces (with stable and dev). Also `bluefin-cli`, which `ujust install-cli-tools` replaces,
-# and `devmode`, an alias of `toggle-devmode`.
+# and Bluefin's developer mode (`toggle-devmode` and its alias `devmode`):
+# Celenn OS's own `ujust install-dev-tools` offers the same list as the tour
+# and Tools.
 python3 -I /ctx/build_files/drop-just-recipes.py \
     "${STAGE}/usr/share/ublue-os/just/shared.just" contribute
 python3 -I /ctx/build_files/drop-just-recipes.py \
     "${STAGE}/usr/share/ublue-os/just/system.just" \
-    bluespeed bluefin-apps bazaar-preview toggle-testing bluefin-cli devmode
-# Every listed ujust command reads verb-object, like cosmic-blue's own in
+    bluespeed bluefin-apps bazaar-preview toggle-testing bluefin-cli devmode toggle-devmode
+# Every listed ujust command reads verb-object, like Celenn OS's own in
 # 60-custom.just: install- (adds apps or tools) and remove-,
 # toggle- (on/off), reset-, check-, show-, switch-, report-... Bluefin's names
 # that do not are renamed, regrouped (Apps installs things, System looks
@@ -183,7 +185,6 @@ python3 -I /ctx/build_files/drop-just-recipes.py \
 # remove-* commands. 60-custom.just keeps every old name as a hidden alias.
 # Fails if upstream renames a recipe.
 python3 -I /ctx/build_files/rename-just-recipes.py "${STAGE}"/usr/share/ublue-os/just/{apps,default,shared,system,update}.just -- \
-    "toggle-devmode=_bluefin-dev-tools>install-dev-tools" \
     "setup-vms=_bluefin-vms>install-vms" \
     "setup-lima=_bluefin-lima>install-lima" \
     "cncf=_bluefin-cncf-tools>install-cncf-tools" \
@@ -222,10 +223,10 @@ path.write_text(text.replace(old, "").replace("\n\n\n", "\n\n"))
 PY
 
 # `ujust enroll-secure-boot-key` (projectbluefin/common) queues the akmods key
-# with Universal Blue's password: 60-custom.just has cosmic-blue's own, with
-# the password "cosmicblue" that the ISO uses too. Its `ujust clean-system`
+# with Universal Blue's password: 60-custom.just has Celenn OS's own, with
+# the password "celennos" that the ISO uses too. Its `ujust clean-system`
 # asks question after question: 60-custom.just's runs the script of the
-# "Clean up" button of cosmic-blue Tools (/usr/libexec/cosmic-blue-clean).
+# "Clean up" button of Celenn OS Tools (/usr/libexec/celenn-clean).
 python3 -I /ctx/build_files/drop-just-recipes.py \
     "${STAGE}/usr/share/ublue-os/just/default.just" enroll-secure-boot-key clean-system
 
@@ -234,8 +235,8 @@ python3 -I /ctx/build_files/drop-just-recipes.py \
 sed -i '/^export LC_[A-Z_]*=en_US/d' "${STAGE}/etc/zsh/zprofile"
 
 # `ujust` with no recipe prints a link to Bluefin's documentation first:
-# point it to the cosmic-blue guide.
-sed -i 's|https://docs.projectbluefin.io/[^"]*|https://cosmic-blue-os.github.io/cosmic-blue/docs/|' \
+# point it to the Celenn OS guide.
+sed -i 's|https://docs.projectbluefin.io/[^"]*|https://celenn-os.github.io/celenn/docs/|' \
     "${STAGE}/usr/share/ublue-os/just/00-entry.just"
 
 # `ujust toggle-tpm2` (projectbluefin/common) runs /usr/bin/luks-tpm2-autounlock:
@@ -245,9 +246,9 @@ install -d "${STAGE}/usr/libexec"
 mv "${STAGE}/usr/bin/luks-tpm2-autounlock" "${STAGE}/usr/libexec/ublue-luks-tpm2-autounlock"
 
 cp -a "${STAGE}/." /
-# Only cosmic-blue's avatars in the profile picture folder
+# Only Celenn OS's avatars in the profile picture folder
 rm -rf /usr/share/pixmaps/faces
-cp -a /ctx/system_files/cosmic-blue/. /
+cp -a /ctx/system_files/celenn/. /
 
 # No Homebrew usage statistics (brew sends them unless told not to), for
 # every shell: brew reads /etc/homebrew/brew.env itself. Appended, as the
@@ -256,28 +257,27 @@ install -d /etc/homebrew
 grep -qsx 'HOMEBREW_NO_ANALYTICS=1' /etc/homebrew/brew.env \
     || echo 'HOMEBREW_NO_ANALYTICS=1' >>/etc/homebrew/brew.env
 
-# Only accept key-signed cosmic-blue images (cosign.pub, signed by build.yml).
-# The scope is the whole namespace, so that switching between cosmic-blue and
-# cosmic-blue-nvidia is verified too.
-# The project is being renamed to Celenn OS: the images move to
-# ghcr.io/celenn-os, signed with the same key, so that namespace is trusted
-# too (cosmic-blue-move-to-celenn switches installed systems to it).
+# Only accept key-signed Celenn OS images (cosign.pub, signed by build.yml).
+# The scope is the whole namespace, so that switching between celenn and
+# celenn-nvidia is verified too.
+# The namespace of the project's old name, ghcr.io/cosmic-blue-os, stays
+# trusted with the same key until the cleanup after the rename.
 IMAGE="ghcr.io/${IMAGE_VENDOR}"
-NEW_IMAGE="ghcr.io/celenn-os"
-jq --arg image "$IMAGE" --arg new "$NEW_IMAGE" 'del(.transports.docker[$image + "/cosmic-blue"])
+OLD_IMAGE="ghcr.io/cosmic-blue-os"
+jq --arg image "$IMAGE" --arg old "$OLD_IMAGE" 'del(.transports.docker[$image + "/celenn"])
     | .transports.docker[$image] = [{
     "type": "sigstoreSigned",
     "keyPath": "/etc/pki/containers/cosmic-blue.pub",
     "signedIdentity": {"type": "matchRepository"}
 }]
-    | .transports.docker[$new] = .transports.docker[$image]' /etc/containers/policy.json > /tmp/policy.json
+    | .transports.docker[$old] = .transports.docker[$image]' /etc/containers/policy.json > /tmp/policy.json
 mv /tmp/policy.json /etc/containers/policy.json
 mkdir -p /etc/containers/registries.d
-cat > /etc/containers/registries.d/cosmic-blue.yaml <<EOF
+cat > /etc/containers/registries.d/celenn.yaml <<EOF
 docker:
   ${IMAGE}:
     use-sigstore-attachments: true
-  ${NEW_IMAGE}:
+  ${OLD_IMAGE}:
     use-sigstore-attachments: true
 EOF
 

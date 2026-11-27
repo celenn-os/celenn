@@ -1,6 +1,6 @@
 (
     output: "all",
-    source: Path("/usr/share/backgrounds/cosmic-blue/cosmic-blue-arcs.jpg"),
+    source: Path("/usr/share/backgrounds/celenn/celenn-arcs.jpg"),
     filter_by_theme: true,
     rotation_frequency: 300,
     filter_method: Lanczos,

@@ -1,5 +1,5 @@
-// The kinds of apps that cosmic-blue offers to install without a terminal,
-// the same in the first steps tour ("Your apps", main.rs) and in cosmic-blue
+// The kinds of apps that Celenn OS offers to install without a terminal,
+// the same in the first steps tour ("Your apps", main.rs) and in Celenn OS
 // Tools (Install apps, more.rs): the same categories in the same order,
 // shown as tiles in two columns. A tile opens its list of apps to tick, with
 // the recommended ones already ticked the first time: in every category, the
@@ -231,7 +231,8 @@ pub const CATEGORIES: &[Category] = &[
         caption: "VS Code, Docker, Zed, Neovim…",
         icon: "utilities-terminal-symbolic",
         groups: DEV_TOOLS,
-        recommended: &["VS Code"],
+        // As Bluefin's developer mode: Docker and Podman Desktop, with VS Code
+        recommended: &["Docker", "Podman Desktop", "VS Code"],
         note: "Lima: ujust install-dev-tools, in a terminal.",
         done: "The developer tools are ready.",
     },
@@ -244,7 +245,8 @@ pub const DEVELOPMENT: usize = 7;
 pub const PASSWORDS: usize = 2;
 
 /// Said under the developer tools while Homebrew is not there
-pub const NO_BREW: &str = "Homebrew is not set up yet: only Podman Desktop can be installed now.";
+pub const NO_BREW: &str =
+    "Homebrew is not set up yet: only the apps from Flathub can be installed now.";
 
 impl Category {
     /// Its apps, numbered in the order of the groups

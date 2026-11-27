@@ -1,14 +1,14 @@
 #!/usr/bin/python3
-"""Patches COSMIC Store for cosmic-blue: FlatPark as a recommended source.
+"""Patches COSMIC Store for Celenn OS: FlatPark as a recommended source.
 
 COSMIC Store's "Software repositories" panel lists two built-in recommended
 Flatpak sources (Flathub, COSMIC Flatpak), each with an Add or Remove button,
-for the user's own Flatpak installation. cosmic-blue offers FlatPark but
+for the user's own Flatpak installation. Celenn OS offers FlatPark but
 leaves it off (its apps are not reviewed like Flathub's), so it becomes a
 third recommended source, off until the user adds it:
 
 1. The FlatPark entry reads its descriptor from the image
-   (/usr/share/cosmic-blue/flatpak/flatpark.flatpakrepo, from
+   (/usr/share/celenn/flatpak/flatpark.flatpakrepo, from
    projectbluefin/common), so it follows common's updates. Its Filter= key
    hides every app that is also on Flathub. It requires Flathub: adding it
    adds Flathub if missing, removing Flathub removes it too. No entry if the
@@ -24,7 +24,7 @@ Spanish, Italian and Brazilian Portuguese texts added to its Fluent files
 i18n/<language>/cosmic_store.ftl with the same keys):
 
 3. The "System Upgrade" row of the Updates page (rpm-ostree backend), with
-   the cosmic-blue updates icon (system-software-update) instead of a
+   the Celenn OS updates icon (system-software-update) instead of a
    generic package, and the "System" source name.
 4. The progress, done and error texts of installs, removals, updates and
    repository changes ("Installing X from Flathub (40%)...").
@@ -56,10 +56,10 @@ replace(
     """                //TODO: can this be defined in flatpakrepo file?
                 requires: vec!["flathub".to_string()],
             });
-            // cosmic-blue: FlatPark, offered but off by default
+            // Celenn OS: FlatPark, offered but off by default
             static FLATPARK: std::sync::OnceLock<Option<Vec<u8>>> = std::sync::OnceLock::new();
             if let Some(data) = FLATPARK.get_or_init(|| {
-                std::fs::read("/usr/share/cosmic-blue/flatpak/flatpark.flatpakrepo").ok()
+                std::fs::read("/usr/share/celenn/flatpak/flatpark.flatpakrepo").ok()
             }) {
                 sources.push(Source {
                     backend_name: BackendName::FlatpakUser,
@@ -83,7 +83,7 @@ replace(
 """,
     """                for add in adds.iter() {
                     let remote = Remote::from_file(&add.id, &glib::Bytes::from(&add.data))?;
-                    // cosmic-blue: FlatPark comes after every other source
+                    // Celenn OS: FlatPark comes after every other source
                     if add.id == "flatpark" {
                         remote.set_prio(0);
                     }
@@ -103,7 +103,7 @@ replace(
     """        //TODO: translate?
         let source_name = "System";
 """,
-    """        // cosmic-blue: translated
+    """        // Celenn OS: translated
         let source_name = crate::fl!("source-system");
 """,
 )
@@ -113,7 +113,7 @@ replace(
     """        //TODO: translate?
         let source_name = "System";
 """,
-    """        // cosmic-blue: translated
+    """        // Celenn OS: translated
         let source_name = crate::fl!("source-system");
 """,
 )
@@ -130,7 +130,7 @@ replace(
                 summary: format!("Update to version {}", version),
                 description: "An OS update is available via rpm-ostree.".to_string(),
 """,
-    """            // cosmic-blue: translated, with the updates icon
+    """            // Celenn OS: translated, with the updates icon
             icon: widget::icon::from_name("system-software-update")
                 .size(128)
                 .handle(),
@@ -237,7 +237,7 @@ impl Operation {
 
 NEW_OPERATION = r"""
 impl Operation {
-    // cosmic-blue: translated texts (i18n/*/cosmic_store.ftl, operation-*)
+    // Celenn OS: translated texts (i18n/*/cosmic_store.ftl, operation-*)
     fn kind_id(&self) -> &'static str {
         match &self.kind {
             OperationKind::Install => "install",
@@ -326,7 +326,7 @@ impl Operation {
 
 replace("src/operation.rs", OLD_OPERATION, NEW_OPERATION)
 
-append("i18n/en/cosmic_store.ftl", """## cosmic-blue
+append("i18n/en/cosmic_store.ftl", """## Celenn OS
 source-system = System
 system-upgrade = System update
 system-upgrade-summary = Update to version { $version }
@@ -357,7 +357,7 @@ operation-failed = { $kind ->
 }
 """)
 
-append("i18n/fr/cosmic_store.ftl", """## cosmic-blue
+append("i18n/fr/cosmic_store.ftl", """## Celenn OS
 source-system = Système
 system-upgrade = Mise à jour du système
 system-upgrade-summary = Passer à la version { $version }
@@ -388,7 +388,7 @@ operation-failed = { $kind ->
 }
 """)
 
-append("i18n/de/cosmic_store.ftl", """## cosmic-blue
+append("i18n/de/cosmic_store.ftl", """## Celenn OS
 source-system = System
 system-upgrade = Systemupdate
 system-upgrade-summary = Auf Version { $version } aktualisieren
@@ -419,7 +419,7 @@ operation-failed = { $kind ->
 }
 """)
 
-append("i18n/es/cosmic_store.ftl", """## cosmic-blue
+append("i18n/es/cosmic_store.ftl", """## Celenn OS
 source-system = Sistema
 system-upgrade = Actualización del sistema
 system-upgrade-summary = Actualizar a la versión { $version }
@@ -450,7 +450,7 @@ operation-failed = { $kind ->
 }
 """)
 
-append("i18n/it/cosmic_store.ftl", """## cosmic-blue
+append("i18n/it/cosmic_store.ftl", """## Celenn OS
 source-system = Sistema
 system-upgrade = Aggiornamento del sistema
 system-upgrade-summary = Aggiorna alla versione { $version }
@@ -481,7 +481,7 @@ operation-failed = { $kind ->
 }
 """)
 
-append("i18n/pt-BR/cosmic_store.ftl", """## cosmic-blue
+append("i18n/pt-BR/cosmic_store.ftl", """## Celenn OS
 source-system = Sistema
 system-upgrade = Atualização do sistema
 system-upgrade-summary = Atualizar para a versão { $version }

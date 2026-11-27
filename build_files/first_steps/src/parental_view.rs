@@ -37,7 +37,7 @@ pub(super) fn app_icon<'a>() -> Element<'a, Message> {
     widget::icon::from_name(ICON).size(44).into()
 }
 
-/// cosmic-blue's profile pictures, to pick one for a new child account, cut
+/// Celenn OS's profile pictures, to pick one for a new child account, cut
 /// as rounded squares (the links, such as COSMIC's default picture, are not listed
 /// twice)
 pub(super) fn faces() -> Vec<(PathBuf, widget::image::Handle)> {
@@ -268,6 +268,8 @@ impl App {
             widget::row::with_capacity(3)
                 .push(
                     widget::button::icon(widget::icon::from_name("list-remove-symbolic"))
+                        .name(tr("Less time"))
+                        .tooltip(tr("Less time"))
                         .on_press(Message::Step(field, false)),
                 )
                 .push(
@@ -281,6 +283,8 @@ impl App {
                 )
                 .push(
                     widget::button::icon(widget::icon::from_name("list-add-symbolic"))
+                        .name(tr("More time"))
+                        .tooltip(tr("More time"))
                         .on_press(Message::Step(field, true)),
                 )
                 .align_y(Alignment::Center)
@@ -821,7 +825,10 @@ impl App {
             .clone()
             .unwrap_or_else(|| duration(u64::from(self.extra) * 60));
         let step = |icon: &'static str, up: bool| {
+            let name = if up { tr("More time") } else { tr("Less time") };
             widget::button::icon(widget::icon::from_name(icon))
+                .name(name)
+                .tooltip(name)
                 .on_press_maybe(on.then_some(Message::ExtraStep(up)))
         };
         let mut field = widget::text_input("", shown)

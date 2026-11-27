@@ -1,12 +1,12 @@
 # Terminal welcome banner (uwelcome). Replaces the Bluefin config.toml of
-# projectbluefin/common: cosmic-blue links and commands, tips from
-# cosmic-blue-tips instead of Bluefin's message of the day.
+# projectbluefin/common: Celenn OS links and commands, tips from
+# celenn-tips instead of Bluefin's message of the day.
 version = 1
 color = "auto"
 
 [motd]
 messages = []
-commands = ["cosmic-blue-tips"]
+commands = ["celenn-tips"]
 
 [greeting]
 prefix = "􌬀 "
@@ -29,12 +29,12 @@ desc = "cli_pkg"
 
 [[links]]
 name = "issues"
-url = "https://github.com/cosmic-blue-os/cosmic-blue/issues"
+url = "https://github.com/celenn-os/celenn/issues"
 
 [[links]]
 name = "discuss"
-url = "https://github.com/cosmic-blue-os/cosmic-blue/discussions"
+url = "https://github.com/celenn-os/celenn/discussions"
 
 [[links]]
 name = "docs"
-url = "https://cosmic-blue-os.github.io/cosmic-blue/docs/"
+url = "https://celenn-os.github.io/celenn/docs/"

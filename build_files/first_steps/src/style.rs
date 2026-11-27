@@ -1,4 +1,4 @@
-// The text styles of cosmic-blue's apps (the tours, Tools, Parental
+// The text styles of Celenn OS's apps (the tours, Tools, Parental
 // controls), so that their rows look alike: a row's title in semibold and
 // its caption dimmed, as in COSMIC Settings.
 

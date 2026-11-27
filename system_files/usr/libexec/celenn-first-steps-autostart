@@ -1,0 +1,36 @@
+#!/usr/bin/bash
+# Opens the first steps tour (celenn-tour) once, at the first
+# login of a new account.
+#
+# New accounts get ~/.config/celenn/first-steps-pending from /etc/skel,
+# so accounts that existed before the tour was added never see it open by
+# itself. The file is removed when the tour opens: it never opens twice.
+#
+# COSMIC's own first-run assistant (cosmic-initial-setup) does not open for
+# new accounts (build_files/20-cosmic.sh): the tour takes its place. Should it
+# run anyway (an account made before Celenn OS skipped it), the tour waits
+# until it is closed, so the two windows never pile up.
+set -euo pipefail
+
+config="${XDG_CONFIG_HOME:-${HOME}/.config}"
+pending="${config}/celenn/first-steps-pending"
+[[ -e "${pending}" ]] || exit 0
+
+initial_setup_running() {
+    pgrep -u "$(id -u)" -f '^(/usr/bin/)?cosmic-initial-setup' >/dev/null
+}
+
+# The assistant may start a little after us: give it up to 30 seconds,
+# unless it is skipped or has already been completed on this account
+if [[ ! -e "${config}/cosmic-initial-setup-done" ]]; then
+    for (( i = 0; i < 15; i++ )); do
+        initial_setup_running && break
+        sleep 2
+    done
+fi
+while initial_setup_running; do
+    sleep 2
+done
+
+rm -f "${pending}"
+exec /usr/libexec/celenn-tour

@@ -1,16 +1,17 @@
 // Progress of a system download, for the progress bar of the Updates page.
 //
-// cosmic-blue-bootc (the bootc that uupd and cosmic-blue-updates-helper run)
+// celenn-bootc (the bootc that uupd and celenn-updates-helper run)
 // copies bootc's progress, JSON lines written to its --progress-fd, to
 // PROGRESS. Each line is an event: "ProgressBytes" while the image is
 // downloaded (task "pulling": bytes and bytesTotal of what is left to
 // download), then "ProgressSteps" while it is imported and staged. Only the
 // last complete line matters. The file is removed when bootc ends.
 
-use crate::i18n::{language, tr};
+use crate::i18n::tr;
+use crate::units::size;
 use std::time::{Duration, SystemTime};
 
-pub const PROGRESS: &str = "/run/cosmic-blue/update-progress.jsonl";
+pub const PROGRESS: &str = "/run/celenn/update-progress.jsonl";
 /// bootc writes an event at least every few seconds while it downloads;
 /// an older file was left by a download that was stopped
 const FRESH: Duration = Duration::from_secs(60);
@@ -18,8 +19,6 @@ const FRESH: Duration = Duration::from_secs(60);
 pub const TEXTS: &[&str] = &[
     "Downloading the new version: {done} of {total} ({percent}%)",
     "Installing the new version…",
-    "MB",
-    "GB",
 ];
 
 #[derive(Clone, Debug, PartialEq)]
@@ -85,25 +84,6 @@ fn parse(line: &str) -> Option<Progress> {
             total: number("stepsTotal"),
         }),
         _ => None,
-    }
-}
-
-/// "1.2 GB", "350 MB" ("1,2 Go" in French: units and decimal comma of the
-/// session language)
-fn size(bytes: u64) -> String {
-    const MB: f64 = 1_000_000.0;
-    const GB: f64 = 1_000_000_000.0;
-    let bytes = bytes as f64;
-    let text = if bytes >= GB {
-        format!("{:.1} {}", bytes / GB, tr("GB"))
-    } else {
-        format!("{:.0} {}", bytes / MB, tr("MB"))
-    };
-    // Every translated language writes decimals with a comma
-    if language().is_some() {
-        text.replacen('.', ",", 1)
-    } else {
-        text
     }
 }
 

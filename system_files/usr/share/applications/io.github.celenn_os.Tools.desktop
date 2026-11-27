@@ -1,0 +1,25 @@
+[Desktop Entry]
+Type=Application
+Name=Celenn OS Tools
+Name[fr]=Outils Celenn OS
+Name[de]=Celenn OS Werkzeuge
+Name[es]=Herramientas de Celenn OS
+Name[it]=Strumenti di Celenn OS
+Name[pt_BR]=Ferramentas do Celenn OS
+Comment=Updates, maintenance and help, without typing commands
+Comment[fr]=Mises à jour, entretien et aide, sans taper de commande
+Comment[de]=Updates, Pflege und Hilfe, ganz ohne Befehle
+Comment[es]=Actualizaciones, mantenimiento y ayuda, sin escribir comandos
+Comment[it]=Aggiornamenti, manutenzione e aiuto, senza digitare comandi
+Comment[pt_BR]=Atualizações, manutenção e ajuda, sem digitar comandos
+Keywords=Celenn OS;Tools;Toolbox;Maintenance;Clean;Disk space;Backup;Repair;Help;Bug;ujust;
+Keywords[fr]=Celenn OS;Outils;Boîte à outils;Sauvegarde;Réparer;Entretien;Nettoyer;Espace disque;Aide;Bug;ujust;
+Keywords[de]=Celenn OS;Werkzeuge;Werkzeugkasten;Sicherung;Reparieren;Pflege;Aufräumen;Speicherplatz;Hilfe;Fehler;ujust;
+Keywords[es]=Celenn OS;Herramientas;Caja de herramientas;Copia de seguridad;Reparar;Mantenimiento;Limpiar;Espacio;Ayuda;Error;ujust;
+Keywords[it]=Celenn OS;Strumenti;Cassetta degli attrezzi;Backup;Riparare;Manutenzione;Pulizia;Spazio;Aiuto;Bug;ujust;
+Keywords[pt_BR]=Celenn OS;Ferramentas;Caixa de ferramentas;Backup;Reparar;Manutenção;Limpar;Espaço;Ajuda;Bug;ujust;
+Icon=celenn-tools
+Exec=/usr/libexec/celenn-tools
+Terminal=false
+StartupNotify=true
+Categories=System;Settings;

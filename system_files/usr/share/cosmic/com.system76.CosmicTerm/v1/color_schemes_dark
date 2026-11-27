@@ -1,11 +1,11 @@
-// cosmic-blue dark terminal colors, the default of COSMIC Terminal.
-// The blue is the cosmic-blue accent; the other colors share its cool
+// Celenn OS dark terminal colors, the default of COSMIC Terminal.
+// The blue is the Celenn OS accent; the other colors share its cool
 // tint and a matching lightness (OKLCH), readable on the theme background.
 // The background is left unset, so the terminal keeps the theme's night
 // blue (and its frosted glass) like COSMIC's own built-in schemes.
 {
     1: (
-        name: "cosmic-blue",
+        name: "Celenn",
         foreground: "#D7DEEC",
         cursor: "#4F8DFF",
         bright_foreground: "#EEF2F9",

@@ -1,4 +1,4 @@
-# Brazilian Portuguese translation of the cosmic-blue tours
+# Brazilian Portuguese translation of the Celenn OS tours
 # (build_files/first_steps/src/main.rs).
 msgid ""
 msgstr ""
@@ -20,8 +20,8 @@ msgstr "Mais tarde"
 msgid "Step {} of {}"
 msgstr "Passo {} de {}"
 
-msgid "Welcome to cosmic-blue"
-msgstr "Boas-vindas ao cosmic-blue"
+msgid "Welcome to Celenn OS"
+msgstr "Boas-vindas ao Celenn OS"
 
 msgid "Accessibility"
 msgstr "Acessibilidade"
@@ -62,14 +62,14 @@ msgstr "Abrir"
 msgid "Get started"
 msgstr "Começar"
 
-msgid "cosmic-blue is Fedora Atomic with the COSMIC desktop, made in the spirit of Bluefin: a desktop that stays out of your way and keeps itself up to date."
-msgstr "cosmic-blue é o Fedora Atomic com o ambiente COSMIC, feito no espírito do Bluefin: uma área de trabalho que não atrapalha e se mantém atualizada sozinha."
+msgid "Celenn OS is Fedora Atomic with the COSMIC desktop, made in the spirit of Bluefin: a desktop that stays out of your way and keeps itself up to date."
+msgstr "Celenn OS é o Fedora Atomic com o ambiente COSMIC, feito no espírito do Bluefin: uma área de trabalho que não atrapalha e se mantém atualizada sozinha."
 
 msgid "Is this computer ready?"
 msgstr "Este computador está pronto?"
 
-msgid "cosmic-blue runs from the USB drive, without touching your disk. Here is what it found."
-msgstr "O cosmic-blue roda a partir do pendrive, sem mexer no seu disco. Veja o que ele encontrou."
+msgid "Celenn OS runs from the USB drive, without touching your disk. Here is what it found."
+msgstr "O Celenn OS roda a partir do pendrive, sem mexer no seu disco. Veja o que ele encontrou."
 
 msgid "Wi-Fi"
 msgstr "Wi-Fi"
@@ -107,8 +107,8 @@ msgstr "{}: o driver já está no sistema."
 msgid "{}: the NVIDIA driver is ready."
 msgstr "{}: o driver da NVIDIA está pronto."
 
-msgid "{}. For games, switch to the NVIDIA edition after installing: one click in cosmic-blue Tools → NVIDIA driver."
-msgstr "{}. Para jogos, mude para a edição NVIDIA depois de instalar: um clique em Ferramentas do cosmic-blue → Driver NVIDIA."
+msgid "{}. For games, switch to the NVIDIA edition after installing: one click in Celenn OS Tools → NVIDIA driver."
+msgstr "{}. Para jogos, mude para a edição NVIDIA depois de instalar: um clique em Ferramentas do Celenn OS → Driver NVIDIA."
 
 msgid "{}: no driver, the picture may be slow."
 msgstr "{}: sem driver, a imagem pode ficar lenta."
@@ -206,11 +206,11 @@ msgstr "Homebrew para ferramentas de linha de comando, distrobox para outras dis
 msgid "Ready to install?"
 msgstr "Tudo pronto para instalar?"
 
-msgid "The installer copies cosmic-blue to your disk. After that, it updates itself from the cosmic-blue image registry."
-msgstr "O instalador copia o cosmic-blue para o seu disco. Depois disso, ele se atualiza sozinho pelo registro de imagens do cosmic-blue."
+msgid "The installer copies Celenn OS to your disk. After that, it updates itself from the Celenn OS image registry."
+msgstr "O instalador copia o Celenn OS para o seu disco. Depois disso, ele se atualiza sozinho pelo registro de imagens do Celenn OS."
 
-msgid "Install cosmic-blue"
-msgstr "Instalar o cosmic-blue"
+msgid "Install Celenn OS"
+msgstr "Instalar o Celenn OS"
 
 msgid "Keep trying"
 msgstr "Continuar testando"
@@ -293,8 +293,8 @@ msgstr "Configurações de rede"
 msgid "NVIDIA graphics card"
 msgstr "Placa de vídeo NVIDIA"
 
-msgid "The NVIDIA edition of cosmic-blue has its driver: about 4 GB to download, then it starts at the next restart."
-msgstr "A edição NVIDIA do cosmic-blue tem o driver dela: cerca de 4 GB para baixar, e ela inicia na próxima reinicialização."
+msgid "The NVIDIA edition of Celenn OS has its driver: about 4 GB to download, then it starts at the next restart."
+msgstr "A edição NVIDIA do Celenn OS tem o driver dela: cerca de 4 GB para baixar, e ela inicia na próxima reinicialização."
 
 msgid "Switch"
 msgstr "Trocar"
@@ -305,8 +305,8 @@ msgstr "Baixando a edição NVIDIA… Isso pode levar um tempo."
 msgid "The NVIDIA edition starts at the next restart."
 msgstr "A edição NVIDIA inicia na próxima reinicialização."
 
-msgid "At the restart, a blue screen asks to enroll a key: choose Enroll MOK, Continue, Yes, then type the password cosmicblue (the keyboard is QWERTY there)."
-msgstr "Na reinicialização, uma tela azul pede para registrar uma chave: escolha Enroll MOK, Continue, Yes e digite a senha cosmicblue (lá o teclado é QWERTY)."
+msgid "At the restart, a blue screen asks to enroll a key: choose Enroll MOK, Continue, Yes, then type the password celennos (the keyboard is QWERTY there)."
+msgstr "Na reinicialização, uma tela azul pede para registrar uma chave: escolha Enroll MOK, Continue, Yes e digite a senha celennos (lá o teclado é QWERTY)."
 
 msgid "Firmware updates are available"
 msgstr "Há atualizações de firmware disponíveis"
@@ -356,14 +356,14 @@ msgstr "Este tour e o aplicativo Atalhos de teclado continuam na biblioteca de a
 msgid "“{}” does not install here"
 msgstr "“{}” não se instala aqui"
 
-msgid "This is a Windows program. On cosmic-blue, apps come from COSMIC Store: most well-known apps are there, or a good alternative."
-msgstr "Este é um programa do Windows. No cosmic-blue, os aplicativos vêm da COSMIC Store: a maioria dos aplicativos conhecidos está lá, ou uma boa alternativa."
+msgid "This is a Windows program. On Celenn OS, apps come from COSMIC Store: most well-known apps are there, or a good alternative."
+msgstr "Este é um programa do Windows. No Celenn OS, os aplicativos vêm da COSMIC Store: a maioria dos aplicativos conhecidos está lá, ou uma boa alternativa."
 
-msgid "This is a package for Debian and Ubuntu. On cosmic-blue, apps come from COSMIC Store: most well-known apps are there, or a good alternative."
-msgstr "Este é um pacote para Debian e Ubuntu. No cosmic-blue, os aplicativos vêm da COSMIC Store: a maioria dos aplicativos conhecidos está lá, ou uma boa alternativa."
+msgid "This is a package for Debian and Ubuntu. On Celenn OS, apps come from COSMIC Store: most well-known apps are there, or a good alternative."
+msgstr "Este é um pacote para Debian e Ubuntu. No Celenn OS, os aplicativos vêm da COSMIC Store: a maioria dos aplicativos conhecidos está lá, ou uma boa alternativa."
 
-msgid "This is a package for Fedora. cosmic-blue's system is a read-only image: apps come from COSMIC Store instead. Most well-known apps are there, or a good alternative."
-msgstr "Este é um pacote para o Fedora. O sistema do cosmic-blue é uma imagem somente leitura: os aplicativos vêm da COSMIC Store. A maioria dos aplicativos conhecidos está lá, ou uma boa alternativa."
+msgid "This is a package for Fedora. Celenn OS's system is a read-only image: apps come from COSMIC Store instead. Most well-known apps are there, or a good alternative."
+msgstr "Este é um pacote para o Fedora. O sistema do Celenn OS é uma imagem somente leitura: os aplicativos vêm da COSMIC Store. A maioria dos aplicativos conhecidos está lá, ou uma boa alternativa."
 
 msgid "Search for “{}” in COSMIC Store"
 msgstr "Buscar “{}” na COSMIC Store"
@@ -614,6 +614,9 @@ msgstr "Editores de código"
 msgid "In the terminal"
 msgstr "No terminal"
 
+msgid "Other tools"
+msgstr "Outras ferramentas"
+
 msgid "Homebrew is still being set up: the code editors and terminal tools can be chosen in a few minutes."
 msgstr "O Homebrew ainda está sendo configurado: os editores de código e as ferramentas de terminal poderão ser escolhidos em alguns minutos."
 
@@ -665,8 +668,8 @@ msgstr "“{}” não funcionou"
 msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
 msgstr "Sem conexão com a internet. Conecte-se a uma rede e tente de novo. Nada foi alterado."
 
-msgid "The disk is full ({} free). Free up space with cosmic-blue Tools, then try again."
-msgstr "O disco está cheio ({} livres). Libere espaço com Ferramentas do cosmic-blue e tente de novo."
+msgid "The disk is full ({} free). Free up space with Celenn OS Tools, then try again."
+msgstr "O disco está cheio ({} livres). Libere espaço com Ferramentas do Celenn OS e tente de novo."
 
 msgid "The server does not answer. Try again in a few minutes."
 msgstr "O servidor não responde. Tente de novo em alguns minutos."
@@ -683,8 +686,8 @@ msgstr "Relatar o problema"
 msgid "Technical details"
 msgstr "Detalhes técnicos"
 
-msgid "The report opens in your browser, filled in: the cosmic-blue version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
-msgstr "O relatório abre no navegador, já preenchido: a versão do cosmic-blue, o hardware e este erro. Nenhum arquivo ou dado pessoal. Você revisa antes de enviar; escreva no seu idioma. Para enviar é preciso uma conta no GitHub."
+msgid "The report opens in your browser, filled in: the Celenn OS version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
+msgstr "O relatório abre no navegador, já preenchido: a versão do Celenn OS, o hardware e este erro. Nenhum arquivo ou dado pessoal. Você revisa antes de enviar; escreva no seu idioma. Para enviar é preciso uma conta no GitHub."
 
 msgid "Open the report"
 msgstr "Abrir o relatório"
@@ -746,14 +749,14 @@ msgstr "O essencial"
 msgid "What is different here, and your tools."
 msgstr "O que muda aqui, e suas ferramentas."
 
-msgid "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Install apps."
-msgstr "Escritório, jogos, gráficos e mais: COSMIC Store, ou Ferramentas do cosmic-blue → Instalar aplicativos."
+msgid "Office, games, graphics and more: COSMIC Store, or Celenn OS Tools → Install apps."
+msgstr "Escritório, jogos, gráficos e mais: COSMIC Store, ou Ferramentas do Celenn OS → Instalar aplicativos."
 
-msgid "From another cosmic-blue computer"
-msgstr "De outro computador cosmic-blue"
+msgid "From another Celenn OS computer"
+msgstr "De outro computador Celenn OS"
 
-msgid "Your settings and the list of your apps, with the file saved there in cosmic-blue Tools → Change computers."
-msgstr "Suas configurações e a lista dos seus apps, com o arquivo salvo lá em Ferramentas do cosmic-blue → Trocar de computador."
+msgid "Your settings and the list of your apps, with the file saved there in Celenn OS Tools → Change computers."
+msgstr "Suas configurações e a lista dos seus apps, com o arquivo salvo lá em Ferramentas do Celenn OS → Trocar de computador."
 
 msgid "Restore…"
 msgstr "Recuperar…"
@@ -761,8 +764,8 @@ msgstr "Recuperar…"
 msgid "Ticked and grey: already installed."
 msgstr "Marcado e cinza: já instalado."
 
-msgid "Homebrew is not set up yet: only Podman Desktop can be installed now."
-msgstr "O Homebrew ainda não está pronto: por enquanto só o Podman Desktop pode ser instalado."
+msgid "Homebrew is not set up yet: only the apps from Flathub can be installed now."
+msgstr "O Homebrew ainda não está pronto: por enquanto só os apps do Flathub podem ser instalados."
 
 msgid "LibreOffice, OnlyOffice…"
 msgstr "LibreOffice, OnlyOffice…"
@@ -908,8 +911,26 @@ msgstr "Esc fecha esta janela."
 msgid "Shift"
 msgstr "Shift"
 
+msgid "Ctrl"
+msgstr "Ctrl"
+
 msgid "Escape"
 msgstr "Esc"
 
 msgid "Space"
 msgstr "Espaço"
+
+msgid "B"
+msgstr "B"
+
+msgid "kB"
+msgstr "kB"
+
+msgid "MB"
+msgstr "MB"
+
+msgid "GB"
+msgstr "GB"
+
+msgid "TB"
+msgstr "TB"

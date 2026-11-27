@@ -4,15 +4,16 @@ set -euox pipefail
 
 systemctl enable \
     brew-setup.service \
-    cosmic-blue-flatpark-off.service \
-    cosmic-blue-login-pictures.path \
-    cosmic-blue-login-pictures.service \
-    cosmic-blue-migrate-defaults.service \
+    celenn-flatpark-off.service \
+    celenn-login-pictures.path \
+    celenn-login-pictures.service \
+    celenn-migrate-defaults.service \
+    celenn-migrate-names.service \
     cosmic-blue-move-to-celenn.timer \
-    cosmic-blue-parental-controls.service \
-    cosmic-blue-user-defaults.service \
-    cosmic-blue-root-mount-options.service \
-    cosmic-blue-signed-updates.timer \
+    celenn-parental-controls.service \
+    celenn-user-defaults.service \
+    celenn-root-mount-options.service \
+    celenn-signed-updates.timer \
     flatpak-nuke-fedora.service \
     flatpak-preinstall.service \
     input-remapper.service \
@@ -55,11 +56,11 @@ systemctl --global enable speech-dispatcher.socket
 
 # AppImages added with Gear Lever update by themselves once a day, like the
 # system and flatpaks (and stop when `ujust toggle-updates` turns uupd off)
-systemctl --global enable cosmic-blue-appimage-update.timer
+systemctl --global enable celenn-appimage-update.timer
 
 # Files trashed more than 30 days ago go, and a notification warns when the
-# disk is almost full (cosmic-blue Tools turns both off)
-systemctl --global enable cosmic-blue-housekeeping.timer
+# disk is almost full (Celenn OS Tools turns both off)
+systemctl --global enable celenn-housekeeping.timer
 
 # LocalSend (a first-boot app; the tour's "Send without a cable") finds
 # phones on the same network and receives their files on port 53317, which
@@ -67,7 +68,7 @@ systemctl --global enable cosmic-blue-housekeeping.timer
 # open, and LocalSend asks before it accepts files. Our service definition,
 # unless firewalld ships its own.
 if [[ ! -e /usr/lib/firewalld/services/localsend.xml ]]; then
-    install -m 0644 /usr/share/cosmic-blue/firewalld/localsend.xml /usr/lib/firewalld/services/localsend.xml
+    install -m 0644 /usr/share/celenn/firewalld/localsend.xml /usr/lib/firewalld/services/localsend.xml
 fi
 firewall-offline-cmd --zone=public --add-service=localsend
 

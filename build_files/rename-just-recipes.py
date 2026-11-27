@@ -13,7 +13,7 @@ Each OP is one of:
   ...|Text        (after any of the above) new description, shown by `ujust`
 
 Used on projectbluefin/common's ujust files so that every listed command
-reads verb-object, like cosmic-blue's own (install-, toggle-, reset-,
+reads verb-object, like Celenn OS's own (install-, toggle-, reset-,
 check-, show-...). A recipe starts at an unindented "name ...:" line; the
 [attribute] and comment lines right above it belong to it. Calls of a renamed
 recipe in any of the files (`ujust old`, `just --justfile ... old`) follow

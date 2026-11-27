@@ -10,7 +10,7 @@
 #
 # Usage: tests/vm-update-test.sh <from image> <to image> <output dir>
 #   Both images are registry references, e.g.
-#   ghcr.io/cosmic-blue-os/cosmic-blue:stable ghcr.io/cosmic-blue-os/cosmic-blue:20261106
+#   ghcr.io/celenn-os/celenn:stable ghcr.io/celenn-os/celenn:20261106
 # Needs: podman, skopeo, qemu-system-x86_64, OVMF, socat, openssh-client, jq, KVM.
 set -euo pipefail
 trap 'echo "::error::Command failed at line ${LINENO}: ${BASH_COMMAND}"' ERR
@@ -58,7 +58,7 @@ fi
 
 # 2. Some user data and settings that the update must keep, and a logged in
 # user, as on a real system
-vm "echo kept > /etc/cosmic-blue-update-test"
+vm "echo kept > /etc/celenn-update-test"
 if demo_user && demo_login 00-login-failed-before-update; then
     sleep 30
     vm "pkill -u ${DEMO_USER} -f cosmic-initial-setup" || true
@@ -72,15 +72,25 @@ demo_journal before-update
 
 # 3. The update, then a reboot into it
 log "Updating to ${TO}"
-# Through cosmic-blue-bootc when the old image records the download
+# Through celenn-bootc when the old image records the download
 # progress, as the Updates app does. The copy only exists while bootc runs:
 # a watcher keeps the last one it saw
 bootc_cmd=bootc
-vm "grep -q update-progress /usr/libexec/cosmic-blue-bootc" 2>/dev/null \
-    && bootc_cmd=/usr/libexec/cosmic-blue-bootc
-vm "(while sleep 1; do cp /run/cosmic-blue/update-progress.jsonl /run/progress-seen 2>/dev/null; done) >/dev/null 2>&1 &
+vm "grep -q update-progress /usr/libexec/celenn-bootc" 2>/dev/null \
+    && bootc_cmd=/usr/libexec/celenn-bootc
+# The signature is checked when the old image trusts the namespace of TO.
+# Images from before the rename to Celenn OS do not trust ghcr.io/celenn-os:
+# they move to it by hand, without the check, and the new image turns it
+# back on (celenn-signed-updates). Remove in the cleanup after the rename.
+sigpolicy=--enforce-container-sigpolicy
+namespace="$(cut -d/ -f1-2 <<<"${TO}")"
+if ! vm "jq -e '.transports.docker.\"${namespace}\"[0].type == \"sigstoreSigned\"' /etc/containers/policy.json" >/dev/null 2>&1; then
+    echo "::warning::${FROM} does not trust ${namespace}: switching without the signature check, as its users do"
+    sigpolicy=""
+fi
+vm "(while sleep 1; do cp /run/celenn/update-progress.jsonl /run/progress-seen 2>/dev/null; done) >/dev/null 2>&1 &
     watcher=\$!
-    timeout 1800 ${bootc_cmd} switch --enforce-container-sigpolicy ${TO}; status=\$?
+    timeout 1800 ${bootc_cmd} switch ${sigpolicy} ${TO}; status=\$?
     kill \${watcher}
     exit \${status}" \
     || fail "bootc could not update to ${TO} (pull or signature check failed)"
@@ -88,8 +98,8 @@ if [[ "${bootc_cmd}" != bootc ]]; then
     seen="$(vm "cat /run/progress-seen" 2>/dev/null)" || seen=""
     echo "Download progress (last lines): $(tail -n 3 <<<"${seen}")"
     grep -q '"type":"ProgressBytes"' <<<"${seen}" \
-        || { echo "::error::cosmic-blue-bootc did not record the download progress"; errors=1; }
-    if vm "test -e /run/cosmic-blue/update-progress.jsonl"; then
+        || { echo "::error::celenn-bootc did not record the download progress"; errors=1; }
+    if vm "test -e /run/celenn/update-progress.jsonl"; then
         echo "::error::the download progress was not removed after the download"
         errors=1
     fi
@@ -111,13 +121,13 @@ if [[ "$(vm_booted_digest)" != "${to_digest}" ]]; then
 fi
 vm_check_system after-update || errors=1
 # Older images turned FlatPark on by themselves: an update that brings
-# cosmic-blue-flatpark-off turns it off (no app was installed from it)
-if vm 'test -e /usr/libexec/cosmic-blue-flatpark-off' \
+# celenn-flatpark-off turns it off (no app was installed from it)
+if vm 'test -e /usr/libexec/celenn-flatpark-off' \
     && vm 'flatpak remotes --system --columns=name' | grep -qx flatpark; then
     echo "::error::FlatPark is still on after the update"
     errors=1
 fi
-vm "grep -qx kept /etc/cosmic-blue-update-test" \
+vm "grep -qx kept /etc/celenn-update-test" \
     || { echo "::error::A change to /etc was lost in the update"; errors=1; }
 vm "grep -qx kept ~${DEMO_USER}/update-test" \
     || { echo "::error::A file in the home folder was lost in the update"; errors=1; }

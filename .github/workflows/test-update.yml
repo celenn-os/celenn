@@ -38,7 +38,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Pull requests that do not touch NVIDIA only test cosmic-blue
+  # Pull requests that do not touch NVIDIA only test celenn
   images:
     name: Pick the images
     runs-on: ubuntu-26.04
@@ -69,7 +69,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Same images as build.yml: cosmic-blue and cosmic-blue-nvidia
+        # Same images as build.yml: celenn and celenn-nvidia
         image_suffix: ${{ fromJSON(needs.images.outputs.suffixes) }}
     env:
       # output of build.yml, keep in sync
@@ -92,7 +92,7 @@ jobs:
           echo "image=${image}" >> "${GITHUB_OUTPUT}"
           for tag in "${FROM_TAG}" "${TO_TAG}"; do
             if ! skopeo inspect --format '{{.Digest}}' "docker://${image}:${tag}" >/dev/null 2>&1; then
-              # e.g. no stable cosmic-blue-nvidia yet
+              # e.g. no stable celenn-nvidia yet
               echo "::notice::${image}:${tag} does not exist, skipping"
               echo "skip=true" >> "${GITHUB_OUTPUT}"
               exit 0

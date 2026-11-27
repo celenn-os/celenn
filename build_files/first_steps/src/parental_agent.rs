@@ -28,7 +28,7 @@ pub(super) fn write_focus(path: &Path, app: Option<&str>) {
 /// time makes the warnings come again before the new end.
 pub(super) fn agent() {
     let user = user_name();
-    // Administrators cannot have rules (see cosmic-blue-parental-helper)
+    // Administrators cannot have rules (see celenn-parental-helper)
     let groups = std::process::Command::new("id")
         .arg("-nG")
         .output()
@@ -121,7 +121,7 @@ pub(super) fn more_time_launcher(show: bool) {
         return;
     }
     let entry = format!(
-        "[Desktop Entry]\nType=Application\nName={}\nComment={}\nIcon={ICON}\nExec=/usr/libexec/cosmic-blue-parental-controls --more-time\nCategories=Utility;\nTerminal=false\n",
+        "[Desktop Entry]\nType=Application\nName={}\nComment={}\nIcon={ICON}\nExec=/usr/libexec/celenn-parental-controls --more-time\nCategories=Utility;\nTerminal=false\n",
         tr("Ask for more time"),
         tr("A parent confirms with their password."),
     );
@@ -214,7 +214,7 @@ pub(super) fn notify(remaining: u64, end: &str) {
                 .arg("--more-time")
                 .spawn()
                 .or_else(|_| {
-                    std::process::Command::new("/usr/libexec/cosmic-blue-parental-controls")
+                    std::process::Command::new("/usr/libexec/celenn-parental-controls")
                         .arg("--more-time")
                         .spawn()
                 })

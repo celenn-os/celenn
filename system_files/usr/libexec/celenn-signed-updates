@@ -1,0 +1,47 @@
+#!/usr/bin/bash
+# Turns on the signature check of Celenn OS updates on systems that follow
+# a Celenn OS image without it.
+#
+# `bootc switch ghcr.io/celenn-os/celenn:stable` (from Bluefin,
+# Aurora, Silverblue...) records the image without signature verification
+# unless --enforce-container-sigpolicy is given, and every later update
+# (uupd, `ujust update`, `bootc upgrade`) then installs whatever the registry
+# serves. Once the system runs Celenn OS, its policy
+# (/etc/containers/policy.json) knows the Celenn OS key: this switches to the
+# same image again, this time with the policy enforced. The image is
+# downloaded and checked like an update and applies at the next reboot.
+# Systems installed from the ISO already check signatures: nothing to do.
+#
+# Usage: celenn-signed-updates [--dry-run]
+set -euo pipefail
+
+VENDOR="ghcr.io/celenn-os"
+dry_run=false
+[[ "${1:-}" == --dry-run ]] && dry_run=true
+
+spec="$(bootc status --json | jq -c '.spec.image // {}')"
+image="$(jq -r '.image // empty' <<<"${spec}")"
+transport="$(jq -r '.transport // empty' <<<"${spec}")"
+signature="$(jq -r '.signature // empty' <<<"${spec}")"
+
+if [[ "${transport}" != registry || "${image,,}" != "${VENDOR}/"* ]]; then
+    echo "Not following a Celenn OS image from the registry (${transport:-none}:${image:-none}): nothing to do"
+    exit 0
+fi
+if [[ -n "${signature}" ]]; then
+    echo "${image}: signature check already on (${signature})"
+    exit 0
+fi
+# The Celenn OS key must be in the policy, or the switch would be refused
+if ! jq -e --arg vendor "${VENDOR}" '.transports.docker[$vendor][0].type == "sigstoreSigned"' \
+    /etc/containers/policy.json >/dev/null; then
+    echo "${image}: no Celenn OS key in /etc/containers/policy.json, leaving it as it is" >&2
+    exit 0
+fi
+
+if [[ "${dry_run}" == true ]]; then
+    echo "${image}: would turn on the signature check (bootc switch --enforce-container-sigpolicy)"
+    exit 0
+fi
+echo "${image}: turning on the signature check"
+bootc switch --enforce-container-sigpolicy "${image}"

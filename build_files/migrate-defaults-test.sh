@@ -1,15 +1,15 @@
 #!/usr/bin/bash
-# Checks cosmic-blue-migrate-defaults on a made-up account and image defaults.
+# Checks celenn-migrate-defaults on a made-up account and image defaults.
 # Run by 99-tests.sh; also runs outside the image:
-#   build_files/migrate-defaults-test.sh system_files/usr/libexec/cosmic-blue-migrate-defaults
+#   build_files/migrate-defaults-test.sh system_files/usr/libexec/celenn-migrate-defaults
 set -euo pipefail
 
-SCRIPT="$(realpath "${1:-/usr/libexec/cosmic-blue-migrate-defaults}")"
+SCRIPT="$(realpath "${1:-/usr/libexec/celenn-migrate-defaults}")"
 WORK="$(mktemp -d)"
 trap 'rm -rf "${WORK}"' EXIT
-export COSMIC_BLUE_DEFAULTS_DIR="${WORK}/defaults"
-export COSMIC_BLUE_MANIFEST="${WORK}/defaults.list"
-export COSMIC_BLUE_PREVIOUS="${WORK}/previous.list"
+export CELENN_DEFAULTS_DIR="${WORK}/defaults"
+export CELENN_MANIFEST="${WORK}/defaults.list"
+export CELENN_PREVIOUS="${WORK}/previous.list"
 export HOME="${WORK}/home"
 unset XDG_CONFIG_HOME XDG_STATE_HOME
 CONFIG="${HOME}/.config/cosmic"
@@ -25,13 +25,13 @@ put() { # file value
     printf '%s' "$2" >"$1"
 }
 image() { # path value: an image default
-    put "${COSMIC_BLUE_DEFAULTS_DIR}/$1" "$2"
+    put "${CELENN_DEFAULTS_DIR}/$1" "$2"
 }
 account() { # path value: the account's own copy
     put "${CONFIG}/$1" "$2"
 }
 manifest() {
-    "${SCRIPT}" --manifest >"${COSMIC_BLUE_MANIFEST}"
+    "${SCRIPT}" --manifest >"${CELENN_MANIFEST}"
 }
 migrate() { "${SCRIPT}" --user; }
 kept() { [[ "$(cat "${CONFIG}/$1")" == "$2" ]] || fail "$1 should be kept as $2"; }
@@ -47,7 +47,7 @@ LBG=com.system76.CosmicTheme.Light.Builder/v2/bg_color
 XKB=com.system76.CosmicComp/v1/xkb_config
 
 # An image from before: COSMIC's default icons, teal theme, a dock
-image "${ICONS}" '"cosmic-blue"'
+image "${ICONS}" '"celenn"'
 image "${FONT}" '"Open Sans"'
 image "${DOCK}" '["firefox"]'
 image "${ACCENT}" 'Some("#63D0DF")'
@@ -58,7 +58,7 @@ image "${XKB}" '(layout: "us")'
 # Fedora's packaged icon theme default, and a built-in one
 mkdir -p "${WORK}/previous/com.system76.CosmicTk/v1"
 printf '"Cosmic"' >"${WORK}/previous/${ICONS}"
-"${SCRIPT}" --hash-tree "${WORK}/previous" >"${COSMIC_BLUE_PREVIOUS}"
+"${SCRIPT}" --hash-tree "${WORK}/previous" >"${CELENN_PREVIOUS}"
 manifest
 
 # The account: icons from the old built-in default (no choice), a font of the
@@ -84,7 +84,7 @@ gone "${BG}"
 kept "${LACCENT}" 'Some("#FF00FF")'  # light theme: user's own accent, kept as a whole
 kept "${LBG}" 'None'
 kept "${XKB}" '(layout: "us")'       # set from the installer, never touched
-grep -q '^manifest ' "${HOME}/.local/state/cosmic-blue/defaults.list" || fail "no state written"
+grep -q '^manifest ' "${HOME}/.local/state/celenn/defaults.list" || fail "no state written"
 
 # The user then picks values equal to defaults again: with no image change,
 # nothing is looked at

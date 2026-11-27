@@ -1,4 +1,4 @@
-// cosmic-blue Tools, the toolbox (the window's first page): where things
+// Celenn OS Tools, the toolbox (the window's first page): where things
 // stand, in one line; a search through every tool and setting; then the
 // tools as tiles, in groups, each saying how things are (tools.rs asks the
 // pages that know), and under them the tools for experienced users, the
@@ -21,7 +21,7 @@ use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub const TEXTS: &[&str] = &[
-    "All is well: cosmic-blue looks after itself.",
+    "All is well: Celenn OS looks after itself.",
     "One thing needs your attention: {}",
     "{} things need your attention: {}",
     "Up to date, version {}",
@@ -105,9 +105,9 @@ const SETTINGS: &[(&str, &str, Tool)] = &[
         "Accent color, wallpaper, panel, dock, fonts…",
         Tool::Look,
     ),
-    ("The cosmic-blue look", "", Tool::Repair),
+    ("The Celenn OS look", "", Tool::Repair),
     ("All COSMIC settings", "", Tool::Repair),
-    ("Apps that come with cosmic-blue", "", Tool::Repair),
+    ("Apps that come with Celenn OS", "", Tool::Repair),
     ("Documentation", "", Tool::Help),
     ("Ask a question", "", Tool::Help),
     ("Report a problem", "", Tool::Help),
@@ -360,10 +360,10 @@ impl Page {
                 Some(disk) if disk.total > 0 && disk.used as f32 / disk.total as f32 >= 0.9 => {
                     Summary::Warns(fill(
                         tr("Almost full: {} free."),
-                        &maintenance::size(disk.free),
+                        &crate::units::size(disk.free),
                     ))
                 }
-                Some(disk) => Summary::Says(fill(tr("{} free"), &maintenance::size(disk.free))),
+                Some(disk) => Summary::Says(fill(tr("{} free"), &crate::units::size(disk.free))),
                 None => Summary::Unknown,
             },
             _ => Summary::Unknown,
@@ -423,7 +423,7 @@ impl Page {
             .map(|(tool, _)| tr(tool.title()))
             .collect();
         let status: Element<'a, Message> = match attention.len() {
-            0 => dim_caption(tr("All is well: cosmic-blue looks after itself.")).into(),
+            0 => dim_caption(tr("All is well: Celenn OS looks after itself.")).into(),
             count => {
                 let names = attention.join(", ");
                 let line = if count == 1 {
@@ -450,6 +450,9 @@ impl Page {
             .on_input(Message::Search)
             .on_clear(Message::Search(String::new()))
             .width(Length::Fixed(360.0));
+        // The group headings sit close to their tiles, so that every tile
+        // fits without scrolling in the window COSMIC opens on a 1080p
+        // screen (693 px high)
         let mut body = widget::column::with_capacity(8)
             .align_x(Alignment::Center)
             .push(text::title3(tr("Toolbox")))
@@ -470,7 +473,7 @@ impl Page {
                         text::heading(tr(group))
                             .width(Length::Fill)
                             .apply(widget::container)
-                            .padding([space_s, 0, space_xs, 0]),
+                            .padding([space_xs, 0, space_xxs, 0]),
                     )
                     .push(grid(shown));
             }
