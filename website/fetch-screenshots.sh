@@ -22,7 +22,17 @@ mkdir -p "${out}"
 
 fail() { echo "::error file=website/fetch-screenshots.sh::Screenshots: $*"; exit 1; }
 
+# Until the first stable promotion under the new name: the stable image
+# published under the project's old name. Remove in the cleanup after the
+# rename.
+if ! skopeo inspect --raw "${image}" >/dev/null 2>&1 && [[ "${repo,,}" == celenn-os/celenn ]]; then
+    echo "::notice::${image} is not published yet, using the image of the old name"
+    image="docker://ghcr.io/celenn-os/cosmic-blue:stable"
+fi
 labels="$(skopeo inspect --retry-times 3 "${image}")" || fail "could not read ${image}"
+# The boot test artifact is named after the image (boot-test-celenn)
+image_name="${image##*/}"
+image_name="${image_name%%:*}"
 version="$(jq -r '.Labels["org.opencontainers.image.version"] // empty' <<< "${labels}")"
 [[ -n "${version}" ]] || fail "${image} has no version label"
 echo "stable is ${version}"
@@ -48,7 +58,7 @@ else
         pushed="$(gh api "repos/${repo}/actions/runs/${id}/jobs?per_page=100" \
             --jq '.jobs[] | select(.name == "Build and push image") | .steps[] | select(.name == "Push the version tag") | .conclusion')"
         [[ "${pushed}" == success ]] || continue
-        gh run download "${id}" -R "${repo}" -n boot-test-celenn -D "${tmp}" >/dev/null 2>&1 || continue
+        gh run download "${id}" -R "${repo}" -n "boot-test-${image_name}" -D "${tmp}" >/dev/null 2>&1 || continue
         run="${id}" created="${when}"
         break
     done < <(gh api "repos/${repo}/actions/workflows/build.yml/runs?head_sha=${revision}&status=completed&per_page=20" \
