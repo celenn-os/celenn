@@ -2,8 +2,8 @@
 // the sheet lists, opening and closing it, and the image's check that the
 // sheet still matches the shortcuts COSMIC really has.
 
+use super::*;
 use std::collections::BTreeSet;
-use std::path::PathBuf;
 
 /// The keyboard shortcuts app: (heading, [(keys, what they do)])
 pub const SHORTCUTS: &[(&str, &[(&str, &str)])] = &[
@@ -92,6 +92,121 @@ pub fn close_open_sheet() -> bool {
     }
     let _ = std::fs::write(&file, std::process::id().to_string());
     false
+}
+
+// The sheet itself, a view of the tour's App (main.rs)
+impl<T: Tour> App<T> {
+    /// The "Keyboard shortcuts" app
+    pub(super) fn shortcuts_view(&self) -> Element<'_, Message> {
+        let cosmic_theme::Spacing {
+            space_xxs,
+            space_s,
+            space_m,
+            space_l,
+            ..
+        } = theme::spacing();
+        // Three columns of sections, so that every shortcut shows at once
+        let columns = SHORTCUT_COLUMNS.iter().map(|sections| {
+            sections
+                .iter()
+                .map(|&i| {
+                    // A compact card per section: every row on screen at once
+                    let (title, rows) = SHORTCUTS[i];
+                    let mut card = widget::column::with_capacity(rows.len() * 2);
+                    for (n, (keys, description)) in rows.iter().enumerate() {
+                        if n > 0 {
+                            card = card.push(widget::divider::horizontal::light());
+                        }
+                        card = card.push(
+                            widget::row::with_capacity(2)
+                                .push(
+                                    text::body(tr(description))
+                                        .wrapping(Wrapping::Word)
+                                        .width(Length::Fill),
+                                )
+                                .push(shortcut_keys(keys))
+                                .spacing(space_s)
+                                .align_y(Alignment::Center)
+                                .padding([space_xxs, space_s]),
+                        );
+                    }
+                    widget::column::with_capacity(2)
+                        .spacing(space_xxs)
+                        .push(text::heading(tr(title)))
+                        .push(
+                            card.apply(widget::container)
+                                .padding([space_xxs, 0])
+                                .class(theme::Container::Card),
+                        )
+                })
+                .fold(
+                    widget::column::with_capacity(2).spacing(space_m),
+                    |column, section| column.push(section),
+                )
+                .width(Length::FillPortion(1))
+                .into()
+        });
+        // The two notes under the columns, beside the button, so that the
+        // longest languages still fit without scrolling
+        widget::column::with_capacity(2)
+            .spacing(space_m)
+            .push(
+                widget::row::with_children(columns.collect::<Vec<Element<'_, Message>>>())
+                    .spacing(space_m),
+            )
+            .push(
+                widget::row::with_capacity(2)
+                    .spacing(space_m)
+                    .align_y(Alignment::Center)
+                    .push(
+                        widget::column::with_capacity(2)
+                            .spacing(2)
+                            .push(
+                                text::caption(tr(
+                                    "Super is the key with the Windows logo on most keyboards.",
+                                ))
+                                .wrapping(Wrapping::Word),
+                            )
+                            .push(text::caption(tr("Escape closes this window.")))
+                            .width(Length::Fill),
+                    )
+                    .push(
+                        widget::button::standard(tr("Change them in Settings")).on_press_maybe(
+                            in_path("cosmic-settings").then_some(Message::Run(Action::Launch(&[
+                                "cosmic-settings",
+                                "keyboard",
+                            ]))),
+                        ),
+                    ),
+            )
+            .padding([space_s, space_l, space_l, space_l])
+            .apply(widget::scrollable)
+            .into()
+    }
+}
+
+/// The keys of a sheet's shortcut, with their names translated
+fn shortcut_keys(keys: &'static str) -> Element<'static, Message> {
+    let mut row = widget::row::with_capacity(5)
+        .spacing(6)
+        .align_y(Alignment::Center);
+    for (i, combination) in keys.split(" / ").enumerate() {
+        if i > 0 {
+            row = row.push(text::caption("/"));
+        }
+        let names: Vec<&'static str> = combination
+            .split(' ')
+            .filter(|word| !word.is_empty() && *word != "+")
+            .map(|name| {
+                KEY_LABELS
+                    .iter()
+                    .find(|label| **label == name)
+                    .map_or(name, |label| tr(label))
+            })
+            .collect();
+        row = row.push(key_combo(&names));
+    }
+    row.into()
 }
 
 /// One key combination: its modifiers (sorted) and its key, None for a
