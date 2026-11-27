@@ -449,10 +449,11 @@ impl Page {
             .on_input(Message::Search)
             .on_clear(Message::Search(String::new()))
             .width(Length::Fixed(360.0));
-        let mut body = widget::column::with_capacity(8)
+        // No big title: the state line and the search say where one is,
+        // and the tiles fit without scrolling in the window COSMIC opens
+        // on a 1080p screen (693 px high)
+        let mut body = widget::column::with_capacity(6)
             .align_x(Alignment::Center)
-            .push(text::title3(tr("Toolbox")))
-            .push(widget::space::vertical().height(space_xxs))
             .push(status)
             .push(widget::space::vertical().height(space_s))
             .push(search)
@@ -469,7 +470,7 @@ impl Page {
                         text::heading(tr(group))
                             .width(Length::Fill)
                             .apply(widget::container)
-                            .padding([space_s, 0, space_xs, 0]),
+                            .padding([space_xs, 0, space_xxs, 0]),
                     )
                     .push(grid(shown));
             }
