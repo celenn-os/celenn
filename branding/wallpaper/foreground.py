@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Foreground layer of the cosmic-blue wallpaper, as a transparent SVG.
+"""Foreground layer of the Celenn OS wallpaper, as a transparent SVG.
 
 The logo, as a scene: a planet inside a glowing open orbit, with a moon in
 the gap. The sky, the Milky Way and the stars are rendered by sky.py.
@@ -38,7 +38,7 @@ C = {
 }
 
 o = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">',
-     '<title>cosmic-blue</title><defs>',
+     '<title>Celenn OS</title><defs>',
      '<linearGradient id="orb" gradientUnits="userSpaceOnUse" x1="1400" y1="2200" x2="4800" y2="900">'
      '<stop offset="0" stop-color="{0}"/><stop offset=".55" stop-color="{1}"/><stop offset="1" stop-color="{2}"/></linearGradient>'.format(*C["orb"]),
      '<radialGradient id="pl" cx=".32" cy=".78" r="1"><stop offset="0" stop-color="#d6f2ff"/><stop offset=".28" stop-color="#5aa4ff"/>'

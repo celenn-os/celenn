@@ -1,4 +1,4 @@
-// cosmic-blue Tools, the toolbox (the window's first page): where things
+// Celenn OS Tools, the toolbox (the window's first page): where things
 // stand, in one line; a search through every tool and setting; then the
 // tools as tiles, in groups, each saying how things are (tools.rs asks the
 // pages that know), and under them the tools for experienced users, the
@@ -21,7 +21,7 @@ use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub const TEXTS: &[&str] = &[
-    "All is well: cosmic-blue looks after itself.",
+    "All is well: Celenn OS looks after itself.",
     "One thing needs your attention: {}",
     "{} things need your attention: {}",
     "Up to date, version {}",
@@ -104,9 +104,9 @@ const SETTINGS: &[(&str, &str, Tool)] = &[
         "Accent color, wallpaper, panel, dock, fonts…",
         Tool::Look,
     ),
-    ("The cosmic-blue look", "", Tool::Repair),
+    ("The Celenn OS look", "", Tool::Repair),
     ("All COSMIC settings", "", Tool::Repair),
-    ("Apps that come with cosmic-blue", "", Tool::Repair),
+    ("Apps that come with Celenn OS", "", Tool::Repair),
     ("Documentation", "", Tool::Help),
     ("Ask a question", "", Tool::Help),
     ("Report a problem", "", Tool::Help),
@@ -422,7 +422,7 @@ impl Page {
             .map(|(tool, _)| tr(tool.title()))
             .collect();
         let status: Element<'a, Message> = match attention.len() {
-            0 => dim_caption(tr("All is well: cosmic-blue looks after itself.")).into(),
+            0 => dim_caption(tr("All is well: Celenn OS looks after itself.")).into(),
             count => {
                 let names = attention.join(", ");
                 let line = if count == 1 {

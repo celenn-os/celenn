@@ -2,14 +2,14 @@
 // top of the page until it is closed (a toast goes away before it is read).
 // It says what did not work and why, in plain words, and what to do:
 // retry, open the network settings, or report the problem. Shared by the
-// welcome tour (its app installs), cosmic-blue Tools and Parental controls.
+// welcome tour (its app installs), Celenn OS Tools and Parental controls.
 //
 // The cause is guessed from what the command wrote on its error output
 // (the technical details, shown folded in the card) and from the state of
 // the computer: no network, a full disk, a server that does not answer.
 //
 // "Report a problem" first says what the report holds, in the card, then
-// runs /usr/libexec/cosmic-blue-report-bug (the script of `ujust
+// runs /usr/libexec/celenn-report-bug (the script of `ujust
 // report-bug`) with the error added to the system details: the form opens in
 // the browser, filled in, and nothing is sent until it is submitted there.
 
@@ -20,21 +20,21 @@ use cosmic::widget::{self, text};
 use cosmic::{Apply, Element, theme};
 use std::process::Stdio;
 
-const REPORT: &str = "/usr/libexec/cosmic-blue-report-bug";
+const REPORT: &str = "/usr/libexec/celenn-report-bug";
 /// Lines of the error output kept for the details and the report
 const DETAIL_LINES: usize = 12;
 
 pub const TEXTS: &[&str] = &[
     "“{}” did not work",
     "No internet connection. Connect to a network, then try again. Nothing was changed.",
-    "The disk is full ({} free). Free up space with cosmic-blue Tools, then try again.",
+    "The disk is full ({} free). Free up space with Celenn OS Tools, then try again.",
     "The server does not answer. Try again in a few minutes.",
     "Something unexpected went wrong. Nothing was changed.",
     "Try again",
     "Network settings",
     "Report the problem",
     "Technical details",
-    "The report opens in your browser, filled in: the cosmic-blue version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account.",
+    "The report opens in your browser, filled in: the Celenn OS version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account.",
     "Open the report",
     "Cancel",
     "Close",
@@ -222,11 +222,7 @@ impl<J: Clone> Card<J> {
             CardMessage::ReportOpen => {
                 self.reporting = false;
                 let error = format!("{}\n{}", self.title, self.failure.details);
-                spawn(
-                    REPORT,
-                    &["open"],
-                    Some(("COSMIC_BLUE_REPORT_ERROR", &error)),
-                );
+                spawn(REPORT, &["open"], Some(("CELENN_REPORT_ERROR", &error)));
             }
             CardMessage::Details => self.details = !self.details,
             CardMessage::Close => return CardAction::Close,
@@ -245,7 +241,7 @@ impl<J: Clone> Card<J> {
             )
             .to_owned(),
             Cause::DiskFull => tr(
-                "The disk is full ({} free). Free up space with cosmic-blue Tools, then try again.",
+                "The disk is full ({} free). Free up space with Celenn OS Tools, then try again.",
             )
             .replacen("{}", &free_space().map(size).unwrap_or_default(), 1),
             Cause::Server => tr("The server does not answer. Try again in a few minutes.").to_owned(),
@@ -300,7 +296,7 @@ impl<J: Clone> Card<J> {
                 widget::column::with_capacity(2)
                     .spacing(space.space_xs)
                     .push(
-                        text::caption(tr("The report opens in your browser, filled in: the cosmic-blue version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."))
+                        text::caption(tr("The report opens in your browser, filled in: the Celenn OS version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."))
                             .wrapping(Wrapping::Word),
                     )
                     .push(

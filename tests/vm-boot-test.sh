@@ -43,14 +43,14 @@ vm "bootc status --json" | jq -e --arg ref "${TARGET_IMGREF}" \
     '.status.booted.image.image.image == $ref' >/dev/null \
     || { echo "::error::The booted image is not ${TARGET_IMGREF}"; errors=1; }
 # `bootc install` here, like a manual `bootc switch`, records the image
-# without signature verification: cosmic-blue-signed-updates must offer to
+# without signature verification: celenn-signed-updates must offer to
 # turn it on (dry run: the real switch would download the published image).
 # Its timer is stopped first so it does not start that download mid-test.
-vm "systemctl stop cosmic-blue-signed-updates.timer"
-signed_updates="$(vm "/usr/libexec/cosmic-blue-signed-updates --dry-run")" || signed_updates=""
+vm "systemctl stop celenn-signed-updates.timer"
+signed_updates="$(vm "/usr/libexec/celenn-signed-updates --dry-run")" || signed_updates=""
 echo "${signed_updates}"
 grep -q 'would turn on the signature check' <<<"${signed_updates}" \
-    || { echo "::error::cosmic-blue-signed-updates would not turn on the signature check"; errors=1; }
+    || { echo "::error::celenn-signed-updates would not turn on the signature check"; errors=1; }
 
 # Network exposure: the firewall is on, and only known services listen on
 # the network. Desktop firewall zones (such as Fedora Workstation's) let
@@ -78,7 +78,7 @@ preinstall_problem() { echo "::error::First-boot apps: $*"; errors=1; }
 wait_for 600 '[ "$(systemctl show -P ActiveState flatpak-preinstall.service)" != activating ]' \
     || preinstall_problem "flatpak-preinstall.service still runs after 10 minutes"
 wanted="$(awk '/^\[Flatpak Preinstall / { app = substr($3, 1, length($3) - 1) }
-    /^IsRuntime=false/ { print app }' "${SYSTEM_FILES}/usr/share/flatpak/preinstall.d/cosmic-blue.preinstall" | sort -u)"
+    /^IsRuntime=false/ { print app }' "${SYSTEM_FILES}/usr/share/flatpak/preinstall.d/celenn.preinstall" | sort -u)"
 installed="$(vm 'flatpak list --system --app --columns=application' | sort -u)" || installed=""
 echo "Installed flatpaks:"
 echo "${installed}"
@@ -115,46 +115,46 @@ esac
 
 # Updates app: what it shows (read from rpm-ostree, as in the user's session)
 # on a new install: this version, the channel, no previous version yet
-updates="$(vm "/usr/libexec/cosmic-blue-updates --status" 2>&1)" || updates=""
+updates="$(vm "/usr/libexec/celenn-updates --status" 2>&1)" || updates=""
 echo "${updates}"
 grep -qE '^current: [0-9]' <<<"${updates}" \
     && grep -qx 'previous: none' <<<"${updates}" \
-    || { echo "::error::cosmic-blue-updates --status does not show the version"; errors=1; }
+    || { echo "::error::celenn-updates --status does not show the version"; errors=1; }
 case "${expected}" in
     stable|testing|dev)
         grep -qx "channel: ${expected}" <<<"${updates}" \
-            || { echo "::error::cosmic-blue-updates --status does not show the ${expected} channel"; errors=1; } ;;
+            || { echo "::error::celenn-updates --status does not show the ${expected} channel"; errors=1; } ;;
 esac
 # The older stable versions it offers (stable-YYYYMMDD tags of the registry)
-older="$(vm "/usr/libexec/cosmic-blue-updates --older" 2>&1)" || older=""
+older="$(vm "/usr/libexec/celenn-updates --older" 2>&1)" || older=""
 echo "Older stable versions: ${older//$'\n'/ }"
 grep -qE '^stable-[0-9]{8}$' <<<"${older}" \
-    || echo "::warning::cosmic-blue-updates --older lists no older stable version (${older})"
+    || echo "::warning::celenn-updates --older lists no older stable version (${older})"
 # Its root helper only does what it is meant to: no rollback without a
 # previous version, no dev channel (ujust only), no tag other than stable-YYYYMMDD
-vm "/usr/libexec/cosmic-blue-updates-helper rollback" 2>/dev/null \
-    && { echo "::error::cosmic-blue-updates-helper rolled back without a previous version"; errors=1; }
-vm "/usr/libexec/cosmic-blue-updates-helper channel dev" 2>/dev/null \
-    && { echo "::error::cosmic-blue-updates-helper accepted the dev channel"; errors=1; }
-vm "/usr/libexec/cosmic-blue-updates-helper pin testing" 2>/dev/null \
-    && { echo "::error::cosmic-blue-updates-helper pinned something else than a stable-YYYYMMDD tag"; errors=1; }
+vm "/usr/libexec/celenn-updates-helper rollback" 2>/dev/null \
+    && { echo "::error::celenn-updates-helper rolled back without a previous version"; errors=1; }
+vm "/usr/libexec/celenn-updates-helper channel dev" 2>/dev/null \
+    && { echo "::error::celenn-updates-helper accepted the dev channel"; errors=1; }
+vm "/usr/libexec/celenn-updates-helper pin testing" 2>/dev/null \
+    && { echo "::error::celenn-updates-helper pinned something else than a stable-YYYYMMDD tag"; errors=1; }
 # A version left behind with "Go back" is not installed again by uupd
-# (through cosmic-blue-bootc), until a newer one is out. The published
+# (through celenn-bootc), until a newer one is out. The published
 # image of TARGET_IMGREF is an update for this test build: set it aside as
 # the Updates app's helper would, then pretend another version was.
-hold=/var/lib/cosmic-blue/update-hold
+hold=/var/lib/celenn/update-hold
 upgrade_check="$(vm "bootc upgrade --check" 2>&1)" || upgrade_check=""
 available="$(sed -n 's/^  Digest: //p' <<<"${upgrade_check}" | head -n 1)"
 if [[ -n "${available}" ]]; then
     vm "mkdir -p ${hold%/*} && echo '${available} 44.test' > ${hold}"
-    held_check="$(vm "/usr/libexec/cosmic-blue-bootc upgrade --check" 2>&1)" || held_check=""
+    held_check="$(vm "/usr/libexec/celenn-bootc upgrade --check" 2>&1)" || held_check=""
     echo "${held_check}"
     grep -q '^No changes in: ' <<<"${held_check}" && vm "test -s ${hold}" \
-        || { echo "::error::cosmic-blue-bootc offers the version set aside again"; errors=1; }
+        || { echo "::error::celenn-bootc offers the version set aside again"; errors=1; }
     vm "echo 'sha256:0000000000000000000000000000000000000000000000000000000000000000 44.old' > ${hold}"
-    new_check="$(vm "/usr/libexec/cosmic-blue-bootc upgrade --check" 2>&1)" || new_check=""
+    new_check="$(vm "/usr/libexec/celenn-bootc upgrade --check" 2>&1)" || new_check=""
     grep -q '^Update available for: ' <<<"${new_check}" && vm "test ! -e ${hold}" \
-        || { echo "::error::cosmic-blue-bootc does not offer a newer version after one was set aside"; errors=1; }
+        || { echo "::error::celenn-bootc does not offer a newer version after one was set aside"; errors=1; }
     vm "rm -f ${hold}"
 else
     echo "::warning::No update offered for ${TARGET_IMGREF} (${upgrade_check}): the update hold was not tested"
@@ -167,8 +167,8 @@ flatpark_state() { # --user (the installation COSMIC Store manages) or --system
     vm "flatpak remotes $1 --columns=name,priority,filter" | awk '$1 == "flatpark" {print $2, $3}'
 }
 flatpark_problem() { echo "::error::FlatPark: $*"; errors=1; }
-vm 'test -e /var/lib/cosmic-blue/flatpark-off-done' \
-    || flatpark_problem "cosmic-blue-flatpark-off.service did not run"
+vm 'test -e /var/lib/celenn/flatpark-off-done' \
+    || flatpark_problem "celenn-flatpark-off.service did not run"
 [[ -z "$(flatpark_state --user)$(flatpark_state --system)" ]] || flatpark_problem "on by default"
 vm 'ujust toggle-flatpark on' || flatpark_problem "ujust toggle-flatpark on failed"
 state="$(flatpark_state --user || true)"
@@ -178,10 +178,10 @@ echo "FlatPark priority and filter: ${state}"
 vm 'ujust toggle-flatpark off' || flatpark_problem "ujust toggle-flatpark off failed"
 [[ -z "$(flatpark_state --user)" ]] || flatpark_problem "still on after ujust toggle-flatpark off"
 # As older images left it: system-wide, from remotes.d
-vm 'flatpak remote-add --system flatpark /usr/share/cosmic-blue/flatpak/flatpark.flatpakrepo \
-        && rm /var/lib/cosmic-blue/flatpark-off-done && systemctl start cosmic-blue-flatpark-off.service' \
-    || flatpark_problem "cosmic-blue-flatpark-off.service failed"
-[[ -z "$(flatpark_state --system)" ]] || flatpark_problem "cosmic-blue-flatpark-off.service left it on"
+vm 'flatpak remote-add --system flatpark /usr/share/celenn/flatpak/flatpark.flatpakrepo \
+        && rm /var/lib/celenn/flatpark-off-done && systemctl start celenn-flatpark-off.service' \
+    || flatpark_problem "celenn-flatpark-off.service failed"
+[[ -z "$(flatpark_state --system)" ]] || flatpark_problem "celenn-flatpark-off.service left it on"
 
 # Let the login screen draw, then take a picture of it
 sleep 20

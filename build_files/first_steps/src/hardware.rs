@@ -1,4 +1,4 @@
-// What the Computer page of cosmic-blue Tools (more.rs) says about the
+// What the Computer page of Celenn OS Tools (more.rs) says about the
 // computer itself: its model, processor, memory, graphics cards and how it
 // starts. Read once, without root, from /sys and /proc (and lspci for the
 // names of the graphics cards, when it is there). Nothing personal: no

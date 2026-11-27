@@ -1,0 +1,33 @@
+#!/usr/bin/bash
+# The login and lock screens (cosmic-greeter) show a user's picture only from
+# /var/lib/AccountsService/icons/<user>. AccountsService copies a chosen
+# picture there, except one of the system's own (/usr/share/pixmaps/faces:
+# the Celenn OS avatars), which it only names in
+# /var/lib/AccountsService/users/<user>. Such a picture is copied here, so
+# the login screen shows it too. Run at startup and whenever an account's
+# settings change (celenn-login-pictures.path).
+set -euo pipefail
+
+USERS=/var/lib/AccountsService/users
+ICONS=/var/lib/AccountsService/icons
+FACES=/usr/share/pixmaps/faces
+
+[[ -d "${USERS}" ]] || exit 0
+for settings in "${USERS}"/*; do
+    [[ -f "${settings}" ]] || continue
+    user="${settings##*/}"
+    icon="$(sed -n 's/^Icon=//p' "${settings}" | tail -n 1)"
+    [[ "${icon}" == "${FACES}"/* ]] || continue
+    # The avatar itself (pop-robot.png, COSMIC Settings' default, is a link
+    # to one of them), still in the system's folder
+    picture="$(realpath -e -- "${icon}" 2>/dev/null)" || continue
+    [[ "${picture}" == "${FACES}"/* && -f "${picture}" ]] || continue
+    install -d -m 0775 "${ICONS}"
+    target="${ICONS}/${user}"
+    # The greeter does not follow links
+    [[ -L "${target}" ]] && rm -f -- "${target}"
+    if ! cmp -s -- "${picture}" "${target}"; then
+        install -m 0644 -- "${picture}" "${target}"
+        echo "${user}: ${picture##*/}"
+    fi
+done

@@ -202,12 +202,14 @@ for page in "${all_pages[@]}"; do
   fi
 done
 cp "${root}/website/style.css" "${root}/website/site.js" "${out}/"
-cp "${root}/branding/logo/cosmic-blue-logo.svg" \
-   "${root}/branding/logo/cosmic-blue-logo-horizontal-dark.svg" "${out}/img/"
+# (The pages still use the file names from before the rename to Celenn OS)
+cp "${root}/branding/logo/celenn-logo.svg" "${out}/img/cosmic-blue-logo.svg"
+cp "${root}/branding/logo/celenn-logo-horizontal-dark.svg" \
+   "${out}/img/cosmic-blue-logo-horizontal-dark.svg"
 
 # Header image: WebP (about a quarter of the JPEG size), JPEG kept for old
 # browsers and for link previews (og:image)
-wallpaper="${root}/system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue.jpg"
+wallpaper="${root}/system_files/usr/share/backgrounds/celenn/celenn.jpg"
 for width in 1280 2560; do
   convert "${wallpaper}" -resize "${width}x" -strip -interlace Plane \
     -sampling-factor 4:2:0 -quality 82 "${out}/img/wallpaper-${width}.jpg"

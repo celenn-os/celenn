@@ -3,7 +3,7 @@
 # user's login shell (vm-lib.sh, terminal_checks):
 #   runuser -u demo -- bash -l -s -- <project dir> < tests/vm-terminal-checks.sh
 # Makes a small git project for the terminal screenshot, then checks the
-# cosmic-blue prompt (Starship) and fastfetch. Prints one "FAIL <reason>" line
+# Celenn OS prompt (Starship) and fastfetch. Prints one "FAIL <reason>" line
 # per problem; always exits 0.
 export LC_ALL=C.UTF-8
 project="$1"
@@ -19,11 +19,11 @@ if [[ ! -d .git ]]; then
     } || echo "FAIL could not make a git project for the prompt"
 fi
 
-# Prompt: the cosmic-blue config (/etc/profile.d/90-starship.sh), valid
-# (Starship reports config errors on stderr), with the cosmic-blue Prompt font
+# Prompt: the Celenn OS config (/etc/profile.d/90-starship.sh), valid
+# (Starship reports config errors on stderr), with the Celenn Prompt font
 # symbols: logo, arrow, git branch and failed status
-if [[ "${STARSHIP_CONFIG:-}" != /usr/share/cosmic-blue/starship.toml ]]; then
-    echo "FAIL the login shell does not use the cosmic-blue prompt (STARSHIP_CONFIG='${STARSHIP_CONFIG:-}')"
+if [[ "${STARSHIP_CONFIG:-}" != /usr/share/celenn/starship.toml ]]; then
+    echo "FAIL the login shell does not use the Celenn OS prompt (STARSHIP_CONFIG='${STARSHIP_CONFIG:-}')"
 fi
 errors="$(mktemp)"
 prompt="$(starship prompt --status 1 2>"${errors}")" \
@@ -37,10 +37,10 @@ for symbol in $'\U10cb00:logo' $'\U10cb01:arrow' $'\U10cb02:git branch' $'\U10cb
 done
 [[ "${prompt}" == *hello* ]] || echo "FAIL the prompt does not show the current folder"
 
-# fastfetch: the ff alias and a cosmic-blue report without errors
+# fastfetch: the ff alias and a Celenn OS report without errors
 alias ff >/dev/null 2>&1 || echo "FAIL the ff alias is missing"
 report="$(ublue-fastfetch 2>&1)" || echo "FAIL ublue-fastfetch exited with an error"
-[[ "${report}" == *cosmic-blue* ]] || echo "FAIL fastfetch does not show cosmic-blue"
+[[ "${report}" == *"Celenn OS"* ]] || echo "FAIL fastfetch does not show Celenn OS"
 if grep -qi error <<< "${report}"; then
     echo "FAIL fastfetch printed an error: $(grep -i error <<< "${report}" | head -n 3 | tr '\n' ' ')"
 fi

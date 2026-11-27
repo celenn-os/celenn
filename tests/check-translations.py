@@ -15,10 +15,10 @@ import sys
 CRATE = pathlib.Path(__file__).resolve().parent.parent / "build_files/first_steps"
 # Each program: its source root and its template
 PROGRAMS = {
-    "src/main.rs": "po/cosmic-blue-tour.pot",
-    "src/tools.rs": "po/tools/cosmic-blue-tools.pot",
-    "src/parental.rs": "po/parental/cosmic-blue-parental-controls.pot",
-    "src/parental_daemon.rs": "po/parental/cosmic-blue-parental-controls.pot",
+    "src/main.rs": "po/celenn-tour.pot",
+    "src/tools.rs": "po/tools/celenn-tools.pot",
+    "src/parental.rs": "po/parental/celenn-parental-controls.pot",
+    "src/parental_daemon.rs": "po/parental/celenn-parental-controls.pot",
 }
 TR = re.compile(r'\btr\(\s*"((?:[^"\\]|\\.)*)"\s*\)', re.S)
 MOD = re.compile(r"^\s*(?:pub(?:\([^)]*\))?\s+)?mod\s+(\w+)\s*;", re.M)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The Milky Way above the Earth, from a photo taken on the International
 Space Station (NASA, ISS064-E-55946, public domain), graded with the
-cosmic-blue palette and cropped to 16:9 at 5120x2880.
+Celenn OS palette and cropped to 16:9 at 5120x2880.
 Usage: milky_way.py IN.jpg OUT.jpg (the original is downloaded by build.sh).
 Needs numpy and pillow.
 """

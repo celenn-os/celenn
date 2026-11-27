@@ -4,7 +4,7 @@
 # what its service and its login check need from the system.
 set -euox pipefail
 
-# dnsmasq: the family web filter (cosmic-blue-family-dns.service); nftables:
+# dnsmasq: the family web filter (celenn-family-dns.service); nftables:
 # sends the child accounts' DNS queries to it; acl (setfacl): closes
 # systemd-resolved's socket to them; libnotify (notify-send): the warnings
 # before the session closes
@@ -17,9 +17,9 @@ dnf5 -y install acl dnsmasq libnotify nftables
 # /etc/greetd/cosmic-greeter.toml ("cosmic-greeter"; "greetd" is greetd's
 # default, covered too). Fedora ships these PAM files in /usr/lib/pam.d: a
 # copy in /etc/pam.d takes precedence.
-# pam_cosmic_blue_parental.so (build_files/first_steps/src/pam_parental.rs)
-# runs `cosmic-blue-parental-daemon login-check` and shows its message
-line='account    required     pam_cosmic_blue_parental.so'
+# pam_celenn_parental.so (build_files/first_steps/src/pam_parental.rs)
+# runs `celenn-parental-daemon login-check` and shows its message
+line='account    required     pam_celenn_parental.so'
 for service in cosmic-greeter greetd; do
     pam="/etc/pam.d/${service}"
     if [[ ! -f "${pam}" ]]; then
@@ -30,14 +30,19 @@ for service in cosmic-greeter greetd; do
         fi
         cp "/usr/lib/pam.d/${service}" "${pam}"
     fi
-    if ! grep -qF 'pam_cosmic_blue_parental.so' "${pam}"; then
+    if ! grep -qF 'pam_celenn_parental.so' "${pam}"; then
         # Before the first account line, so that it runs whatever follows
         awk -v line="${line}" '!done && /^account/ { print line; done = 1 } { print }' "${pam}" > "${pam}.new"
-        grep -qF 'pam_cosmic_blue_parental.so' "${pam}.new"
+        grep -qF 'pam_celenn_parental.so' "${pam}.new"
         cat "${pam}.new" > "${pam}"
         rm -f "${pam}.new"
     fi
     cat "${pam}"
 done
+# Systems installed before the rename to Celenn OS may keep an /etc/pam.d copy
+# that names the module's old name (an /etc file changed by hand is not
+# replaced on update): the old name leads to the same module. Remove in the
+# cleanup after the rename.
+ln -sf pam_celenn_parental.so /usr/lib64/security/pam_cosmic_blue_parental.so
 grep -qx 'service = "cosmic-greeter"' /etc/greetd/cosmic-greeter.toml \
     || { echo "The login screen's PAM service changed" >&2; exit 1; }

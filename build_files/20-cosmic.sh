@@ -24,13 +24,13 @@ dnf5 -y install \
 # first page of our tour): named here so the image never ships without it
 dnf5 -y install orca
 
-# The COSMIC version cosmic-blue is tested against (also checked by
+# The COSMIC version Celenn OS is tested against (also checked by
 # `just helpers-keys` before the helper stages): a new version comes through
 # the pull request of check-cosmic-version.yml, which moves cosmic-version.
 pinned="$(grep -v '^#' /ctx/build_files/cosmic-version | tr -d '[:space:]')"
 installed="$(rpm -q --qf '%{VERSION}' cosmic-settings)"
 if [[ "${installed}" != "${pinned}" ]]; then
-    echo "COSMIC ${installed} installed, but cosmic-blue is pinned to ${pinned} (build_files/cosmic-version)" >&2
+    echo "COSMIC ${installed} installed, but Celenn OS is pinned to ${pinned} (build_files/cosmic-version)" >&2
     exit 1
 fi
 
@@ -58,36 +58,36 @@ systemctl enable cosmic-greeter.service
 
 # COSMIC's first-run assistant (cosmic-initial-setup) does not open: the
 # installer has already set the language, keyboard layout, time zone and the
-# account, and cosmic-blue sets the appearance and panel layout. It exits at
+# account, and Celenn OS sets the appearance and panel layout. It exits at
 # once when ~/.config/cosmic-initial-setup-done exists, which new accounts get
 # from /etc/skel. Its accessibility page is replaced by the accessibility row
 # on the first page of our tour below. (Its OEM mode, run by a
 # "cosmic-initial-setup" system user whose home is not made from /etc/skel,
-# is not used on cosmic-blue: Anaconda creates the account.)
+# is not used on Celenn OS: Anaconda creates the account.)
 mkdir -p /etc/skel/.config
 touch /etc/skel/.config/cosmic-initial-setup-done
 
-# cosmic-blue's own first steps tour (/usr/libexec/cosmic-blue-tour, built
+# Celenn OS's own first steps tour (/usr/libexec/celenn-tour, built
 # with libcosmic in Containerfile.helpers), opened once at the first login
 # of each new account: the autostart entry only acts while
-# ~/.config/cosmic-blue/first-steps-pending exists, which new accounts get
-# from /etc/skel (see /usr/libexec/cosmic-blue-first-steps-autostart).
-mkdir -p /etc/skel/.config/cosmic-blue
-touch /etc/skel/.config/cosmic-blue/first-steps-pending
+# ~/.config/celenn/first-steps-pending exists, which new accounts get
+# from /etc/skel (see /usr/libexec/celenn-first-steps-autostart).
+mkdir -p /etc/skel/.config/celenn
+touch /etc/skel/.config/celenn/first-steps-pending
 
-# The Updates launcher (cosmic-blue Tools on its Updates page, built with the
+# The Updates launcher (Celenn OS Tools on its Updates page, built with the
 # tour) replaces the "System Update" launcher of Bluefin's shared files, which
 # ran `ujust update` in a terminal: its "Check now" runs the same update
 # (uupd-manual.service), and `ujust update` stays for the terminal.
-# /usr/libexec/cosmic-blue-updates, its earlier program (the tour, tests),
+# /usr/libexec/celenn-updates, its earlier program (the tour, tests),
 # opens the same page.
 rm -f /usr/share/applications/system-update.desktop
-ln -sf cosmic-blue-tools /usr/libexec/cosmic-blue-updates
+ln -sf celenn-tools /usr/libexec/celenn-updates
 
 systemctl set-default graphical.target
 
 # Fedora's default wallpaper for this release (day/night), offered in COSMIC
-# Settings next to the cosmic-blue one. (Fedora 44 has no extras package.)
+# Settings next to the Celenn OS one. (Fedora 44 has no extras package.)
 dnf5 -y install "f${FEDORA_MAJOR_VERSION}-backgrounds-base"
 
 # COSMIC Settings lists every image under /usr/share/backgrounds, following
@@ -115,8 +115,8 @@ done < <(find /usr/share/backgrounds -type f -regextype egrep \
     -iregex '.*\.(png|jpe?g|jxl|webp|svg)' -print0 | sort -z)
 find /usr/share/backgrounds -mindepth 1 -type d -empty -delete
 # COSMIC Settings lists the wallpapers in folder order (alphabetical in the
-# deployed image): move COSMIC's own wallpapers after cosmic-blue's so that
-# ours come first ("cosmic" sorts before "cosmic-blue").
+# deployed image): move COSMIC's own wallpapers after ours ("cosmic" sorts after
+# "celenn", but other folders may come between).
 if [[ -d /usr/share/backgrounds/cosmic ]]; then
     mv /usr/share/backgrounds/cosmic /usr/share/backgrounds/cosmic-desktop
     if grep -rlF /usr/share/backgrounds/cosmic/ /usr/share/cosmic /etc 2>/dev/null; then
@@ -134,43 +134,43 @@ ls /usr/share/cosmic/com.system76.CosmicSettings.Shortcuts/v1/ || true
 # Defaults that accounts may still hold as a copy from an earlier image:
 # Fedora's packaged COSMIC defaults (before ours replace them), COSMIC's
 # earlier default themes and built-in defaults (build_files/previous_defaults).
-# cosmic-blue-migrate-defaults resets such copies when a default changes.
-PREVIOUS_DEFAULTS=/usr/share/cosmic-blue/previous-defaults.list
+# celenn-migrate-defaults resets such copies when a default changes.
+PREVIOUS_DEFAULTS=/usr/share/celenn/previous-defaults.list
 mkdir -p "$(dirname "${PREVIOUS_DEFAULTS}")"
 {
-    /usr/libexec/cosmic-blue-migrate-defaults --hash-tree /usr/share/cosmic
+    /usr/libexec/celenn-migrate-defaults --hash-tree /usr/share/cosmic
     for variant in /ctx/previous_defaults/theme/*/cosmic /ctx/build_files/previous_defaults/*/; do
-        /usr/libexec/cosmic-blue-migrate-defaults --hash-tree "${variant}"
+        /usr/libexec/celenn-migrate-defaults --hash-tree "${variant}"
     done
 } | sort -u >"${PREVIOUS_DEFAULTS}"
 wc -l "${PREVIOUS_DEFAULTS}"
 
-# cosmic-blue defaults (wallpaper, theme, dock, extra shortcuts) and boot
+# Celenn OS defaults (wallpaper, theme, dock, extra shortcuts) and boot
 # screen (Plymouth theme)
 # were copied before these packages were installed; apply them again so they
 # win over the packaged files.
-cp -a /ctx/system_files/cosmic-blue/usr/share/cosmic/. /usr/share/cosmic/
-cp -a /ctx/system_files/cosmic-blue/usr/share/plymouth/. /usr/share/plymouth/
+cp -a /ctx/system_files/celenn/usr/share/cosmic/. /usr/share/cosmic/
+cp -a /ctx/system_files/celenn/usr/share/plymouth/. /usr/share/plymouth/
 
-# cosmic-blue boot screen: Fedora's BGRT theme (the PC maker's logo from the
+# Celenn OS boot screen: Fedora's BGRT theme (the PC maker's logo from the
 # firmware, so the boot stays flicker-free) with our images. When the firmware
-# has no logo (virtual machines, some PCs), the cosmic-blue mark is shown in
-# its place (bgrt-fallback.png). The spinner is tinted blue and the cosmic-blue
+# has no logo (virtual machines, some PCs), the Celenn OS mark is shown in
+# its place (bgrt-fallback.png). The spinner is tinted blue and the Celenn OS
 # logo replaces Fedora's at the bottom (watermark.png). The other images
 # (password prompt...) are Fedora's spinner ones. The background stays black
 # to match the firmware screen. The initramfs is regenerated in 60-initramfs.sh.
-PLYMOUTH_THEME=/usr/share/plymouth/themes/cosmic-blue
+PLYMOUTH_THEME=/usr/share/plymouth/themes/celenn
 for image in /usr/share/plymouth/themes/spinner/*.png; do
     [[ -e "${PLYMOUTH_THEME}/$(basename "${image}")" ]] || cp -a "${image}" "${PLYMOUTH_THEME}/"
 done
-sed -e 's|^Name=.*|Name=cosmic-blue|' \
-    -e 's|^Description=.*|Description=cosmic-blue boot screen, based on the BGRT theme|' \
+sed -e 's|^Name=.*|Name=Celenn OS|' \
+    -e 's|^Description=.*|Description=Celenn OS boot screen, based on the BGRT theme|' \
     -e "s|^ImageDir=.*|ImageDir=${PLYMOUTH_THEME}|" \
-    /usr/share/plymouth/themes/bgrt/bgrt.plymouth > "${PLYMOUTH_THEME}/cosmic-blue.plymouth"
-cat "${PLYMOUTH_THEME}/cosmic-blue.plymouth"
-plymouth-set-default-theme cosmic-blue
+    /usr/share/plymouth/themes/bgrt/bgrt.plymouth > "${PLYMOUTH_THEME}/celenn.plymouth"
+cat "${PLYMOUTH_THEME}/celenn.plymouth"
+plymouth-set-default-theme celenn
 # The login screen takes over from the boot screen without a black screen
-# (drop-in cosmic-greeter.service.d/10-cosmic-blue-boot-screen.conf): it must
+# (drop-in cosmic-greeter.service.d/10-celenn-boot-screen.conf): it must
 # no longer wait for Plymouth to quit. A drop-in cannot remove an ordering,
 # so it is taken out of the packaged unit.
 GREETER_UNIT=/usr/lib/systemd/system/cosmic-greeter.service
@@ -179,5 +179,5 @@ grep -q '^After=.*plymouth-quit-wait\.service' "${GREETER_UNIT}"
 sed -i -E -e '/^After=/ s/[[:space:]]*plymouth-quit-wait\.service//' -e '/^After=[[:space:]]*$/d' \
     "${GREETER_UNIT}"
 grep '^After=' "${GREETER_UNIT}"
-# Dark GTK defaults (zz1-cosmic-blue.gschema.override)
+# Dark GTK defaults (zz1-celenn.gschema.override)
 glib-compile-schemas /usr/share/glib-2.0/schemas

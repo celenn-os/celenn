@@ -7,7 +7,7 @@ index 442a5a1..2f2faa4 100644
      }
  }
 +
-+/// cosmic-blue: the "i" icon of a login message, colored with the text color
++/// Celenn OS: the "i" icon of a login message, colored with the text color
 +/// when drawn
 +static INFO_ICON: std::sync::LazyLock<widget::svg::Handle> = std::sync::LazyLock::new(|| {
 +    widget::svg::Handle::from_memory(
@@ -17,7 +17,7 @@ index 442a5a1..2f2faa4 100644
 +    )
 +});
 +
-+/// cosmic-blue: a login message (wrong password, or a login refused by
++/// Celenn OS: a login message (wrong password, or a login refused by
 +/// parental controls) in a light box with an icon, in the text color: the
 +/// upstream pure red text could hardly be read over the dark blue panel, and
 +/// sounded alarming to a child
@@ -70,7 +70,7 @@ index 852e219..7735732 100644
          user_icons: user_datas
              .iter_mut()
 -            .map(|d| d.icon_opt.take().map(widget::image::Handle::from_bytes))
-+            // cosmic-blue: round pictures, and COSMIC's default one for an
++            // Celenn OS: round pictures, and COSMIC's default one for an
 +            // account without a picture
 +            .map(|d| {
 +                d.icon_opt
@@ -85,10 +85,10 @@ index 852e219..7735732 100644
      Ok(())
  }
  
-+/// cosmic-blue: the picture COSMIC Settings gives a new account
++/// Celenn OS: the picture COSMIC Settings gives a new account
 +const DEFAULT_PICTURE: &str = "/usr/share/pixmaps/faces/pop-robot.png";
 +
-+/// cosmic-blue: the 2 px ring around an account avatar (64 px picture, 4 px
++/// Celenn OS: the 2 px ring around an account avatar (64 px picture, 4 px
 +/// padding), colored with the accent color when drawn
 +static USER_RING: LazyLock<widget::svg::Handle> = LazyLock::new(|| {
 +    widget::svg::Handle::from_memory(
@@ -97,7 +97,7 @@ index 852e219..7735732 100644
 +    )
 +});
 +
-+/// cosmic-blue: an account picture cut as a disk with a smooth edge (the
++/// Celenn OS: an account picture cut as a disk with a smooth edge (the
 +/// image widget's own rounding has a jagged one); the picture as it is when
 +/// it cannot be read
 +fn round_picture(bytes: Vec<u8>) -> widget::image::Handle {
@@ -126,7 +126,7 @@ index 852e219..7735732 100644
      Surface(surface::Action<Message>),
      Suspend,
      Username(String),
-+    /// cosmic-blue: the pointer entered (true) or left (false) an account avatar
++    /// Celenn OS: the pointer entered (true) or left (false) an account avatar
 +    UserHover(String, bool),
      EnterUser(bool, String),
      ScreenReader(bool),
@@ -135,7 +135,7 @@ index 852e219..7735732 100644
  
      accessibility: Accessibility,
      authenticating: bool,
-+    /// cosmic-blue: the account avatar under the pointer
++    /// Celenn OS: the account avatar under the pointer
 +    hovered_username: Option<String>,
  }
  
@@ -148,7 +148,7 @@ index 852e219..7735732 100644
 -                    widget::text(error)
 -                        .class(theme::Text::Color(iced::Color::from_rgb(1.0, 0.0, 0.0))),
 -                );
-+                // cosmic-blue: in a readable box instead of red text
++                // Celenn OS: in a readable box instead of red text
 +                column = column.push(common::message_box(error));
                  if !self.common.caps_lock {
                      column = column.push(widget::text(""));
@@ -158,7 +158,7 @@ index 852e219..7735732 100644
              }
  
 -            id_container(
-+            // cosmic-blue: with 2 to 8 accounts, show them as a row of avatars
++            // Celenn OS: with 2 to 8 accounts, show them as a row of avatars
 +            // (two rows from 5) to pick one in a click; the users menu stays.
 +            // The rows are put under the 280 px column, as a row of 4 is wider
 +            let mut user_rows_opt = None;
@@ -310,7 +310,7 @@ index 852e219..7735732 100644
                  if self.entering_name || username != self.selected_username.username {
                      self.entering_name = false;
                      self.authenticating = false;
-+                    // cosmic-blue: the previous user's error (a refused login)
++                    // Celenn OS: the previous user's error (a refused login)
 +                    // does not apply to the newly selected one
 +                    self.common.error_opt = None;
                      let data_idx = self
@@ -328,7 +328,7 @@ index ce1b3d1..ff8f865 100644
 -                    widget::text(error)
 -                        .class(theme::Text::Color(iced::Color::from_rgb(1.0, 0.0, 0.0))),
 -                );
-+                // cosmic-blue: in a readable box instead of red text
++                // Celenn OS: in a readable box instead of red text
 +                column = column.push(common::message_box(error));
                  if !self.common.caps_lock {
                      column = column.push(widget::text(""));

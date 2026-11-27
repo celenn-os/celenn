@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# Rebuilds Fedora's cosmic-greeter package with the cosmic-blue wallpaper as
+# Rebuilds Fedora's cosmic-greeter package with the Celenn OS wallpaper as
 # its built-in background, from the same source package and build flags as
 # Fedora. Runs in a Fedora container of the same release as the image; the
 # binary is written to /out and installed by build_files/23-greeter.sh.
@@ -60,7 +60,7 @@ install -m 0644 "${WALLPAPER}" "${src}/${fallback}"
 
 patch --directory="${src}" --strip=1 --forward --fuzz=0 \
     < "$(dirname "$0")/user-switch.patch"
-grep -q 'cosmic-blue: with 2 to 8 accounts' "${src}/src/greeter.rs"
+grep -q 'Celenn OS: with 2 to 8 accounts' "${src}/src/greeter.rs"
 
 # Compiled crates kept from the previous build in CARGO_CACHE_DIR
 # (Containerfile.helpers). The package's own sources are touched, so they
@@ -85,7 +85,7 @@ import sys
 binary = open(sys.argv[1], "rb").read()
 image = open(sys.argv[2], "rb").read()
 if image not in binary:
-    sys.exit("the cosmic-blue wallpaper is not embedded in cosmic-greeter")
+    sys.exit("the Celenn OS wallpaper is not embedded in cosmic-greeter")
 PY
 mkdir -p /out
 # Without debug data: Fedora's Rust build flags keep it (-Cdebuginfo=2), and

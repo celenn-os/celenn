@@ -1,25 +1,25 @@
-# cosmic-blue branding
+# Celenn OS branding
 
 ## Logo
 
 The "orbit c": an open orbit around a planet, with a moon in the gap. The
-wordmark is Montserrat Light, stored as outlines in `logo/glyphs.json` so the
-SVGs need no font.
+wordmark "celenn" is Montserrat Light, stored as outlines in `logo/glyphs.json`
+(written by `logo/glyphs.py`) so the SVGs need no font.
 
-- `logo/cosmic-blue-logo.svg`: the mark (installed as the `cosmic-blue-logo` icon)
-- `logo/cosmic-blue-logo-symbolic.svg`: the mark in one color (installed as
-  `cosmic-blue-logo-symbolic`, the icon of the cosmic-blue group in the App
+- `logo/celenn-logo.svg`: the mark (installed as the `celenn-logo` icon)
+- `logo/celenn-logo-symbolic.svg`: the mark in one color (installed as
+  `celenn-logo-symbolic`, the icon of the Celenn OS group in the App
   Library)
-- `logo/cosmic-blue-readme-banner.svg`: the README header, the logo and the
+- `logo/celenn-readme-banner.svg`: the README header, the logo and the
   name in white on the night sky of the tour (`tour/build.py`)
-- `logo/cosmic-blue-logo.png`: the mark, 512 px (Artifact Hub)
-- `logo/cosmic-blue-logo-horizontal-dark.svg` / `-light.svg`: mark + wordmark,
+- `logo/celenn-logo.png`: the mark, 512 px (Artifact Hub)
+- `logo/celenn-logo-horizontal-dark.svg` / `-light.svg`: mark + wordmark,
   for dark and light backgrounds
 
 ## Boot screen
 
-The `cosmic-blue` Plymouth theme, in
-`system_files/usr/share/plymouth/themes/cosmic-blue/`. It is Fedora's BGRT
+The `Celenn OS` Plymouth theme, in
+`system_files/usr/share/plymouth/themes/celenn/`. It is Fedora's BGRT
 theme (the PC maker's logo from the firmware, for a flicker-free boot) with
 our images:
 
@@ -37,35 +37,35 @@ Regenerate the SVGs with `python3 logo/build.py`.
 
 ## Wallpaper
 
-All 5120x2880, in `system_files/usr/share/backgrounds/cosmic-blue/`:
+All 5120x2880, in `system_files/usr/share/backgrounds/celenn/`:
 
-- `cosmic-blue-arcs.jpg`: the logo mark, left of centre, its orbit
+- `celenn-arcs.jpg`: the logo mark, left of centre, its orbit
   echoing outwards in fainter arcs, and the name small near the bottom
   right corner, whole on 16:9, 16:10 and 3:2 screens once COSMIC crops the
   wallpaper to fill (4:3, 5:4 and 21:9 screens cut part of it), with no stars
   next to it (`wallpaper/shaders/echoes.frag`, `wallpaper/logo_mark.py`), the
   default COSMIC wallpaper and the greeter background
-- `cosmic-blue-deep-spiral.jpg`: a flat illustration, a calm night-blue field
+- `celenn-deep-spiral.jpg`: a flat illustration, a calm night-blue field
   with a large tone-on-tone spiral and small round stars, offered in Settings
-- `cosmic-blue-eclipse.jpg`: a deep blue planet in front of its star, ringed with
+- `celenn-eclipse.jpg`: a deep blue planet in front of its star, ringed with
   blue light and soft rays, offered in Settings
-- `cosmic-blue-galaxy.jpg`: a tilted spiral galaxy, offered in Settings
-- `cosmic-blue-galactic-river.jpg`: a diagonal river of stars and gas, offered in
+- `celenn-galaxy.jpg`: a tilted spiral galaxy, offered in Settings
+- `celenn-galactic-river.jpg`: a diagonal river of stars and gas, offered in
   Settings
-- `cosmic-blue-gas-veils.jpg`: veils of blue gas around a star cluster, offered
+- `celenn-gas-veils.jpg`: veils of blue gas around a star cluster, offered
   in Settings
-- `cosmic-blue-line-orbits.jpg`: line art, bundles of orbit lines from two
+- `celenn-line-orbits.jpg`: line art, bundles of orbit lines from two
   corners, offered in Settings
-- `cosmic-blue-ringed-planet.jpg`: a giant ringed planet towards the lower
+- `celenn-ringed-planet.jpg`: a giant ringed planet towards the lower
   right, its thin rings sweeping across the frame, offered in Settings
-- `cosmic-blue-orbits.jpg`: a planetary system seen from above its plane (a
+- `celenn-orbits.jpg`: a planetary system seen from above its plane (a
   bright star, shaded planets, a ringed giant, an asteroid belt) over the
   Milky Way, the previous default, offered in Settings
-- `cosmic-blue.jpg`: the logo as a scene, offered in Settings
-- `cosmic-blue-waves.jpg`: layered ribbons of light, offered in Settings
-- `cosmic-blue-milky-way.jpg`: the Milky Way above the Earth, a photo taken
+- `celenn.jpg`: the logo as a scene, offered in Settings
+- `celenn-waves.jpg`: layered ribbons of light, offered in Settings
+- `celenn-milky-way.jpg`: the Milky Way above the Earth, a photo taken
   on the International Space Station (NASA, ISS064-E-55946, public domain),
-  graded with the cosmic-blue palette, offered in Settings
+  graded with the Celenn OS palette, offered in Settings
 
 COSMIC Settings lists the wallpapers in the order of the folders on disk
 (alphabetical in the deployed image), so the file names put the default
@@ -79,7 +79,7 @@ downloaded); the output is deterministic (fixed seeds). Keep the file names:
 accounts that picked a wallpaper in Settings point to its path.
 
 The first steps tour shows the wallpapers as small thumbnails (224x126 JPEGs
-in `system_files/usr/share/cosmic-blue/wallpapers/`, same file names): run
+in `system_files/usr/share/celenn/wallpapers/`, same file names): run
 `python3 branding/tour/thumbnails.py` from the repository root after adding, removing or changing a wallpaper
 (the image build checks that each wallpaper has its thumbnail).
 
@@ -116,14 +116,14 @@ writes the JPEG.
 `fastfetch` (an alias of `ublue-fastfetch`) shows the mark as terminal art
 next to the system information, in place of Bluefin's dinosaurs:
 
-- `system_files/usr/share/ublue-os/fastfetch/cosmic-blue-dark.txt` /
+- `system_files/usr/share/ublue-os/fastfetch/celenn-dark.txt` /
   `-light.txt`: the mark as color pixels, two per terminal cell, 20 rows by
   49 columns so it stays round in COSMIC Terminal, whose cells are about 2.4
   times higher than wide. COSMIC Terminal draws the usual block elements
   shorter than the cell (lines between rows), and its translucent background
   shows any opaque stand-in for it (reverse video, blended edges) as dark
   squares. So cells with both halves use a background color, and the halves
-  are the upper and lower half glyphs of the cosmic-blue Prompt font
+  are the upper and lower half glyphs of the Celenn Prompt font
   (`prompt-font/`), which span exactly half of the line. The
   light version darkens the moon and the planet highlight. Regenerate them
   with `python3 fastfetch/build.py` (needs `rsvg-convert`, numpy and
@@ -138,10 +138,10 @@ next to the system information, in place of Bluefin's dinosaurs:
 
 ## Shell prompt font
 
-`system_files/usr/share/fonts/cosmic-blue/cosmic-blue-prompt.ttf`, generated
+`system_files/usr/share/fonts/celenn/celenn-prompt.ttf`, generated
 by `python3 prompt-font/build.py <output>` (fontTools): the arrows, the logo
 mark and the icons of the Starship prompt
-(`system_files/usr/share/cosmic-blue/starship.toml`), in plane 16 private use
+(`system_files/usr/share/celenn/starship.toml`), in plane 16 private use
 code points. The arrows span COSMIC Terminal's whole line (1.4 times the font
 size, with its default font Noto Sans Mono); Nerd Font arrows only reach the
 font's own height there. Rebuild the font after any change to the script:
@@ -150,7 +150,7 @@ not the one the script builds (`python3 prompt-font/build.py --check <font>`).
 
 ## Icons
 
-The `cosmic-blue` icon theme is Tela circle, recolored with the accent
+The `Celenn OS` icon theme is Tela circle, recolored with the accent
 (`build_files/icon_theme/`), with a few icons of our own in front of it.
 `icons/build.py` draws them as SVG:
 
@@ -163,7 +163,7 @@ The `cosmic-blue` icon theme is Tela circle, recolored with the accent
 - the live ISO's welcome tour and installer (`iso_files/welcome/*.svg`): the
   mark on a night-blue disk
 - the first steps tour's page icons and the Keyboard shortcuts app's icon
-  (`system_files/usr/share/icons/hicolor/scalable/apps/cosmic-blue-tour-*.svg`),
+  (`system_files/usr/share/icons/hicolor/scalable/apps/celenn-tour-*.svg`),
   in the style of the dock buttons: an accent disk, white symbols, the less
   important parts in translucent white
 
@@ -201,7 +201,7 @@ repository's Apache-2.0 license. Third-party parts shipped in the image:
 | Part | Source | License |
 |------|--------|---------|
 | Wordmark letters (outlines in `logo/glyphs.json`) | Montserrat Light | SIL Open Font License 1.1 |
-| Milky Way photo (`cosmic-blue-milky-way.jpg`) | NASA, ISS064-E-55946 | Public domain |
+| Milky Way photo (`celenn-milky-way.jpg`) | NASA, ISS064-E-55946 | Public domain |
 | Land outlines of the Earth avatar (`avatars/earth-land.txt`) | [Natural Earth](https://www.naturalearthdata.com), 1:110m land | Public domain |
 | Icon theme base | [Tela circle](https://github.com/vinceliuice/Tela-circle-icon-theme), recolored | No license file in the upstream repository (the author's other themes are GPL-3.0) |
 | Cursor theme | [Bibata](https://github.com/ful1e5/Bibata_Cursor), recolored | GPL-3.0 (its LICENSE ships with the theme) |

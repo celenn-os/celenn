@@ -1,7 +1,7 @@
 #!/usr/bin/bash
-# Build the "Bibata-Modern-cosmic-blue" cursor theme into /out: Bibata Modern
+# Build the "Bibata-Modern-celenn" cursor theme into /out: Bibata Modern
 # (rounded) from the sources kept in ./bibata (see its README), recolored with
-# the cosmic-blue colors. Fedora packages Bibata only in its upstream colors.
+# the Celenn OS colors. Fedora packages Bibata only in its upstream colors.
 set -euxo pipefail
 
 # Upstream repository and release the sources in ./bibata come from. Renovate (see
@@ -15,4 +15,4 @@ BIBATA_VERSION="v2.0.7"
 dnf5 -y install python3 librsvg2-tools xcursorgen
 
 HERE="$(dirname "$0")"
-python3 "${HERE}/bibata.py" "${HERE}/bibata" /out/Bibata-Modern-cosmic-blue "${BIBATA_VERSION}"
+python3 "${HERE}/bibata.py" "${HERE}/bibata" /out/Bibata-Modern-celenn "${BIBATA_VERSION}"

@@ -1,5 +1,5 @@
 # vim: set ft=make :
-# cosmic-blue commands, listed by `ujust` under "Desktop", "Apps" and "System".
+# Celenn OS commands, listed by `ujust` under "Desktop", "Apps" and "System".
 # Names are verb-object: install-<thing> and remove-<thing>, toggle-<thing>
 # (on/off), reset-, export-, switch-, report-, enroll-, and for Bluefin's
 # (build_files/10-system-files.sh) check-, show-, run-, reboot-, clean-.
@@ -45,7 +45,7 @@ toggle-dark-mode mode="toggle":
     write_setting is_dark "${is_dark}"
     if [[ "${is_dark}" == true ]]; then echo "Dark theme on."; else echo "Light theme on."; fi
 
-# Bring back the cosmic-blue look
+# Bring back the Celenn OS look
 [group('Desktop')]
 reset-cosmic-theme confirm="ask":
     #!/usr/bin/bash
@@ -62,7 +62,7 @@ reset-cosmic-theme confirm="ask":
         com.system76.CosmicTk
         com.system76.CosmicBackground
     )
-    echo "This restores the cosmic-blue colors, dark theme, icons, fonts and wallpaper."
+    echo "This restores the Celenn OS colors, dark theme, icons, fonts and wallpaper."
     echo "Other COSMIC settings (panel, dock, keyboard, shortcuts...) are kept."
     if [[ "{{ confirm }}" != yes ]] && ! gum confirm "Reset the appearance?"; then
         exit 0
@@ -140,7 +140,7 @@ export-cosmic-config:
     exported=0
     skipped=()
     {
-        echo "# cosmic-blue: COSMIC settings export"
+        echo "# Celenn OS: COSMIC settings export"
         echo "# Date: $(date -u +%Y-%m-%dT%H:%MZ)"
         echo "# Image: $(jq -r '."image-ref" + " " + ."image-tag"' /usr/share/ublue-os/image-info.json 2>/dev/null || echo unknown)"
         echo "# COSMIC: $(rpm -q --qf '%{VERSION}' cosmic-settings 2>/dev/null || echo unknown)"
@@ -235,10 +235,10 @@ _microsoft-fonts action confirm:
     echo "Trebuchet MS, Verdana and Webdings."
     echo "They are covered by Microsoft's End User License Agreement:"
     echo "  https://corefonts.sourceforge.net/eula.htm"
-    echo "Most documents do not need them: cosmic-blue already has look-alike fonts"
+    echo "Most documents do not need them: Celenn OS already has look-alike fonts"
     echo "with the same sizes (Liberation, Carlito, Caladea)."
     # `yes`: the license was accepted already ("Accept and install" in
-    # cosmic-blue Tools, which shows the license link)
+    # Celenn OS Tools, which shows the license link)
     if [[ "{{ confirm }}" != yes ]]; then
         read -r -p "Do you accept the license and want to install them? [y/N] " answer
         [[ "${answer}" =~ ^[YyOo] ]] || { echo "Nothing installed."; exit 0; }
@@ -281,7 +281,7 @@ _cli-tools action:
     esac
     # The tools this recipe installed (not those already there), so that
     # `remove` leaves the user's own Homebrew tools alone
-    added="${XDG_STATE_HOME:-${HOME}/.local/state}/cosmic-blue/cli-tools.list"
+    added="${XDG_STATE_HOME:-${HOME}/.local/state}/celenn/cli-tools.list"
     bling_on() { [[ -f "${rc}" ]] && grep -q "source ${bling_dir}/${script}" "${rc}"; }
     case "{{ action }}" in
         install)
@@ -690,13 +690,13 @@ toggle-flatpark mode="toggle":
     set -euo pipefail
     # FlatPark (https://flatpark.org) is a Flatpak hub with apps that are not
     # on Flathub. How far its apps can be trusted is not established yet, so
-    # cosmic-blue leaves it off. When on, it has the lowest priority, and its
+    # Celenn OS leaves it off. When on, it has the lowest priority, and its
     # filter hides every app that is also on Flathub: those keep coming from
     # Flathub. It is added to your account's Flatpak installation, the one
     # COSMIC Store manages: FlatPark is listed there under Software
     # repositories (Recommended Flatpak sources) and can be added or removed
     # there too. Ask before every change, unless run without a terminal.
-    repofile=/usr/share/cosmic-blue/flatpak/flatpark.flatpakrepo
+    repofile=/usr/share/celenn/flatpak/flatpark.flatpakrepo
     filter=/usr/share/flatpak/flatpark.filter
     confirm() {
         [[ -t 0 ]] || return 0
@@ -772,7 +772,7 @@ switch-channel channel="status":
     repo="${image%:*}"
     tag="${image##*:}"
     if [[ "${repo}" != ghcr.io/cosmic-blue-os/* || "${repo}" == "${image}" ]]; then
-        echo "This system does not follow a cosmic-blue image (${ref:-none}): nothing to switch." >&2
+        echo "This system does not follow a Celenn OS image (${ref:-none}): nothing to switch." >&2
         exit 1
     fi
     channel="{{ channel }}"
@@ -905,7 +905,7 @@ toggle-battery-limit mode="toggle":
         echo "Battery limit off: the battery charges to 100%."
     fi
 
-# Earlier names (cosmic-blue's and Bluefin's, renamed in build_files/10-system-files.sh),
+# Earlier names (Celenn OS's and Bluefin's, renamed in build_files/10-system-files.sh),
 # still accepted but not listed
 [private]
 alias bug-report := report-bug
@@ -954,12 +954,12 @@ alias powerwash := reset-system
 report-bug mode="open":
     #!/usr/bin/bash
     set -euo pipefail
-    # The details (cosmic-blue-system-info) hold no personal data. They go
+    # The details (celenn-system-info) hold no personal data. They go
     # into the "System details" field of the bug report form through its
-    # URL (cosmic-blue-report-bug, also run by "Report a problem" in
-    # cosmic-blue Tools): nothing is sent until the report is submitted.
+    # URL (celenn-report-bug, also run by "Report a problem" in
+    # Celenn OS Tools): nothing is sent until the report is submitted.
     form="https://github.com/cosmic-blue-os/cosmic-blue/issues/new?template=bug_report.yml"
-    info="$(/usr/libexec/cosmic-blue-system-info)"
+    info="$(/usr/libexec/celenn-system-info)"
     case "{{ mode }}" in
         open) ;;
         print)
@@ -984,7 +984,7 @@ report-bug mode="open":
         exit 0
     fi
     if gum confirm "Open the bug report form in the browser?"; then
-        /usr/libexec/cosmic-blue-report-bug open
+        /usr/libexec/celenn-report-bug open
         echo "Describe the problem in the form, then submit it (a GitHub account is needed)."
     else
         echo "Report the bug later at ${form}"
@@ -995,20 +995,20 @@ report-bug mode="open":
 clean-system confirm="ask":
     #!/usr/bin/bash
     set -euo pipefail
-    # Same script as "Clean up" in cosmic-blue Tools (Free up space).
+    # Same script as "Clean up" in Celenn OS Tools (Free up space).
     # Unused Flatpak runtimes, dangling Podman/Docker images, old Homebrew
     # downloads, update caches. Named images, containers and volumes stay:
     # `podman system prune` removes those when you are sure.
     if [[ "{{ confirm }}" != yes ]]; then
         gum confirm "Remove what nothing uses any more (your files stay)?" || exit 0
     fi
-    /usr/libexec/cosmic-blue-clean
+    /usr/libexec/celenn-clean
 
-# NVIDIA with Secure Boot: enroll the driver key (password "cosmicblue")
+# NVIDIA with Secure Boot: enroll the driver key (password "celennos")
 [group('System')]
 enroll-secure-boot-key:
     #!/usr/bin/bash
     set -euo pipefail
-    # Same as "Allow" in cosmic-blue Tools, NVIDIA driver (password cosmicblue,
+    # Same as "Allow" in Celenn OS Tools, NVIDIA driver (password celennos,
     # see the helper)
-    sudo /usr/libexec/cosmic-blue-tools-helper driver-key
+    sudo /usr/libexec/celenn-tools-helper driver-key

@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 # Install the Tela circle icon theme into /out, from upstream at a pinned
 # commit (Fedora doesn't package it), with the folders and the blue parts of
-# the application icons recolored to the cosmic-blue accent.
+# the application icons recolored to the Celenn OS accent.
 #
 # Result: /out/Tela-circle-4f8dff (full theme) and /out/Tela-circle-4f8dff-dark
 # (light monochrome icons for dark themes, links to the first one for the rest).
@@ -30,10 +30,10 @@ mkdir -p /out
 rm -rf "/out/Tela-circle-${ACCENT}-light"
 
 # Readable names in the settings, instead of the color code
-sed -i "s/^Name=Tela circle ${ACCENT}/Name=Tela circle cosmic-blue/" \
+sed -i "s/^Name=Tela circle ${ACCENT}/Name=Tela circle Celenn/" \
     "/out/Tela-circle-${ACCENT}/index.theme" "/out/Tela-circle-${ACCENT}-dark/index.theme"
-grep -qx 'Name=Tela circle cosmic-blue' "/out/Tela-circle-${ACCENT}/index.theme"
-grep -qx 'Name=Tela circle cosmic-blue dark' "/out/Tela-circle-${ACCENT}-dark/index.theme"
+grep -qx 'Name=Tela circle Celenn' "/out/Tela-circle-${ACCENT}/index.theme"
+grep -qx 'Name=Tela circle Celenn dark' "/out/Tela-circle-${ACCENT}-dark/index.theme"
 
 # The default blue must be gone from the folders
 if grep -rlq '#5294e2' "/out/Tela-circle-${ACCENT}/scalable/places/"; then

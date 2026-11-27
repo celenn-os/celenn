@@ -200,7 +200,7 @@ helpers-keys:
         dnf5 -q repoquery --enablerepo=fedora-source --enablerepo=updates-source \
         --latest-limit=1 --queryformat '%{full_nevra}\n' \
         cosmic-comp cosmic-files cosmic-greeter cosmic-settings cosmic-store plymouth-theme-spinner | sort)"
-    # COSMIC must be the version cosmic-blue is tested against
+    # COSMIC must be the version Celenn OS is tested against
     # (build_files/cosmic-version): a new one first goes through the pull
     # request of check-cosmic-version.yml, which moves that file. Checked here,
     # before the helper stages that patch COSMIC programs, so the build stops
@@ -208,7 +208,7 @@ helpers-keys:
     pinned="$(grep -v '^#' build_files/cosmic-version | tr -d '[:space:]')"
     fedora_cosmic="$(sed -nE 's/^cosmic-settings-([0-9]+:)?([^-]+)-.*/\2/p' <<< "${packages}" | sort -u)"
     if [[ "${fedora_cosmic}" != "${pinned}" ]]; then
-        echo "::error::Fedora ${base_tag} now ships COSMIC ${fedora_cosmic:-?}, but cosmic-blue is pinned to ${pinned} (build_files/cosmic-version): merge the COSMIC update pull request of check-cosmic-version.yml first" >&2
+        echo "::error::Fedora ${base_tag} now ships COSMIC ${fedora_cosmic:-?}, but Celenn OS is pinned to ${pinned} (build_files/cosmic-version): merge the COSMIC update pull request of check-cosmic-version.yml first" >&2
         exit 1
     fi
     package() {
@@ -235,7 +235,7 @@ helpers-keys:
                     files build_files/first_steps
                     echo "week $(date -u +%G-W%V)" ;;
                 greeter)
-                    files build_files/greeter system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-arcs.jpg
+                    files build_files/greeter system_files/usr/share/backgrounds/celenn/celenn-arcs.jpg
                     package cosmic-greeter ;;
                 compositor)
                     files build_files/compositor
@@ -321,7 +321,7 @@ fedora-version:
 
 # Checks the signatures of the images the build starts from (idea from
 # Aurora and Bluefin), so that a registry or account compromise upstream
-# cannot slip into cosmic-blue: base-main and brew are signed with the
+# cannot slip into Celenn OS: base-main and brew are signed with the
 # Universal Blue key (.github/keys/ublue-os.pub, ublue-os/main cosign.pub),
 # projectbluefin/common keyless by its own workflows. base-main is followed by
 # tag: its digest is resolved and verified here, and printed (stdout) for

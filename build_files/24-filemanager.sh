@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # Replaces Fedora's COSMIC Files binaries with the ones rebuilt from the same
-# source package with the cosmic-blue patch (build_files/filemanager): the
+# source package with the Celenn OS patch (build_files/filemanager): the
 # user folders (Documents, Music...) get their own icons under /var/home.
 set -euox pipefail
 

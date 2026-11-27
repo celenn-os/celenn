@@ -1,0 +1,25 @@
+[Desktop Entry]
+Type=Application
+Name=First steps
+Name[fr]=Premiers pas
+Name[de]=Erste Schritte
+Name[es]=Primeros pasos
+Name[it]=Primi passi
+Name[pt_BR]=Primeiros passos
+Comment=Get started with Celenn OS: your look, apps for what you do, your computer and help
+Comment[fr]=Bien démarrer avec Celenn OS : votre style, des applications selon vos usages, votre ordinateur et de l'aide
+Comment[de]=Der Einstieg in Celenn OS: Ihr Aussehen, Apps für Ihre Zwecke, Ihr Computer und Hilfe
+Comment[es]=Empieza con Celenn OS: tu estilo, aplicaciones para lo que haces, tu ordenador y ayuda
+Comment[it]=Inizia con Celenn OS: il tuo stile, app per quello che fai, il tuo computer e aiuto
+Comment[pt_BR]=Comece a usar o Celenn OS: seu visual, aplicativos para o que você faz, seu computador e ajuda
+Keywords=Celenn OS;Welcome;Tour;Help;Getting started;
+Keywords[fr]=Celenn OS;Bienvenue;Visite;Aide;Démarrer;
+Keywords[de]=Celenn OS;Willkommen;Tour;Hilfe;Einstieg;
+Keywords[es]=Celenn OS;Bienvenida;Recorrido;Ayuda;Empezar;
+Keywords[it]=Celenn OS;Benvenuto;Presentazione;Aiuto;Iniziare;
+Keywords[pt_BR]=Celenn OS;Boas-vindas;Tour;Ajuda;Começar;
+Icon=celenn-welcome
+Exec=/usr/libexec/celenn-tour
+Terminal=false
+StartupNotify=true
+Categories=System;

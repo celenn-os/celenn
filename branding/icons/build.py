@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the cosmic-blue icons drawn on top of Tela circle.
+"""Generate the Celenn OS icons drawn on top of Tela circle.
 
 - places: folders (a planet-like disk in the logo blues, with a folder tab),
   the home, desktop, network and trash icons
@@ -12,7 +12,7 @@
   The Documentation and System Update icons also replace Tela's help-browser
   and system-software-update, which the first steps tour shows, and the
   tour's commands and tiling pages get icons in the same style. The apps
-  cosmic-blue offers that Tela has no icon for get one too (OFFERED), so that
+  Celenn OS offers that Tela has no icon for get one too (OFFERED), so that
   the App Library and the app lists all look alike.
 - actions: the symbolic icons of the suspend and restart buttons in the
   panel's power menu (Tela has none for restart, and its suspend icon is
@@ -34,11 +34,11 @@ REPO = HERE.parent.parent
 LAYER = REPO / "build_files" / "icon_theme" / "layer"
 APPS = REPO / "iso_files" / "welcome"
 HICOLOR_APPS = REPO / "system_files/usr/share/icons/hicolor/scalable/apps"
-FIRST_STEPS_ICON = HICOLOR_APPS / "cosmic-blue-welcome.svg"
-DOCS_ICON = HICOLOR_APPS / "cosmic-blue-docs.svg"
-UPDATE_ICON = HICOLOR_APPS / "cosmic-blue-update.svg"
-TOUR_STORE_ICON = HICOLOR_APPS / "cosmic-blue-tour-store.svg"
-TOOLS_ICON = HICOLOR_APPS / "cosmic-blue-tools.svg"
+FIRST_STEPS_ICON = HICOLOR_APPS / "celenn-welcome.svg"
+DOCS_ICON = HICOLOR_APPS / "celenn-docs.svg"
+UPDATE_ICON = HICOLOR_APPS / "celenn-update.svg"
+TOUR_STORE_ICON = HICOLOR_APPS / "celenn-tour-store.svg"
+TOOLS_ICON = HICOLOR_APPS / "celenn-tools.svg"
 
 def stroke(d, width=2.2):
     return (f'<path d="{d}" fill="none" stroke="currentColor" stroke-width="{width}" '
@@ -331,7 +331,7 @@ def circle_arrow(r, start, end, opacity=None, head=6.2, width=5):
 # the lower one translucent
 UPDATE = tela_app(circle_arrow(13.5, 165, 40) + circle_arrow(13.5, 345, 220, ".45"))
 
-# cosmic-blue Tools (the ujust commands as buttons): a wrench, with a
+# Celenn OS Tools (the ujust commands as buttons): a wrench, with a
 # screwdriver behind it in translucent white
 TOOLS = tela_app(
     '<g transform="translate(32 32) rotate(45)">'
@@ -414,16 +414,16 @@ TOUR_PASSWORDS = tela_app(
     'M31 39.3h17v4.4h-3v4h-4v-4h-2.5v3h-4v-3H31z" fill="#fff" fill-rule="evenodd"/>'
 )
 TOUR_ICONS = {
-    "cosmic-blue-tour-accessibility": TOUR_ACCESSIBILITY,
-    "cosmic-blue-tour-passwords": TOUR_PASSWORDS,
-    "cosmic-blue-tour-computer": TOUR_COMPUTER,
-    "cosmic-blue-tour-keyboard": TOUR_KEYBOARD,
-    "cosmic-blue-tour-bearings": TOUR_BEARINGS,
-    "cosmic-blue-tour-try": TOUR_TRY,
-    "cosmic-blue-tour-tips": TOUR_TIPS,
+    "celenn-tour-accessibility": TOUR_ACCESSIBILITY,
+    "celenn-tour-passwords": TOUR_PASSWORDS,
+    "celenn-tour-computer": TOUR_COMPUTER,
+    "celenn-tour-keyboard": TOUR_KEYBOARD,
+    "celenn-tour-bearings": TOUR_BEARINGS,
+    "celenn-tour-try": TOUR_TRY,
+    "celenn-tour-tips": TOUR_TIPS,
 }
 
-# cosmic-blue Tools' Appearance page: a palette with its paint wells
+# Celenn OS Tools' Appearance page: a palette with its paint wells
 PALETTE = ('M32 14C21.5 14 14 21.6 14 31.5S21.8 50 31 50c3.3 0 4.6-1.9 4.6-4.1 0-1.4-.6-2.4-.6-3.6'
            ' 0-1.9 1.5-3.3 3.4-3.3H44c3.6 0 6-2.6 6-6.6C50 22.4 42.3 14 32 14z')
 PALETTE_WELLS = [(23.5, 33.5), (24.5, 24.5), (32.5, 20.5), (40.5, 24.5)]
@@ -434,7 +434,7 @@ TOOLS_APPEARANCE = tela_app(
 )
 
 
-# The symbolic icons of cosmic-blue Tools' sidebar: the glyph of each page's
+# The symbolic icons of Celenn OS Tools' sidebar: the glyph of each page's
 # icon, alone, in one color (the app tints them), the translucent parts kept
 # translucent. Drawn in the 64px space of the app icons, shown through a
 # 40px window around the glyph. The accent details become holes (masks).
@@ -500,7 +500,7 @@ FILES = tela_app(
     '-2.5 2.5h-30a2.5 2.5 0 0 1-2.5-2.5z" fill="#fff"/>'
 )
 
-# Apps cosmic-blue offers (first steps tour, Tools) that Tela has no icon for.
+# Apps Celenn OS offers (first steps tour, Tools) that Tela has no icon for.
 # build_files/icon_theme/check_app_icons.py fails the build when another one
 # is missing.
 # Kalzium (periodic table): an atom
@@ -591,20 +591,20 @@ def main():
         for alias in names[1:]:
             os.symlink(f"{names[0]}.svg", mimetypes / f"{alias}.svg")
 
-    (APPS / "cosmic-blue-welcome.svg").write_text(WELCOME)
+    (APPS / "celenn-welcome.svg").write_text(WELCOME)
     # Also the icon of the installed system's first steps tour
     FIRST_STEPS_ICON.write_text(WELCOME)
     DOCS_ICON.write_text(DOCS)
     UPDATE_ICON.write_text(UPDATE)
     TOOLS_ICON.write_text(TOOLS)
     TOUR_STORE_ICON.write_text(TOUR_STORE)
-    (HICOLOR_APPS / "cosmic-blue-tools-appearance.svg").write_text(TOOLS_APPEARANCE)
+    (HICOLOR_APPS / "celenn-tools-appearance.svg").write_text(TOOLS_APPEARANCE)
     for name, icon in TOOLS_SYMBOLIC.items():
-        (HICOLOR_APPS / f"cosmic-blue-tools-{name}-symbolic.svg").write_text(icon)
+        (HICOLOR_APPS / f"celenn-tools-{name}-symbolic.svg").write_text(icon)
     # Bring your things: COSMIC Files' folder
-    for name, icon in {**TOUR_ICONS, "cosmic-blue-tour-files": FILES}.items():
+    for name, icon in {**TOUR_ICONS, "celenn-tour-files": FILES}.items():
         (HICOLOR_APPS / f"{name}.svg").write_text(icon)
-    (APPS / "cosmic-blue-installer.svg").write_text(INSTALLER)
+    (APPS / "celenn-installer.svg").write_text(INSTALLER)
 
 
 if __name__ == "__main__":

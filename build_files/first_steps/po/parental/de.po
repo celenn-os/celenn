@@ -1,4 +1,4 @@
-# German translation of cosmic-blue Parental controls
+# German translation of Celenn OS Parental controls
 # (build_files/first_steps/src/parental.rs).
 msgid ""
 msgstr ""
@@ -200,8 +200,8 @@ msgstr "„{}“ hat nicht geklappt"
 msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
 msgstr "Keine Internetverbindung. Verbinden Sie sich mit einem Netzwerk und versuchen Sie es erneut. Nichts wurde geändert."
 
-msgid "The disk is full ({} free). Free up space with cosmic-blue Tools, then try again."
-msgstr "Die Festplatte ist voll ({} frei). Geben Sie mit cosmic-blue Werkzeuge Speicherplatz frei und versuchen Sie es erneut."
+msgid "The disk is full ({} free). Free up space with Celenn OS Tools, then try again."
+msgstr "Die Festplatte ist voll ({} frei). Geben Sie mit Celenn OS Werkzeuge Speicherplatz frei und versuchen Sie es erneut."
 
 msgid "The server does not answer. Try again in a few minutes."
 msgstr "Der Server antwortet nicht. Versuchen Sie es in ein paar Minuten erneut."
@@ -221,8 +221,8 @@ msgstr "Problem melden"
 msgid "Technical details"
 msgstr "Technische Details"
 
-msgid "The report opens in your browser, filled in: the cosmic-blue version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
-msgstr "Der Bericht öffnet sich ausgefüllt im Browser: die cosmic-blue-Version, die Hardware und dieser Fehler. Keine Dateien, keine persönlichen Daten. Sie lesen ihn vor dem Senden; schreiben Sie in Ihrer Sprache. Zum Senden braucht es ein GitHub-Konto."
+msgid "The report opens in your browser, filled in: the Celenn OS version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
+msgstr "Der Bericht öffnet sich ausgefüllt im Browser: die celenn-Version, die Hardware und dieser Fehler. Keine Dateien, keine persönlichen Daten. Sie lesen ihn vor dem Senden; schreiben Sie in Ihrer Sprache. Zum Senden braucht es ein GitHub-Konto."
 
 msgid "Open the report"
 msgstr "Bericht öffnen"

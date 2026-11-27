@@ -15,7 +15,7 @@ on:
       - '.github/workflows/pages.yml'
       - 'website/**'
       - 'branding/logo/**'
-      - 'system_files/usr/share/backgrounds/cosmic-blue/**'
+      - 'system_files/usr/share/backgrounds/celenn/**'
   pull_request:
     branches:
       - main

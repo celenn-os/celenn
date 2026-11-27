@@ -1,0 +1,18 @@
+[Desktop Entry]
+Type=Application
+Name=Parental controls
+Name[fr]=Contrôle parental
+Name[de]=Jugendschutz
+Name[es]=Control parental
+Name[it]=Controllo parentale
+Name[pt_BR]=Controle parental
+Comment=Warns a child before the session closes, with a button to ask for more time
+Comment[fr]=Prévient un enfant avant la fermeture de sa session, avec un bouton pour demander plus de temps
+Comment[de]=Warnt ein Kind, bevor die Sitzung endet, mit einer Schaltfläche, um mehr Zeit zu erbitten
+Comment[es]=Avisa a un niño antes de que se cierre la sesión, con un botón para pedir más tiempo
+Comment[it]=Avvisa un bambino prima che la sessione si chiuda, con un pulsante per chiedere più tempo
+Comment[pt_BR]=Avisa uma criança antes de a sessão terminar, com um botão para pedir mais tempo
+Icon=celenn-parental-controls
+Exec=/usr/libexec/celenn-parental-controls --agent
+Terminal=false
+NoDisplay=true

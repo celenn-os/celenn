@@ -1,5 +1,5 @@
-// Developer tools that cosmic-blue offers to install without a terminal:
-// the same list in the first steps tour (main.rs) and in cosmic-blue Tools'
+// Developer tools that Celenn OS offers to install without a terminal:
+// the same list in the first steps tour (main.rs) and in Celenn OS Tools'
 // Extra software page (more.rs), installed the same way.
 
 use std::collections::BTreeSet;

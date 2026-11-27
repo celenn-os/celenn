@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the cosmic-blue logo SVGs.
+"""Generate the Celenn OS logo SVGs.
 
 The wordmark uses Montserrat Light outlines (glyphs.json: one path per glyph
 plus its horizontal extent), so the SVGs need no font at runtime.
@@ -37,7 +37,7 @@ def wordmark(fill, tracking=12):
     return f'<g fill="{fill}">{"".join(parts)}</g>', x - tracking
 
 
-def svg(viewbox, body, title="cosmic-blue"):
+def svg(viewbox, body, title="Celenn OS"):
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{viewbox}">'
             f"<title>{title}</title>{DEFS}{body}</svg>\n")
 
@@ -52,13 +52,13 @@ def horizontal(fill, moon):
     return svg(f"0 0 {118 + width * scale + 6:.1f} 100", body)
 
 
-(HERE / "cosmic-blue-logo.svg").write_text(svg("-50 -50 100 100", mark()))
-# One-color mark for symbolic uses (the cosmic-blue group of the App Library);
+(HERE / "celenn-logo.svg").write_text(svg("-50 -50 100 100", mark()))
+# One-color mark for symbolic uses (the Celenn OS group of the App Library);
 # the desktop recolors symbolic icons, #bebebe is only the convention
-(HERE / "cosmic-blue-logo-symbolic.svg").write_text(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100"><title>cosmic-blue</title>'
+(HERE / "celenn-logo-symbolic.svg").write_text(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100"><title>Celenn OS</title>'
     '<g fill="#bebebe"><path d="M30.3 -25.4 A40 40 0 1 0 30.3 25.4" fill="none" stroke="#bebebe" '
     'stroke-width="13" stroke-linecap="round"/><circle cx="-2" cy="0" r="13"/>'
     '<circle cx="38" cy="0" r="6.5"/></g></svg>\n')
-(HERE / "cosmic-blue-logo-horizontal-dark.svg").write_text(horizontal("#e6f3ff", "#e6f3ff"))
-(HERE / "cosmic-blue-logo-horizontal-light.svg").write_text(horizontal("#0b2a8a", "#2f6bff"))
+(HERE / "celenn-logo-horizontal-dark.svg").write_text(horizontal("#e6f3ff", "#e6f3ff"))
+(HERE / "celenn-logo-horizontal-light.svg").write_text(horizontal("#0b2a8a", "#2f6bff"))

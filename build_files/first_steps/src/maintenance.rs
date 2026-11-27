@@ -1,8 +1,8 @@
-// The Maintenance page of cosmic-blue Tools (tools.rs): what `ujust` offers
+// The Maintenance page of Celenn OS Tools (tools.rs): what `ujust` offers
 // to keep the computer in shape, as buttons.
 //
 //   - Disk space: how full the disk is (the Disk Usage Analyzer shows the
-//     details) and "Clean up", which runs /usr/libexec/cosmic-blue-clean, the
+//     details) and "Clean up", which runs /usr/libexec/celenn-clean, the
 //     same script as `ujust clean-system`: app parts no app uses any more,
 //     unused container images, old Homebrew downloads, then (administrator
 //     password) the same for everyone's apps and the system's caches. The
@@ -10,7 +10,7 @@
 //   - The trash: how much it holds, "Empty". Files in it for more than 30
 //     days go by themselves, and a notification warns when the disk is
 //     almost full (housekeeping.rs); two switches turn these off.
-//   - The apps that come with cosmic-blue (/usr/share/flatpak/preinstall.d):
+//   - The apps that come with Celenn OS (/usr/share/flatpak/preinstall.d):
 //     when some were removed, "Reinstall" puts them back, as the first boot
 //     installed them.
 //   - Firmware updates: opens GNOME Firmware.
@@ -26,7 +26,7 @@ use cosmic::{Element, cosmic_theme, theme};
 use std::collections::BTreeSet;
 use std::process::{Command, Stdio};
 
-const CLEAN: &str = "/usr/libexec/cosmic-blue-clean";
+const CLEAN: &str = "/usr/libexec/celenn-clean";
 const PREINSTALL_DIR: &str = "/usr/share/flatpak/preinstall.d";
 const DISK_USAGE: &str = "org.gnome.baobab";
 const FIRMWARE: &str = "org.gnome.Firmware";
@@ -57,7 +57,7 @@ pub const TEXTS: &[&str] = &[
     "Like on Windows and the Mac. Newer ones can still be put back.",
     "Warn when the disk is almost full",
     "A notification when less than 10 % is free (20 GB at most).",
-    "Apps that come with cosmic-blue",
+    "Apps that come with Celenn OS",
     "All of them are installed.",
     "One of them was removed. Put it back?",
     "{} of them were removed. Put them back?",
@@ -124,7 +124,7 @@ pub struct Page {
 }
 
 /// The parts of the page, each in its own tool (tools.rs): disk space and
-/// the trash; putting back the apps that come with cosmic-blue; firmware
+/// the trash; putting back the apps that come with Celenn OS; firmware
 /// updates
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Part {
@@ -390,7 +390,7 @@ impl Page {
         self.state.as_ref().is_some_and(|state| state.firmware_app)
     }
 
-    /// How many of the apps that come with cosmic-blue were removed
+    /// How many of the apps that come with Celenn OS were removed
     pub fn missing(&self) -> usize {
         self.state.as_ref().map_or(0, |state| state.missing.len())
     }
@@ -551,14 +551,14 @@ impl Page {
         content.into()
     }
 
-    /// The apps that come with cosmic-blue, and the button that puts back
+    /// The apps that come with Celenn OS, and the button that puts back
     /// the ones removed
     fn apps(&self, state: &State) -> Element<'_, Message> {
         let cosmic_theme::Spacing {
             space_xxs, space_s, ..
         } = theme::spacing();
         let idle = self.busy.is_none();
-        // Apps that come with cosmic-blue
+        // Apps that come with Celenn OS
         let caption = if state.missing.is_empty() {
             tr("All of them are installed.").to_owned()
         } else {
@@ -572,7 +572,7 @@ impl Page {
         };
         let mut apps_row = vec![
             state_icon("view-app-grid-symbolic", false),
-            label(tr("Apps that come with cosmic-blue"), caption),
+            label(tr("Apps that come with Celenn OS"), caption),
         ];
         if self.busy == Some(Busy::Reinstalling) {
             apps_row.push(

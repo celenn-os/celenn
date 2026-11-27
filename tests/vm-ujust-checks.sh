@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# cosmic-blue's ujust recipes that change the user's COSMIC settings, run as
+# Celenn OS's ujust recipes that change the user's COSMIC settings, run as
 # the test user by tests/vm-boot-test.sh (after the desktop tour, so the
 # account has a real COSMIC configuration). Prints one "FAIL <reason>" line
 # per problem.
@@ -10,7 +10,7 @@ config="${XDG_CONFIG_HOME:-${HOME}/.config}/cosmic"
 mode="${config}/com.system76.CosmicTheme.Mode/v1/is_dark"
 keyboard="${config}/com.system76.CosmicComp/v1/xkb_config"
 # A setting of no COSMIC component, to see what each reset keeps
-other="${config}/cosmic-blue-ujust-test/v1/kept"
+other="${config}/celenn-ujust-test/v1/kept"
 
 fail() { echo "FAIL $*"; }
 setting() { cat "$1" 2>/dev/null || echo "(none)"; }
@@ -49,7 +49,7 @@ backup="$(compgen -G "${config}.backup-*" | tail -n 1)"
 if [[ -z "${backup}" ]]; then
     fail "ujust reset-cosmic-config made no backup"
 else
-    [[ -e "${backup}/cosmic-blue-ujust-test/v1/kept" ]] \
+    [[ -e "${backup}/celenn-ujust-test/v1/kept" ]] \
         || fail "ujust reset-cosmic-config backup ${backup} lacks the settings"
 fi
 [[ ! -e "${other}" ]] || fail "ujust reset-cosmic-config kept the other settings"

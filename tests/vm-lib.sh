@@ -9,7 +9,7 @@
 # Needs: podman, qemu-system-x86_64, OVMF, socat, openssh-client, jq, KVM.
 
 TESTS_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
-WORK="$(mktemp -d -p "${RUNNER_TEMP:-/var/tmp}" cosmic-blue-vm.XXXXXX)"
+WORK="$(mktemp -d -p "${RUNNER_TEMP:-/var/tmp}" celenn-vm.XXXXXX)"
 SSH_PORT=2222
 mkdir -p "${OUT}"
 
@@ -282,7 +282,7 @@ vm_check_tuning() {
         problems+=("fstrim.service failed")
         vm 'journalctl -b -u fstrim.service --no-pager -n 20' || true
     fi
-    # Kernel settings of /usr/lib/sysctl.d/60-cosmic-blue.conf, as applied
+    # Kernel settings of /usr/lib/sysctl.d/60-celenn.conf, as applied
     local setting
     for setting in vm.swappiness=180 vm.page-cluster=0 vm.dirty_bytes=268435456 \
                    vm.dirty_background_bytes=134217728 fs.inotify.max_user_instances=8192; do
@@ -305,7 +305,7 @@ vm_check_tuning() {
 # shipping.
 # Files are numbered in the order they are taken (tests/screenshot-sheet.py).
 DEMO_USER=demo
-DEMO_PASSWORD=cosmicblue  # letters only: typed as US QWERTY key codes below
+DEMO_PASSWORD=celennos  # letters only: typed as US QWERTY key codes below
 SHOTS=screenshots
 
 type_text() {
@@ -326,7 +326,7 @@ wait_for() {
 warn() { echo "::warning::Desktop screenshots: $*"; }
 # A problem the boot test fails on but the update test only warns about (its
 # account was made by the previous image): what a new account gets at its
-# first login (COSMIC's first-run assistant, cosmic-blue's tour) and the
+# first login (COSMIC's first-run assistant, Celenn OS's tour) and the
 # Firefox policies. Kept in DESKTOP_PROBLEMS for the boot test.
 DESKTOP_PROBLEMS=()
 desktop_problem() { warn "$*"; DESKTOP_PROBLEMS+=("$*"); }
@@ -335,7 +335,7 @@ desktop_problem() { warn "$*"; DESKTOP_PROBLEMS+=("$*"); }
 # login screen reads the accounts when it starts)
 demo_user() {
     if ! vm "id ${DEMO_USER}" >/dev/null 2>&1; then
-        vm "useradd -m -c cosmic-blue ${DEMO_USER} && echo ${DEMO_USER}:${DEMO_PASSWORD} | chpasswd" \
+        vm "useradd -m -c Celenn ${DEMO_USER} && echo ${DEMO_USER}:${DEMO_PASSWORD} | chpasswd" \
             || { warn "could not create the test user"; return 1; }
     fi
     # A fixed computer name, shown in the terminal screenshot: without it,
@@ -390,7 +390,7 @@ desktop_tour() {
     # New accounts get the first steps tour (not the account kept from the
     # previous image in the update test)
     local first_steps=false
-    vm "test -e ~${DEMO_USER}/.config/cosmic-blue/first-steps-pending" && first_steps=true
+    vm "test -e ~${DEMO_USER}/.config/celenn/first-steps-pending" && first_steps=true
     screenshot "${SHOTS}/01-login-screen"
     demo_login 02-login-failed || return 1
 
@@ -424,24 +424,24 @@ desktop_tour() {
 
     # Files (folder icons), Settings (accent, theme), COSMIC Store (our
     # rebuild, which no other step starts: a crash fails vm_check_crashes),
-    # cosmic-blue Tools (its home, tools, a failure card, the developer tools list)
-    # and Keyboard shortcuts (cosmic-blue's own apps; images before them skip
+    # Celenn OS Tools (its home, tools, a failure card, the developer tools list)
+    # and Keyboard shortcuts (Celenn OS's own apps; images before them skip
     # them). A command may start with VARIABLE=value settings.
     local entry name cmd program settings
     for entry in "05-files|cosmic-files" "06-settings|cosmic-settings appearance" "06-store|cosmic-store" \
-        "06-tools-overview|/usr/libexec/cosmic-blue-tools" \
-        "06-updates|/usr/libexec/cosmic-blue-updates" \
-        "06-tools-space|/usr/libexec/cosmic-blue-tools --tool space" \
-        "06-tools-inside|/usr/libexec/cosmic-blue-tools --tool inside" \
-        "06-tools-software|/usr/libexec/cosmic-blue-tools --tool apps" \
-        "06-tools-look|/usr/libexec/cosmic-blue-tools --tool look" \
-        "06-tools-repair|/usr/libexec/cosmic-blue-tools --tool repair" \
-        "06-tools-advanced|/usr/libexec/cosmic-blue-tools --tool advanced" \
-        "06-tools-help|/usr/libexec/cosmic-blue-tools --tool help" \
-        "06-tools-failure|COSMIC_BLUE_TOOLS_PREVIEW=failure /usr/libexec/cosmic-blue-tools --tool space" \
-        "06-tools-developer|COSMIC_BLUE_TOOLS_PREVIEW=developer-tools /usr/libexec/cosmic-blue-tools --tool apps" \
-        "06-tools-disks|/usr/libexec/cosmic-blue-tools --tool disks" \
-        "06-shortcuts|/usr/libexec/cosmic-blue-tour --shortcuts"; do
+        "06-tools-overview|/usr/libexec/celenn-tools" \
+        "06-updates|/usr/libexec/celenn-updates" \
+        "06-tools-space|/usr/libexec/celenn-tools --tool space" \
+        "06-tools-inside|/usr/libexec/celenn-tools --tool inside" \
+        "06-tools-software|/usr/libexec/celenn-tools --tool apps" \
+        "06-tools-look|/usr/libexec/celenn-tools --tool look" \
+        "06-tools-repair|/usr/libexec/celenn-tools --tool repair" \
+        "06-tools-advanced|/usr/libexec/celenn-tools --tool advanced" \
+        "06-tools-help|/usr/libexec/celenn-tools --tool help" \
+        "06-tools-failure|CELENN_TOOLS_PREVIEW=failure /usr/libexec/celenn-tools --tool space" \
+        "06-tools-developer|CELENN_TOOLS_PREVIEW=developer-tools /usr/libexec/celenn-tools --tool apps" \
+        "06-tools-disks|/usr/libexec/celenn-tools --tool disks" \
+        "06-shortcuts|/usr/libexec/celenn-tour --shortcuts"; do
         name="${entry%%|*}"
         cmd="${entry#*|}"
         settings=""
@@ -467,14 +467,14 @@ desktop_tour() {
     # Updates once more with the light theme: its symbols and accent must
     # read on both (COSMIC apps follow the setting as it changes)
     local mode_dir="~${DEMO_USER}/.config/cosmic/com.system76.CosmicTheme.Mode/v1"
-    if vm "test -x /usr/libexec/cosmic-blue-updates" \
+    if vm "test -x /usr/libexec/celenn-updates" \
         && vm "runuser -u ${DEMO_USER} -- sh -c 'mkdir -p ${mode_dir} && printf false > ${mode_dir}/is_dark'"; then
         sleep 5
         if vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
-                setsid -f /usr/libexec/cosmic-blue-updates >/dev/null 2>&1 </dev/null"; then
+                setsid -f /usr/libexec/celenn-updates >/dev/null 2>&1 </dev/null"; then
             sleep 12
             screenshot "${SHOTS}/06-updates-light"
-            vm "pkill -u ${DEMO_USER} -f '^/usr/libexec/cosmic-blue-updates'" || true
+            vm "pkill -u ${DEMO_USER} -f '^/usr/libexec/celenn-updates'" || true
             sleep 3
         fi
         vm "runuser -u ${DEMO_USER} -- sh -c 'printf true > ${mode_dir}/is_dark'" \
@@ -484,24 +484,24 @@ desktop_tour() {
 
     # Updates while a new version downloads: its progress bar, from a
     # progress file like the one bootc's download writes (update_progress.rs)
-    local progress=/run/cosmic-blue/update-progress.jsonl
-    if vm "test -x /usr/libexec/cosmic-blue-updates" \
-        && vm "mkdir -p /run/cosmic-blue && printf '%s\\n' \
+    local progress=/run/celenn/update-progress.jsonl
+    if vm "test -x /usr/libexec/celenn-updates" \
+        && vm "mkdir -p /run/celenn && printf '%s\\n' \
             '{\"type\":\"ProgressBytes\",\"task\":\"pulling\",\"bytes\":1288490188,\"bytesTotal\":2147483648}' \
             > ${progress}"; then
         if vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
-                setsid -f /usr/libexec/cosmic-blue-updates >/dev/null 2>&1 </dev/null"; then
+                setsid -f /usr/libexec/celenn-updates >/dev/null 2>&1 </dev/null"; then
             sleep 12
             screenshot "${SHOTS}/06-updates-progress"
-            vm "pkill -u ${DEMO_USER} -f '^/usr/libexec/cosmic-blue-updates'" || true
+            vm "pkill -u ${DEMO_USER} -f '^/usr/libexec/celenn-updates'" || true
             sleep 3
         fi
         vm "rm -f ${progress}" || true
     fi
 
-    # Firefox, a first-boot flatpak in the dock, with the cosmic-blue
+    # Firefox, a first-boot flatpak in the dock, with the Celenn OS
     # policies it reads from its systemconfig extension (mounted at
-    # /app/etc/firefox in its sandbox, see cosmic-blue-firefox.conf)
+    # /app/etc/firefox in its sandbox, see celenn-firefox.conf)
     firefox_shot
 
     # Terminal: prompt and fastfetch
@@ -518,7 +518,7 @@ desktop_tour() {
 
 # Usage: vm_check_crashes <label>
 #   Programs that crashed since the system started (systemd-coredump). A crash
-#   of a COSMIC or cosmic-blue program is an error (returns 1), any other one
+#   of a COSMIC or Celenn OS program is an error (returns 1), any other one
 #   a warning. Run after desktop_tour, which starts the session and some apps.
 vm_check_crashes() {
     local label="$1" errors=0 crashes line name
@@ -528,7 +528,7 @@ vm_check_crashes() {
     while IFS= read -r line; do
         [[ "${line}" =~ ^Process\ [0-9]+\ \((.*)\)\ of\ user ]] || continue
         name="${BASH_REMATCH[1]}"
-        # (names are cut to 15 characters: cosmic-blue-tou)
+        # (names are cut to 15 characters: celenn-tou)
         if [[ "${name}" == cosmic* ]]; then
             echo "::error::${label}: ${name} crashed (${line})"
             errors=1
@@ -540,14 +540,14 @@ vm_check_crashes() {
     return "${errors}"
 }
 
-# cosmic-blue's first steps tour, which opens at the first login of a new
+# Celenn OS's first steps tour, which opens at the first login of a new
 # account: one screenshot per page (Alt+Right turns the page), then closed.
 # Nobody picks where they come from, so the pages are those of the general path.
 FIRST_STEPS_PAGES=5
 
 first_steps_shots() {
     local page
-    if ! wait_for 60 "pgrep -u ${DEMO_USER} -f cosmic-blue-tour\$"; then
+    if ! wait_for 60 "pgrep -u ${DEMO_USER} -f celenn-tour\$"; then
         desktop_problem "the first steps tour did not open at the first login"
         return 1
     fi
@@ -557,13 +557,13 @@ first_steps_shots() {
         monitor "sendkey alt-right"
         sleep 3
     done
-    vm "pkill -u ${DEMO_USER} -f cosmic-blue-tour\$" || true
+    vm "pkill -u ${DEMO_USER} -f celenn-tour\$" || true
     sleep 3
-    vm "test ! -e ~${DEMO_USER}/.config/cosmic-blue/first-steps-pending" \
+    vm "test ! -e ~${DEMO_USER}/.config/celenn/first-steps-pending" \
         || desktop_problem "the first steps tour would open again at the next login"
 }
 
-# The terminal as the test user sees it: the cosmic-blue prompt (Starship) and
+# The terminal as the test user sees it: the Celenn OS prompt (Starship) and
 # fastfetch. Text checks first, as the user's login shell runs them,
 # then COSMIC Terminal opened in a small git project, so the prompt shows its
 # path and git segments, with `fastfetch` typed in it.
@@ -611,7 +611,7 @@ firefox_shot() {
     policies="$(vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} flatpak run --command=cat ${FIREFOX} \
         /app/etc/firefox/policies/policies.json" 2>&1)" || policies=""
     jq -e '.policies.DisableTelemetry' <<<"${policies}" >/dev/null 2>&1 \
-        || desktop_problem "Firefox does not see the cosmic-blue policies: $(head -c 300 <<<"${policies}")"
+        || desktop_problem "Firefox does not see the Celenn OS policies: $(head -c 300 <<<"${policies}")"
     if ! vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
             setsid -f flatpak run ${FIREFOX} >/dev/null 2>&1 </dev/null"; then
         warn "could not start Firefox"
@@ -650,10 +650,10 @@ disks_checks() {
     problem() { echo "::error::Other disks: $*"; failed=1; }
     uuid="$(vm 'blkid -s UUID -o value /dev/vdb1')" || { problem "no test disk"; return 1; }
     uid="$(vm "id -u ${DEMO_USER}")"
-    output="$(vm "PKEXEC_UID=${uid} /usr/libexec/cosmic-blue-tools-helper disks ${uuid}=on" 2>&1)" \
+    output="$(vm "PKEXEC_UID=${uid} /usr/libexec/celenn-tools-helper disks ${uuid}=on" 2>&1)" \
         || problem "the helper did not open the disk: ${output}"
     vm "findmnt -no SOURCE ${mp}" | grep -q '^/dev/vdb1$' || problem "the disk is not open at ${mp}"
-    vm "grep -qE '^UUID=${uuid} ${mp} ext4 [^ ]*nofail[^ ]*x-cosmic-blue-disk 0 2\$' /etc/fstab" \
+    vm "grep -qE '^UUID=${uuid} ${mp} ext4 [^ ]*nofail[^ ]*x-celenn-disk 0 2\$' /etc/fstab" \
         || problem "no fstab line for it: $(vm 'cat /etc/fstab')"
     [[ "$(vm "stat -c %u ${mp}")" == "${uid}" ]] || problem "the new, empty disk is not the user's"
     vm "runuser -u ${DEMO_USER} -- touch /mnt/Mes-Jeux/steam-library-test" \
@@ -661,11 +661,11 @@ disks_checks() {
     vm "grep -q '^filesystems=.*${mp};' /var/lib/flatpak/overrides/com.valvesoftware.Steam" \
         || problem "Steam (Flatpak) was not given ${mp}"
     # Again: nothing changes, no second line
-    vm "PKEXEC_UID=${uid} /usr/libexec/cosmic-blue-tools-helper disks ${uuid}=on" >/dev/null 2>&1 \
+    vm "PKEXEC_UID=${uid} /usr/libexec/celenn-tools-helper disks ${uuid}=on" >/dev/null 2>&1 \
         || problem "turning it on twice failed"
     [[ "$(vm "grep -c 'UUID=${uuid}' /etc/fstab")" == 1 ]] || problem "two fstab lines for it"
     # Off: closed, line and folder gone, its files kept
-    output="$(vm "/usr/libexec/cosmic-blue-tools-helper disks ${uuid}=off" 2>&1)" \
+    output="$(vm "/usr/libexec/celenn-tools-helper disks ${uuid}=off" 2>&1)" \
         || problem "the helper did not close the disk: ${output}"
     vm "mountpoint -q ${mp}" && problem "still open after off"
     vm "grep -q 'UUID=${uuid}' /etc/fstab" && problem "its fstab line is still there"
@@ -676,7 +676,7 @@ disks_checks() {
         || problem "its files were not kept"
     # The system's own partition is refused (in use, or in fstab)
     system="$(vm 'findmnt -nvo UUID /sysroot')"
-    output="$(vm "/usr/libexec/cosmic-blue-tools-helper disks ${system}=on" 2>&1)" \
+    output="$(vm "/usr/libexec/celenn-tools-helper disks ${system}=on" 2>&1)" \
         && problem "the system partition was accepted"
     [[ "${output}" == "${system} system" || "${output}" == "${system} in-fstab" ]] \
         || problem "the system partition: ${output}"
@@ -689,15 +689,15 @@ parental_checks() {
     problem() { echo "::error::Parental controls: $*"; parental_failed=1; }
     rules='{"limit":{"enabled":true,"weekdays":120,"weekend":180},"bedtime":{"enabled":true,"start":1230,"end":420},"web_filter":true,"apps":{"enabled":true,"allowed":["org.mozilla.firefox","org.mozilla.thunderbird"]}}'
     vm "printf '%s\n%s\n' ${DEMO_PASSWORD} '${rules}' \
-            | /usr/libexec/cosmic-blue-parental-helper add-child ${PARENTAL_CHILD} 'Léa' /usr/share/pixmaps/faces/rocket.png" \
-        || { problem "cosmic-blue-parental-helper could not create a child account"; return 1; }
+            | /usr/libexec/celenn-parental-helper add-child ${PARENTAL_CHILD} 'Léa' /usr/share/pixmaps/faces/rocket.png" \
+        || { problem "celenn-parental-helper could not create a child account"; return 1; }
     vm "id -nG ${PARENTAL_CHILD} | grep -qw wheel" && problem "the child account is an administrator"
     # Its avatar, one of the system's own, is copied where the login screen
-    # reads it (cosmic-blue-login-pictures.path)
+    # reads it (celenn-login-pictures.path)
     wait_for 15 "cmp -s /usr/share/pixmaps/faces/rocket.png /var/lib/AccountsService/icons/${PARENTAL_CHILD}" \
         || problem "the child's avatar is not where the login screen reads it"
-    wait_for 30 'systemctl is-active cosmic-blue-parental-controls.service' \
-        || problem "cosmic-blue-parental-controls.service did not start"
+    wait_for 30 'systemctl is-active celenn-parental-controls.service' \
+        || problem "celenn-parental-controls.service did not start"
     # A week of screen time for the chart
     json='{"today":{"date":"'"$(vm 'date +%F')"'","weekday":'"$(vm 'date +%u')"',"seconds":4800},"history":['
     for day in 6 5 4 3 2 1; do
@@ -705,13 +705,13 @@ parental_checks() {
         (( day > 1 )) && json+=','
     done
     json+=']}'
-    vm "echo '${json}' > /var/lib/cosmic-blue/parental-controls/${PARENTAL_CHILD}.json"
+    vm "echo '${json}' > /var/lib/celenn/parental-controls/${PARENTAL_CHILD}.json"
 
     # Web filter: the child's DNS queries go to the family filter
-    wait_for 30 'nft list table inet cosmic_blue_parental' \
+    wait_for 30 'nft list table inet celenn_parental' \
         || problem "no nftables rules for the web filter"
-    wait_for 30 'systemctl is-active cosmic-blue-family-dns.service' \
-        || problem "cosmic-blue-family-dns.service did not start"
+    wait_for 30 'systemctl is-active celenn-family-dns.service' \
+        || problem "celenn-family-dns.service did not start"
     # The filter answers this name itself (Firefox's DNS-over-HTTPS canary):
     # "no such name" for the child shows that its queries reach the filter,
     # without needing the family DNS servers on the internet
@@ -747,7 +747,7 @@ except socket.gaierror as error:
         problem "a downloaded program still runs on the child's account"
         vm "pkill -u ${PARENTAL_CHILD} -x game" || true
     fi
-    vm "journalctl -b --no-pager -u cosmic-blue-parental-controls.service -g 'stopped .*home/${PARENTAL_CHILD}/game'" >/dev/null \
+    vm "journalctl -b --no-pager -u celenn-parental-controls.service -g 'stopped .*home/${PARENTAL_CHILD}/game'" >/dev/null \
         || echo "::warning::Parental controls: the service did not log the downloaded program it stopped"
 
     # What would go around the filter is refused to the child: DNS to another
@@ -770,15 +770,15 @@ except OSError as error:
         echo "${target#* * } for the child: ${probe}"
         [[ "${probe}" == refused ]] || problem "${target#* * } is not refused to the child (${probe})"
     done
-    vm "id -nG ${PARENTAL_CHILD}" | grep -qw cosmic-blue-children \
-        || problem "the child account is not in the cosmic-blue-children group"
+    vm "id -nG ${PARENTAL_CHILD}" | grep -qw celenn-children \
+        || problem "the child account is not in the celenn-children group"
     probe="$(vm "runuser -u ${PARENTAL_CHILD} -- busctl call org.freedesktop.resolve1 /org/freedesktop/resolve1 \
         org.freedesktop.resolve1.Manager ResolveHostname isit 0 example.com 0 0" 2>&1)" && probe="answered: ${probe}"
     echo "systemd-resolved over D-Bus for the child: ${probe}"
     grep -qi 'access denied' <<<"${probe}" \
         || problem "systemd-resolved answers the child over D-Bus (${probe})"
-    if vm "journalctl -b --no-pager -u polkit -g 'cosmic-blue-parental'" | grep -qi error; then
-        problem "polkit could not load 10-cosmic-blue-parental.rules"
+    if vm "journalctl -b --no-pager -u polkit -g 'celenn-parental'" | grep -qi error; then
+        problem "polkit could not load 10-celenn-parental.rules"
     fi
 
     # Unlock the test user's session (locked by the tour)
@@ -794,10 +794,10 @@ except OSError as error:
     local entry
     for entry in "09-parental-controls|" "09-parental-controls-child|--user ${PARENTAL_CHILD}"; do
         if vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
-                setsid -f /usr/libexec/cosmic-blue-parental-controls ${entry#*|} >/dev/null 2>&1 </dev/null"; then
+                setsid -f /usr/libexec/celenn-parental-controls ${entry#*|} >/dev/null 2>&1 </dev/null"; then
             sleep 12
             screenshot "${SHOTS}/${entry%%|*}"
-            vm "pkill -u ${DEMO_USER} -f '^/usr/libexec/cosmic-blue-parental-controls( --user|$)'" || true
+            vm "pkill -u ${DEMO_USER} -f '^/usr/libexec/celenn-parental-controls( --user|$)'" || true
             sleep 3
         else
             warn "could not open Parental controls"
@@ -807,33 +807,33 @@ except OSError as error:
     # The test user becomes a child with 10 minutes a day, 4 min 40 s left:
     # the agent of its session warns
     vm "echo '{\"limit\":{\"enabled\":true,\"weekdays\":10,\"weekend\":10},\"bedtime\":{\"enabled\":false,\"start\":0,\"end\":0},\"web_filter\":false}' \
-            | /usr/libexec/cosmic-blue-parental-helper set ${DEMO_USER}" \
-        || problem "cosmic-blue-parental-helper set failed"
+            | /usr/libexec/celenn-parental-helper set ${DEMO_USER}" \
+        || problem "celenn-parental-helper set failed"
     set_used() {
         vm "echo '{\"today\":{\"date\":\"'\$(date +%F)'\",\"weekday\":'\$(date +%u)',\"seconds\":$1}}' \
-            > /var/lib/cosmic-blue/parental-controls/${DEMO_USER}.json"
+            > /var/lib/celenn/parental-controls/${DEMO_USER}.json"
     }
     set_used 320
-    vm "pgrep -u ${DEMO_USER} -f -- 'cosmic-blue-parental-controls --agent'" >/dev/null \
+    vm "pgrep -u ${DEMO_USER} -f -- 'celenn-parental-controls --agent'" >/dev/null \
         || problem "the warnings agent does not run in the session"
     sleep 15
     screenshot "${SHOTS}/09-parental-warning"
-    state="$(vm '/usr/libexec/cosmic-blue-parental-daemon status' 2>&1)" || true
+    state="$(vm '/usr/libexec/celenn-parental-daemon status' 2>&1)" || true
     echo "${state}"
     grep -q "^${DEMO_USER}: .*blocked no" <<<"${state}" || problem "the test user is blocked too early"
 
     # The more time window, and more time given (as a parent would)
     if vm "runuser -u ${DEMO_USER} -- env ${DEMO_ENV} \
-            setsid -f /usr/libexec/cosmic-blue-parental-controls --more-time >/dev/null 2>&1 </dev/null"; then
+            setsid -f /usr/libexec/celenn-parental-controls --more-time >/dev/null 2>&1 </dev/null"; then
         sleep 10
         screenshot "${SHOTS}/09-parental-more-time"
-        vm "pkill -u ${DEMO_USER} -f -- 'cosmic-blue-parental-controls --more-time'" || true
+        vm "pkill -u ${DEMO_USER} -f -- 'celenn-parental-controls --more-time'" || true
     fi
-    vm "/usr/libexec/cosmic-blue-parental-extend ${DEMO_USER} 15" || problem "cosmic-blue-parental-extend failed"
-    state="$(vm '/usr/libexec/cosmic-blue-parental-daemon status' 2>&1)" || true
+    vm "/usr/libexec/celenn-parental-extend ${DEMO_USER} 15" || problem "celenn-parental-extend failed"
+    state="$(vm '/usr/libexec/celenn-parental-daemon status' 2>&1)" || true
     grep -q "^${DEMO_USER}: .*allowed 1500s" <<<"${state}" || problem "more time was not added: ${state}"
-    vm "/usr/libexec/cosmic-blue-parental-extend ${DEMO_USER} 600" 2>/dev/null \
-        && problem "cosmic-blue-parental-extend accepted 600 minutes"
+    vm "/usr/libexec/celenn-parental-extend ${DEMO_USER} 600" 2>/dev/null \
+        && problem "celenn-parental-extend accepted 600 minutes"
 
     # Six more accounts, so that the login screen shows the most avatars it
     # can (8, two rows of 4); removed once the login has been refused
@@ -847,7 +847,7 @@ except OSError as error:
         log "Parental controls closed the session when its time was up"
     else
         problem "the session was not closed when its time was up"
-        vm 'loginctl list-sessions; /usr/libexec/cosmic-blue-parental-daemon status' || true
+        vm 'loginctl list-sessions; /usr/libexec/celenn-parental-daemon status' || true
     fi
     sleep 20
     # Eight accounts now (the test user, the child and the six above): the
@@ -861,17 +861,17 @@ except OSError as error:
     sleep 20
     vm "pgrep -u ${DEMO_USER} -x cosmic-panel" >/dev/null \
         && problem "the login screen let the test user in after its time was up"
-    vm "env -i PAM_USER=${DEMO_USER} /usr/libexec/cosmic-blue-parental-daemon login-check" \
+    vm "env -i PAM_USER=${DEMO_USER} /usr/libexec/celenn-parental-daemon login-check" \
         && problem "the login check lets the test user in after its time was up"
-    if ! vm "journalctl -b --no-pager -g 'pam_cosmic_blue_parental\\(cosmic-greeter:account\\): login refused for ${DEMO_USER}'" >/dev/null; then
+    if ! vm "journalctl -b --no-pager -g 'pam_celenn_parental\\(cosmic-greeter:account\\): login refused for ${DEMO_USER}'" >/dev/null; then
         problem "the login screen did not run the login check"
         vm "grep -rs . /etc/greetd/ | grep -v '^#'; ls /etc/pam.d /usr/lib/pam.d | grep -i greet; \
-            journalctl -b --no-pager -g 'pam_cosmic_blue_parental|greetd' | tail -n 10; \
+            journalctl -b --no-pager -g 'pam_celenn_parental|greetd' | tail -n 10; \
             ausearch -m avc -ts boot 2>/dev/null | grep -i parental | tail -n 10" || true
     fi
-    vm "journalctl -b --no-pager -u cosmic-blue-parental-controls.service" | tail -n 20 || true
-    vm "journalctl -b --no-pager -g pam_cosmic_blue_parental" | tail -n 5 || true
-    vm "rm -f /etc/cosmic-blue/parental-controls/${DEMO_USER}.json"
+    vm "journalctl -b --no-pager -u celenn-parental-controls.service" | tail -n 20 || true
+    vm "journalctl -b --no-pager -g pam_celenn_parental" | tail -n 5 || true
+    vm "rm -f /etc/celenn/parental-controls/${DEMO_USER}.json"
     for extra in "${extra_users[@]}"; do
         vm "userdel -r ${extra}" || true
     done

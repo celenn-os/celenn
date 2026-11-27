@@ -1,0 +1,13 @@
+# Some time after boot (the first boot after a `bootc switch` to Celenn OS),
+# then once a day until it succeeds; afterwards each run finds nothing to do.
+[Unit]
+Description=Turn on the signature check of Celenn OS updates
+ConditionPathExists=/run/ostree-booted
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=1d
+RandomizedDelaySec=5min
+
+[Install]
+WantedBy=timers.target

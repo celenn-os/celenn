@@ -1,6 +1,6 @@
 // The "Other disks" tool (more.rs, disks.rs): one switch per disk, then
 // Apply. Apply asks for the administrator password once (pkexec,
-// cosmic-blue-tools-helper disks), then says, under the list, what could not
+// celenn-tools-helper disks), then says, under the list, what could not
 // be done and why.
 
 use super::{Message, Page, refresh};
@@ -41,7 +41,7 @@ fn switched_on(disks: &[Disk]) -> BTreeSet<String> {
         .collect()
 }
 
-/// pkexec cosmic-blue-tools-helper disks UUID=on|off...
+/// pkexec celenn-tools-helper disks UUID=on|off...
 async fn apply(changes: Vec<String>) -> Option<(bool, String)> {
     let output = tokio::process::Command::new("pkexec")
         .arg(disks::HELPER)
