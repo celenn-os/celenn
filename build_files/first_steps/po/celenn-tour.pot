@@ -920,3 +920,18 @@ msgstr ""
 
 msgid "Space"
 msgstr ""
+
+msgid "B"
+msgstr ""
+
+msgid "kB"
+msgstr ""
+
+msgid "MB"
+msgstr ""
+
+msgid "GB"
+msgstr ""
+
+msgid "TB"
+msgstr ""

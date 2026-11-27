@@ -352,3 +352,24 @@ msgstr "A sessão fecha às {} mesmo assim."
 
 msgid "Bedtime ({}) does not apply to this time."
 msgstr "A hora de dormir ({}) não vale para este tempo."
+
+msgid "B"
+msgstr "B"
+
+msgid "kB"
+msgstr "kB"
+
+msgid "MB"
+msgstr "MB"
+
+msgid "GB"
+msgstr "GB"
+
+msgid "TB"
+msgstr "TB"
+
+msgid "Less time"
+msgstr "Menos tempo"
+
+msgid "More time"
+msgstr "Mais tempo"

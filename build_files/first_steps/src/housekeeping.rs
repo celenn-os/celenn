@@ -43,7 +43,9 @@ fn home() -> PathBuf {
     std::env::var_os("HOME").map_or_else(|| PathBuf::from("/"), PathBuf::from)
 }
 
-fn xdg(variable: &str, default: &str) -> PathBuf {
+/// An XDG base folder (XDG_CONFIG_HOME, XDG_DATA_HOME...) when it is set to
+/// an absolute path, else its default under the home folder
+pub fn xdg(variable: &str, default: &str) -> PathBuf {
     std::env::var_os(variable)
         .map(PathBuf::from)
         .filter(|path| path.is_absolute())
@@ -224,7 +226,7 @@ fn notify(free: u64) {
             tr("The disk is almost full"),
             &fill(
                 tr("{} left. Updates and new apps need room."),
-                &crate::maintenance::size(free),
+                &crate::units::size(free),
             ),
         ])
         .stdin(std::process::Stdio::null())

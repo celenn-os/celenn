@@ -137,9 +137,4 @@ pub fn site_url(path: &str) -> String {
     format!("https://celenn-os.github.io/celenn/{language}{path}")
 }
 
-/// Starts a program without waiting for it (a browser, another app)
-pub fn spawn(program: &str, args: &[&str]) {
-    if let Err(error) = std::process::Command::new(program).args(args).spawn() {
-        eprintln!("Could not start {program}: {error}");
-    }
-}
+pub use crate::process::spawn;

@@ -72,12 +72,14 @@ mod maintenance;
 mod more;
 mod network;
 mod overview;
+mod process;
 mod style;
 // What the tour reads from the system; Tools uses the settings folder and
 // the first-boot apps (transfer.rs)
 #[allow(dead_code)]
 mod system;
 mod transfer;
+mod units;
 mod update_progress;
 mod updates_page;
 use i18n::tr;
@@ -406,6 +408,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             TEXTS,
             updates_page::TEXTS,
             update_progress::TEXTS,
+            units::TEXTS,
             maintenance::TEXTS,
             more::TEXTS,
             help::TEXTS,

@@ -52,7 +52,9 @@ mod parental_apps;
 mod parental_focus;
 mod parental_rules;
 mod parental_view;
+mod process;
 mod style;
+mod units;
 use failure::{Card, CardAction, CardMessage, Outcome};
 use i18n::{fill, tr};
 use parental_agent::*;
@@ -328,12 +330,15 @@ const TEXTS: &[&str] = &[
     "A parent must allow it first in Parental controls.",
     "Program blocked",
     "«{}» cannot run on this account: downloaded programs are not allowed.",
+    // The - and + buttons of times (their tooltip and name for screen readers)
+    "Less time",
+    "More time",
 ];
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     if args.iter().any(|arg| arg == "--check") {
-        let texts: Vec<&str> = [TEXTS, failure::TEXTS].concat();
+        let texts: Vec<&str> = [TEXTS, failure::TEXTS, units::TEXTS].concat();
         std::process::exit(if i18n::check(&texts) { 0 } else { 1 });
     }
     if args.iter().any(|arg| arg == "--agent") {

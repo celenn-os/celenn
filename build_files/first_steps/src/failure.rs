@@ -14,6 +14,8 @@
 // the browser, filled in, and nothing is sent until it is submitted there.
 
 use crate::i18n::tr;
+use crate::process::{spawn, spawn_with};
+use crate::units::size;
 use cosmic::iced::core::text::Wrapping;
 use cosmic::iced::{Alignment, Length};
 use cosmic::widget::{self, text};
@@ -163,14 +165,6 @@ fn free_space() -> Option<u64> {
         .ok()
 }
 
-fn size(bytes: u64) -> String {
-    if bytes >= 1_000_000_000 {
-        format!("{:.1} GB", bytes as f64 / 1e9)
-    } else {
-        format!("{} MB", bytes / 1_000_000)
-    }
-}
-
 #[derive(Clone, Debug)]
 pub enum CardMessage {
     Retry,
@@ -216,13 +210,13 @@ impl<J: Clone> Card<J> {
     pub fn update(&mut self, message: CardMessage) -> CardAction<J> {
         match message {
             CardMessage::Retry => return CardAction::Retry(self.job.clone()),
-            CardMessage::Network => spawn("cosmic-settings", &["network"], None),
+            CardMessage::Network => spawn("cosmic-settings", &["network"]),
             CardMessage::Report => self.reporting = true,
             CardMessage::ReportCancel => self.reporting = false,
             CardMessage::ReportOpen => {
                 self.reporting = false;
                 let error = format!("{}\n{}", self.title, self.failure.details);
-                spawn(REPORT, &["open"], Some(("CELENN_REPORT_ERROR", &error)));
+                spawn_with(REPORT, &["open"], Some(("CELENN_REPORT_ERROR", &error)));
             }
             CardMessage::Details => self.details = !self.details,
             CardMessage::Close => return CardAction::Close,
@@ -362,17 +356,6 @@ impl<J: Clone> Card<J> {
                 }
             }))
             .into()
-    }
-}
-
-fn spawn(program: &str, args: &[&str], env: Option<(&str, &str)>) {
-    let mut command = std::process::Command::new(program);
-    command.args(args);
-    if let Some((key, value)) = env {
-        command.env(key, value);
-    }
-    if let Err(error) = command.spawn() {
-        eprintln!("Could not start {program}: {error}");
     }
 }
 
