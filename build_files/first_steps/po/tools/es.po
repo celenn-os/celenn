@@ -150,8 +150,8 @@ msgstr "Ver qué ocupa espacio"
 msgid "Free up space"
 msgstr "Liberar espacio"
 
-msgid "Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of tools. Your files stay as they are."
-msgstr "Elimina lo que ya nada usa: restos de aplicaciones eliminadas, imágenes de contenedores sin usar, descargas antiguas de herramientas. Sus archivos quedan como están."
+msgid "Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of tools."
+msgstr "Elimina lo que ya nada usa: restos de aplicaciones eliminadas, imágenes de contenedores sin usar, descargas antiguas de herramientas."
 
 msgid "Clean up"
 msgstr "Limpiar"

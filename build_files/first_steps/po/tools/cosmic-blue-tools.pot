@@ -148,7 +148,7 @@ msgstr ""
 msgid "Free up space"
 msgstr ""
 
-msgid "Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of tools. Your files stay as they are."
+msgid "Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of tools."
 msgstr ""
 
 msgid "Clean up"

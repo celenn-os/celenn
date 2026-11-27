@@ -37,7 +37,7 @@ pub const TEXTS: &[&str] = &[
     "{} free",
     "See what takes space",
     "Free up space",
-    "Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of tools. Your files stay as they are.",
+    "Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of tools.",
     "Clean up",
     "Cleaning up…",
     "{} freed",
@@ -475,17 +475,23 @@ impl Page {
                 .on_press_maybe(idle.then_some(Message::CleanUp))
                 .into()
         };
-        disk = disk.add(
+        // The error card above stands for the change that did not work
+        // (its Try again does it again): its row makes room for it, so that
+        // the page still fits without scrolling
+        let failed = self.card.as_ref().map(|card| card.job);
+        if failed != Some(Busy::Cleaning) {
+            disk = disk.add(
             settings::item_row(vec![
                 state_icon("edit-clear-all-symbolic", false),
                 label(
                     tr("Clean up the system"),
-                    tr("Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of tools. Your files stay as they are.").to_owned(),
+                    tr("Removes what nothing uses any more: leftover parts of removed apps, unused container images, old downloads of tools.").to_owned(),
                 ),
                 clean,
             ])
             .spacing(space_s),
-        );
+            );
+        }
 
         // Trash
         let trash_caption = if state.trash == 0 {
@@ -513,7 +519,9 @@ impl Page {
                     .into(),
             );
         }
-        disk = disk.add(settings::item_row(trash_row).spacing(space_s));
+        if failed != Some(Busy::Emptying) {
+            disk = disk.add(settings::item_row(trash_row).spacing(space_s));
+        }
         content = content.push(disk);
 
         // What happens by itself (housekeeping.rs)

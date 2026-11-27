@@ -417,10 +417,10 @@ msgid "See your workspaces"
 msgstr "Ihre Arbeitsflächen sehen"
 
 msgid "Super + W: one desktop per activity. Super + Ctrl + arrows goes from one to the next."
-msgstr "Super + W: eine Arbeitsfläche pro Tätigkeit. Super + Strg + Pfeiltasten wechselt zwischen ihnen."
+msgstr "Super + W: eine Arbeitsfläche pro Tätigkeit. Super + Strg + Pfeile wechselt zwischen ihnen."
 
 msgid "Windows side by side, without overlap. Super + Y turns it on or off."
-msgstr "Fenster nebeneinander, ohne Überlappung. Super + Y schaltet es ein oder aus."
+msgstr "Fenster nebeneinander, ohne Überlappung. Super + Y schaltet es um."
 
 msgid "Take a screenshot"
 msgstr "Ein Bildschirmfoto aufnehmen"
