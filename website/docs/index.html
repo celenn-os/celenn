@@ -292,7 +292,7 @@ distrobox enter arch</code></pre>
       <ul>
         <li>Updates, once a day: the cosmic-blue images on GitHub, Flathub and the COSMIC app repository, and Homebrew if you use it (with Homebrew's usage statistics turned off).</li>
         <li>Fedora's anonymous weekly count (<code>rpm-ostree-countme</code>): one request a week to Fedora's servers, with the Fedora release and a rough age of the system but no identifier, so that Fedora knows how many systems use it.</li>
-        <li>Firefox: telemetry, studies and sponsored content are off.</li>
+        <li>Firefox: telemetry, studies, sponsored content and ad measurement are off. uBlock Origin blocks ads and trackers, and sites open over HTTPS whenever they can.</li>
         <li>Tailscale is installed, for <code>sudo tailscale up</code>: its service runs but does not join any network until you sign in.</li>
       </ul>
       <p>To stop the Fedora count, or the Tailscale service if you do not use it:</p>

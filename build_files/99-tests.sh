@@ -169,6 +169,7 @@ grep -qx OnOverlap /usr/share/cosmic/com.system76.CosmicPanel.Dock/v1/autohide
 # extension at boot; Bluefin's prefs and copy hook are gone
 FIREFOX_POLICIES=/usr/share/cosmic-blue/firefox/policies/policies.json
 jq -e '.policies.DisableTelemetry and .policies.DisableAppUpdate
+    and .policies.HttpsOnlyMode == "enabled"
     and .policies.ExtensionSettings."uBlock0@raymondhill.net".installation_mode == "normal_installed"' \
     "${FIREFOX_POLICIES}" >/dev/null
 SYSTEMCONFIG=/var/lib/flatpak/extension/org.mozilla.firefox.systemconfig/x86_64/stable
