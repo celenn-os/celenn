@@ -405,7 +405,7 @@ msgid "Open the launcher"
 msgstr "Den Starter öffnen"
 
 msgid "Press Super, type the name of an app, then Enter."
-msgstr "Drücken Sie Super, geben Sie den Namen einer App ein, dann die Eingabetaste."
+msgstr "Super drücken, den Namen einer App tippen, dann die Eingabetaste."
 
 msgid "See all your apps"
 msgstr "Alle Ihre Apps sehen"
@@ -417,7 +417,7 @@ msgid "See your workspaces"
 msgstr "Ihre Arbeitsflächen sehen"
 
 msgid "Super + W: one desktop per activity. Super + Ctrl + arrows goes from one to the next."
-msgstr "Super + W: eine Arbeitsfläche pro Tätigkeit. Super + Strg + Pfeile wechselt zwischen ihnen."
+msgstr "Super + W: eine Arbeitsfläche pro Tätigkeit. Super + Strg + Pfeile zum Wechseln."
 
 msgid "Windows side by side, without overlap. Super + Y turns it on or off."
 msgstr "Fenster nebeneinander, ohne Überlappung. Super + Y schaltet es um."
@@ -910,6 +910,9 @@ msgstr "Esc schließt dieses Fenster."
 
 msgid "Shift"
 msgstr "Umschalt"
+
+msgid "Ctrl"
+msgstr "Strg"
 
 msgid "Escape"
 msgstr "Esc"

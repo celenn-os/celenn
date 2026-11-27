@@ -1012,23 +1012,30 @@ impl<T: Tour> App<T> {
                 .width(Length::FillPortion(1))
                 .into()
         });
-        widget::column::with_capacity(3)
+        // The two notes under the columns, beside the button, so that the
+        // longest languages still fit without scrolling
+        widget::column::with_capacity(2)
             .spacing(space_m)
-            .push(
-                text::caption(tr(
-                    "Super is the key with the Windows logo on most keyboards.",
-                ))
-                .width(Length::Fill),
-            )
             .push(
                 widget::row::with_children(columns.collect::<Vec<Element<'_, Message>>>())
                     .spacing(space_m),
             )
             .push(
-                widget::row::with_capacity(3)
+                widget::row::with_capacity(2)
+                    .spacing(space_m)
                     .align_y(Alignment::Center)
-                    .push(text::caption(tr("Escape closes this window.")))
-                    .push(widget::space::horizontal().width(Length::Fill))
+                    .push(
+                        widget::column::with_capacity(2)
+                            .spacing(2)
+                            .push(
+                                text::caption(tr(
+                                    "Super is the key with the Windows logo on most keyboards.",
+                                ))
+                                .wrapping(Wrapping::Word),
+                            )
+                            .push(text::caption(tr("Escape closes this window.")))
+                            .width(Length::Fill),
+                    )
                     .push(
                         widget::button::standard(tr("Change them in Settings")).on_press_maybe(
                             in_path("cosmic-settings").then_some(Message::Run(Action::Launch(&[
