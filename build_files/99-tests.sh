@@ -149,7 +149,8 @@ SHORTCUTS=/usr/share/cosmic/com.system76.CosmicSettings.Shortcuts/v1
 test -s "${SHORTCUTS}/defaults"
 grep -q 'System(Terminal)' "${SHORTCUTS}/custom"
 for combo in '\[Ctrl, Alt\], key: "t"' '\[Super\], key: "e"' \
-             '\[Super, Shift\], key: "s"' '\[Ctrl, Shift\], key: "Escape"'; do
+             '\[Super, Shift\], key: "s"' '\[Ctrl, Shift\], key: "Escape"' \
+             '\[Super\], key: "F1"'; do
     grep -q "${combo}" "${SHORTCUTS}/custom"
     if grep -q "${combo}" "${SHORTCUTS}/defaults"; then exit 1; fi
 done
@@ -313,7 +314,9 @@ done
 # renames Bluefin's that do not), and every install-<thing> has its
 # remove-<thing>; the earlier names and Bluefin's own installers still run,
 # unlisted
-grep -q 'ublue-os/tap/antigravity-ide-linux' /usr/share/ublue-os/just/system.just
+# Developer tools: Celenn OS's own menu, Bluefin's developer mode is gone
+if grep -q '^toggle-devmode:' /usr/share/ublue-os/just/system.just; then echo "Bluefin's toggle-devmode left in place"; exit 1; fi
+grep -q '"Antigravity|cask|antigravity-ide-linux"' /usr/share/ublue-os/just/60-custom.just
 for recipe in $(tr ' ' '\n' <<<"${recipes}" | grep '^install-'); do
     tr ' ' '\n' <<<"${recipes}" | grep -qx -- "remove-${recipe#install-}" \
         || { echo "ujust ${recipe} has no remove-${recipe#install-}"; exit 1; }
@@ -328,7 +331,7 @@ for recipe in install-dev-tools install-vms install-lima reset-default-apps inst
 done
 for recipe in devmode toggle-devmode bug-report setup-vms setup-lima install-system-flatpaks cncf \
               bios bios-info logs-this-boot logs-last-boot benchmark check-sb-key powerwash \
-              jetbrains-toolbox toggle-user-motd device-info toggle-vms _bluefin-dev-tools _bluefin-vms \
+              jetbrains-toolbox toggle-user-motd device-info toggle-vms _bluefin-vms \
               _bluefin-lima _bluefin-cncf-tools _bluefin-ai-tools _bluefin-asus _bluefin-jetbrains-toolbox \
               _bluefin-opentabletdriver; do
     if tr ' ' '\n' <<<"${recipes}" | grep -qx -- "${recipe}"; then echo "ujust ${recipe} still listed"; exit 1; fi
@@ -856,7 +859,7 @@ if [[ "${IMAGE_NAME}" == *-nvidia ]]; then
     grep -q 'nvidia-drm' /tmp/initramfs.txt
     grep -q 'nvidia-drm.modeset=1' /usr/lib/bootc/kargs.d/00-nvidia.toml
     grep -q 'modprobe.blacklist=nouveau' /usr/lib/bootc/kargs.d/00-nvidia.toml
-    systemctl is-enabled cosmic-blue-nvidia-flatpak-gl.service
+    systemctl is-enabled celenn-nvidia-flatpak-gl.service
     # The NVIDIA repositories used for the install are disabled again
     if dnf5 repolist --enabled | grep -i nvidia; then
         echo "NVIDIA repositories left enabled"; exit 1
@@ -893,7 +896,7 @@ grep -q 'ghcr.io/celenn-os:' /etc/containers/registries.d/celenn.yaml
 test -x /usr/libexec/celenn-fix-aleph
 grep -q celenn-fix-aleph /usr/lib/systemd/system/bootloader-update.service.d/10-celenn-aleph.conf
 # ISO installs: no systemd-remount-fs on the composefs root (fstab "/" line)
-grep -q "ConditionPathExists=!/run/ostree-booted" /usr/lib/systemd/system/systemd-remount-fs.service.d/10-cosmic-blue-ostree.conf
+grep -q "ConditionPathExists=!/run/ostree-booted" /usr/lib/systemd/system/systemd-remount-fs.service.d/10-celenn-ostree.conf
 # ...whose btrfs options (compression) are applied to the root btrfs
 test -x /usr/libexec/celenn-root-mount-options
 systemctl is-enabled celenn-root-mount-options.service

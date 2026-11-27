@@ -14,8 +14,8 @@
 #     - ~/.config/cosmic-blue and ~/.local/state/cosmic-blue move to
 #       ~/.config/celenn and ~/.local/state/celenn
 #     - COSMIC settings that name a renamed thing follow it: launchers of our
-#       apps (dock, App Library), wallpapers, icon, cursor and terminal
-#       themes, the App Library group
+#       apps (dock, App Library), shortcuts, wallpapers, icon, cursor and
+#       terminal themes, the App Library group
 #     - the GTK icon and cursor themes (GSettings) likewise
 #
 # Each step only acts on what still has an old name, so running it again does
@@ -109,6 +109,7 @@ migrate_user() {
                 -e "s/${OLD_APP_ID}/${NEW_APP_ID}/g" \
                 -e 's#/usr/share/backgrounds/cosmic-blue/cosmic-blue#/usr/share/backgrounds/celenn/celenn#g' \
                 -e 's#/usr/share/cosmic-blue/#/usr/share/celenn/#g' \
+                -e 's#/usr/libexec/cosmic-blue-#/usr/libexec/celenn-#g' \
                 -e 's/Bibata-Modern-cosmic-blue/Bibata-Modern-celenn/g' \
                 -e 's/"cosmic-blue-/"celenn-/g' \
                 "${file}"

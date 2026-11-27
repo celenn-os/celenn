@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # Installs the Flatpak NVIDIA GL extensions matching the running driver
-# (cosmic-blue-nvidia only, cosmic-blue-nvidia-flatpak-gl.service).
+# (cosmic-blue-nvidia only, celenn-nvidia-flatpak-gl.service).
 #
 # Flatpak apps (Steam, games, browsers) only get hardware acceleration on
 # NVIDIA through org.freedesktop.Platform.GL.nvidia-<driver version> (and
@@ -11,7 +11,7 @@
 # Same approach as Aurora (get-aurora-dev/common,
 # ublue-nvidia-flatpak-runtime-sync, Apache-2.0).
 #
-# Usage: cosmic-blue-nvidia-flatpak-gl check|sync
+# Usage: celenn-nvidia-flatpak-gl check|sync
 #   check: exit 0 when the extensions are missing (sync needed), 1 otherwise
 set -euo pipefail
 

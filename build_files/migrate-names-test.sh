@@ -38,6 +38,7 @@ put "${COSMIC}/com.system76.CosmicTheme.Dark/v1/icon_theme" '"cosmic-blue"'
 put "${COSMIC}/com.system76.CosmicTerm/v1/syntax_theme_dark" '"cosmic-blue"'
 put "${COSMIC}/com.system76.CosmicAppLibrary/v1/groups" '[(name: "cosmic-blue", icon: "cosmic-blue-logo-symbolic")]'
 put "${COSMIC}/com.system76.CosmicPanel.Dock/v1/opacity" '0.8'
+put "${COSMIC}/com.system76.CosmicSettings.Shortcuts/v1/custom" '{(modifiers: [Super], key: "F1"): Spawn("/usr/libexec/cosmic-blue-tour --shortcuts")}'
 # Already on the new names: both the old and the new folder
 put "${CONFIG}/celenn/kept" 'new'
 
@@ -51,6 +52,7 @@ is "${COSMIC}/com.system76.CosmicAppList/v1/favorites" \
     '["firefox", "io.github.celenn_os.Tools", "com.system76.CosmicFiles"]'
 is "${COSMIC}/com.system76.CosmicBackground/v1/all" \
     '(output: "all", source: Path("/usr/share/backgrounds/celenn/celenn-arcs.jpg"))'
+is "${COSMIC}/com.system76.CosmicSettings.Shortcuts/v1/custom" '{(modifiers: [Super], key: "F1"): Spawn("/usr/libexec/celenn-tour --shortcuts")}'
 is "${COSMIC}/com.system76.CosmicTk/v1/icon_theme" '"celenn"'
 is "${COSMIC}/com.system76.CosmicTheme.Dark/v1/icon_theme" '"celenn"'
 is "${COSMIC}/com.system76.CosmicTerm/v1/syntax_theme_dark" '"Celenn"'

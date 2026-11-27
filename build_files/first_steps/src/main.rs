@@ -473,7 +473,7 @@ fn bearings(origin: Origin) -> Page {
 }
 
 /// Under the bearings: where the other shortcuts are
-const SHORTCUTS_NOTE: &str = "Every shortcut, tiling included: the Keyboard shortcuts app.";
+const SHORTCUTS_NOTE: &str = "Every shortcut, tiling included: Super + F1.";
 
 /// The page of the experienced Linux user's tour: what is different here,
 /// then the developer tools and the password managers (Body::Essentials
@@ -641,6 +641,7 @@ const SHORTCUTS: &[(&str, &[(&str, &str)])] = &[
             ("Super + W", "See your windows and workspaces"),
             ("Super + Shift + S", "Take a screenshot"),
             ("Super + Escape", "Lock the screen"),
+            ("Super + F1", "These keyboard shortcuts"),
         ],
     ),
     (
@@ -649,45 +650,43 @@ const SHORTCUTS: &[(&str, &[(&str, &str)])] = &[
             ("Alt + Tab", "Go from one window to the next"),
             ("Super + Q", "Close the window"),
             ("Super + M", "Maximize the window"),
+            ("Super + G", "Let the window float"),
             ("Super + Y", "Turn tiling on or off"),
-            (
-                "Super + ← ↑ ↓ →",
-                "Go to the window on the left, right, above or below",
-            ),
-            (
-                "Super + Shift + ← ↑ ↓ →",
-                "Move the window to the left, right, up or down",
-            ),
-            ("Super + G", "Let a window float above the others"),
+            ("Super + ←↑↓→", "Go to a nearby window"),
+            ("Super + Shift + ←↑↓→", "Move the window"),
         ],
     ),
     (
         "Workspaces",
         &[
-            (
-                "Super + Ctrl + ← ↑ ↓ →",
-                "Go to the next or previous workspace",
-            ),
             ("Super + 1 … 9", "Go to a workspace"),
-            ("Super + Shift + 1 … 9", "Move the window to a workspace"),
+            ("Super + Shift + 1 … 9", "Move the window there"),
+            ("Super + Ctrl + ←→", "Next or previous workspace"),
         ],
     ),
     (
         "Apps",
         &[
-            ("Ctrl + Alt + T", "Terminal"),
+            ("Super + B", "Web browser"),
             ("Super + E", "Files"),
+            ("Ctrl + Alt + T", "Terminal"),
             ("Ctrl + Shift + Escape", "System monitor"),
         ],
     ),
     (
         "Accessibility",
         &[
-            ("Super + Alt + S", "Turn the screen reader on or off"),
+            ("Super + Alt + S", "Screen reader"),
             ("Super + = / Super + -", "Zoom in and out"),
         ],
     ),
 ];
+
+/// The columns of the shortcuts sheet: numbers of SHORTCUTS' sections
+const SHORTCUT_COLUMNS: [&[usize]; 3] = [&[0, 4], &[1], &[2, 3]];
+
+/// Key names drawn translated on the keys ("Shift" is "Maj" in French)
+const KEY_LABELS: &[&str] = &["Shift", "Escape", "Space"];
 
 /// Texts that are not in a page (buttons, states, the other windows)
 const TEXTS: &[&str] = &[
@@ -785,6 +784,7 @@ const TEXTS: &[&str] = &[
     "Keyboard shortcuts",
     "Super is the key with the Windows logo on most keyboards.",
     "Change them in Settings",
+    "Escape closes this window.",
 ];
 
 /// Every text of the tours and windows, for the translation check
@@ -801,6 +801,7 @@ fn all_texts() -> Vec<&'static str> {
         let (title, caption) = thing.texts();
         texts.extend([title, caption]);
     }
+    texts.extend(KEY_LABELS);
     for (heading, rows) in SHORTCUTS {
         texts.push(heading);
         texts.extend(rows.iter().map(|(_, description)| *description));
@@ -884,14 +885,50 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             cosmic::app::run::<App<BelongingsDialog>>(settings, Mode::Belongings)?;
         }
         Some("--shortcuts") => {
+            // Super + F1 opens the sheet, and closes it when it is open
+            if close_open_sheet() {
+                return Ok(());
+            }
             let settings = Settings::default()
-                .size(cosmic::iced::Size::new(760.0, 720.0))
+                .size(cosmic::iced::Size::new(1120.0, 680.0))
                 .size_limits(Limits::NONE.min_width(480.0).min_height(400.0));
             cosmic::app::run::<App<ShortcutsApp>>(settings, Mode::Shortcuts)?;
         }
         _ => cosmic::app::run::<App<FirstStepsTour>>(tour, Mode::FirstSteps)?,
     }
     Ok(())
+}
+
+/// The shortcuts sheet already open (its process number in the runtime
+/// folder, still running with --shortcuts): close it and say so; otherwise
+/// note this one
+fn close_open_sheet() -> bool {
+    let Some(runtime) = std::env::var_os("XDG_RUNTIME_DIR") else {
+        return false;
+    };
+    let file = PathBuf::from(runtime).join("celenn-shortcuts.pid");
+    let open = std::fs::read_to_string(&file)
+        .ok()
+        .and_then(|pid| pid.trim().parse::<u32>().ok())
+        .filter(|pid| {
+            *pid != std::process::id()
+                && std::fs::read(format!("/proc/{pid}/cmdline")).is_ok_and(|cmdline| {
+                    cmdline
+                        .split(|byte| *byte == 0)
+                        .any(|arg| arg == b"--shortcuts")
+                })
+        });
+    if let Some(pid) = open {
+        let closed = std::process::Command::new("kill")
+            .arg(pid.to_string())
+            .status()
+            .is_ok_and(|status| status.success());
+        if closed {
+            return true;
+        }
+    }
+    let _ = std::fs::write(&file, std::process::id().to_string());
+    false
 }
 
 /// The state of the profile installation

@@ -167,12 +167,14 @@ done
 # `bluefin-apps` (alias of install-system-flatpaks), `bazaar-preview`, and
 # `toggle-testing`, Bluefin's way to its testing tag, which `ujust
 # switch-channel testing` replaces (with stable and dev). Also `bluefin-cli`, which `ujust install-cli-tools` replaces,
-# and `devmode`, an alias of `toggle-devmode`.
+# and Bluefin's developer mode (`toggle-devmode` and its alias `devmode`):
+# Celenn OS's own `ujust install-dev-tools` offers the same list as the tour
+# and Tools.
 python3 -I /ctx/build_files/drop-just-recipes.py \
     "${STAGE}/usr/share/ublue-os/just/shared.just" contribute
 python3 -I /ctx/build_files/drop-just-recipes.py \
     "${STAGE}/usr/share/ublue-os/just/system.just" \
-    bluespeed bluefin-apps bazaar-preview toggle-testing bluefin-cli devmode
+    bluespeed bluefin-apps bazaar-preview toggle-testing bluefin-cli devmode toggle-devmode
 # Every listed ujust command reads verb-object, like Celenn OS's own in
 # 60-custom.just: install- (adds apps or tools) and remove-,
 # toggle- (on/off), reset-, check-, show-, switch-, report-... Bluefin's names
@@ -183,7 +185,6 @@ python3 -I /ctx/build_files/drop-just-recipes.py \
 # remove-* commands. 60-custom.just keeps every old name as a hidden alias.
 # Fails if upstream renames a recipe.
 python3 -I /ctx/build_files/rename-just-recipes.py "${STAGE}"/usr/share/ublue-os/just/{apps,default,shared,system,update}.just -- \
-    "toggle-devmode=_bluefin-dev-tools>install-dev-tools" \
     "setup-vms=_bluefin-vms>install-vms" \
     "setup-lima=_bluefin-lima>install-lima" \
     "cncf=_bluefin-cncf-tools>install-cncf-tools" \

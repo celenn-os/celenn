@@ -47,14 +47,8 @@ msgstr "Organize suas janelas lado a lado"
 msgid "Turn tiling on or off"
 msgstr "Ativar ou desativar o lado a lado"
 
-msgid "Go to the window on the left, right, above or below"
-msgstr "Ir para a janela à esquerda, à direita, acima ou abaixo"
 
-msgid "Move the window to the left, right, up or down"
-msgstr "Mover a janela para a esquerda, a direita, para cima ou para baixo"
 
-msgid "Let a window float above the others"
-msgstr "Deixar uma janela flutuando sobre as outras"
 
 msgid "Documentation"
 msgstr "Documentação"
@@ -458,14 +452,10 @@ msgstr "Maximizar a janela"
 msgid "Workspaces"
 msgstr "Espaços de trabalho"
 
-msgid "Go to the next or previous workspace"
-msgstr "Ir para o espaço de trabalho seguinte ou anterior"
 
 msgid "Go to a workspace"
 msgstr "Ir para um espaço de trabalho"
 
-msgid "Move the window to a workspace"
-msgstr "Mover a janela para um espaço de trabalho"
 
 msgid "Apps"
 msgstr "Aplicativos"
@@ -479,8 +469,6 @@ msgstr "Arquivos"
 msgid "System monitor"
 msgstr "Monitor do sistema"
 
-msgid "Turn the screen reader on or off"
-msgstr "Ativar ou desativar o leitor de tela"
 
 msgid "Zoom in and out"
 msgstr "Aumentar e diminuir o zoom"
@@ -626,6 +614,9 @@ msgstr "Editores de código"
 msgid "In the terminal"
 msgstr "No terminal"
 
+msgid "Other tools"
+msgstr "Outras ferramentas"
+
 msgid "Homebrew is still being set up: the code editors and terminal tools can be chosen in a few minutes."
 msgstr "O Homebrew ainda está sendo configurado: os editores de código e as ferramentas de terminal poderão ser escolhidos em alguns minutos."
 
@@ -740,8 +731,8 @@ msgstr "Ver como"
 msgid "Your apps"
 msgstr "Seus aplicativos"
 
-msgid "Every shortcut, tiling included: the Keyboard shortcuts app."
-msgstr "Todos os atalhos, incluindo o mosaico: o aplicativo Atalhos de teclado."
+msgid "Every shortcut, tiling included: Super + F1."
+msgstr "Todos os atalhos, incluindo o mosaico: Super + F1."
 
 msgid "What is done, and what is left for when you want."
 msgstr "O que está feito, e o que fica para quando você quiser."
@@ -773,8 +764,8 @@ msgstr "Recuperar…"
 msgid "Ticked and grey: already installed."
 msgstr "Marcado e cinza: já instalado."
 
-msgid "Homebrew is not set up yet: only Podman Desktop can be installed now."
-msgstr "O Homebrew ainda não está pronto: por enquanto só o Podman Desktop pode ser instalado."
+msgid "Homebrew is not set up yet: only the apps from Flathub can be installed now."
+msgstr "O Homebrew ainda não está pronto: por enquanto só os apps do Flathub podem ser instalados."
 
 msgid "LibreOffice, OnlyOffice…"
 msgstr "LibreOffice, OnlyOffice…"
@@ -889,3 +880,39 @@ msgstr "Lima: ujust install-dev-tools, em um terminal."
 
 msgid "Pick what concerns you. In each list, the apps most used on Linux are already ticked, all free. Nothing installs without your OK."
 msgstr "Escolha o que interessa a você. Em cada lista, os aplicativos mais usados no Linux já estão marcados, todos gratuitos. Nada é instalado sem a sua permissão."
+
+msgid "These keyboard shortcuts"
+msgstr "Estes atalhos de teclado"
+
+msgid "Let the window float"
+msgstr "Deixar a janela flutuando"
+
+msgid "Go to a nearby window"
+msgstr "Ir para a janela ao lado"
+
+msgid "Move the window"
+msgstr "Mover a janela"
+
+msgid "Move the window there"
+msgstr "Mover a janela para lá"
+
+msgid "Next or previous workspace"
+msgstr "Espaço de trabalho seguinte ou anterior"
+
+msgid "Web browser"
+msgstr "Navegador"
+
+msgid "Screen reader"
+msgstr "Leitor de tela"
+
+msgid "Escape closes this window."
+msgstr "Esc fecha esta janela."
+
+msgid "Shift"
+msgstr "Shift"
+
+msgid "Escape"
+msgstr "Esc"
+
+msgid "Space"
+msgstr "Espaço"

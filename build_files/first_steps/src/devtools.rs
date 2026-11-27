@@ -30,7 +30,9 @@ fn brew_has_cask(name: &str) -> bool {
 
 /// Developer tools, as in `ujust install-dev-tools` (Bluefin's menu), but
 /// picked in the tour: Homebrew formulas and casks for the user, Podman
-/// Desktop from Flathub. Lima stays with ujust (its setup needs a restart).
+/// Desktop, Bruno (API client), DBeaver (databases) and Dev Toolbox (JSON,
+/// Base64, hashes...) from Flathub. Lima stays with ujust (its setup needs a
+/// restart).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ToolKind {
     /// Homebrew formulas (the first one tells if it is installed)
@@ -106,6 +108,23 @@ pub const DEV_TOOLS: &[(&str, &[DevTool])] = &[
             },
         ],
     ),
+    (
+        "Other tools",
+        &[
+            DevTool {
+                name: "Bruno",
+                kind: ToolKind::Flatpak("com.usebruno.Bruno"),
+            },
+            DevTool {
+                name: "Dev Toolbox",
+                kind: ToolKind::Flatpak("me.iepure.devtoolbox"),
+            },
+            DevTool {
+                name: "DBeaver",
+                kind: ToolKind::Flatpak("io.dbeaver.DBeaverCommunity"),
+            },
+        ],
+    ),
 ];
 
 /// Every developer tool, numbered in the order of DEV_TOOLS
@@ -172,12 +191,14 @@ pub async fn brew_install(formulas: Vec<&'static str>, casks: Vec<String>) -> Re
         // Already tapped, or the installs below say what is wrong
         let _ = brew(vec!["tap".into(), "ublue-os/tap".into()]).await;
     }
-    let mut commands = Vec::new();
-    if !formulas.is_empty() {
-        let mut args = vec!["install".to_owned(), "devcontainer".to_owned()];
-        args.extend(formulas.iter().map(|name| (*name).to_owned()));
-        commands.push(args);
+    if formulas.is_empty() && casks.is_empty() {
+        return Ok(());
     }
+    // The devcontainer CLI comes with any Homebrew tool: every editor can
+    // use it
+    let mut args = vec!["install".to_owned(), "devcontainer".to_owned()];
+    args.extend(formulas.iter().map(|name| (*name).to_owned()));
+    let mut commands = vec![args];
     for cask in casks {
         commands.push(vec!["install".into(), "--cask".into(), cask]);
     }

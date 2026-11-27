@@ -478,7 +478,10 @@ msgstr ""
 msgid "In the terminal"
 msgstr ""
 
-msgid "Homebrew is not set up yet: only Podman Desktop can be installed now."
+msgid "Other tools"
+msgstr ""
+
+msgid "Homebrew is not set up yet: only the apps from Flathub can be installed now."
 msgstr ""
 
 msgid "The developer tools are ready."
