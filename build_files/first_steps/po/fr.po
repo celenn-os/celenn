@@ -626,6 +626,9 @@ msgstr "Éditeurs de code"
 msgid "In the terminal"
 msgstr "Dans le terminal"
 
+msgid "Other tools"
+msgstr "Autres outils"
+
 msgid "Homebrew is still being set up: the code editors and terminal tools can be chosen in a few minutes."
 msgstr "Homebrew est encore en cours d’installation : les éditeurs de code et les outils du terminal pourront être choisis dans quelques minutes."
 
@@ -773,8 +776,8 @@ msgstr "Reprendre…"
 msgid "Ticked and grey: already installed."
 msgstr "Coché et grisé : déjà installé."
 
-msgid "Homebrew is not set up yet: only Podman Desktop can be installed now."
-msgstr "Homebrew n’est pas encore prêt : seul Podman Desktop peut être installé pour l’instant."
+msgid "Homebrew is not set up yet: only the apps from Flathub can be installed now."
+msgstr "Homebrew n’est pas encore prêt : seules les applis de Flathub peuvent être installées pour l’instant."
 
 msgid "LibreOffice, OnlyOffice…"
 msgstr "LibreOffice, OnlyOffice…"

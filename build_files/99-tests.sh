@@ -328,7 +328,7 @@ for recipe in install-dev-tools install-vms install-lima reset-default-apps inst
 done
 for recipe in devmode toggle-devmode bug-report setup-vms setup-lima install-system-flatpaks cncf \
               bios bios-info logs-this-boot logs-last-boot benchmark check-sb-key powerwash \
-              jetbrains-toolbox toggle-user-motd device-info toggle-vms _bluefin-dev-tools _bluefin-vms \
+              jetbrains-toolbox toggle-user-motd device-info toggle-vms _bluefin-vms \
               _bluefin-lima _bluefin-cncf-tools _bluefin-ai-tools _bluefin-asus _bluefin-jetbrains-toolbox \
               _bluefin-opentabletdriver; do
     if tr ' ' '\n' <<<"${recipes}" | grep -qx -- "${recipe}"; then echo "ujust ${recipe} still listed"; exit 1; fi
