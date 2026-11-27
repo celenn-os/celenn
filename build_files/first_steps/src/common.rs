@@ -1,4 +1,4 @@
-// What the tools of cosmic-blue Tools share (tools.rs): their toasts, their
+// What the tools of Celenn OS Tools share (tools.rs): their toasts, their
 // round symbol, the rows' text and symbols, and running a command in the
 // background.
 
@@ -40,7 +40,7 @@ pub enum Summary {
 }
 
 /// A tool's symbol in a round accent-colored button shape, as the dock's
-/// icons of cosmic-blue: on the toolbox's tiles and at the top of a tool
+/// icons of Celenn OS: on the toolbox's tiles and at the top of a tool
 pub fn tool_icon<'a, M: 'static>(name: &'static str, size: u16) -> Element<'a, M> {
     widget::icon::from_name(name)
         .size(size / 2)
@@ -118,13 +118,13 @@ pub fn label<'a, M: 'static>(title: &'static str, caption: String) -> Element<'a
 }
 
 /// What the image's screenshot test asks a page to show at once, from
-/// COSMIC_BLUE_TOOLS_PREVIEW (tests/vm-lib.sh): "failure" (a failure card in
+/// CELENN_TOOLS_PREVIEW (tests/vm-lib.sh): "failure" (a failure card in
 /// Free up space) or "developer-tools" (the list open in Install apps)
 pub fn preview(what: &str) -> bool {
-    std::env::var("COSMIC_BLUE_TOOLS_PREVIEW").is_ok_and(|value| value == what)
+    std::env::var("CELENN_TOOLS_PREVIEW").is_ok_and(|value| value == what)
 }
 
-/// A page of the cosmic-blue site in the session language ("docs/#updates")
+/// A page of the Celenn OS site in the session language ("docs/#updates")
 pub fn site_url(path: &str) -> String {
     let language = match crate::i18n::language() {
         Some("pt_BR") => "pt-br/",

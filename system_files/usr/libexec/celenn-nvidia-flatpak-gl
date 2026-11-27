@@ -1,0 +1,44 @@
+#!/usr/bin/bash
+# Installs the Flatpak NVIDIA GL extensions matching the running driver
+# (cosmic-blue-nvidia only, celenn-nvidia-flatpak-gl.service).
+#
+# Flatpak apps (Steam, games, browsers) only get hardware acceleration on
+# NVIDIA through org.freedesktop.Platform.GL.nvidia-<driver version> (and
+# GL32 for 32-bit games), which must match the driver exactly. After an image
+# update brings a new driver, Flatpak installs the matching extension only at
+# its next update (flatpak/flatpak#3907): until then, apps fall back to
+# software rendering or fail to start. This installs it at boot instead.
+# Same approach as Aurora (get-aurora-dev/common,
+# ublue-nvidia-flatpak-runtime-sync, Apache-2.0).
+#
+# Usage: celenn-nvidia-flatpak-gl check|sync
+#   check: exit 0 when the extensions are missing (sync needed), 1 otherwise
+set -euo pipefail
+
+driver="$(cat /sys/module/nvidia/version)"
+version="${driver//./-}"
+extensions=(
+    "org.freedesktop.Platform.GL.nvidia-${version}"
+    "org.freedesktop.Platform.GL32.nvidia-${version}"
+)
+
+case "${1:-}" in
+    check)
+        for extension in "${extensions[@]}"; do
+            if ! flatpak info --system "${extension}" >/dev/null 2>&1; then
+                echo "Flatpak NVIDIA GL extensions for driver ${driver} missing"
+                exit 0
+            fi
+        done
+        echo "Flatpak NVIDIA GL extensions for driver ${driver} already installed"
+        exit 1
+        ;;
+    sync)
+        echo "Installing the Flatpak NVIDIA GL extensions for driver ${driver}"
+        flatpak install --system --noninteractive --assumeyes flathub "${extensions[@]}"
+        ;;
+    *)
+        echo "Usage: $0 check|sync" >&2
+        exit 2
+        ;;
+esac

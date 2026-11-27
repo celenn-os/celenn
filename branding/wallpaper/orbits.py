@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The default cosmic-blue wallpaper: a planetary system seen from above its
+"""The default Celenn OS wallpaper: a planetary system seen from above its
 plane. A bright star, six orbits, shaded planets (one ringed giant), an
 asteroid belt, over the Milky Way of sky.py.
 Usage: orbits.py OUT.jpg (reads sky.png).

@@ -1,21 +1,21 @@
-// cosmic-blue tours, built with libcosmic so they look exactly like COSMIC's
+// Celenn OS tours, built with libcosmic so they look exactly like COSMIC's
 // own first-run assistant (cosmic-initial-setup): same window, title, text,
 // lists and buttons, frosted glass and accent color from the COSMIC theme.
 //
-//   cosmic-blue-tour             "First steps": the installed system, opened once
+//   celenn-tour             "First steps": the installed system, opened once
 //                                at the first login of each new account
-//                                (/usr/libexec/cosmic-blue-first-steps-autostart)
+//                                (/usr/libexec/celenn-first-steps-autostart)
 //                                and from the "First steps" launcher
-//   cosmic-blue-tour --live      Welcome tour of the live ISO, with a button
+//   celenn-tour --live      Welcome tour of the live ISO, with a button
 //                                that starts the installer
-//   cosmic-blue-tour --open FILE What a downloaded .exe, .msi, .deb or .rpm
+//   celenn-tour --open FILE What a downloaded .exe, .msi, .deb or .rpm
 //                                file opens: why it does not install here, and
 //                                a search for the app in COSMIC Store
-//   cosmic-blue-tour --shortcuts The "Keyboard shortcuts" app: COSMIC's main
+//   celenn-tour --shortcuts The "Keyboard shortcuts" app: COSMIC's main
 //                                shortcuts on one page
-//   cosmic-blue-tour --belongings "Bring your things": files, photos,
+//   celenn-tour --belongings "Bring your things": files, photos,
 //                                bookmarks and email from the old computer
-//   cosmic-blue-tour --check     Image build test: every text has its
+//   celenn-tour --check     Image build test: every text has its
 //                                translations (no window)
 //
 // The first steps tour adapts to the person. Its first page asks where they
@@ -45,7 +45,7 @@ mod devtools;
 mod edition;
 mod failure;
 // The live session's hardware check reads the same details as Tools'
-// Computer page (cosmic-blue-tools), not all of them
+// Computer page (celenn-tools), not all of them
 #[allow(dead_code)]
 mod hardware;
 mod i18n;
@@ -68,31 +68,31 @@ use tour_keys::*;
 use tour_view::*;
 
 const SITE: &str = "https://cosmic-blue-os.github.io/cosmic-blue/";
-const LOGO: &str = "/usr/share/icons/hicolor/scalable/apps/cosmic-blue-logo.svg";
+const LOGO: &str = "/usr/share/icons/hicolor/scalable/apps/celenn-logo.svg";
 /// Welcome page illustration of the live tour: the default wallpaper in
 /// miniature
-const HERO: &str = "/usr/share/cosmic-blue/tour-welcome.svg";
+const HERO: &str = "/usr/share/celenn/tour-welcome.svg";
 /// The same sky (600 x 100), behind the icon of the other pages
 /// (both from branding/tour/build.py)
-const BANNER: &str = "/usr/share/cosmic-blue/tour-banner.svg";
+const BANNER: &str = "/usr/share/celenn/tour-banner.svg";
 const INSTALLERS: [&str; 2] = [
     "/usr/share/applications/liveinst.desktop",
     "/usr/share/applications/anaconda.desktop",
 ];
-const UPDATES_APP: &str = "/usr/libexec/cosmic-blue-updates";
+const UPDATES_APP: &str = "/usr/libexec/celenn-updates";
 /// This program, for the windows it opens (--phone)
-const TOUR: &str = "/usr/libexec/cosmic-blue-tour";
-const TOOLS: &str = "/usr/libexec/cosmic-blue-tools";
+const TOUR: &str = "/usr/libexec/celenn-tour";
+const TOOLS: &str = "/usr/libexec/celenn-tools";
 /// LocalSend (first-boot app): files between phones and computers
 const LOCALSEND: &[&str] = &["flatpak", "run", "org.localsend.localsend_app"];
 /// A QR code of LocalSend's download page, for the phone
-const LOCALSEND_QR: &str = "/usr/share/cosmic-blue/localsend-qr.svg";
+const LOCALSEND_QR: &str = "/usr/share/celenn/localsend-qr.svg";
 
 /// One shortcut per line (the Settings button next to it opens the rest)
 const ACCESSIBILITY: &str = "Screen reader: Super + Alt + S\nZoom: Super + = and Super + -";
 
 /// Translations, one gettext PO file per language in po/ (copies of
-/// po/cosmic-blue-tour.pot). To add a language, add its file here: pt_BR is
+/// po/celenn-tour.pot). To add a language, add its file here: pt_BR is
 /// a regional variant, also used for the other variants of its language when
 /// they have no file of their own.
 pub(crate) const LANGUAGES: &[(&str, &str)] = &[
@@ -102,14 +102,14 @@ pub(crate) const LANGUAGES: &[(&str, &str)] = &[
     ("it", include_str!("../po/it.po")),
     ("pt_BR", include_str!("../po/pt_BR.po")),
 ];
-pub(crate) const TEMPLATE: &str = include_str!("../po/cosmic-blue-tour.pot");
+pub(crate) const TEMPLATE: &str = include_str!("../po/celenn-tour.pot");
 
 /// Where the PO files are, for the messages of the translation check
 pub(crate) const PO_DIR: &str = "po";
-pub(crate) const TEMPLATE_NAME: &str = "cosmic-blue-tour.pot";
+pub(crate) const TEMPLATE_NAME: &str = "celenn-tour.pot";
 
 /// Where the person comes from (first page of the first steps tour), kept
-/// in ~/.config/cosmic-blue/tour-origin for the next time
+/// in ~/.config/celenn/tour-origin for the next time
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum Origin {
     Windows,
@@ -277,7 +277,7 @@ enum Body {
 
 struct Page {
     /// Icon of the icon theme shown above the title on the BANNER sky, in
-    /// color like the app icons (cosmic-blue's Tela circle theme)
+    /// color like the app icons (Celenn OS's Tela circle theme)
     icon: Option<&'static str>,
     title: &'static str,
     description: Option<&'static str>,
@@ -313,7 +313,7 @@ enum Mode {
     Belongings,
 }
 
-/// The cosmic-blue site in the session language
+/// The Celenn OS site in the session language
 /// The website's folder of the session language ("" for English)
 fn site_language() -> &'static str {
     match language() {
@@ -346,7 +346,7 @@ const FIREFOX: &[&str] = &["flatpak", "run", "org.mozilla.firefox"];
 const THUNDERBIRD: &[&str] = &["flatpak", "run", "org.mozilla.thunderbird"];
 const FIRMWARE: &[&str] = &["flatpak", "run", "org.gnome.Firmware"];
 
-/// What is different on cosmic-blue for someone who knows Linux: the
+/// What is different on Celenn OS for someone who knows Linux: the
 /// Linux bearings, and the first rows of the experienced tour
 fn linux_rows() -> Vec<Row> {
     vec![
@@ -482,7 +482,7 @@ fn essentials() -> Page {
     // No banner: the rows need the room
     Page {
         note: Some(
-            "Office, games, graphics and more: COSMIC Store, or cosmic-blue Tools → Install apps.",
+            "Office, games, graphics and more: COSMIC Store, or Celenn OS Tools → Install apps.",
         ),
         ..Page::new(
             "The essentials",
@@ -511,8 +511,8 @@ fn belongings_rows() -> Vec<Row> {
             Action::Launch(&[TOUR, "--phone"]),
         ),
         row_button(
-            "From another cosmic-blue computer",
-            "Your settings and the list of your apps, with the file saved there in cosmic-blue Tools → Change computers.",
+            "From another Celenn OS computer",
+            "Your settings and the list of your apps, with the file saved there in Celenn OS Tools → Change computers.",
             "Restore…",
             Action::Launch(&[TOOLS, "--restore"]),
         ),
@@ -541,7 +541,7 @@ fn pages(mode: &Mode, origin: Option<Origin>, experienced: bool) -> Vec<Page> {
     match mode {
         Mode::FirstSteps => {
             let welcome = Page::new(
-                "Welcome to cosmic-blue",
+                "Welcome to Celenn OS",
                 Some(
                     "Your system is installed and ready. Where do you come from? The tour adapts to you.",
                 ),
@@ -575,7 +575,7 @@ fn pages(mode: &Mode, origin: Option<Origin>, experienced: bool) -> Vec<Page> {
             let bearings = match origin {
                 Some(origin) => bearings(origin),
                 None => Page {
-                    icon: Some("cosmic-blue-tour-try"),
+                    icon: Some("celenn-tour-try"),
                     note: Some(SHORTCUTS_NOTE),
                     ..Page::new(
                         "Try it, it is safe",
@@ -588,16 +588,16 @@ fn pages(mode: &Mode, origin: Option<Origin>, experienced: bool) -> Vec<Page> {
         }
         Mode::Live => vec![
             Page::new(
-                "Welcome to cosmic-blue",
+                "Welcome to Celenn OS",
                 Some(
-                    "cosmic-blue is Fedora Atomic with the COSMIC desktop, made in the spirit of Bluefin: a desktop that stays out of your way and keeps itself up to date.",
+                    "Celenn OS is Fedora Atomic with the COSMIC desktop, made in the spirit of Bluefin: a desktop that stays out of your way and keeps itself up to date.",
                 ),
                 Body::Welcome,
             ),
             Page::new(
                 "Is this computer ready?",
                 Some(
-                    "cosmic-blue runs from the USB drive, without touching your disk. Here is what it found.",
+                    "Celenn OS runs from the USB drive, without touching your disk. Here is what it found.",
                 ),
                 Body::Readiness,
             ),
@@ -622,7 +622,7 @@ fn pages(mode: &Mode, origin: Option<Origin>, experienced: bool) -> Vec<Page> {
             Page::new(
                 "Ready to install?",
                 Some(
-                    "The installer copies cosmic-blue to your disk. After that, it updates itself from the cosmic-blue image registry.",
+                    "The installer copies Celenn OS to your disk. After that, it updates itself from the Celenn OS image registry.",
                 ),
                 Body::Install,
             ),
@@ -698,7 +698,7 @@ const TEXTS: &[&str] = &[
     "First steps",
     "Open",
     "Get started",
-    "Install cosmic-blue",
+    "Install Celenn OS",
     "Keep trying",
     "Accessibility",
     ACCESSIBILITY,
@@ -739,11 +739,11 @@ const TEXTS: &[&str] = &[
     "Apps and updates need it.",
     "Network settings",
     "NVIDIA graphics card",
-    "The NVIDIA edition of cosmic-blue has its driver: about 4 GB to download, then it starts at the next restart.",
+    "The NVIDIA edition of Celenn OS has its driver: about 4 GB to download, then it starts at the next restart.",
     "Switch",
     "Downloading the NVIDIA edition… This can take a while.",
     "The NVIDIA edition starts at the next restart.",
-    "At the restart, a blue screen asks to enroll a key: choose Enroll MOK, Continue, Yes, then type the password cosmicblue (the keyboard is QWERTY there).",
+    "At the restart, a blue screen asks to enroll a key: choose Enroll MOK, Continue, Yes, then type the password celennos (the keyboard is QWERTY there).",
     "Firmware updates are available",
     "Open Firmware",
     "Take care of the battery",
@@ -771,9 +771,9 @@ const TEXTS: &[&str] = &[
     "This tour and the Keyboard shortcuts app stay in the app library.",
     // Files that do not install here
     "“{}” does not install here",
-    "This is a Windows program. On cosmic-blue, apps come from COSMIC Store: most well-known apps are there, or a good alternative.",
-    "This is a package for Debian and Ubuntu. On cosmic-blue, apps come from COSMIC Store: most well-known apps are there, or a good alternative.",
-    "This is a package for Fedora. cosmic-blue's system is a read-only image: apps come from COSMIC Store instead. Most well-known apps are there, or a good alternative.",
+    "This is a Windows program. On Celenn OS, apps come from COSMIC Store: most well-known apps are there, or a good alternative.",
+    "This is a package for Debian and Ubuntu. On Celenn OS, apps come from COSMIC Store: most well-known apps are there, or a good alternative.",
+    "This is a package for Fedora. Celenn OS's system is a read-only image: apps come from COSMIC Store instead. Most well-known apps are there, or a good alternative.",
     "Search for “{}” in COSMIC Store",
     "Open COSMIC Store",
     "A Windows program with no equivalent? Bottles, in COSMIC Store, runs some of them.",
@@ -906,7 +906,7 @@ fn close_open_sheet() -> bool {
     let Some(runtime) = std::env::var_os("XDG_RUNTIME_DIR") else {
         return false;
     };
-    let file = PathBuf::from(runtime).join("cosmic-blue-shortcuts.pid");
+    let file = PathBuf::from(runtime).join("celenn-shortcuts.pid");
     let open = std::fs::read_to_string(&file)
         .ok()
         .and_then(|pid| pid.trim().parse::<u32>().ok())
@@ -1010,27 +1010,27 @@ trait Tour: 'static {
 }
 struct FirstStepsTour;
 impl Tour for FirstStepsTour {
-    const APP_ID: &'static str = "io.github.cosmic_blue_os.FirstSteps";
+    const APP_ID: &'static str = "io.github.celenn_os.FirstSteps";
 }
 struct LiveTour;
 impl Tour for LiveTour {
-    const APP_ID: &'static str = "io.github.cosmic_blue_os.Welcome";
+    const APP_ID: &'static str = "io.github.celenn_os.Welcome";
 }
 struct OpenDialog;
 impl Tour for OpenDialog {
-    const APP_ID: &'static str = "io.github.cosmic_blue_os.OpenPackage";
+    const APP_ID: &'static str = "io.github.celenn_os.OpenPackage";
 }
 struct PhoneDialog;
 impl Tour for PhoneDialog {
-    const APP_ID: &'static str = "io.github.cosmic_blue_os.PhoneTransfer";
+    const APP_ID: &'static str = "io.github.celenn_os.PhoneTransfer";
 }
 struct BelongingsDialog;
 impl Tour for BelongingsDialog {
-    const APP_ID: &'static str = "io.github.cosmic_blue_os.Belongings";
+    const APP_ID: &'static str = "io.github.celenn_os.Belongings";
 }
 struct ShortcutsApp;
 impl Tour for ShortcutsApp {
-    const APP_ID: &'static str = "io.github.cosmic_blue_os.Shortcuts";
+    const APP_ID: &'static str = "io.github.celenn_os.Shortcuts";
 }
 
 struct App<T: Tour> {
@@ -1038,7 +1038,7 @@ struct App<T: Tour> {
     core: Core,
     mode: Mode,
     origin: Option<Origin>,
-    /// The short tour (kept in ~/.config/cosmic-blue/tour-level)
+    /// The short tour (kept in ~/.config/celenn/tour-level)
     experienced: bool,
     pages: Vec<Page>,
     page_i: usize,
@@ -1345,7 +1345,7 @@ impl<T: Tour> Application for App<T> {
             tiling: system::tiling(),
         };
         let title = match &mode {
-            Mode::Live => tr("Welcome to cosmic-blue").to_owned(),
+            Mode::Live => tr("Welcome to Celenn OS").to_owned(),
             Mode::FirstSteps => tr("First steps").to_owned(),
             Mode::Shortcuts => tr("Keyboard shortcuts").to_owned(),
             Mode::Phone => tr("Send without a cable").to_owned(),
@@ -1732,7 +1732,7 @@ impl<T: Tour> Application for App<T> {
             };
             widget::button::suggested(tr(label)).on_press_maybe(self.next_message())
         } else if self.mode == Mode::Live {
-            let install = widget::button::suggested(tr("Install cosmic-blue"));
+            let install = widget::button::suggested(tr("Install Celenn OS"));
             if installer().is_some() {
                 install.on_press(Message::Run(Action::Install))
             } else {

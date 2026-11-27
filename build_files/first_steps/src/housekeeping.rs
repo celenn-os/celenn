@@ -1,7 +1,7 @@
 // Housekeeping, like Windows' Storage Sense and the Mac's "Optimize
-// storage": what cosmic-blue Tools does on its own, a few times a day, in
-// each person's session (cosmic-blue-housekeeping.timer, a systemd user
-// timer, runs `cosmic-blue-tools --housekeeping`, with no window).
+// storage": what Celenn OS Tools does on its own, a few times a day, in
+// each person's session (celenn-housekeeping.timer, a systemd user
+// timer, runs `celenn-tools --housekeeping`, with no window).
 //
 //   - Files that stayed in the trash for more than 30 days are deleted. The
 //     trash of the home folder only, not those of USB drives.
@@ -11,7 +11,7 @@
 //     controls): the parent sees it in theirs.
 //
 // Both are on by default; the Free up space tool turns them off. Off is a
-// file in ~/.config/cosmic-blue/ (keep-trash, no-disk-warning), so nothing
+// file in ~/.config/celenn/ (keep-trash, no-disk-warning), so nothing
 // is written while they stay on.
 
 use crate::common::{fill, spawn};
@@ -30,8 +30,8 @@ const LOW_SHARE: u64 = 10;
 const LOW_MAX: u64 = 20_000_000_000;
 /// A warning comes back after a week when nothing changed
 const AGAIN: Duration = Duration::from_secs(7 * 24 * 3600);
-const PARENTAL_RULES: &str = "/etc/cosmic-blue/parental-controls";
-const ICON: &str = "cosmic-blue-tools";
+const PARENTAL_RULES: &str = "/etc/celenn/parental-controls";
+const ICON: &str = "celenn-tools";
 
 pub const TEXTS: &[&str] = &[
     "The disk is almost full",
@@ -51,14 +51,12 @@ fn xdg(variable: &str, default: &str) -> PathBuf {
 }
 
 fn config(name: &str) -> PathBuf {
-    xdg("XDG_CONFIG_HOME", ".config")
-        .join("cosmic-blue")
-        .join(name)
+    xdg("XDG_CONFIG_HOME", ".config").join("celenn").join(name)
 }
 
 fn warned_file() -> PathBuf {
     xdg("XDG_STATE_HOME", ".local/state")
-        .join("cosmic-blue")
+        .join("celenn")
         .join("disk-warned")
 }
 
@@ -217,7 +215,7 @@ fn notify(free: u64) {
     let output = std::process::Command::new("notify-send")
         .args([
             "--app-name",
-            tr("cosmic-blue Tools"),
+            tr("Celenn OS Tools"),
             "--icon",
             ICON,
             "--action",
@@ -233,14 +231,14 @@ fn notify(free: u64) {
         .output();
     match output {
         Ok(output) if String::from_utf8_lossy(&output.stdout).trim() == "open" => {
-            spawn("/usr/libexec/cosmic-blue-tools", &["--tool", "space"]);
+            spawn("/usr/libexec/celenn-tools", &["--tool", "space"]);
         }
         Ok(_) => {}
         Err(error) => eprintln!("notify-send: {error}"),
     }
 }
 
-/// `cosmic-blue-tools --housekeeping`: the timer's run
+/// `celenn-tools --housekeeping`: the timer's run
 pub fn run() -> i32 {
     if trash_auto() {
         let deleted = purge_trash(TRASH_DAYS);

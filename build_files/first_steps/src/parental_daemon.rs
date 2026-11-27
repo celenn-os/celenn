@@ -1,31 +1,31 @@
-// cosmic-blue parental controls: the service that applies the rules of the
+// Celenn OS parental controls: the service that applies the rules of the
 // child accounts (see parental_rules.rs), as root.
 //
-//   cosmic-blue-parental-daemon run
-//       the service (cosmic-blue-parental-controls.service), every 15 s:
+//   celenn-parental-daemon run
+//       the service (celenn-parental-controls.service), every 15 s:
 //         - counts the screen time of each child account: the time one of
 //           its sessions is the one on screen, not locked; and the same
 //           time by application in front, as the session's agent says;
 //         - closes the sessions of an account when its time is up or at
 //           bedtime (the session agent warns 10, 5 and 1 minutes before,
-//           see `cosmic-blue-parental-controls --agent`);
+//           see `celenn-parental-controls --agent`);
 //         - sends the DNS queries of the accounts with the web filter on to
-//           a family filter (cosmic-blue-family-dns.service): nftables rules
+//           a family filter (celenn-family-dns.service): nftables rules
 //           for their user ids, and no access to systemd-resolved's own
 //           socket, so that the name lookups go through DNS.
 //       and, every 2 s (another thread), for the accounts whose
 //       applications are validated by a parent (parental_apps.rs): stops the
 //       applications not allowed and the downloaded programs, and tells the
 //       child why.
-//   cosmic-blue-parental-daemon login-check
+//   celenn-parental-daemon login-check
 //       the login screen's check (the PAM account module
-//       pam_cosmic_blue_parental.so, see pam_parental.rs): refuses a login
+//       pam_celenn_parental.so, see pam_parental.rs): refuses a login
 //       during bedtime or once the day's time is used up, with a message
 //       saying when it is possible again. Accounts without rules are
 //       always let in.
-//   cosmic-blue-parental-daemon refusal
+//   celenn-parental-daemon refusal
 //       the login screen's message when the check gives no reason
-//   cosmic-blue-parental-daemon status
+//   celenn-parental-daemon status
 //       what the rules allow now, for each child account (tests)
 
 use std::collections::BTreeSet;
@@ -50,16 +50,16 @@ pub(crate) const LANGUAGES: &[(&str, &str)] = &[
     ("pt_BR", include_str!("../po/parental/pt_BR.po")),
 ];
 #[allow(dead_code)]
-pub(crate) const TEMPLATE: &str = include_str!("../po/parental/cosmic-blue-parental-controls.pot");
+pub(crate) const TEMPLATE: &str = include_str!("../po/parental/celenn-parental-controls.pot");
 #[allow(dead_code)]
 pub(crate) const PO_DIR: &str = "po/parental";
 #[allow(dead_code)]
-pub(crate) const TEMPLATE_NAME: &str = "cosmic-blue-parental-controls.pot";
+pub(crate) const TEMPLATE_NAME: &str = "celenn-parental-controls.pot";
 
 const TICK: Duration = Duration::from_secs(15);
-const TABLE: &str = "cosmic_blue_parental";
-/// The family filter (dnsmasq, see cosmic-blue-family-dns.service)
-const FILTER_SERVICE: &str = "cosmic-blue-family-dns.service";
+const TABLE: &str = "celenn_parental";
+/// The family filter (dnsmasq, see celenn-family-dns.service)
+const FILTER_SERVICE: &str = "celenn-family-dns.service";
 /// Port 53 on 127.0.0.1: systemd-resolved only listens on 127.0.0.53 and
 /// 127.0.0.54, and SELinux lets dnsmasq bind the DNS port
 const FILTER_PORT: u16 = 53;
@@ -83,7 +83,7 @@ fn main() {
             );
         }
         _ => {
-            eprintln!("Usage: cosmic-blue-parental-daemon run | login-check | refusal | status");
+            eprintln!("Usage: celenn-parental-daemon run | login-check | refusal | status");
             std::process::exit(2);
         }
     }
@@ -232,7 +232,7 @@ const DOH_V6: &str = "2606:4700:4700::1111, 2606:4700:4700::1001, \
 /// Ports of the usual VPN protocols (WireGuard, OpenVPN, IPsec, L2TP,
 /// PPTP), refused to the filtered accounts' own programs. Connections made
 /// by NetworkManager run as root: polkit keeps children from adding them
-/// (50-cosmic-blue-parental.rules).
+/// (50-celenn-parental.rules).
 const VPN_UDP: &str = "51820, 1194, 500, 4500, 1701";
 const VPN_TCP: &str = "1194, 1723";
 
@@ -407,7 +407,7 @@ fn tick(now: &Now, elapsed: u64, applied: &mut Applied) {
 /// network connections of their own (VPN), no time zone change, no direct
 /// systemd-resolved lookups. Its members are the accounts with rules (the
 /// helper adds a new child at once; this also removes former ones).
-const GROUP: &str = "cosmic-blue-children";
+const GROUP: &str = "celenn-children";
 
 fn sync_group(children: &[String]) {
     let Ok(output) = Command::new("getent").args(["group", GROUP]).output() else {
@@ -501,13 +501,13 @@ fn login_check() -> i32 {
     // stderr goes to the journal of the login screen
     match refusal(&user) {
         Some(message) => {
-            eprintln!("cosmic-blue-parental-daemon: login refused for {user}");
+            eprintln!("celenn-parental-daemon: login refused for {user}");
             println!("{message}");
             1
         }
         None => {
             if Rules::load(&user).is_some() {
-                eprintln!("cosmic-blue-parental-daemon: login allowed for {user}");
+                eprintln!("celenn-parental-daemon: login allowed for {user}");
             }
             0
         }
@@ -640,7 +640,7 @@ fn tell_child(user: &str, uid: u32, stop: &parental_apps::Stop) {
             "--app-name",
             tr("Parental controls"),
         ])
-        .args(["--icon", "cosmic-blue-parental-controls", &title, &body])
+        .args(["--icon", "celenn-parental-controls", &title, &body])
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()

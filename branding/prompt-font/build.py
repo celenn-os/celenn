@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Generate cosmic-blue-prompt.ttf, the few symbols of the shell prompt.
+"""Generate celenn-prompt.ttf, the few symbols of the shell prompt.
 
 COSMIC Terminal spaces lines at 1.4 times the font size, while powerline
 arrows from Nerd Fonts are drawn at the font's own height (about 1.2 em), so
 filled arrows end up shorter than the colored backgrounds around them. These
 glyphs are sized for COSMIC Terminal's cell with its default font, Noto Sans
 Mono (advance 600, ascent 1069, descent 293 per 1000 units): the arrow spans
-the whole 1.4 em line. The font also holds the cosmic-blue logo mark and the
+the whole 1.4 em line. The font also holds the Celenn OS logo mark and the
 other prompt icons, so a prompt line only uses these two fonts and keeps the
 same baseline.
 
@@ -197,11 +197,11 @@ def build():
     fb.setupHorizontalMetrics({name: (ADVANCE, getattr(glyf[name], "xMin", 0))
                                for name in order})
     fb.setupHorizontalHeader(ascent=ASCENT, descent=-DESCENT)
-    fb.setupNameTable({"familyName": "cosmic-blue Prompt", "styleName": "Regular",
-                       "uniqueFontIdentifier": "cosmic-blue Prompt Regular",
-                       "fullName": "cosmic-blue Prompt Regular",
-                       "psName": "cosmic-blue-Prompt-Regular",
-                       "copyright": "cosmic-blue contributors, Apache-2.0"})
+    fb.setupNameTable({"familyName": "Celenn Prompt", "styleName": "Regular",
+                       "uniqueFontIdentifier": "Celenn Prompt Regular",
+                       "fullName": "Celenn Prompt Regular",
+                       "psName": "celenn-Prompt-Regular",
+                       "copyright": "Celenn OS contributors, Apache-2.0"})
     fb.setupOS2(version=4, sTypoAscender=ASCENT, sTypoDescender=-DESCENT, sTypoLineGap=0,
                 usWinAscent=ASCENT, usWinDescent=DESCENT, fsSelection=0x40 | 0x80,
                 xAvgCharWidth=ADVANCE)

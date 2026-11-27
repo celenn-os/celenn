@@ -63,6 +63,6 @@ kargs = ["rd.driver.blacklist=nouveau", "modprobe.blacklist=nouveau", "nvidia-dr
 EOF
 
 # Flatpak NVIDIA GL extensions matching the driver, installed at boot
-systemctl enable cosmic-blue-nvidia-flatpak-gl.service
+systemctl enable celenn-nvidia-flatpak-gl.service
 
 rm -rf /tmp/akmods-nvidia /tmp/akmods-nvidia-layer

@@ -1,5 +1,5 @@
-# Helper stages of the cosmic-blue image: programs rebuilt with our changes
-# and themes recolored with the cosmic-blue colors. They change rarely and take
+# Helper stages of the Celenn OS image: programs rebuilt with our changes
+# and themes recolored with the Celenn OS colors. They change rarely and take
 # a large part of the build, so they are built on their own (`just
 # build-helpers`) and the CI keeps the output of each one in the Actions cache,
 # keyed on that stage's own inputs (`just helpers-keys`): a change to one
@@ -24,18 +24,18 @@ FROM docker.io/library/rust:1 AS theme-build
 COPY build_files/theme /theme
 ENV CARGO_HOME=/cargo/home CARGO_TARGET_DIR=/cargo/target
 RUN cd /theme && cargo build --release --locked \
-    && XDG_CONFIG_HOME=/out /cargo/target/release/cosmic-blue-theme \
-    && XDG_CONFIG_HOME=/out/previous/stock /cargo/target/release/cosmic-blue-theme stock \
-    && XDG_CONFIG_HOME=/out/previous/frosted /cargo/target/release/cosmic-blue-theme frosted \
-    && XDG_CONFIG_HOME=/out/previous/glass-0.8 /cargo/target/release/cosmic-blue-theme glass-0.8 \
-    && XDG_CONFIG_HOME=/out/previous/glass-0.65 /cargo/target/release/cosmic-blue-theme glass-0.65 \
-    && XDG_CONFIG_HOME=/out/previous/accent-3a9dff /cargo/target/release/cosmic-blue-theme accent-3a9dff
+    && XDG_CONFIG_HOME=/out /cargo/target/release/celenn-theme \
+    && XDG_CONFIG_HOME=/out/previous/stock /cargo/target/release/celenn-theme stock \
+    && XDG_CONFIG_HOME=/out/previous/frosted /cargo/target/release/celenn-theme frosted \
+    && XDG_CONFIG_HOME=/out/previous/glass-0.8 /cargo/target/release/celenn-theme glass-0.8 \
+    && XDG_CONFIG_HOME=/out/previous/glass-0.65 /cargo/target/release/celenn-theme glass-0.65 \
+    && XDG_CONFIG_HOME=/out/previous/accent-3a9dff /cargo/target/release/celenn-theme accent-3a9dff
 FROM scratch AS theme
 COPY --from=theme-build /out /
 
-# cosmic-blue's tours: "First steps" on installed systems and the live ISO's
+# Celenn OS's tours: "First steps" on installed systems and the live ISO's
 # welcome tour, built with libcosmic like COSMIC's first-run assistant
-# (see build_files/first_steps/src/main.rs), and the cosmic-blue Tools (with
+# (see build_files/first_steps/src/main.rs), and the Celenn OS Tools (with
 # its Updates page) and Parental controls apps, which look the same
 # (src/tools.rs, src/parental.rs; with
 # the parental controls service, src/parental_daemon.rs)
@@ -46,25 +46,25 @@ ENV CARGO_HOME=/cargo/home CARGO_TARGET_DIR=/cargo/target
 # warnings fail the build
 RUN dnf5 -y install cargo rust clippy gcc pkgconf-pkg-config libxkbcommon-devel wayland-devel \
     && cd /tour && cargo build --release --locked \
-    && /cargo/target/release/cosmic-blue-tour --check \
-    && /cargo/target/release/cosmic-blue-tools --check \
-    && /cargo/target/release/cosmic-blue-parental-controls --check \
+    && /cargo/target/release/celenn-tour --check \
+    && /cargo/target/release/celenn-tools --check \
+    && /cargo/target/release/celenn-parental-controls --check \
     && cargo test --release --locked \
     && cargo clippy --release --locked --all-targets -- -D warnings \
-    && install -D -m 0755 /cargo/target/release/cosmic-blue-tour /out/cosmic-blue-tour \
-    && install -D -m 0755 /cargo/target/release/cosmic-blue-tools /out/cosmic-blue-tools \
-    && install -D -m 0755 /cargo/target/release/cosmic-blue-parental-controls /out/cosmic-blue-parental-controls \
-    && install -D -m 0755 /cargo/target/release/cosmic-blue-parental-daemon /out/cosmic-blue-parental-daemon \
-    && install -D -m 0755 /cargo/target/release/libpam_cosmic_blue_parental.so /out/pam_cosmic_blue_parental.so
+    && install -D -m 0755 /cargo/target/release/celenn-tour /out/celenn-tour \
+    && install -D -m 0755 /cargo/target/release/celenn-tools /out/celenn-tools \
+    && install -D -m 0755 /cargo/target/release/celenn-parental-controls /out/celenn-parental-controls \
+    && install -D -m 0755 /cargo/target/release/celenn-parental-daemon /out/celenn-parental-daemon \
+    && install -D -m 0755 /cargo/target/release/libpam_celenn_parental.so /out/pam_celenn_parental.so
 FROM scratch AS tour
 COPY --from=tour-build /out /
 
 # Login and lock screens, rebuilt from Fedora's source package with the
-# cosmic-blue wallpaper as their built-in background
+# Celenn OS wallpaper as their built-in background
 # (see build_files/greeter/build.sh)
 FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS greeter-build
 COPY build_files/greeter /greeter
-COPY system_files/usr/share/backgrounds/cosmic-blue/cosmic-blue-arcs.jpg /greeter/background.jpg
+COPY system_files/usr/share/backgrounds/celenn/celenn-arcs.jpg /greeter/background.jpg
 ENV CARGO_CACHE_DIR=/cargo
 RUN /greeter/build.sh /greeter/background.jpg
 FROM scratch AS greeter
@@ -114,7 +114,7 @@ RUN /tela.sh
 FROM scratch AS icons
 COPY --from=icons-build /out /
 
-# Bibata Modern cursors, recolored with the cosmic-blue colors
+# Bibata Modern cursors, recolored with the Celenn OS colors
 # (see build_files/cursor_theme/bibata.py)
 FROM registry.fedoraproject.org/fedora:${BASE_TAG} AS cursors-build
 COPY build_files/cursor_theme /cursor_theme

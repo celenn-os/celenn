@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check that every app cosmic-blue offers has an icon in its icon theme.
+"""Check that every app Celenn OS offers has an icon in its icon theme.
 
 The apps are the Flatpaks of the first steps tour and Tools lists
 (build_files/first_steps/src: flatpak("Name", "id") and Flatpak("id")) and
@@ -9,10 +9,10 @@ Library and the app lists it would stand out among the round Tela icons. An app 
 has an icon named after its id, or after one of its launchers (id.writer,
 id-writer, as LibreOffice's).
 
-A missing icon gets one in the cosmic-blue layer (OFFERED in
+A missing icon gets one in the Celenn OS layer (OFFERED in
 branding/icons/build.py).
 
-The theme directories are the cosmic-blue theme and the Tela themes it
+The theme directories are the Celenn OS theme and the Tela themes it
 inherits its application icons from (build_files/icon_theme/compose.py), not
 the fallbacks (Adwaita, hicolor), whose icons are in another style.
 

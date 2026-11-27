@@ -1,4 +1,4 @@
-// Tools of cosmic-blue Tools (tools.rs) that turn `ujust` commands into
+// Tools of Celenn OS Tools (tools.rs) that turn `ujust` commands into
 // buttons. Each button runs the matching command (`ujust <recipe>`, without
 // a terminal: the recipes then skip their questions), so the terminal and
 // the window do exactly the same thing. Each part is one tool:
@@ -18,7 +18,7 @@
 //               open a list to tick (apps.rs)
 //   Transfer    settings and apps taken to another computer
 //               (more_transfer.rs, transfer.rs)
-//   Repair      the cosmic-blue look back, every COSMIC setting back to the
+//   Repair      the Celenn OS look back, every COSMIC setting back to the
 //               defaults
 //   Advanced    restarting into the firmware settings (reboot-to-bios),
 //               virtual machines, the FlatPark app source
@@ -48,8 +48,8 @@ pub use transfer_view::TransferMessage;
 mod disks_view;
 pub use disks_view::DisksMessage;
 
-const UPDATES_HELPER: &str = "/usr/libexec/cosmic-blue-updates-helper";
-const TOOLS_HELPER: &str = "/usr/libexec/cosmic-blue-tools-helper";
+const UPDATES_HELPER: &str = "/usr/libexec/celenn-updates-helper";
+const TOOLS_HELPER: &str = "/usr/libexec/celenn-tools-helper";
 const FONTS_LICENSE: &str = "https://corefonts.sourceforge.net/eula.htm";
 const VMS: &str = "org.virt_manager.virt-manager";
 const SCANNER: &str = "org.gnome.SimpleScan";
@@ -87,15 +87,15 @@ pub const TEXTS: &[&str] = &[
     "Battery charge limit",
     "Charging stops at 80 %: the battery lasts longer when the laptop stays plugged in.",
     "NVIDIA graphics card",
-    "Use the NVIDIA edition of cosmic-blue, with NVIDIA's own driver, for games and graphics apps.",
+    "Use the NVIDIA edition of Celenn OS, with NVIDIA's own driver, for games and graphics apps.",
     "You use the NVIDIA edition, with NVIDIA's own driver.",
     "Use it",
-    "The NVIDIA edition is downloaded now and starts at the next restart. With Secure Boot on, a blue screen asks for the password cosmicblue once.",
+    "The NVIDIA edition is downloaded now and starts at the next restart. With Secure Boot on, a blue screen asks for the password celennos once.",
     "Switch",
     "The NVIDIA edition starts at the next restart.",
-    "Secure Boot does not let NVIDIA's driver load yet. Allow it once: at the next restart, a blue screen asks for the password cosmicblue.",
+    "Secure Boot does not let NVIDIA's driver load yet. Allow it once: at the next restart, a blue screen asks for the password celennos.",
     "Allow",
-    "At the next restart, a blue screen asks for the password cosmicblue: choose Enroll MOK, Continue, Yes, type cosmicblue, then Reboot. The keyboard may be in QWERTY.",
+    "At the next restart, a blue screen asks for the password celennos: choose Enroll MOK, Continue, Yes, type celennos, then Reboot. The keyboard may be in QWERTY.",
     "Firmware settings (BIOS/UEFI)",
     "Restart into the computer's own settings: boot order, virtualization, Secure Boot…",
     "Restart",
@@ -131,11 +131,11 @@ pub const TEXTS: &[&str] = &[
     "More in Settings",
     "Accent color, wallpaper, panel, dock, fonts…",
     "Open",
-    "The cosmic-blue look",
-    "Back to the cosmic-blue colors, dark theme, icons, fonts and wallpaper. Panel, dock, keyboard and shortcuts stay.",
+    "The Celenn OS look",
+    "Back to the Celenn OS colors, dark theme, icons, fonts and wallpaper. Panel, dock, keyboard and shortcuts stay.",
     "Restore",
     "All COSMIC settings",
-    "Back to the cosmic-blue defaults, for every setting. A copy of the current ones is kept.",
+    "Back to the Celenn OS defaults, for every setting. A copy of the current ones is kept.",
     "Reset",
     "Every COSMIC setting goes back to the defaults. A copy is kept in your settings folder.",
     "Log out and back in to finish.",
@@ -298,7 +298,7 @@ impl Job {
             Job::Vms(_) => "Virtual machines",
             Job::FlatPark(_) => "FlatPark",
             Job::Dark(_) => "Dark theme",
-            Job::ResetTheme => "The cosmic-blue look",
+            Job::ResetTheme => "The Celenn OS look",
             Job::ResetConfig => "All COSMIC settings",
         }
     }
@@ -319,7 +319,7 @@ impl Job {
     fn question(self) -> Option<&'static str> {
         match self {
             Job::Nvidia => Some(
-                "The NVIDIA edition is downloaded now and starts at the next restart. With Secure Boot on, a blue screen asks for the password cosmicblue once.",
+                "The NVIDIA edition is downloaded now and starts at the next restart. With Secure Boot on, a blue screen asks for the password celennos once.",
             ),
             Job::Firmware => Some("The computer restarts now. Save your work first."),
             Job::Fonts(true) => Some("Microsoft's license applies to these fonts."),
@@ -594,7 +594,7 @@ impl Page {
             restored: None,
             disks: Default::default(),
         };
-        // `cosmic-blue-tools --restore` (the tour's "Bring your things"):
+        // `celenn-tools --restore` (the tour's "Bring your things"):
         // the file chooser at once
         let restore = if std::env::args().any(|arg| arg == "--restore") {
             Task::done(cosmic::Action::App(Message::Transfer(
@@ -1102,14 +1102,14 @@ impl Page {
                     Some(DriverKey::Missing) => self.row(
                         "video-display-symbolic",
                         "NVIDIA graphics card",
-                        "Secure Boot does not let NVIDIA's driver load yet. Allow it once: at the next restart, a blue screen asks for the password cosmicblue.",
+                        "Secure Boot does not let NVIDIA's driver load yet. Allow it once: at the next restart, a blue screen asks for the password celennos.",
                         self.button(Job::DriverKey, "Allow", true),
                         None,
                     ),
                     Some(DriverKey::Queued) => self.row(
                         "video-display-symbolic",
                         "NVIDIA graphics card",
-                        "At the next restart, a blue screen asks for the password cosmicblue: choose Enroll MOK, Continue, Yes, type cosmicblue, then Reboot. The keyboard may be in QWERTY.",
+                        "At the next restart, a blue screen asks for the password celennos: choose Enroll MOK, Continue, Yes, type celennos, then Reboot. The keyboard may be in QWERTY.",
                         widget::space::horizontal().width(0).into(),
                         None,
                     ),
@@ -1119,7 +1119,7 @@ impl Page {
                 section = section.add(self.row(
                     "video-display-symbolic",
                     "NVIDIA graphics card",
-                    "Use the NVIDIA edition of cosmic-blue, with NVIDIA's own driver, for games and graphics apps.",
+                    "Use the NVIDIA edition of Celenn OS, with NVIDIA's own driver, for games and graphics apps.",
                     self.button(Job::Nvidia, "Use it", true),
                     Some(Job::Nvidia),
                 ));
@@ -1318,20 +1318,20 @@ impl Page {
         look.into()
     }
 
-    /// The cosmic-blue look back, or every COSMIC setting
+    /// The Celenn OS look back, or every COSMIC setting
     fn repair(&self) -> Element<'_, Message> {
         settings::section()
             .add(self.row(
                 "edit-undo-symbolic",
-                "The cosmic-blue look",
-                "Back to the cosmic-blue colors, dark theme, icons, fonts and wallpaper. Panel, dock, keyboard and shortcuts stay.",
+                "The Celenn OS look",
+                "Back to the Celenn OS colors, dark theme, icons, fonts and wallpaper. Panel, dock, keyboard and shortcuts stay.",
                 self.button(Job::ResetTheme, "Restore", false),
                 None,
             ))
             .add(self.row(
                 "document-revert-symbolic",
                 "All COSMIC settings",
-                "Back to the cosmic-blue defaults, for every setting. A copy of the current ones is kept.",
+                "Back to the Celenn OS defaults, for every setting. A copy of the current ones is kept.",
                 self.button(Job::ResetConfig, "Reset", false),
                 Some(Job::ResetConfig),
             ))

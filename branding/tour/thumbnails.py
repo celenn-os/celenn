@@ -3,8 +3,8 @@
 page (build_files/first_steps): decoding the 5K originals would make the
 page slow and heavy. 224 x 126 (shown at 92 x 52, sharp on HiDPI screens).
 
-Written to system_files/usr/share/cosmic-blue/wallpapers, one per wallpaper
-of system_files/usr/share/backgrounds/cosmic-blue, same file name; the image
+Written to system_files/usr/share/celenn/wallpapers, one per wallpaper
+of system_files/usr/share/backgrounds/celenn, same file name; the image
 build test checks that every wallpaper has one. Run from the repository root
 after adding or changing a wallpaper: python3 branding/tour/thumbnails.py
 (needs Pillow).
@@ -14,8 +14,8 @@ import pathlib
 
 from PIL import Image
 
-SOURCE = pathlib.Path("system_files/usr/share/backgrounds/cosmic-blue")
-OUT = pathlib.Path("system_files/usr/share/cosmic-blue/wallpapers")
+SOURCE = pathlib.Path("system_files/usr/share/backgrounds/celenn")
+OUT = pathlib.Path("system_files/usr/share/celenn/wallpapers")
 SIZE = (224, 126)
 
 OUT.mkdir(parents=True, exist_ok=True)

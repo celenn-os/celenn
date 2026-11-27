@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# cosmic-blue build entry point. Each step is a separate script.
+# Celenn OS build entry point. Each step is a separate script.
 set -euox pipefail
 
 : "${IMAGE_NAME:=cosmic-blue}"

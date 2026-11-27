@@ -1,0 +1,12 @@
+[Unit]
+Description=Turn off the FlatPark Flatpak remote enabled by older Celenn OS images
+Documentation=file:///usr/libexec/celenn-flatpark-off
+After=local-fs.target
+ConditionPathExists=!/var/lib/celenn/flatpark-off-done
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/celenn-flatpark-off
+
+[Install]
+WantedBy=multi-user.target

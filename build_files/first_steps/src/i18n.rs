@@ -1,4 +1,4 @@
-// Translations shared by cosmic-blue's apps (the tours, Tools with its
+// Translations shared by Celenn OS's apps (the tours, Tools with its
 // Updates page, Parental controls and its service):
 // gettext PO files read at build time. Each program (crate root) defines
 //   LANGUAGES      (code, PO file contents), one per language

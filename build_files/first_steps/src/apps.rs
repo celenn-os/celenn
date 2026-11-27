@@ -1,5 +1,5 @@
-// The kinds of apps that cosmic-blue offers to install without a terminal,
-// the same in the first steps tour ("Your apps", main.rs) and in cosmic-blue
+// The kinds of apps that Celenn OS offers to install without a terminal,
+// the same in the first steps tour ("Your apps", main.rs) and in Celenn OS
 // Tools (Install apps, more.rs): the same categories in the same order,
 // shown as tiles in two columns. A tile opens its list of apps to tick, with
 // the recommended ones already ticked the first time: in every category, the

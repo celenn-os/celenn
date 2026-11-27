@@ -1,0 +1,25 @@
+[Desktop Entry]
+Type=Application
+Name=Updates
+Name[fr]=Mises à jour
+Name[de]=Updates
+Name[es]=Actualizaciones
+Name[it]=Aggiornamenti
+Name[pt_BR]=Atualizações
+Comment=See the system version, check for updates or go back to the previous version
+Comment[fr]=Voir la version du système, vérifier les mises à jour ou revenir à la version précédente
+Comment[de]=Systemversion anzeigen, nach Updates suchen oder zur vorherigen Version zurückkehren
+Comment[es]=Ver la versión del sistema, buscar actualizaciones o volver a la versión anterior
+Comment[it]=Vedere la versione del sistema, cercare aggiornamenti o tornare alla versione precedente
+Comment[pt_BR]=Ver a versão do sistema, procurar atualizações ou voltar para a versão anterior
+Keywords=Celenn OS;Update;Upgrade;Rollback;Version;System;
+Keywords[fr]=Celenn OS;Mise à jour;Retour arrière;Version;Système;
+Keywords[de]=Celenn OS;Update;Aktualisierung;Zurück;Version;System;
+Keywords[es]=Celenn OS;Actualización;Volver;Versión;Sistema;
+Keywords[it]=Celenn OS;Aggiornamento;Ripristino;Versione;Sistema;
+Keywords[pt_BR]=Celenn OS;Atualização;Voltar;Versão;Sistema;
+Icon=celenn-update
+Exec=/usr/libexec/celenn-tools --updates
+Terminal=false
+StartupNotify=true
+Categories=System;Settings;

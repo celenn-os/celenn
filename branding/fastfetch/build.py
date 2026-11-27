@@ -1,7 +1,7 @@
 #!/usr/bin/python3
-"""Render the cosmic-blue logo as terminal art for fastfetch.
+"""Render the Celenn OS logo as terminal art for fastfetch.
 
-Writes system_files/usr/share/ublue-os/fastfetch/cosmic-blue-{dark,light}.txt
+Writes system_files/usr/share/ublue-os/fastfetch/celenn-{dark,light}.txt
 (24-bit color art, shown by `fastfetch` through ublue-fastfetch). The light
 version darkens the moon and the planet highlight, which would vanish on a
 light terminal background.
@@ -16,7 +16,7 @@ for it, like reverse video, into dark squares. So each cell is drawn with:
   cell background (a space on that background when both are the same)
 - one half set: that half on the terminal's own background
 
-The halves are U+10CB05 and U+10CB06 of the cosmic-blue Prompt font
+The halves are U+10CB05 and U+10CB06 of the Celenn Prompt font
 (branding/prompt-font), which span exactly half of COSMIC Terminal's line.
 
 Needs rsvg-convert (librsvg), python3-numpy and python3-pillow:
@@ -32,7 +32,7 @@ import numpy as np
 from PIL import Image
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-LOGO = ROOT / "branding/logo/cosmic-blue-logo.svg"
+LOGO = ROOT / "branding/logo/celenn-logo.svg"
 OUT = ROOT / "system_files/usr/share/ublue-os/fastfetch"
 # Height / width of a COSMIC Terminal cell with its default font and line
 # height (measured on a screenshot: 19.3 x 7.9 px). Each pixel is half a
@@ -49,13 +49,13 @@ VIEW = 100
 # Colors of the mark that are too pale for a light background
 LIGHT_SWAPS = {"#e6f3ff": "#1d47c4", "#cfeeff": "#4f98f5"}
 # Pixels at least half covered by the logo get its color, the others stay
-# empty. They are not blended with a background color: the cosmic-blue
+# empty. They are not blended with a background color: the Celenn OS
 # terminal is translucent, so any blend shows as darker squares on the edges.
 MIN_COVERAGE = 0.5
 # Two halves closer than this (per channel) are drawn as one color
 SAME_COLOR = 10
 
-# Half cells of the cosmic-blue Prompt font
+# Half cells of the Celenn Prompt font
 UPPER_HALF = "\U0010CB05"
 LOWER_HALF = "\U0010CB06"
 
@@ -168,11 +168,11 @@ def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     place = placement(svg)
     print("logo size {:.1f}, position {:.1f} {:.1f} (sub-pixels)".format(*place))
-    render(svg, OUT / "cosmic-blue-dark.txt", place)
+    render(svg, OUT / "celenn-dark.txt", place)
     for old, new in LIGHT_SWAPS.items():
         assert old in svg, old
         svg = svg.replace(old, new)
-    render(svg, OUT / "cosmic-blue-light.txt", place)
+    render(svg, OUT / "celenn-light.txt", place)
 
 
 if __name__ == "__main__":

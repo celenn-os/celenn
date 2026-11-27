@@ -1,4 +1,4 @@
-# French translation of cosmic-blue Tools
+# French translation of Celenn OS Tools
 # (build_files/first_steps/src/tools.rs and its pages).
 msgid ""
 msgstr ""
@@ -90,8 +90,8 @@ msgstr "Mo"
 msgid "GB"
 msgstr "Go"
 
-msgid "The system version could not be read: is this computer installed with cosmic-blue?"
-msgstr "Impossible de lire la version du système : cet ordinateur est-il installé avec cosmic-blue ?"
+msgid "The system version could not be read: is this computer installed with Celenn OS?"
+msgstr "Impossible de lire la version du système : cet ordinateur est-il installé avec Celenn OS ?"
 
 msgid "Apps from COSMIC Store update by themselves too."
 msgstr "Les applications de COSMIC Store se mettent aussi à jour toutes seules."
@@ -132,8 +132,8 @@ msgstr "Ce système reste sur cette version. Reprenez-les pour recevoir de nouve
 msgid "Resume updates"
 msgstr "Reprendre les mises à jour"
 
-msgid "cosmic-blue Tools"
-msgstr "Outils cosmic-blue"
+msgid "Celenn OS Tools"
+msgstr "Outils Celenn OS"
 
 msgid "Disk space"
 msgstr "Espace disque"
@@ -201,8 +201,8 @@ msgstr "Le disque est presque plein"
 msgid "{} left. Updates and new apps need room."
 msgstr "Il reste {}. Les mises à jour et les nouvelles applications ont besoin de place."
 
-msgid "Apps that come with cosmic-blue"
-msgstr "Applications fournies avec cosmic-blue"
+msgid "Apps that come with Celenn OS"
+msgstr "Applications fournies avec Celenn OS"
 
 msgid "All of them are installed."
 msgstr "Elles sont toutes installées."
@@ -243,8 +243,8 @@ msgstr "Mises à jour, logiciels, commandes et astuces"
 msgid "Ask a question"
 msgstr "Poser une question"
 
-msgid "Other cosmic-blue users and its makers answer, on GitHub."
-msgstr "D'autres utilisateurs de cosmic-blue et ses auteurs répondent, sur GitHub."
+msgid "Other Celenn OS users and its makers answer, on GitHub."
+msgstr "D'autres utilisateurs de Celenn OS et ses auteurs répondent, sur GitHub."
 
 msgid "Report a problem"
 msgstr "Signaler un problème"
@@ -291,11 +291,11 @@ msgstr "Tous les réglages COSMIC"
 msgid "Arial, Times New Roman, Verdana… for documents made on Windows."
 msgstr "Arial, Times New Roman, Verdana… pour les documents créés sous Windows."
 
-msgid "Back to the cosmic-blue colors, dark theme, icons, fonts and wallpaper. Panel, dock, keyboard and shortcuts stay."
-msgstr "Retour aux couleurs, au thème sombre, aux icônes, aux polices et au fond d'écran de cosmic-blue. Panneau, dock, clavier et raccourcis restent."
+msgid "Back to the Celenn OS colors, dark theme, icons, fonts and wallpaper. Panel, dock, keyboard and shortcuts stay."
+msgstr "Retour aux couleurs, au thème sombre, aux icônes, aux polices et au fond d'écran de Celenn OS. Panneau, dock, clavier et raccourcis restent."
 
-msgid "Back to the cosmic-blue defaults, for every setting. A copy of the current ones is kept."
-msgstr "Retour aux réglages par défaut de cosmic-blue, pour tout. Une copie des réglages actuels est gardée."
+msgid "Back to the Celenn OS defaults, for every setting. A copy of the current ones is kept."
+msgstr "Retour aux réglages par défaut de Celenn OS, pour tout. Une copie des réglages actuels est gardée."
 
 msgid "Battery charge limit"
 msgstr "Limite de charge de la batterie"
@@ -438,8 +438,8 @@ msgstr "Enregistrer"
 msgid "Switch"
 msgstr "Changer"
 
-msgid "The NVIDIA edition is downloaded now and starts at the next restart. With Secure Boot on, a blue screen asks for the password cosmicblue once."
-msgstr "L'édition NVIDIA est téléchargée maintenant et démarre au prochain redémarrage. Avec Secure Boot activé, un écran bleu demande une fois le mot de passe cosmicblue."
+msgid "The NVIDIA edition is downloaded now and starts at the next restart. With Secure Boot on, a blue screen asks for the password celennos once."
+msgstr "L'édition NVIDIA est téléchargée maintenant et démarre au prochain redémarrage. Avec Secure Boot activé, un écran bleu demande une fois le mot de passe celennos."
 
 msgid "The NVIDIA edition starts at the next restart."
 msgstr "L'édition NVIDIA démarre au prochain redémarrage."
@@ -447,14 +447,14 @@ msgstr "L'édition NVIDIA démarre au prochain redémarrage."
 msgid "The computer restarts now. Save your work first."
 msgstr "L'ordinateur redémarre tout de suite. Enregistrez votre travail avant."
 
-msgid "The cosmic-blue look"
-msgstr "Le look cosmic-blue"
+msgid "The Celenn OS look"
+msgstr "Le look Celenn OS"
 
 msgid "Use it"
 msgstr "L'utiliser"
 
-msgid "Use the NVIDIA edition of cosmic-blue, with NVIDIA's own driver, for games and graphics apps."
-msgstr "Utiliser l'édition NVIDIA de cosmic-blue, avec le pilote de NVIDIA, pour les jeux et les applications graphiques."
+msgid "Use the NVIDIA edition of Celenn OS, with NVIDIA's own driver, for games and graphics apps."
+msgstr "Utiliser l'édition NVIDIA de Celenn OS, avec le pilote de NVIDIA, pour les jeux et les applications graphiques."
 
 msgid "Virtual machines"
 msgstr "Machines virtuelles"
@@ -507,8 +507,8 @@ msgstr "Vos applications de jeu sont prêtes."
 msgid "Allow"
 msgstr "Autoriser"
 
-msgid "At the next restart, a blue screen asks for the password cosmicblue: choose Enroll MOK, Continue, Yes, type cosmicblue, then Reboot. The keyboard may be in QWERTY."
-msgstr "Au prochain redémarrage, un écran bleu demande le mot de passe cosmicblue : choisissez Enroll MOK, Continue, Yes, tapez cosmicblue, puis Reboot. Le clavier peut être en QWERTY."
+msgid "At the next restart, a blue screen asks for the password celennos: choose Enroll MOK, Continue, Yes, type celennos, then Reboot. The keyboard may be in QWERTY."
+msgstr "Au prochain redémarrage, un écran bleu demande le mot de passe celennos : choisissez Enroll MOK, Continue, Yes, tapez celennos, puis Reboot. Le clavier peut être en QWERTY."
 
 msgid "Close"
 msgstr "Fermer"
@@ -525,8 +525,8 @@ msgstr "Ouvrir le rapport"
 msgid "Report the problem"
 msgstr "Signaler le problème"
 
-msgid "Secure Boot does not let NVIDIA's driver load yet. Allow it once: at the next restart, a blue screen asks for the password cosmicblue."
-msgstr "Secure Boot ne laisse pas encore le pilote NVIDIA se charger. Autorisez-le une fois : au prochain redémarrage, un écran bleu demande le mot de passe cosmicblue."
+msgid "Secure Boot does not let NVIDIA's driver load yet. Allow it once: at the next restart, a blue screen asks for the password celennos."
+msgstr "Secure Boot ne laisse pas encore le pilote NVIDIA se charger. Autorisez-le une fois : au prochain redémarrage, un écran bleu demande le mot de passe celennos."
 
 msgid "Something unexpected went wrong. Nothing was changed."
 msgstr "Un problème inattendu est survenu. Rien n'a été modifié."
@@ -534,11 +534,11 @@ msgstr "Un problème inattendu est survenu. Rien n'a été modifié."
 msgid "Technical details"
 msgstr "Détails techniques"
 
-msgid "The disk is full ({} free). Free up space with cosmic-blue Tools, then try again."
-msgstr "Le disque est plein ({} libres). Libérez de l'espace avec Outils cosmic-blue, puis réessayez."
+msgid "The disk is full ({} free). Free up space with Celenn OS Tools, then try again."
+msgstr "Le disque est plein ({} libres). Libérez de l'espace avec Outils Celenn OS, puis réessayez."
 
-msgid "The report opens in your browser, filled in: the cosmic-blue version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
-msgstr "Le rapport s'ouvre dans votre navigateur, déjà rempli : la version de cosmic-blue, le matériel et cette erreur. Aucun fichier ni donnée personnelle. Vous le relisez avant de l'envoyer ; écrivez dans votre langue. L'envoi demande un compte GitHub."
+msgid "The report opens in your browser, filled in: the Celenn OS version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
+msgstr "Le rapport s'ouvre dans votre navigateur, déjà rempli : la version de Celenn OS, le matériel et cette erreur. Aucun fichier ni donnée personnelle. Vous le relisez avant de l'envoyer ; écrivez dans votre langue. L'envoi demande un compte GitHub."
 
 msgid "The server does not answer. Try again in a few minutes."
 msgstr "Le serveur ne répond pas. Réessayez dans quelques minutes."
@@ -735,8 +735,8 @@ msgstr "Numériser"
 msgid "Change computers"
 msgstr "Changer d'ordinateur"
 
-msgid "Your settings and the list of your apps in a file, to take back on another cosmic-blue computer."
-msgstr "Vos réglages et la liste de vos applis dans un fichier, à reprendre sur un autre ordinateur cosmic-blue."
+msgid "Your settings and the list of your apps in a file, to take back on another Celenn OS computer."
+msgstr "Vos réglages et la liste de vos applis dans un fichier, à reprendre sur un autre ordinateur Celenn OS."
 
 msgid "Restore…"
 msgstr "Reprendre…"
@@ -750,8 +750,8 @@ msgstr "Afficher"
 msgid "Choose the file saved on your other computer"
 msgstr "Choisissez le fichier enregistré sur votre autre ordinateur"
 
-msgid "cosmic-blue-settings"
-msgstr "cosmic-blue-mes-reglages"
+msgid "celenn-settings"
+msgstr "celenn-mes-reglages"
 
 msgid "Restore these settings"
 msgstr "Reprendre ces réglages"
@@ -806,8 +806,8 @@ msgstr "{} raccourcis lancent un programme : par sécurité, ajoutez-les à nouv
 msgid "One shortcut starts a program: for safety, add it again in Settings."
 msgstr "Un raccourci lance un programme : par sécurité, ajoutez-le à nouveau dans Paramètres."
 
-msgid "{} settings unknown to this version of cosmic-blue were left out."
-msgstr "{} réglages inconnus de cette version de cosmic-blue ont été laissés de côté."
+msgid "{} settings unknown to this version of Celenn OS were left out."
+msgstr "{} réglages inconnus de cette version de Celenn OS ont été laissés de côté."
 
 msgid "{} app names were not valid and were left out."
 msgstr "{} noms d'applis n'étaient pas valides et ont été laissés de côté."
@@ -821,11 +821,11 @@ msgstr "Une copie de vos réglages précédents est dans {}."
 msgid "Log out and back in to see every change."
 msgstr "Déconnectez-vous puis reconnectez-vous pour voir tous les changements."
 
-msgid "This file is not a cosmic-blue settings file."
-msgstr "Ce fichier n'est pas un fichier de réglages cosmic-blue."
+msgid "This file is not a Celenn OS settings file."
+msgstr "Ce fichier n'est pas un fichier de réglages Celenn OS."
 
-msgid "This file was saved by a newer cosmic-blue. Update this computer first."
-msgstr "Ce fichier vient d'un cosmic-blue plus récent. Mettez d'abord cet ordinateur à jour."
+msgid "This file was saved by a newer Celenn OS. Update this computer first."
+msgstr "Ce fichier vient d'un Celenn OS plus récent. Mettez d'abord cet ordinateur à jour."
 
 msgid "This file could not be read."
 msgstr "Ce fichier n'a pas pu être lu."
@@ -941,8 +941,8 @@ msgstr "Une copie de vos fichiers"
 msgid "A copy of your files on a USB drive or another disk, made by itself every day."
 msgstr "Une copie de vos fichiers sur une clé USB ou un autre disque, faite toute seule chaque jour."
 
-msgid "All is well: cosmic-blue looks after itself."
-msgstr "Tout va bien : cosmic-blue s'occupe de lui-même."
+msgid "All is well: Celenn OS looks after itself."
+msgstr "Tout va bien : Celenn OS s'occupe de lui-même."
 
 msgid "Apps, look, settings"
 msgstr "Applications, apparence, réglages"
@@ -1022,8 +1022,8 @@ msgstr "Processeur, mémoire, carte graphique"
 msgid "Protect your files"
 msgstr "Protéger vos fichiers"
 
-msgid "Put back what is missing: the apps that come with cosmic-blue, the cosmic-blue look, your COSMIC settings."
-msgstr "Remettre ce qui manque : les applications fournies avec cosmic-blue, l'apparence de cosmic-blue, vos réglages COSMIC."
+msgid "Put back what is missing: the apps that come with Celenn OS, the Celenn OS look, your COSMIC settings."
+msgstr "Remettre ce qui manque : les applications fournies avec Celenn OS, l'apparence de Celenn OS, vos réglages COSMIC."
 
 msgid "Remove what nothing uses any more. Your files stay as they are."
 msgstr "Supprimer ce qui ne sert plus. Vos fichiers restent tels quels."
@@ -1085,8 +1085,8 @@ msgstr "Quand ça ne va pas"
 msgid "Your settings and apps, in one file."
 msgstr "Réglages et applications, en un fichier."
 
-msgid "cosmic-blue updates itself in the background. A new version starts at the next restart, without interrupting you."
-msgstr "cosmic-blue se met à jour en arrière-plan. Une nouvelle version démarre au prochain redémarrage, sans vous interrompre."
+msgid "Celenn OS updates itself in the background. A new version starts at the next restart, without interrupting you."
+msgstr "Celenn OS se met à jour en arrière-plan. Une nouvelle version démarre au prochain redémarrage, sans vous interrompre."
 
 msgid "{} things need your attention: {}"
 msgstr "{} choses demandent votre attention : {}"

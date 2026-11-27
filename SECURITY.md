@@ -23,6 +23,6 @@ In scope: what this repository adds to the image (the Containerfile, build
 scripts, services and configuration under `system_files/`), the CI that
 builds, signs and publishes the images and live ISOs, and the website.
 
-Problems in the software cosmic-blue ships unchanged (Fedora packages, COSMIC,
+Problems in the software Celenn OS ships unchanged (Fedora packages, COSMIC,
 the Universal Blue base, Flatpak apps) belong to those projects: please report
 them upstream. If you are not sure, report here and we will forward it.

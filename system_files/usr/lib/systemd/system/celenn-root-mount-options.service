@@ -1,0 +1,13 @@
+[Unit]
+Description=Apply the root btrfs mount options of /etc/fstab (compression)
+Documentation=file:///usr/libexec/celenn-root-mount-options
+After=local-fs.target ostree-remount.service
+ConditionPathExists=/run/ostree-booted
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/celenn-root-mount-options
+
+[Install]
+WantedBy=multi-user.target

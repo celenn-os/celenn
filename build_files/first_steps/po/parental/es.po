@@ -1,4 +1,4 @@
-# Spanish translation of cosmic-blue Parental controls
+# Spanish translation of Celenn OS Parental controls
 # (build_files/first_steps/src/parental.rs).
 msgid ""
 msgstr ""
@@ -200,8 +200,8 @@ msgstr "«{}» no ha funcionado"
 msgid "No internet connection. Connect to a network, then try again. Nothing was changed."
 msgstr "No hay conexión a Internet. Conéctese a una red y vuelva a intentarlo. No se ha cambiado nada."
 
-msgid "The disk is full ({} free). Free up space with cosmic-blue Tools, then try again."
-msgstr "El disco está lleno ({} libres). Libera espacio con Herramientas de cosmic-blue y vuelve a intentarlo."
+msgid "The disk is full ({} free). Free up space with Celenn OS Tools, then try again."
+msgstr "El disco está lleno ({} libres). Libera espacio con Herramientas de Celenn OS y vuelve a intentarlo."
 
 msgid "The server does not answer. Try again in a few minutes."
 msgstr "El servidor no responde. Vuelva a intentarlo en unos minutos."
@@ -221,8 +221,8 @@ msgstr "Informar del problema"
 msgid "Technical details"
 msgstr "Detalles técnicos"
 
-msgid "The report opens in your browser, filled in: the cosmic-blue version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
-msgstr "El informe se abre en el navegador, ya rellenado: la versión de cosmic-blue, el hardware y este error. Sin archivos ni datos personales. Lo revisa antes de enviarlo; escriba en su idioma. Para enviarlo hace falta una cuenta de GitHub."
+msgid "The report opens in your browser, filled in: the Celenn OS version, the hardware and this error. No files or personal data. You read it before sending it; write in your own language. Sending needs a GitHub account."
+msgstr "El informe se abre en el navegador, ya rellenado: la versión de Celenn OS, el hardware y este error. Sin archivos ni datos personales. Lo revisa antes de enviarlo; escriba en su idioma. Para enviarlo hace falta una cuenta de GitHub."
 
 msgid "Open the report"
 msgstr "Abrir el informe"

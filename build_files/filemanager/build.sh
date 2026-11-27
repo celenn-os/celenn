@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# Rebuilds Fedora's cosmic-files package with the cosmic-blue patch (see
+# Rebuilds Fedora's cosmic-files package with the Celenn OS patch (see
 # patch.py), from the same source package and build flags as Fedora. Runs in a
 # Fedora container of the same release as the image; the binary is written to
 # /out and installed by build_files/24-filemanager.sh.

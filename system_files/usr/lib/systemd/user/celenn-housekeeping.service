@@ -1,0 +1,14 @@
+[Unit]
+Description=Empty the old trash and warn when the disk is almost full
+# Not for the login screen's own user, only people's sessions
+ConditionUser=!@system
+
+[Service]
+Type=oneshot
+# Deletes what stayed in the trash for more than 30 days, and shows one
+# notification when the disk is almost full (then waits for its button).
+# Both can be turned off in Celenn OS Tools > Free up space.
+ExecStart=/usr/libexec/celenn-tools --housekeeping
+TimeoutStartSec=1h
+Nice=19
+IOSchedulingClass=idle

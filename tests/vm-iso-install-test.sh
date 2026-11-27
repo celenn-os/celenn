@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # ISO install test: boots the live ISO in a virtual machine with an empty
-# disk, installs cosmic-blue with the live session's Anaconda installer
+# disk, installs Celenn OS with the live session's Anaconda installer
 # (automated with a kickstart that keeps the ISO's own installer settings:
 # embedded image, partitioning, post-install scripts), then boots the
 # installed system and checks it the way a person would see it, all with
@@ -77,7 +77,7 @@ live_sb="$(vm 'mokutil --sb-state' 2>&1 || true)"
 echo "Live session: ${live_sb}"
 grep -q 'SecureBoot enabled' <<< "${live_sb}" || error "The live ISO did not start with Secure Boot on (${live_sb})"
 
-# The live desktop, as it opens for a person trying cosmic-blue
+# The live desktop, as it opens for a person trying Celenn OS
 mkdir -p "${OUT}/${SHOTS}"
 if wait_for 300 'pgrep -x cosmic-panel'; then
     sleep 30
@@ -100,7 +100,7 @@ zerombr
 clearpart --all --initlabel --disklabel=gpt
 # The profile's layout (btrfs with /, /home and /var)
 autopart
-user --name=${DEMO_USER} --password=${DEMO_PASSWORD} --plaintext --groups=wheel --gecos=cosmic-blue
+user --name=${DEMO_USER} --password=${DEMO_PASSWORD} --plaintext --groups=wheel --gecos=Celenn
 # Only for the test: SSH for the checks (the key reaches root through a
 # systemd credential at boot, see step 3), boot messages on the serial log
 services --enabled=sshd
@@ -144,7 +144,7 @@ collect_live_logs() {
 
 log "Installing from the live ISO"
 started=${SECONDS}
-vm 'systemd-run --unit=cosmic-blue-install --service-type=exec \
+vm 'systemd-run --unit=celenn-install --service-type=exec \
     -p StandardOutput=file:/root/install.log -p StandardError=file:/root/install.log \
     /root/install.sh'
 # Anaconda powers the virtual machine off when the install succeeds
@@ -156,7 +156,7 @@ while vm_running; do
         collect_live_logs
         fail "The install did not finish within $((INSTALL_TIMEOUT / 60)) minutes"
     fi
-    state="$(vm 'systemctl show -p ActiveState --value cosmic-blue-install' 2>/dev/null || true)"
+    state="$(vm 'systemctl show -p ActiveState --value celenn-install' 2>/dev/null || true)"
     if [[ "${state}" == failed || "${state}" == inactive ]]; then
         sleep 30  # a successful install powers off right after Anaconda exits
         vm_running || break
@@ -206,10 +206,10 @@ mkdir -p "${OUT}/anaconda"
 vm 'tar -cz -C /tmp/anaconda-logs .' | tar -xz -C "${OUT}/anaconda" 2>/dev/null || true
 
 # 4. Checks of the installed system
-# The installer used the cosmic-blue profile (iso_files/configure_live_iso.sh:
+# The installer used the Celenn OS profile (iso_files/configure_live_iso.sh:
 # btrfs layout, no network spoke...), matched on VARIANT_ID in os-release
-grep -q "The 'cosmic-blue' profile is detected" "${OUT}"/anaconda/anaconda.log 2>/dev/null \
-    || error "The installer did not use the cosmic-blue profile: $(grep -ho "The '[^']*' profile is detected" "${OUT}"/anaconda/anaconda.log 2>/dev/null || echo 'anaconda.log missing')"
+grep -q "The 'celenn' profile is detected" "${OUT}"/anaconda/anaconda.log 2>/dev/null \
+    || error "The installer did not use the Celenn OS profile: $(grep -ho "The '[^']*' profile is detected" "${OUT}"/anaconda/anaconda.log 2>/dev/null || echo 'anaconda.log missing')"
 if vm 'findmnt -n -o SOURCE /run/rootfsbase' >/dev/null 2>&1; then
     fail "The live ISO booted again instead of the installed system"
 fi
@@ -222,21 +222,21 @@ vm_check_tuning installed || errors=1
 fstype="$(vm 'findmnt -n -o FSTYPE /sysroot' || true)"
 [[ "${fstype}" == btrfs ]] || error "The system is on '${fstype}', not btrfs"
 # Compression chosen by the installer profile, applied at boot by
-# cosmic-blue-root-mount-options.service. An image published before that
+# celenn-root-mount-options.service. An image published before that
 # service (a pull request testing it) gets the script from this checkout.
-if ! vm 'systemctl cat cosmic-blue-root-mount-options.service' >/dev/null 2>&1; then
-    echo "::notice::The installed image has no cosmic-blue-root-mount-options.service yet: running the script of this checkout"
-    vm 'bash -s' < "$(dirname "$0")/../system_files/usr/libexec/cosmic-blue-root-mount-options" || true
+if ! vm 'systemctl cat celenn-root-mount-options.service' >/dev/null 2>&1; then
+    echo "::notice::The installed image has no celenn-root-mount-options.service yet: running the script of this checkout"
+    vm 'bash -s' < "$(dirname "$0")/../system_files/usr/libexec/celenn-root-mount-options" || true
 fi
 if ! vm 'findmnt -n -o OPTIONS /var | grep -q compress=zstd:1'; then
     error "btrfs compression (compress=zstd:1) is not active"
-    vm 'systemctl status --no-pager cosmic-blue-root-mount-options.service; journalctl -b --no-pager -o short-monotonic | grep -E "root-mount-options|var.mount|Remount|remount" | tail -n 40' || true
+    vm 'systemctl status --no-pager celenn-root-mount-options.service; journalctl -b --no-pager -o short-monotonic | grep -E "root-mount-options|var.mount|Remount|remount" | tail -n 40' || true
 fi
 vm 'findmnt -n -o FSTYPE /var/home | grep -qx btrfs' || error "/var/home is not on btrfs"
 vm 'cat /etc/fstab; findmnt -o TARGET,SOURCE,FSTYPE,OPTIONS -R /sysroot; findmnt /; findmnt /var; findmnt /var/home; lsblk -f' || true
 
 # Keyboard layout and clock format from the installer, given to COSMIC by
-# cosmic-blue-user-defaults before the login screen
+# celenn-user-defaults before the login screen
 vm 'localectl status' || true
 xkb="$(vm "cat ~${DEMO_USER}/.config/cosmic/com.system76.CosmicComp/v1/xkb_config" || true)"
 echo "xkb_config of ${DEMO_USER}: ${xkb}"
@@ -246,8 +246,8 @@ grep -q 'layout: "ch"' <<< "${xkb}" && grep -q 'variant: "fr"' <<< "${xkb}" \
     || error "COSMIC did not get the 24-hour clock of ${KS_LANG}"
 vm "id -nG ${DEMO_USER} | grep -qw wheel" || error "The user made in the installer is not an administrator"
 # The first steps tour opens at this user's first login (images that have it)
-if vm "test -f /etc/xdg/autostart/io.github.cosmic_blue_os.FirstSteps.desktop"; then
-    vm "test -e ~${DEMO_USER}/.config/cosmic-blue/first-steps-pending" \
+if vm "test -f /etc/xdg/autostart/io.github.celenn_os.FirstSteps.desktop"; then
+    vm "test -e ~${DEMO_USER}/.config/celenn/first-steps-pending" \
         || error "The user made in the installer will not get the first steps tour"
 fi
 

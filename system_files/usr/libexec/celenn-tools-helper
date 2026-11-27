@@ -1,0 +1,279 @@
+#!/usr/bin/bash
+# The changes Celenn OS Tools (/usr/libexec/celenn-tools) makes to the
+# system, run as root through pkexec after an administrator password (polkit
+# action io.github.celenn_os.tools.manage). Only these:
+#
+#   clean    remove the Flatpak runtimes and extensions that no app installed
+#            for everyone needs any more, and the system's update caches
+#            (rpm-ostree cleanup --base --repomd: the deployments, so the
+#            previous version, stay). Run by /usr/libexec/celenn-clean.
+#   driver-key
+#            queue the key that signs NVIDIA's driver for enrollment with
+#            Secure Boot: at the next restart the firmware's MOK manager (a
+#            blue screen) asks for the password "celennos". Not a secret:
+#            it only confirms, at the machine itself, that the key was
+#            queued on purpose. Also run by `ujust enroll-secure-boot-key`.
+#   disks UUID=on|off...
+#            open an internal data disk at every startup, or stop doing so
+#            (Tools, Other disks). "on" adds a line to /etc/fstab
+#            (kept by updates): the disk by its UUID, at /var/mnt/<its name>
+#            (also /mnt/<its name>), never in the way of the startup
+#            (nofail), shown in Files (x-gvfs-show), marked as ours
+#            (x-celenn-disk), then opens it now. Only internal disks
+#            with a data file system (ext4, btrfs, XFS, NTFS, exFAT, FAT),
+#            never one the system uses, a removable one, an encrypted one,
+#            or the partition Windows itself runs from. A Linux disk that is
+#            still empty becomes the user's (PKEXEC_UID), so they can write
+#            to it; NTFS, exFAT and FAT disks are mounted as theirs. The game
+#            launchers of Tools' Games list (Flatpaks, which only see what
+#            they are given) may use the folder: a Steam library there.
+#            "off"
+#            removes our line and closes the disk (at the next restart if a
+#            file on it is open); files on the disk are never touched.
+#            Exit status 0, or 1 with one line per disk that was not
+#            changed: "<UUID> <reason>" (see DISK_REASONS in disks.rs).
+set -euo pipefail
+
+usage() {
+    echo "Usage: ${0##*/} clean | driver-key | disks UUID=on|off..." >&2
+    exit 2
+}
+
+case "${1:-} $#" in
+    "clean 1" | "driver-key 1") ;;
+    "disks "[0-9]*)
+        (( $# >= 2 )) || usage
+        for change in "${@:2}"; do
+            [[ "${change}" =~ ^[0-9A-Fa-f-]{4,36}=(on|off)$ ]] || usage
+        done
+        ;;
+    *) usage ;;
+esac
+
+FSTAB=/etc/fstab
+MARK=x-celenn-disk
+MOUNT_ROOT=/var/mnt
+
+# Partition types that are never data: EFI system, Microsoft reserved,
+# Windows recovery, BIOS boot (GPT), and EFI / Windows recovery (MBR)
+NOT_DATA='^(c12a7328-f81f-11d2-ba4b-00a0c93ec93b|e3c9e316-0b5c-4db8-817d-f92df00215ae|de94bba4-06d1-4d40-a16a-bfd50179d6ac|21686148-6449-6e6f-744e-656564454649|0xef|0x27)$'
+
+# The Flatpak game launchers of Tools' Games list (apps.rs) that may keep
+# games on an other disk: a system override gives them its folder, even
+# before they are installed
+GAME_APPS=(com.valvesoftware.Steam com.heroicgameslauncher.hgl net.lutris.Lutris com.usebottles.bottles)
+
+# Gives the game launchers the folder, or takes it back: the filesystems=
+# list of their system override ([Context], as `flatpak override --system`
+# writes it, which refuses apps not installed yet); other overrides stay
+games_access() { # on|off folder
+    local app file
+    mkdir -p /var/lib/flatpak/overrides
+    for app in "${GAME_APPS[@]}"; do
+        file="/var/lib/flatpak/overrides/${app}"
+        [[ "$1" == on || -f "${file}" ]] || continue
+        touch "${file}"
+        awk -v folder="$2" -v add="$([[ "$1" == on ]] && echo 1)" '
+            function list(entries,    n, i, kept, item) {
+                n = split(entries, item, ";")
+                kept = ""
+                for (i = 1; i <= n; i++)
+                    if (item[i] != "" && item[i] != folder) kept = kept item[i] ";"
+                if (add) kept = kept folder ";"
+                return kept
+            }
+            function finish() {
+                if (section == "Context" && !done) {
+                    if (add) print "filesystems=" folder ";"
+                    done = 1
+                }
+            }
+            /^\[/ { finish(); section = substr($0, 2, length($0) - 2); print; next }
+            section == "Context" && /^filesystems=/ {
+                kept = list(substr($0, length("filesystems=") + 1))
+                if (kept != "") print "filesystems=" kept
+                done = 1
+                next
+            }
+            { print }
+            END {
+                finish()
+                if (!done && add) printf "[Context]\nfilesystems=%s;\n", folder
+            }' "${file}" > "${file}.new"
+        chmod 0644 "${file}.new"
+        mv "${file}.new" "${file}"
+        # Nothing left in it: no override at all
+        [[ "$(tr -d '[:space:]' < "${file}")" != "[Context]" ]] || rm -f "${file}"
+    done
+}
+
+# One column of lsblk for a device ("" when empty)
+column() { lsblk -dno "$2" "$1" 2>/dev/null | sed 's/[[:space:]]*$//'; }
+
+# Our line for this UUID in fstab, if any
+our_line() { awk -v uuid="UUID=$1" -v mark="${MARK}" '$1 == uuid && $4 ~ mark' "${FSTAB}"; }
+
+# Writes fstab without the lines of this UUID (ours only), plus an optional
+# new line; checks the result before putting it in place
+write_fstab() { # uuid [new line]
+    local tmp
+    tmp="$(mktemp "${FSTAB}.XXXXXX")"
+    cp -a "${FSTAB}" "${tmp}"
+    awk -v uuid="UUID=$1" -v mark="${MARK}" '!($1 == uuid && $4 ~ mark)' "${FSTAB}" > "${tmp}"
+    [[ -z "${2:-}" ]] || printf '%s\n' "$2" >> "${tmp}"
+    # A problem fstab already had is not ours to block on
+    if ! findmnt --verify --tab-file "${tmp}" >/dev/null 2>&1 \
+        && findmnt --verify --tab-file "${FSTAB}" >/dev/null 2>&1; then
+        rm -f "${tmp}"
+        return 1
+    fi
+    cp -a "${FSTAB}" "${FSTAB}.celenn.bak"
+    mv "${tmp}" "${FSTAB}"
+    systemctl daemon-reload
+}
+
+# A folder name from the disk's label: letters (accents kept), digits,
+# - _ . only, spaces as -
+mount_name() { # label uuid
+    local name
+    name="$(printf '%s' "$1" | LC_ALL=C.UTF-8 sed -E 's/[[:space:]]+/-/g; s/[^[:alnum:]._-]//g; s/^[.-]+//; s/-+$//')"
+    [[ -n "${name}" ]] || name="Disk-${2:0:8}"
+    local candidate="${name}" n=2
+    while [[ -e "${MOUNT_ROOT}/${candidate}" ]] \
+        && { mountpoint -q "${MOUNT_ROOT}/${candidate}" \
+            || [[ -n "$(ls -A "${MOUNT_ROOT}/${candidate}" 2>/dev/null)" ]] \
+            || grep -q "[[:space:]]${MOUNT_ROOT}/${candidate}[[:space:]]" "${FSTAB}"; }; do
+        candidate="${name}-$((n++))"
+    done
+    printf '%s' "${candidate}"
+}
+
+disk_on() { # uuid
+    local uuid="$1" dev fstype parttype type mounted disk tran options pass mp unit probe
+    if [[ -n "$(our_line "${uuid}")" ]]; then
+        mp="$(our_line "${uuid}" | awk '{ print $2 }')"
+        mountpoint -q "${mp}" || systemctl start "$(systemd-escape -p --suffix=mount "${mp}")" 2>/dev/null \
+            || { echo "${uuid} not-opened"; return 1; }
+        return 0
+    fi
+    dev="$(readlink -f "/dev/disk/by-uuid/${uuid}" 2>/dev/null)" || dev=""
+    [[ -b "${dev}" ]] || { echo "${uuid} not-found"; return 1; }
+    # Already in fstab by the person or the installer: theirs, not ours
+    if awk -v uuid="UUID=${uuid}" -v dev="${dev}" '$1 == uuid || $1 == dev' "${FSTAB}" | grep -q .; then
+        echo "${uuid} in-fstab"; return 1
+    fi
+    type="$(column "${dev}" TYPE)"
+    fstype="$(column "${dev}" FSTYPE)"
+    parttype="$(column "${dev}" PARTTYPE)"
+    disk="$(column "${dev}" PKNAME)"
+    tran="$(lsblk -dno TRAN "/dev/${disk}" 2>/dev/null | tr -d ' ')"
+    case "${fstype}" in
+        BitLocker | crypto_LUKS) echo "${uuid} encrypted"; return 1 ;;
+        ext4 | xfs | btrfs | ntfs | exfat | vfat) ;;
+        *) echo "${uuid} unsupported"; return 1 ;;
+    esac
+    if [[ "${type}" != part || "$(column "${dev}" RM)" != 0 || "${tran}" == usb ]] \
+        || [[ "${parttype,,}" =~ ${NOT_DATA} ]]; then
+        echo "${uuid} not-internal"; return 1
+    fi
+    # In use by the system, or opened in Files: Files' own mount is closed
+    # first (the disk then opens at its new place)
+    for mounted in $(findmnt -rno TARGET -S "${dev}" 2>/dev/null; findmnt -rno TARGET -S "UUID=${uuid}" 2>/dev/null); do
+        case "${mounted}" in
+            /run/media/*) umount "${mounted}" 2>/dev/null || { echo "${uuid} busy"; return 1; } ;;
+            *) echo "${uuid} system"; return 1 ;;
+        esac
+    done
+    # The partition Windows runs from: left alone (Windows' own files)
+    if [[ "${fstype}" == ntfs ]]; then
+        probe="$(mktemp -d)"
+        if mount -t ntfs3 -o ro "${dev}" "${probe}" 2>/dev/null; then
+            if [[ -d "${probe}/Windows/System32" ]]; then
+                umount "${probe}"; rmdir "${probe}"
+                echo "${uuid} windows"; return 1
+            fi
+            umount "${probe}"
+        fi
+        rmdir "${probe}"
+    fi
+
+    local uid="${PKEXEC_UID:-0}" gid
+    gid="$(id -g "${uid}" 2>/dev/null || echo 0)"
+    pass=0
+    case "${fstype}" in
+        ext4) options=defaults; pass=2 ;;
+        xfs | btrfs) options=defaults ;;
+        ntfs) fstype=ntfs3; options="uid=${uid},gid=${gid},umask=0022,windows_names" ;;
+        exfat) options="uid=${uid},gid=${gid},umask=0022" ;;
+        vfat) options="uid=${uid},gid=${gid},umask=0022,shortname=mixed,utf8" ;;
+    esac
+    options+=",nofail,x-systemd.device-timeout=10s,x-gvfs-show,${MARK}"
+    mp="${MOUNT_ROOT}/$(mount_name "$(column "${dev}" LABEL)" "${uuid}")"
+    mkdir -p "${mp}"
+    if ! write_fstab "${uuid}" "UUID=${uuid} ${mp} ${fstype} ${options} 0 ${pass}"; then
+        rmdir "${mp}" 2>/dev/null || :
+        echo "${uuid} not-opened"; return 1
+    fi
+    unit="$(systemd-escape -p --suffix=mount "${mp}")"
+    if ! systemctl start "${unit}" 2>/dev/null; then
+        # Not now (NTFS: often Windows not fully shut down): nothing kept
+        write_fstab "${uuid}"
+        rmdir "${mp}" 2>/dev/null || :
+        if [[ "${fstype}" == ntfs3 ]]; then echo "${uuid} windows-not-shut-down"; else echo "${uuid} not-opened"; fi
+        return 1
+    fi
+    games_access on "${mp}"
+    # A Linux disk still empty (a new one, owned by root): the user's
+    case "${fstype}" in
+        ext4 | xfs | btrfs)
+            if [[ "${uid}" != 0 && "$(stat -c %u "${mp}")" == 0 ]] \
+                && [[ -z "$(find "${mp}" -mindepth 1 -maxdepth 1 ! -name lost+found -print -quit)" ]]; then
+                chown "${uid}:${gid}" "${mp}"
+            fi
+            ;;
+    esac
+}
+
+disk_off() { # uuid
+    local uuid="$1" mp
+    mp="$(our_line "${uuid}" | awk '{ print $2 }')"
+    [[ -n "${mp}" ]] || return 0
+    write_fstab "${uuid}" || { echo "${uuid} not-closed"; return 1; }
+    games_access off "${mp}"
+    if mountpoint -q "${mp}" && ! umount "${mp}" 2>/dev/null; then
+        # A file on it is open: it closes at the next restart
+        echo "${uuid} busy-until-restart"
+        return 0
+    fi
+    rmdir "${mp}" 2>/dev/null || :
+}
+
+case "$1" in
+    clean)
+        flatpak uninstall --system --unused --noninteractive -y
+        rpm-ostree cleanup --base --repomd
+        ;;
+    driver-key)
+        key=/etc/pki/akmods/certs/akmods-ublue.der
+        if mokutil --test-key "${key}" 2>/dev/null | grep -q 'already enrolled'; then
+            echo "The driver key is already enrolled."
+            exit 0
+        fi
+        mokutil --timeout -1 || :
+        printf '%s\n%s\n' celennos celennos | mokutil --import "${key}"
+        echo "At the next restart, a blue screen (MOK manager, QWERTY keyboard layout) shows up:"
+        echo "choose \"Enroll MOK\", then \"Continue\", and type the password \"celennos\"."
+        ;;
+    disks)
+        failed=0
+        for change in "${@:2}"; do
+            uuid="${change%=*}"
+            if [[ "${change#*=}" == on ]]; then
+                disk_on "${uuid}" || failed=1
+            else
+                disk_off "${uuid}" || failed=1
+            fi
+        done
+        exit "${failed}"
+        ;;
+esac

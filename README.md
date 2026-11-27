@@ -1,4 +1,4 @@
-<p align="center"><img src="branding/logo/cosmic-blue-readme-banner.svg" alt="cosmic-blue" width="720"></p>
+<p align="center"><img src="branding/logo/celenn-readme-banner.svg" alt="cosmic-blue" width="720"></p>
 
 cosmic-blue is an independent Fedora Atomic image with the
 [COSMIC](https://system76.com/cosmic) desktop. It is built on the
@@ -64,7 +64,7 @@ sudo systemctl reboot
 Secure Boot: the standard image works with it as is (Fedora's signed kernel).
 Only the NVIDIA image needs its driver's key enrolled once: on the first reboot,
 a blue screen (MOK manager) shows up; choose *Enroll MOK*, then *Continue*, and
-type the password `cosmicblue` (QWERTY keyboard layout).
+type the password `celennos` (QWERTY keyboard layout).
 
 ## Updates and rollback
 

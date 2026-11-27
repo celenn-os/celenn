@@ -1,8 +1,8 @@
-// The Help page of cosmic-blue Tools (tools.rs): the documentation, a place
+// The Help page of Celenn OS Tools (tools.rs): the documentation, a place
 // to ask questions, and the bug report of `ujust report-bug`, as buttons.
-// "Report a problem" runs /usr/libexec/cosmic-blue-report-bug, the same
+// "Report a problem" runs /usr/libexec/celenn-report-bug, the same
 // script as `ujust report-bug`: it opens the bug report form with the system
-// details filled in (cosmic-blue-system-info: no personal data). The page
+// details filled in (celenn-system-info: no personal data). The page
 // shows those details first, and can copy them.
 
 use crate::common::{label, spawn, state_icon};
@@ -12,10 +12,10 @@ use cosmic::iced::{Alignment, Length};
 use cosmic::widget::{self, settings, text};
 use cosmic::{Element, cosmic_theme, theme};
 
-const DOCS: &str = "/usr/bin/cosmic-blue-docs";
+const DOCS: &str = "/usr/bin/celenn-docs";
 const QUESTIONS: &str = "https://github.com/cosmic-blue-os/cosmic-blue/discussions/categories/q-a";
-const REPORT: &str = "/usr/libexec/cosmic-blue-report-bug";
-const SYSTEM_INFO: &str = "/usr/libexec/cosmic-blue-system-info";
+const REPORT: &str = "/usr/libexec/celenn-report-bug";
+const SYSTEM_INFO: &str = "/usr/libexec/celenn-system-info";
 
 pub const TEXTS: &[&str] = &[
     "Find answers, ask a question, or tell us what goes wrong.",
@@ -23,7 +23,7 @@ pub const TEXTS: &[&str] = &[
     "Updates, software, commands and tips",
     "Open",
     "Ask a question",
-    "Other cosmic-blue users and its makers answer, on GitHub.",
+    "Other Celenn OS users and its makers answer, on GitHub.",
     "Report a problem",
     "Opens the bug report form with the details of this computer filled in. They hold no personal data. A GitHub account is needed.",
     "Show the details",
@@ -182,7 +182,7 @@ impl Page {
                     .add(row(
                         "dialog-question-symbolic",
                         tr("Ask a question"),
-                        "Other cosmic-blue users and its makers answer, on GitHub.",
+                        "Other Celenn OS users and its makers answer, on GitHub.",
                         open(Message::Questions),
                     )),
             )

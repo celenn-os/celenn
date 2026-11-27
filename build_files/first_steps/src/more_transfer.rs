@@ -161,7 +161,7 @@ impl Page {
                 use cosmic::dialog::file_chooser;
                 let dialog = file_chooser::open::Dialog::new()
                     .title(tr("Choose the file saved on your other computer"))
-                    .filter(file_chooser::FileFilter::new("cosmic-blue").glob("*.json"));
+                    .filter(file_chooser::FileFilter::new("Celenn OS").glob("*.json"));
                 return Task::perform(
                     async move {
                         dialog
@@ -327,7 +327,7 @@ impl Page {
             state_icon("emblem-synchronizing-symbolic", false),
             label(
                 tr("Change computers"),
-                tr("Your settings and the list of your apps in a file, to take back on another cosmic-blue computer.")
+                tr("Your settings and the list of your apps in a file, to take back on another Celenn OS computer.")
                     .to_owned(),
             ),
             widget::row::with_capacity(2)
