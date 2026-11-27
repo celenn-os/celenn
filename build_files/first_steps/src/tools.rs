@@ -528,10 +528,10 @@ impl App {
                 .more
                 .opened(more::Part::Apps)
                 .map(|action| action.map(Message::More)),
-            Some(Tool::WebApps) => {
-                self.webapps.opened();
-                Task::none()
-            }
+            Some(Tool::WebApps) => self
+                .webapps
+                .opened()
+                .map(|action| action.map(Message::WebApps)),
             Some(_) => Task::none(),
         };
         // From the top

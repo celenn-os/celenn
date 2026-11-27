@@ -111,6 +111,8 @@ pub enum Message {
     Remove(String),
     Launch(String),
     Toast(ToastAsk<Message>),
+    /// The popular sites' icons are in the cache
+    IconsCached,
 }
 
 pub struct Page {
@@ -119,6 +121,10 @@ pub struct Page {
     dock: bool,
     /// Addresses being added
     adding: Vec<String>,
+    /// The popular sites' icons (from the cache), in the order of SITES
+    site_icons: Vec<Option<PathBuf>>,
+    /// Their icons are being fetched
+    caching: bool,
 }
 
 impl Page {
@@ -128,12 +134,25 @@ impl Page {
             address: String::new(),
             dock: false,
             adding: Vec::new(),
+            site_icons: site_icons(),
+            caching: false,
         }
     }
 
-    /// The tool was opened: its web apps read again
-    pub fn opened(&mut self) {
+    /// The tool was opened: its web apps read again, and the popular sites'
+    /// icons fetched from the sites themselves when not in the cache yet
+    pub fn opened(&mut self) -> Task<Message> {
         self.apps = installed();
+        if self.caching || !SITES.iter().any(|(_, url, _)| icon_missing(url)) {
+            return Task::none();
+        }
+        self.caching = true;
+        Task::perform(
+            async {
+                let _ = tokio::task::spawn_blocking(cache_icons).await;
+            },
+            |()| cosmic::Action::App(Message::IconsCached),
+        )
     }
 
     /// What its tile says
@@ -262,6 +281,11 @@ impl Page {
                 crate::common::spawn("gio", &["launch", &file.to_string_lossy()]);
                 Task::none()
             }
+            Message::IconsCached => {
+                self.caching = false;
+                self.site_icons = site_icons();
+                Task::none()
+            }
             // (tools.rs shows it)
             Message::Toast(_) => Task::none(),
         }
@@ -288,10 +312,14 @@ impl Page {
                 } else {
                     tr(caption).to_owned()
                 };
+                let icon = app
+                    .and_then(|app| icon_file(&app.id))
+                    .or_else(|| self.site_icons.get(i).cloned().flatten());
                 tile(
                     name.to_owned(),
                     caption,
-                    app.map(|app| app.id.as_str()),
+                    icon,
+                    app.is_some(),
                     (!adding).then_some(Message::Site(i)),
                 )
             })
@@ -308,7 +336,8 @@ impl Page {
                     tile(
                         app.name.clone(),
                         host(&app.url).unwrap_or(&app.url).to_owned(),
-                        Some(&app.id),
+                        icon_file(&app.id),
+                        true,
                         Some(Message::AskRemove(app.id.clone())),
                     )
                 }),
@@ -322,6 +351,7 @@ impl Page {
                         host(url).unwrap_or(url).to_owned(),
                         tr("Adding…").to_owned(),
                         None,
+                        false,
                         None,
                     )
                 }),
@@ -382,21 +412,22 @@ impl Page {
     }
 }
 
-/// A site's tile: its icon once added (a globe before), its name, a caption,
+/// A site's tile: its icon (a globe while it has none), its name, a caption,
 /// and a tick once added (a "+" before)
 fn tile<'a>(
     name: String,
     caption: String,
-    added: Option<&str>,
+    icon: Option<PathBuf>,
+    added: bool,
     on_press: Option<Message>,
 ) -> Element<'a, Message> {
     let space_s = theme::spacing().space_s;
     let one_line = Ellipsize::End(EllipsizeHeightLimit::Lines(1));
-    let icon = match added.and_then(icon_file) {
+    let icon = match icon {
         Some(file) => widget::icon(widget::icon::from_path(file)).size(32).into(),
         None => tool_icon("web-browser-symbolic", 32),
     };
-    let mark = widget::icon::from_name(if added.is_some() {
+    let mark = widget::icon::from_name(if added {
         "object-select-symbolic"
     } else {
         "list-add-symbolic"
@@ -418,7 +449,7 @@ fn tile<'a>(
         .padding([0, space_s])
         .height(Length::Fill)
         .apply(widget::button::custom)
-        .class(crate::style::tile_style(added.is_some()))
+        .class(crate::style::tile_style(added))
         .padding(0)
         .width(Length::Fill)
         .height(Length::Fixed(50.0))
@@ -459,6 +490,93 @@ fn icon_paths(id: &str) -> [PathBuf; 2] {
 /// The web app's icon file, when it has one
 fn icon_file(id: &str) -> Option<PathBuf> {
     icon_paths(id).into_iter().find(|path| path.is_file())
+}
+
+/// Where a site's icon is kept, fetched from the site itself (nothing is
+/// shipped in the image): PNG, SVG, and a mark saying the site has none
+fn cache_paths(url: &str) -> Option<[PathBuf; 3]> {
+    let id = app_id(url)?;
+    let name = id.strip_prefix(ID_PREFIX).unwrap_or(&id);
+    let cache = std::env::var_os("XDG_CACHE_HOME")
+        .map(PathBuf::from)
+        .filter(|path| path.is_absolute())
+        .unwrap_or_else(|| home().join(".cache"))
+        .join("cosmic-blue/web-app-icons");
+    Some([
+        cache.join(format!("{name}.png")),
+        cache.join(format!("{name}.svg")),
+        cache.join(format!("{name}.none")),
+    ])
+}
+
+/// A site's icon in the cache
+fn cached_icon(url: &str) -> Option<PathBuf> {
+    let [png, svg, _] = cache_paths(url)?;
+    [png, svg].into_iter().find(|path| path.is_file())
+}
+
+/// The site's icon is not in the cache, and the site was not asked for it
+/// in the last week
+fn icon_missing(url: &str) -> bool {
+    let Some([_, _, none]) = cache_paths(url) else {
+        return false;
+    };
+    let asked_lately = std::fs::metadata(&none)
+        .and_then(|meta| meta.modified())
+        .ok()
+        .and_then(|time| time.elapsed().ok())
+        .is_some_and(|age| age.as_secs() < 7 * 24 * 3600);
+    cached_icon(url).is_none() && !asked_lately
+}
+
+fn site_icons() -> Vec<Option<PathBuf>> {
+    SITES.iter().map(|(_, url, _)| cached_icon(url)).collect()
+}
+
+/// Fetches the popular sites' missing icons, all at once
+fn cache_icons() {
+    let threads: Vec<_> = SITES
+        .iter()
+        .filter(|(_, url, _)| icon_missing(url))
+        .map(|&(_, url, _)| std::thread::spawn(move || cache_icon(url)))
+        .collect();
+    for thread in threads {
+        let _ = thread.join();
+    }
+}
+
+fn cache_icon(url: &str) {
+    let Some([png, svg, none]) = cache_paths(url) else {
+        return;
+    };
+    if let Some(dir) = png.parent() {
+        let _ = std::fs::create_dir_all(dir);
+    }
+    let page = fetch(url);
+    let base = page
+        .as_ref()
+        .map_or_else(|| url.to_owned(), |(_, final_url)| final_url.clone());
+    // (written aside first: the page may read the cache meanwhile)
+    let [png_part, svg_part] = [
+        png.with_extension("png.part"),
+        svg.with_extension("svg.part"),
+    ];
+    let found = matches!(
+        site_icon(
+            &png_part,
+            &svg_part,
+            page.as_ref().map(|(html, _)| html.as_str()),
+            &base
+        ),
+        Ok(true)
+    );
+    let _ = std::fs::rename(&png_part, &png);
+    let _ = std::fs::rename(&svg_part, &svg);
+    if found {
+        let _ = std::fs::remove_file(&none);
+    } else {
+        let _ = std::fs::write(&none, "");
+    }
 }
 
 /// Its Firefox profile (in Firefox's own folder, which the Flatpak sees)
@@ -596,6 +714,7 @@ fn create(name: Option<&str>, url: &str, dock: bool) -> Result<WebApp, String> {
     install_icon(
         &id,
         &name,
+        url,
         page.as_ref().map(|(html, _)| html.as_str()),
         &base,
     )
@@ -907,9 +1026,15 @@ fn icon_candidates(html: Option<&str>, base: &str) -> Vec<String> {
     candidates
 }
 
-/// The site's icon at the icon theme's place: its best icon of at least
-/// 48 pixels, or else a round letter
-fn install_icon(id: &str, name: &str, html: Option<&str>, base: &str) -> std::io::Result<()> {
+/// The site's icon at the icon theme's place: the one in the cache, or its
+/// best icon of at least 48 pixels, or else a round letter
+fn install_icon(
+    id: &str,
+    name: &str,
+    url: &str,
+    html: Option<&str>,
+    base: &str,
+) -> std::io::Result<()> {
     let [png, svg] = icon_paths(id);
     for path in [&png, &svg] {
         if let Some(dir) = path.parent() {
@@ -917,6 +1042,25 @@ fn install_icon(id: &str, name: &str, html: Option<&str>, base: &str) -> std::io
         }
         let _ = std::fs::remove_file(path);
     }
+    if let Some(cached) = cached_icon(url) {
+        let target = if cached.extension().is_some_and(|ext| ext == "svg") {
+            &svg
+        } else {
+            &png
+        };
+        if std::fs::copy(&cached, target).is_ok() {
+            return Ok(());
+        }
+    }
+    if site_icon(&png, &svg, html, base)? {
+        return Ok(());
+    }
+    std::fs::write(&svg, letter_icon(name))
+}
+
+/// Writes the site's best icon of at least 48 pixels (or 32 when it has no
+/// larger one) to `png` or `svg`; false when it has none
+fn site_icon(png: &Path, svg: &Path, html: Option<&str>, base: &str) -> std::io::Result<bool> {
     let mut small: Option<image::DynamicImage> = None;
     for candidate in icon_candidates(html, base).iter().take(6) {
         let Some(bytes) = download(candidate) else {
@@ -924,13 +1068,15 @@ fn install_icon(id: &str, name: &str, html: Option<&str>, base: &str) -> std::io
         };
         let head = String::from_utf8_lossy(&bytes[..bytes.len().min(512)]).to_ascii_lowercase();
         if head.contains("<svg") {
-            return std::fs::write(&svg, &bytes);
+            std::fs::write(svg, &bytes)?;
+            return Ok(true);
         }
         let Ok(picture) = image::load_from_memory(&bytes) else {
             continue;
         };
         if picture.width().min(picture.height()) >= 48 {
-            return save_png(&picture, &png);
+            save_png(&picture, png)?;
+            return Ok(true);
         }
         if small
             .as_ref()
@@ -940,8 +1086,8 @@ fn install_icon(id: &str, name: &str, html: Option<&str>, base: &str) -> std::io
         }
     }
     match small {
-        Some(picture) if picture.width() >= 32 => save_png(&picture, &png),
-        _ => std::fs::write(&svg, letter_icon(name)),
+        Some(picture) if picture.width() >= 32 => save_png(&picture, png).map(|()| true),
+        _ => Ok(false),
     }
 }
 
