@@ -43,7 +43,7 @@ put "${CONFIG}/celenn/kept" 'new'
 
 "${SCRIPT}" --user >/dev/null
 
-[[ ! -e "${CONFIG}/cosmic-blue" ]] || fail "~/.config/cosmic-blue is still there"
+[[ ! -e "${CONFIG}/cosmic-blue" ]] || fail "the old settings folder is still there"
 is "${CONFIG}/celenn/tools.json" '{"seen": true}'
 is "${CONFIG}/celenn/kept" 'new'
 is "${HOME}/.local/state/celenn/defaults.list" 'manifest x'
