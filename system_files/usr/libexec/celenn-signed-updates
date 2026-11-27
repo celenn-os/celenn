@@ -2,7 +2,7 @@
 # Turns on the signature check of Celenn OS updates on systems that follow
 # a Celenn OS image without it.
 #
-# `bootc switch ghcr.io/cosmic-blue-os/cosmic-blue:stable` (from Bluefin,
+# `bootc switch ghcr.io/celenn-os/celenn:stable` (from Bluefin,
 # Aurora, Silverblue...) records the image without signature verification
 # unless --enforce-container-sigpolicy is given, and every later update
 # (uupd, `ujust update`, `bootc upgrade`) then installs whatever the registry
@@ -15,7 +15,7 @@
 # Usage: celenn-signed-updates [--dry-run]
 set -euo pipefail
 
-VENDOR="ghcr.io/cosmic-blue-os"
+VENDOR="ghcr.io/celenn-os"
 dry_run=false
 [[ "${1:-}" == --dry-run ]] && dry_run=true
 

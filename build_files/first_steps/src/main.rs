@@ -71,7 +71,7 @@ use system::{Computer, Package};
 use tour_keys::*;
 use tour_view::*;
 
-const SITE: &str = "https://cosmic-blue-os.github.io/cosmic-blue/";
+const SITE: &str = "https://celenn-os.github.io/celenn/";
 const LOGO: &str = "/usr/share/icons/hicolor/scalable/apps/celenn-logo.svg";
 /// Welcome page illustration of the live tour: the default wallpaper in
 /// miniature

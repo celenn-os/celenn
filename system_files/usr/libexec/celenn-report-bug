@@ -11,7 +11,7 @@
 # problem" button of an error in Celenn OS Tools or Parental controls).
 set -euo pipefail
 
-form="https://github.com/cosmic-blue-os/cosmic-blue/issues/new?template=bug_report.yml"
+form="https://github.com/celenn-os/celenn/issues/new?template=bug_report.yml"
 
 case "${1:-} $#" in
     "open 1" | "url 1") ;;

@@ -7,7 +7,7 @@
      caches). An administrator password, remembered for a few minutes. -->
 <policyconfig>
   <vendor>Celenn OS</vendor>
-  <vendor_url>https://cosmic-blue-os.github.io/cosmic-blue/</vendor_url>
+  <vendor_url>https://celenn-os.github.io/celenn/</vendor_url>
   <action id="io.github.celenn_os.tools.manage">
     <description>Free up disk space</description>
     <description xml:lang="fr">Libérer de l'espace disque</description>

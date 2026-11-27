@@ -2,8 +2,8 @@
 # Celenn OS build entry point. Each step is a separate script.
 set -euox pipefail
 
-: "${IMAGE_NAME:=cosmic-blue}"
-: "${IMAGE_VENDOR:=cosmic-blue-os}"
+: "${IMAGE_NAME:=celenn}"
+: "${IMAGE_VENDOR:=celenn-os}"
 : "${UBLUE_IMAGE_TAG:=latest}"
 : "${VERSION:=}"
 export IMAGE_NAME IMAGE_VENDOR UBLUE_IMAGE_TAG VERSION

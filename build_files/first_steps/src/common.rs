@@ -134,7 +134,7 @@ pub fn site_url(path: &str) -> String {
         Some("it") => "it/",
         _ => "",
     };
-    format!("https://cosmic-blue-os.github.io/cosmic-blue/{language}{path}")
+    format!("https://celenn-os.github.io/celenn/{language}{path}")
 }
 
 pub use crate::process::spawn;

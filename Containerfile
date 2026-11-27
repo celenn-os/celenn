@@ -50,8 +50,8 @@ COPY cosign.pub /system_files/celenn/etc/pki/containers/cosmic-blue.pub
 
 FROM ${BASE_IMAGE}
 
-ARG IMAGE_NAME="cosmic-blue"
-ARG IMAGE_VENDOR="cosmic-blue-os"
+ARG IMAGE_NAME="celenn"
+ARG IMAGE_VENDOR="celenn-os"
 ARG UBLUE_IMAGE_TAG="latest"
 ARG VERSION=""
 
