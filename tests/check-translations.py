@@ -21,7 +21,10 @@ PROGRAMS = {
     "src/parental_daemon.rs": "po/parental/celenn-parental-controls.pot",
 }
 TR = re.compile(r'\btr\(\s*"((?:[^"\\]|\\.)*)"\s*\)', re.S)
-MOD = re.compile(r"^\s*(?:pub(?:\([^)]*\))?\s+)?mod\s+(\w+)\s*;", re.M)
+# A module declaration, with the file named by #[path = "..."] when it has one
+MOD = re.compile(
+    r'^\s*(?:#\[path\s*=\s*"([^"]+)"\]\s*)?(?:pub(?:\([^)]*\))?\s+)?mod\s+(\w+)\s*;', re.M
+)
 MSGID = re.compile(r'^msgid "((?:[^"\\]|\\.)*)"\n((?:"(?:[^"\\]|\\.)*"\n)*)', re.M)
 
 
@@ -58,8 +61,14 @@ for po in sorted(CRATE.glob("po/**/*.po*")):
         seen.add(text)
 for root, pot in PROGRAMS.items():
     known = template(CRATE / pot)
+    # The program's modules, and theirs (src/ is flat: a module's own
+    # modules are files next to it, or the file its #[path] names)
     files = [CRATE / root]
-    files += [CRATE / "src" / f"{name}.rs" for name in MOD.findall(files[0].read_text())]
+    for file in files:
+        for path, name in MOD.findall(file.read_text()):
+            module = CRATE / "src" / (path or f"{name}.rs")
+            if module.exists() and module not in files:
+                files.append(module)
     for file in files:
         source = file.read_text()
         # Not the unit tests
