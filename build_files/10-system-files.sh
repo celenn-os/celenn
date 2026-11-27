@@ -280,10 +280,4 @@ docker:
   ${OLD_IMAGE}:
     use-sigstore-attachments: true
 EOF
-docker:
-  ${IMAGE}:
-    use-sigstore-attachments: true
-  ${NEW_IMAGE}:
-    use-sigstore-attachments: true
-EOF
 
