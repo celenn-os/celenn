@@ -1120,3 +1120,89 @@ msgstr "Der offene, in Linux eingebaute Treiber."
 
 msgid "This computer has only ever run this version."
 msgstr "Dieser Computer lief bisher nur mit dieser Version."
+
+msgid "Add"
+msgstr "Hinzufügen"
+
+msgid "Added"
+msgstr "Hinzugefügt"
+
+msgid "Adding…"
+msgstr "Wird hinzugefügt…"
+
+msgid "Also add to the dock"
+msgstr "Auch zum Dock hinzufügen"
+
+msgid "Another site"
+msgstr "Eine andere Seite"
+
+msgid "Documents and sheets"
+msgstr "Texte und Tabellen"
+
+msgid "Email"
+msgstr "E-Mail"
+
+msgid "Films and series"
+msgstr "Filme und Serien"
+
+msgid "Firefox is missing. Put it back in Repair."
+msgstr "Firefox fehlt. Stellen Sie es unter Reparieren wieder her."
+
+msgid "For example laposte.fr"
+msgstr "Zum Beispiel bahn.de"
+
+msgid "Its name and icon are found by themselves."
+msgstr "Name und Symbol werden von selbst gefunden."
+
+msgid "Messages"
+msgstr "Nachrichten"
+
+msgid "Music"
+msgstr "Musik"
+
+msgid "Otherwise its icon shows in the dock while it is open."
+msgstr "Sonst erscheint ihr Symbol im Dock, solange sie geöffnet ist."
+
+
+msgid "Posters and cards"
+msgstr "Plakate und Karten"
+
+msgid "Remove {}? You will have to sign in again if you add it back."
+msgstr "{} entfernen? Wenn Sie sie wieder hinzufügen, müssen Sie sich erneut anmelden."
+
+msgid "They open with Firefox: the protection against ads and tracking, and the parental controls, apply to them too. Sign in once in each one."
+msgstr "Sie öffnen sich mit Firefox: Der Schutz vor Werbung und Tracking und die Kindersicherung gelten auch für sie. Melden Sie sich in jeder einmal an."
+
+msgid "This address does not look right. Type it as in the address bar, for example laposte.fr."
+msgstr "Diese Adresse scheint nicht zu stimmen. Geben Sie sie wie in der Adressleiste ein, zum Beispiel bahn.de."
+
+msgid "Videos"
+msgstr "Videos"
+
+msgid "Web apps"
+msgstr "Web-Apps"
+
+msgid "WhatsApp, Netflix, Gmail…"
+msgstr "WhatsApp, Netflix, Gmail…"
+
+msgid "Word and Excel online"
+msgstr "Word und Excel online"
+
+msgid "Your favourite sites in their own window, with their icon in your apps and the dock."
+msgstr "Ihre Lieblingsseiten in einem eigenen Fenster, mit ihrem Symbol in Ihren Apps und im Dock."
+
+
+msgid "Your photos"
+msgstr "Ihre Fotos"
+
+msgid "Photos and stories"
+msgstr "Fotos und Storys"
+
+msgid "{} could not be added. Is this computer connected to the internet?"
+msgstr "{} konnte nicht hinzugefügt werden. Ist dieser Computer mit dem Internet verbunden?"
+
+msgid "{} is in your apps."
+msgstr "{} ist jetzt in Ihren Apps."
+
+msgid "{} was removed."
+msgstr "{} wurde entfernt."

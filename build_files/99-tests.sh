@@ -575,6 +575,10 @@ if ldd /usr/libexec/celenn-tools | grep 'not found'; then
     echo "celenn-tools: missing libraries"; exit 1
 fi
 /usr/libexec/celenn-tools --check
+# Web apps (webapps.rs): the programs that make them and open them
+for program in curl gio update-desktop-database; do
+    command -v "${program}"
+done
 for script in celenn-clean celenn-tools-helper celenn-report-bug; do
     test -x "/usr/libexec/${script}"
 done

@@ -441,6 +441,7 @@ desktop_tour() {
         "06-tools-failure|CELENN_TOOLS_PREVIEW=failure /usr/libexec/celenn-tools --tool space" \
         "06-tools-developer|CELENN_TOOLS_PREVIEW=developer-tools /usr/libexec/celenn-tools --tool apps" \
         "06-tools-disks|/usr/libexec/celenn-tools --tool disks" \
+        "06-tools-web-apps|/usr/libexec/celenn-tools --tool web-apps" \
         "06-shortcuts|/usr/libexec/celenn-tour --shortcuts"; do
         name="${entry%%|*}"
         cmd="${entry#*|}"
@@ -459,6 +460,8 @@ desktop_tour() {
             continue
         fi
         sleep 12
+        # (Web apps: its sites' icons come from the internet)
+        [[ "${name}" == 06-tools-web-apps ]] && sleep 18
         screenshot "${SHOTS}/${name}"
         vm "pkill -u ${DEMO_USER} -f '^(/usr/bin/)?${program}'" || true
         sleep 3

@@ -1120,3 +1120,89 @@ msgstr "O driver livre que vem no Linux."
 
 msgid "This computer has only ever run this version."
 msgstr "Este computador só usou esta versão até agora."
+
+msgid "Add"
+msgstr "Adicionar"
+
+msgid "Added"
+msgstr "Adicionado"
+
+msgid "Adding…"
+msgstr "Adicionando…"
+
+msgid "Also add to the dock"
+msgstr "Adicionar também ao dock"
+
+msgid "Another site"
+msgstr "Outro site"
+
+msgid "Documents and sheets"
+msgstr "Documentos e planilhas"
+
+msgid "Email"
+msgstr "E-mail"
+
+msgid "Films and series"
+msgstr "Filmes e séries"
+
+msgid "Firefox is missing. Put it back in Repair."
+msgstr "O Firefox está faltando. Coloque-o de volta em Reparar."
+
+msgid "For example laposte.fr"
+msgstr "Por exemplo correios.com.br"
+
+msgid "Its name and icon are found by themselves."
+msgstr "O nome e o ícone são encontrados sozinhos."
+
+msgid "Messages"
+msgstr "Mensagens"
+
+msgid "Music"
+msgstr "Música"
+
+msgid "Otherwise its icon shows in the dock while it is open."
+msgstr "Senão, o ícone aparece no dock enquanto ele está aberto."
+
+
+msgid "Posters and cards"
+msgstr "Cartazes e cartões"
+
+msgid "Remove {}? You will have to sign in again if you add it back."
+msgstr "Remover {}? Será preciso entrar de novo se você adicioná-lo outra vez."
+
+msgid "They open with Firefox: the protection against ads and tracking, and the parental controls, apply to them too. Sign in once in each one."
+msgstr "Eles abrem com o Firefox: a proteção contra anúncios e rastreamento e o controle parental também valem para eles. Entre uma vez em cada um."
+
+msgid "This address does not look right. Type it as in the address bar, for example laposte.fr."
+msgstr "Este endereço não parece certo. Digite-o como na barra de endereços, por exemplo correios.com.br."
+
+msgid "Videos"
+msgstr "Vídeos"
+
+msgid "Web apps"
+msgstr "Apps da web"
+
+msgid "WhatsApp, Netflix, Gmail…"
+msgstr "WhatsApp, Netflix, Gmail…"
+
+msgid "Word and Excel online"
+msgstr "Word e Excel on-line"
+
+msgid "Your favourite sites in their own window, with their icon in your apps and the dock."
+msgstr "Seus sites favoritos em uma janela própria, com o ícone deles nos seus apps e no dock."
+
+
+msgid "Your photos"
+msgstr "Suas fotos"
+
+msgid "Photos and stories"
+msgstr "Fotos e stories"
+
+msgid "{} could not be added. Is this computer connected to the internet?"
+msgstr "Não foi possível adicionar {}. Este computador está conectado à internet?"
+
+msgid "{} is in your apps."
+msgstr "{} está nos seus apps."
+
+msgid "{} was removed."
+msgstr "{} foi removido."

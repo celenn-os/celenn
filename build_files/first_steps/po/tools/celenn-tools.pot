@@ -1118,3 +1118,89 @@ msgstr ""
 
 msgid "This computer has only ever run this version."
 msgstr ""
+
+msgid "Add"
+msgstr ""
+
+msgid "Added"
+msgstr ""
+
+msgid "Adding…"
+msgstr ""
+
+msgid "Also add to the dock"
+msgstr ""
+
+msgid "Another site"
+msgstr ""
+
+msgid "Documents and sheets"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "Films and series"
+msgstr ""
+
+msgid "Firefox is missing. Put it back in Repair."
+msgstr ""
+
+msgid "For example laposte.fr"
+msgstr ""
+
+msgid "Its name and icon are found by themselves."
+msgstr ""
+
+msgid "Messages"
+msgstr ""
+
+msgid "Music"
+msgstr ""
+
+msgid "Otherwise its icon shows in the dock while it is open."
+msgstr ""
+
+
+msgid "Posters and cards"
+msgstr ""
+
+msgid "Remove {}? You will have to sign in again if you add it back."
+msgstr ""
+
+msgid "They open with Firefox: the protection against ads and tracking, and the parental controls, apply to them too. Sign in once in each one."
+msgstr ""
+
+msgid "This address does not look right. Type it as in the address bar, for example laposte.fr."
+msgstr ""
+
+msgid "Videos"
+msgstr ""
+
+msgid "Web apps"
+msgstr ""
+
+msgid "WhatsApp, Netflix, Gmail…"
+msgstr ""
+
+msgid "Word and Excel online"
+msgstr ""
+
+msgid "Your favourite sites in their own window, with their icon in your apps and the dock."
+msgstr ""
+
+
+msgid "Your photos"
+msgstr ""
+
+msgid "Photos and stories"
+msgstr ""
+
+msgid "{} could not be added. Is this computer connected to the internet?"
+msgstr ""
+
+msgid "{} is in your apps."
+msgstr ""
+
+msgid "{} was removed."
+msgstr ""

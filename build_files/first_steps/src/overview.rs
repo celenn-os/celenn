@@ -61,6 +61,7 @@ const SETTINGS: &[(&str, &str, Tool)] = &[
     ),
     ("Get new features early", "", Tool::Advanced),
     ("An older version", "", Tool::Advanced),
+    ("Another site", "WhatsApp, Netflix, Gmail…", Tool::WebApps),
     ("Disk space", "", Tool::Space),
     ("Trash", "", Tool::Space),
     (
