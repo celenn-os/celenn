@@ -1,6 +1,6 @@
-<p align="center"><img src="branding/logo/celenn-readme-banner.svg" alt="cosmic-blue" width="720"></p>
+<p align="center"><img src="branding/logo/celenn-readme-banner.svg" alt="Celenn OS" width="720"></p>
 
-cosmic-blue is an independent Fedora Atomic image with the
+Celenn OS is an independent Fedora Atomic image with the
 [COSMIC](https://system76.com/cosmic) desktop. It is built on the
 [Universal Blue](https://universal-blue.org/) base images and inspired by
 Bluefin, but it is not part of, affiliated with or endorsed by Universal Blue
@@ -9,11 +9,11 @@ or Bluefin.
 It is an atomic (bootc) system: updates are applied in the background, take
 effect on the next reboot, and can be rolled back.
 
-[![cosmic-blue desktop with a terminal open](https://celenn-os.github.io/celenn/img/screenshots/terminal.webp?v=45.20261127)](https://celenn-os.github.io/celenn/screenshots/)
+[![Celenn OS desktop with a terminal open](https://celenn-os.github.io/celenn/img/screenshots/terminal.webp?v=45.20261127)](https://celenn-os.github.io/celenn/screenshots/)
 
 It comes with its own apps: a guided tour at first login, parental controls,
-cosmic-blue Tools (system tools and extra software, without a terminal) and
-Updates. See [why cosmic-blue](https://celenn-os.github.io/celenn/why/).
+Celenn OS Tools (system tools and extra software, without a terminal) and
+Updates. See [why Celenn OS](https://celenn-os.github.io/celenn/why/).
 
 ## Versions
 
@@ -27,7 +27,7 @@ In the current `stable` image (Celenn OS 45.20261127):
 ![NVIDIA 620.73.04](https://img.shields.io/badge/NVIDIA-620.73.04-4f8dff)
 <!-- versions:end -->
 
-What changed in each `stable` version (packages, COSMIC, cosmic-blue):
+What changed in each `stable` version (packages, COSMIC, Celenn OS):
 [Releases](https://github.com/celenn-os/celenn/releases).
 
 ## Install
@@ -44,7 +44,7 @@ sudo bootc switch ghcr.io/celenn-os/celenn:stable
 sudo systemctl reboot
 ```
 
-After the reboot, cosmic-blue turns on the signature check of its updates by
+After the reboot, Celenn OS turns on the signature check of its updates by
 itself (`bootc switch --enforce-container-sigpolicy`).
 
 `stable` moves once a week to a build that has spent a week on `testing`.
@@ -78,7 +78,7 @@ sudo bootc rollback   # go back to the previous version on next boot
 
 ## Developer tools
 
-Pick them in cosmic-blue Tools, *Extra software*, or from a terminal:
+Pick them in Celenn OS Tools, *Extra software*, or from a terminal:
 
 ```bash
 ujust install-dev-tools   # Docker, VS Code, Podman Desktop and other developer tools
@@ -103,5 +103,5 @@ and [COSMIC](https://github.com/pop-os/cosmic-epoch), from the
 The Milky Way wallpaper is a photo taken on the International Space Station,
 courtesy of NASA.
 
-cosmic-blue is an independent project, not affiliated with any of the projects
+Celenn OS is an independent project, not affiliated with any of the projects
 above.

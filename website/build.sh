@@ -65,7 +65,7 @@ if [[ -n "${shots_dir}" && -f "${shots_dir}/info.env" ]]; then
     [[ " ${shots} " == *" ${name} "* ]] && continue
     convert "${file}" -strip -quality 90 -define webp:method=6 "${out}/img/screenshots/${name}.webp"
     convert "${file}" -resize 960x -strip -quality 85 -define webp:method=6 "${out}/img/screenshots/${name}-960.webp"
-    # The "Why cosmic-blue" page shows app windows closer: the middle of the
+    # The "Why Celenn OS" page shows app windows closer: the middle of the
     # screen, where the window opens
     if [[ " ${zoom_shots} " == *" ${name} "* ]]; then
       convert "${file}" -gravity center -crop 1200x760+0-40 +repage -strip -quality 85 \
@@ -90,7 +90,7 @@ elif [[ -n "${shots_dir}" ]]; then
   echo "::error file=website/build.sh::SCREENSHOTS_DIR=${shots_dir} has no screenshots (see website/fetch-screenshots.sh)"
   exit 1
 fi
-# The "Why cosmic-blue" page needs its screenshots: fail when the boot test
+# The "Why Celenn OS" page needs its screenshots: fail when the boot test
 # no longer takes one (renamed or removed) rather than drop it silently
 for name in ${zoom_shots} ${win_shots}; do
   if ! grep -qE "[0-9]{2}-${name%-[0-9]}" "${root}/tests/vm-lib.sh"; then
@@ -203,9 +203,9 @@ for page in "${all_pages[@]}"; do
 done
 cp "${root}/website/style.css" "${root}/website/site.js" "${out}/"
 # (The pages still use the file names from before the rename to Celenn OS)
-cp "${root}/branding/logo/celenn-logo.svg" "${out}/img/cosmic-blue-logo.svg"
+cp "${root}/branding/logo/celenn-logo.svg" "${out}/img/celenn-logo.svg"
 cp "${root}/branding/logo/celenn-logo-horizontal-dark.svg" \
-   "${out}/img/cosmic-blue-logo-horizontal-dark.svg"
+   "${out}/img/celenn-logo-horizontal-dark.svg"
 
 # Header image: WebP (about a quarter of the JPEG size), JPEG kept for old
 # browsers and for link previews (og:image)
@@ -221,7 +221,7 @@ done
 cp -r "${root}/website/fonts" "${out}/"
 
 # Link preview image (og:image): the wallpaper, the logo and, when the
-# screenshots are there, the desktop with cosmic-blue Tools open
+# screenshots are there, the desktop with Celenn OS Tools open
 og_shot=()
 if [[ -f "${out}/img/screenshots/tools-overview.webp" ]]; then
   og_shot=( '(' "${out}/img/screenshots/tools-overview.webp" -resize 880x -bordercolor '#8fc4ff' -border 2 ')'
@@ -229,7 +229,7 @@ if [[ -f "${out}/img/screenshots/tools-overview.webp" ]]; then
 fi
 convert "${wallpaper}" -resize 1200x630^ -gravity center -extent 1200x630 \
   -fill '#050a1a' -colorize 30% \
-  '(' "${root}/website/og-logo.png" -resize 440x ')' -gravity north -geometry +0+70 -composite \
+  '(' "${root}/website/og-logo.png" -resize x79 ')' -gravity north -geometry +0+70 -composite \
   "${og_shot[@]}" -strip -quality 85 "${out}/img/og.jpg"
 
 # Every image a page links to must be in the site: screenshots, logo,

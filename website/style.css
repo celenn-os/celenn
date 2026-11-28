@@ -1,4 +1,4 @@
-/* cosmic-blue website. Colors come from the logo and the default theme. */
+/* Celenn OS website. Colors come from the logo and the default theme. */
 
 /* Inter (SIL Open Font License, fonts/OFL.txt), served with the site so the
    text looks the same on every system. The latin-ext file only loads for
@@ -1255,7 +1255,7 @@ main {
 .lightbox .caption p { margin: 2px 0 0; }
 .lightbox .caption strong { color: var(--text); }
 
-/* Why cosmic-blue: one reason per section, text beside its screenshots */
+/* Why Celenn OS: one reason per section, text beside its screenshots */
 .why .lead { margin: 0; font-size: 1.1rem; text-align: left; }
 
 .reason {

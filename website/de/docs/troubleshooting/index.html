@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fehlerbehebung · cosmic-blue</title>
-  <meta name="description" content="Häufige Probleme mit cosmic-blue lösen: nach einem fehlerhaften Update zurückgehen, den Desktop zurücksetzen, Apps reparieren und einen Fehler melden.">
+  <title>Fehlerbehebung · Celenn OS</title>
+  <meta name="description" content="Häufige Probleme mit Celenn OS lösen: nach einem fehlerhaften Update zurückgehen, den Desktop zurücksetzen, Apps reparieren und einen Fehler melden.">
   <meta name="theme-color" content="#050a1a">
   <link rel="canonical" href="https://celenn-os.github.io/celenn/de/docs/troubleshooting/">
-  <meta property="og:title" content="Fehlerbehebung · cosmic-blue">
-  <meta property="og:description" content="Häufige Probleme mit cosmic-blue lösen: nach einem fehlerhaften Update zurückgehen, den Desktop zurücksetzen, Apps reparieren und einen Fehler melden.">
+  <meta property="og:title" content="Fehlerbehebung · Celenn OS">
+  <meta property="og:description" content="Häufige Probleme mit Celenn OS lösen: nach einem fehlerhaften Update zurückgehen, den Desktop zurücksetzen, Apps reparieren und einen Fehler melden.">
   <meta property="og:image" content="https://celenn-os.github.io/celenn/img/og.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:url" content="https://celenn-os.github.io/celenn/de/docs/troubleshooting/">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="de_DE">
-  <meta property="og:site_name" content="cosmic-blue">
+  <meta property="og:site_name" content="Celenn OS">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="alternate" hreflang="de" href="https://celenn-os.github.io/celenn/de/docs/troubleshooting/">
   <link rel="alternate" hreflang="en" href="https://celenn-os.github.io/celenn/docs/troubleshooting/">
@@ -24,7 +24,7 @@
   <link rel="alternate" hreflang="it" href="https://celenn-os.github.io/celenn/it/docs/troubleshooting/">
   <link rel="alternate" hreflang="pt-BR" href="https://celenn-os.github.io/celenn/pt-br/docs/troubleshooting/">
   <link rel="alternate" hreflang="x-default" href="https://celenn-os.github.io/celenn/docs/troubleshooting/">
-  <link rel="icon" href="../../../img/cosmic-blue-logo.svg" type="image/svg+xml">
+  <link rel="icon" href="../../../img/celenn-logo.svg" type="image/svg+xml">
   <link rel="preload" href="../../../fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../../../style.css">
 </head>
@@ -32,7 +32,7 @@
   <a class="skip" href="#main">Zum Inhalt springen</a>
   <header class="site-header">
     <nav class="top">
-      <a class="brand" href="../../"><img src="../../../img/cosmic-blue-logo.svg" alt="" width="28" height="28"><span>cosmic-blue</span></a>
+      <a class="brand" href="../../"><img src="../../../img/celenn-logo.svg" alt="" width="28" height="28"><span>Celenn OS</span></a>
       <span class="links">
         <a class="text" href="../../why/">Warum</a>
         <a class="text" href="../../install/">Installieren</a>
@@ -92,7 +92,7 @@
     <div class="doc-body" data-pagefind-body>
     <section class="block">
       <h1>Fehlerbehebung</h1>
-      <p>Etwas ist schiefgegangen? Die meisten Probleme mit cosmic-blue lassen sich rückgängig machen: Die vorherige Systemversion bleibt installiert, und Ihre COSMIC-Einstellungen lassen sich auf die Standardwerte zurücksetzen. Die Befehle gehören in ein Terminal. Siehe auch die <a href="../">Dokumentation</a>.</p>
+      <p>Etwas ist schiefgegangen? Die meisten Probleme mit Celenn OS lassen sich rückgängig machen: Die vorherige Systemversion bleibt installiert, und Ihre COSMIC-Einstellungen lassen sich auf die Standardwerte zurücksetzen. Die Befehle gehören in ein Terminal. Siehe auch die <a href="../">Dokumentation</a>.</p>
     </section>
 
     <section class="block">
@@ -124,7 +124,7 @@ ujust toggle-updates enable    # später wieder einschalten</code></pre>
         <button type="button" class="copy" data-copy>Kopieren</button>
       </div>
       <h3>Weiter zurückgehen</h3>
-      <p>Jeder Build hat seine eigene Version, etwa <code>44.20261110</code>: <code>sudo bootc status</code> zeigt Ihre an, und die <a href="https://github.com/celenn-os/celenn/releases">Release-Seite</a> listet die wöchentlichen auf. Sie können eine davon installieren und später zu den normalen Updates zurückkehren. Auf dem NVIDIA-Image schreiben Sie <code>celenn-nvidia</code> statt <code>cosmic-blue</code>.</p>
+      <p>Jeder Build hat seine eigene Version, etwa <code>44.20261110</code>: <code>sudo bootc status</code> zeigt Ihre an, und die <a href="https://github.com/celenn-os/celenn/releases">Release-Seite</a> listet die wöchentlichen auf. Sie können eine davon installieren und später zu den normalen Updates zurückkehren. Auf dem NVIDIA-Image schreiben Sie <code>celenn-nvidia</code> statt <code>Celenn OS</code>.</p>
       <div class="code">
         <pre><code>sudo bootc switch --enforce-container-sigpolicy ghcr.io/celenn-os/celenn:44.20261110   # bei dieser Version bleiben
 sudo bootc switch --enforce-container-sigpolicy ghcr.io/celenn-os/celenn:stable        # zurück zu den wöchentlichen Updates</code></pre>
@@ -149,7 +149,7 @@ sudo systemctl reboot</code></pre>
 
     <section class="block">
       <h2 id="settings">Aussehen und Einstellungen</h2>
-      <p>Das cosmic-blue-Aussehen ist weg, oder eine Leiste, das Dock oder ein Tastenkürzel verhält sich seltsam? Setzen Sie nur das Aussehen oder alle COSMIC-Einstellungen zurück. Melden Sie sich danach ab und wieder an.</p>
+      <p>Das Celenn-OS-Aussehen ist weg, oder eine Leiste, das Dock oder ein Tastenkürzel verhält sich seltsam? Setzen Sie nur das Aussehen oder alle COSMIC-Einstellungen zurück. Melden Sie sich danach ab und wieder an.</p>
       <dl class="commands">
         <dt><code>ujust reset-cosmic-theme</code></dt>
         <dd>Farben, dunkles Theme, Icons, Schriften und Hintergrundbild wiederherstellen. Leiste, Dock, Tastatur und Tastenkürzel bleiben erhalten.</dd>
@@ -183,7 +183,7 @@ mv ~/.var/app/org.example.App ~/.var/app/org.example.App.old</code></pre>
 ujust toggle-updates</code></pre>
         <button type="button" class="copy" data-copy>Kopieren</button>
       </div>
-      <p>Festplatte voll? In <strong>cosmic-blue Werkzeuge</strong>, <em>Speicherplatz freigeben</em>, entfernt <em>Aufräumen</em>, was nichts mehr braucht: Flatpak-Laufzeiten, ungenutzte Container-Images, alte Homebrew-Downloads. Ihre Dateien, Container und deren Volumes bleiben. Im Terminal: <code>ujust clean-system</code>.</p>
+      <p>Festplatte voll? In <strong>Celenn OS Werkzeuge</strong>, <em>Speicherplatz freigeben</em>, entfernt <em>Aufräumen</em>, was nichts mehr braucht: Flatpak-Laufzeiten, ungenutzte Container-Images, alte Homebrew-Downloads. Ihre Dateien, Container und deren Volumes bleiben. Im Terminal: <code>ujust clean-system</code>.</p>
     </section>
 
     <section class="block">
@@ -215,13 +215,13 @@ sudo journalctl -b -1 -p err --no-pager</code></pre>
   <footer class="site-footer">
     <div class="footer-cols">
       <div>
-        <a class="brand" href="../../"><img src="../../../img/cosmic-blue-logo.svg" alt="" width="26" height="26"><span>cosmic-blue</span></a>
+        <a class="brand" href="../../"><img src="../../../img/celenn-logo.svg" alt="" width="26" height="26"><span>Celenn OS</span></a>
         <p>Der COSMIC-Desktop, bereit ab dem ersten Start.</p>
       </div>
       <nav aria-labelledby="footer-discover">
         <h2 id="footer-discover">Entdecken</h2>
         <ul>
-          <li><a href="../../why/">Warum cosmic-blue?</a></li>
+          <li><a href="../../why/">Warum Celenn OS?</a></li>
           <li><a href="../../screenshots/">Screenshots</a></li>
           <li><a href="../../#download">Herunterladen</a></li>
         </ul>
@@ -244,7 +244,7 @@ sudo journalctl -b -1 -p err --no-pager</code></pre>
         </ul>
       </nav>
     </div>
-    <p class="legal">Aufgebaut auf <a href="https://universal-blue.org/">Universal Blue</a>, <a href="https://projectbluefin.io/">Bluefin</a>, <a href="https://fedoraproject.org/">Fedora</a> und <a href="https://system76.com/cosmic">COSMIC</a>. cosmic-blue ist ein unabhängiges Projekt, nicht mit diesen Projekten verbunden und nicht von ihnen unterstützt.</p>
+    <p class="legal">Aufgebaut auf <a href="https://universal-blue.org/">Universal Blue</a>, <a href="https://projectbluefin.io/">Bluefin</a>, <a href="https://fedoraproject.org/">Fedora</a> und <a href="https://system76.com/cosmic">COSMIC</a>. Celenn OS ist ein unabhängiges Projekt, nicht mit diesen Projekten verbunden und nicht von ihnen unterstützt.</p>
   </footer>
 
   <script src="../../../site.js"></script>
