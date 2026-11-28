@@ -569,7 +569,7 @@ fn tile<'a>(tool: Tool, summary: &Summary) -> Element<'a, Message> {
         .class(crate::style::tile_style(false))
         .padding(0)
         .width(Length::Fill)
-        .height(Length::Fixed(54.0))
+        .height(Length::Fixed(44.0))
         .on_press(Message::Go(tool))
         .into()
 }

@@ -196,13 +196,13 @@ pub const GROUPS: &[(&str, &[Tool])] = &[
             Tool::Space,
             Tool::Backup,
             Tool::Print,
-            Tool::Transfer,
         ],
     ),
     (
         "My computer",
         &[
             Tool::Inside,
+            Tool::Transfer,
             Tool::Battery,
             Tool::Disks,
             Tool::Look,
