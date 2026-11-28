@@ -32,7 +32,9 @@ use std::path::{Path, PathBuf};
 /// What launchers of web apps start with
 const ID_PREFIX: &str = "io.github.celenn_os.WebApp_";
 /// The launcher's key that keeps the web app's address
-const URL_KEY: &str = "X-CosmicBlue-WebApp-Url";
+const URL_KEY: &str = "X-Celenn-WebApp-Url";
+/// The same key, in launchers made before the project was renamed
+const URL_KEY_BEFORE_RENAME: &str = "X-CosmicBlue-WebApp-Url";
 const FIREFOX: &str = "org.mozilla.firefox";
 /// Tiles on a line (the page is as wide as the toolbox, WIDE in tools.rs)
 const PER_LINE: usize = 4;
@@ -688,7 +690,7 @@ pub fn installed() -> Vec<WebApp> {
             Some(WebApp {
                 id: id.to_owned(),
                 name: value("Name")?,
-                url: value(URL_KEY)?,
+                url: value(URL_KEY).or_else(|| value(URL_KEY_BEFORE_RENAME))?,
             })
         })
         .collect();
