@@ -208,6 +208,7 @@ fn bindings(keys: &str) -> Vec<Binding> {
             "←→" => vec![Some("Left".to_owned()), Some("Right".to_owned())],
             "=" => vec![Some("equal".to_owned())],
             "-" => vec![Some("minus".to_owned())],
+            "Space" => vec![Some("space".to_owned())],
             key if key.chars().count() == 1 => vec![Some(key.to_lowercase())],
             key => vec![Some(key.to_owned())],
         };
