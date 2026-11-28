@@ -4,7 +4,8 @@
 
 The "orbit c": an open orbit around a planet, with a moon in the gap. The
 wordmark "celenn" is Montserrat Light, stored as outlines in `logo/glyphs.json`
-(written by `logo/glyphs.py`) so the SVGs need no font.
+(written by `logo/glyphs.py`) so the SVGs need no font. The same file holds the
+full name "Celenn OS", which the default wallpaper and the boot screen show.
 
 - `logo/celenn-logo.svg`: the mark (installed as the `celenn-logo` icon)
 - `logo/celenn-logo-symbolic.svg`: the mark in one color (installed as
@@ -15,6 +16,8 @@ wordmark "celenn" is Montserrat Light, stored as outlines in `logo/glyphs.json`
 - `logo/celenn-logo.png`: the mark, 512 px (Artifact Hub)
 - `logo/celenn-logo-horizontal-dark.svg` / `-light.svg`: mark + wordmark,
   for dark and light backgrounds
+- `logo/celenn-os-logo-horizontal-dark.svg`: mark + "Celenn OS", for dark
+  backgrounds (boot screen watermark, default wallpaper)
 
 ## Boot screen
 
@@ -24,9 +27,10 @@ theme (the PC maker's logo from the firmware, for a flicker-free boot) with
 our images:
 
 - `bgrt-fallback.png`: the mark at 192x192, shown in the middle when the
-  firmware has no logo (virtual machines, some PCs). Regenerate it with
-  `node plymouth/render.js` (Playwright).
-- `watermark.png`: the dark horizontal logo at 392x70, at the bottom
+  firmware has no logo (virtual machines, some PCs)
+- `watermark.png`: the mark and "Celenn OS" at 352x70, at the bottom
+
+Regenerate both with `node plymouth/render.js` (Playwright).
 - the spinner: Fedora's frames tinted with the orbit blues at build time
   (`build_files/plymouth/tint.py`)
 
@@ -40,8 +44,8 @@ Regenerate the SVGs with `python3 logo/build.py`.
 All 5120x2880, in `system_files/usr/share/backgrounds/celenn/`:
 
 - `celenn-arcs.jpg`: the logo mark, left of centre, its orbit
-  echoing outwards in fainter arcs, and the name small near the bottom
-  right corner, whole on 16:9, 16:10 and 3:2 screens once COSMIC crops the
+  echoing outwards in fainter arcs, and the name "Celenn OS" small near the
+  bottom right corner, whole on 16:9, 16:10 and 3:2 screens once COSMIC crops the
   wallpaper to fill (4:3, 5:4 and 21:9 screens cut part of it), with no stars
   next to it (`wallpaper/shaders/echoes.frag`, `wallpaper/logo_mark.py`), the
   default COSMIC wallpaper and the greeter background

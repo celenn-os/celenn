@@ -20,7 +20,7 @@ W, H = 5120, 2880
 # wide), centred 60 px below the middle
 SCALE = 2900 / 559.7
 MARK = (W / 2 - 559.7 * SCALE / 2 + 50 * SCALE, H / 2 + 60)
-LOGO = (Path(__file__).parent / "../logo/celenn-logo-horizontal-dark.svg").read_text()
+LOGO = (Path(__file__).parent / "../logo/celenn-os-logo-horizontal-dark.svg").read_text()
 # the horizontal logo's text runs from x 118 to its width less 6, and from
 # y 19 to 81, in logo units
 TEXT_RIGHT = float(LOGO.split('viewBox="0 0 ')[1].split()[0]) - 6
