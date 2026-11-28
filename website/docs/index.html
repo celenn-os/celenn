@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Documentation · cosmic-blue</title>
-  <meta name="description" content="How to use cosmic-blue: updates and rollback, installing apps, ujust commands, the look and getting help.">
+  <title>Documentation · Celenn OS</title>
+  <meta name="description" content="How to use Celenn OS: updates and rollback, installing apps, ujust commands, the look and getting help.">
   <meta name="theme-color" content="#050a1a">
   <link rel="canonical" href="https://celenn-os.github.io/celenn/docs/">
-  <meta property="og:title" content="Documentation · cosmic-blue">
-  <meta property="og:description" content="How to use cosmic-blue: updates and rollback, installing apps, ujust commands, the look and getting help.">
+  <meta property="og:title" content="Documentation · Celenn OS">
+  <meta property="og:description" content="How to use Celenn OS: updates and rollback, installing apps, ujust commands, the look and getting help.">
   <meta property="og:image" content="https://celenn-os.github.io/celenn/img/og.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:url" content="https://celenn-os.github.io/celenn/docs/">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="en_US">
-  <meta property="og:site_name" content="cosmic-blue">
+  <meta property="og:site_name" content="Celenn OS">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="alternate" hreflang="de" href="https://celenn-os.github.io/celenn/de/docs/">
   <link rel="alternate" hreflang="en" href="https://celenn-os.github.io/celenn/docs/">
@@ -24,7 +24,7 @@
   <link rel="alternate" hreflang="it" href="https://celenn-os.github.io/celenn/it/docs/">
   <link rel="alternate" hreflang="pt-BR" href="https://celenn-os.github.io/celenn/pt-br/docs/">
   <link rel="alternate" hreflang="x-default" href="https://celenn-os.github.io/celenn/docs/">
-  <link rel="icon" href="../img/cosmic-blue-logo.svg" type="image/svg+xml">
+  <link rel="icon" href="../img/celenn-logo.svg" type="image/svg+xml">
   <link rel="preload" href="../fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../style.css">
 </head>
@@ -32,7 +32,7 @@
   <a class="skip" href="#main">Skip to content</a>
   <header class="site-header">
     <nav class="top">
-      <a class="brand" href="../"><img src="../img/cosmic-blue-logo.svg" alt="" width="28" height="28"><span>cosmic-blue</span></a>
+      <a class="brand" href="../"><img src="../img/celenn-logo.svg" alt="" width="28" height="28"><span>Celenn OS</span></a>
       <span class="links">
         <a class="text" href="../why/">Why</a>
         <a class="text" href="../install/">Install</a>
@@ -82,7 +82,7 @@
         </ul>
         <h2>Your system</h2>
         <ul>
-          <li><a href="#tools">cosmic-blue Tools</a></li>
+          <li><a href="#tools">Celenn OS Tools</a></li>
           <li><a href="#parental">Parental controls</a></li>
           <li><a href="#ujust">ujust commands</a></li>
           <li><a href="#look">The look</a></li>
@@ -104,12 +104,12 @@
     <div class="doc-body" data-pagefind-body>
     <section class="block">
       <h1>Documentation</h1>
-      <p>What you need to know to use cosmic-blue day to day. cosmic-blue is an independent atomic image built on the Universal Blue base: the system is read-only and updated as a whole, and your apps and files live apart from it.</p>
+      <p>What you need to know to use Celenn OS day to day. Celenn OS is an independent atomic image built on the Universal Blue base: the system is read-only and updated as a whole, and your apps and files live apart from it.</p>
     </section>
 
     <section class="block">
       <h2 id="updates">Updates and rollback</h2>
-      <p>The <strong>Updates</strong> app shows the version you run. If something goes wrong after an update, <em>Go back</em> in cosmic-blue Tools returns to the previous version at the next restart, without touching your files, and the version you leave is not installed again. <em>Get new features early</em>, under <em>For experienced users…</em>, brings an update every day instead of one tested update a week.</p>
+      <p>The <strong>Updates</strong> app shows the version you run. If something goes wrong after an update, <em>Go back</em> in Celenn OS Tools returns to the previous version at the next restart, without touching your files, and the version you leave is not installed again. <em>Get new features early</em>, under <em>For experienced users…</em>, brings an update every day instead of one tested update a week.</p>
       <p>The system, Flatpak apps, Homebrew packages and the AppImages added with Gear Lever update by themselves in the background. A system update applies on the next boot. To update now, or to turn the automatic updates off:</p>
       <div class="code">
         <pre><code>ujust update           # update everything now
@@ -133,7 +133,7 @@ sudo bootc status      # see the current and previous versions</code></pre>
       <h3>AppImages: Gear Lever</h3>
       <p>Open a downloaded AppImage: <strong>Gear Lever</strong> adds it to the app list and keeps it up to date.</p>
       <h3>Web apps</h3>
-      <p>WhatsApp, Netflix, Gmail or any other site can open in its own window, with its icon in the app list, like an app: cosmic-blue Tools, <em>Web apps</em>. They use Firefox, so its protection against ads and tracking and the parental controls apply. Sign in once in each one. <em>Also add to the dock</em> keeps its icon in the dock.</p>
+      <p>WhatsApp, Netflix, Gmail or any other site can open in its own window, with its icon in the app list, like an app: Celenn OS Tools, <em>Web apps</em>. They use Firefox, so its protection against ads and tracking and the parental controls apply. Sign in once in each one. <em>Also add to the dock</em> keeps its icon in the dock.</p>
       <h3>Command line tools: Homebrew</h3>
       <p>Command line tools install in your home folder with Homebrew:</p>
       <div class="code">
@@ -161,23 +161,23 @@ distrobox enter arch</code></pre>
       <p>Windows (.exe) and Mac programs do not install here. Almost every one has a free equivalent, often already installed. Others are in <strong>COSMIC Store</strong>: search for their name.</p>
       <div class="table">
         <table>
-          <thead><tr><th>For</th><th>On Windows or Mac</th><th>On cosmic-blue</th><th>Where</th></tr></thead>
+          <thead><tr><th>For</th><th>On Windows or Mac</th><th>On Celenn OS</th><th>Where</th></tr></thead>
           <tbody>
           <tr><td>Browsing</td><td>Edge, Chrome, Safari</td><td><strong>Firefox</strong></td><td><span class="here">Already installed</span> · Chrome: COSMIC Store</td></tr>
           <tr><td>Email, calendar</td><td>Outlook, Mail</td><td><strong>Thunderbird</strong></td><td><span class="here">Already installed</span></td></tr>
-          <tr><td>Office</td><td>Word, Excel, PowerPoint</td><td><strong>LibreOffice</strong></td><td>Tour or cosmic-blue Tools, <em>Office</em></td></tr>
+          <tr><td>Office</td><td>Word, Excel, PowerPoint</td><td><strong>LibreOffice</strong></td><td>Tour or Celenn OS Tools, <em>Office</em></td></tr>
           <tr><td>Photos</td><td>Photos, Paint</td><td><strong>Image Viewer, Pinta</strong></td><td><span class="here">Already installed</span></td></tr>
-          <tr><td>Photo editing, drawing</td><td>Photoshop, Illustrator</td><td><strong>GIMP, Inkscape, Krita</strong></td><td>Tour or cosmic-blue Tools, <em>Graphics and photos</em></td></tr>
-          <tr><td>Video</td><td>Premiere, iMovie, OBS</td><td><strong>Kdenlive, OBS Studio</strong></td><td>Tour or cosmic-blue Tools, <em>Videos and streaming</em></td></tr>
+          <tr><td>Photo editing, drawing</td><td>Photoshop, Illustrator</td><td><strong>GIMP, Inkscape, Krita</strong></td><td>Tour or Celenn OS Tools, <em>Graphics and photos</em></td></tr>
+          <tr><td>Video</td><td>Premiere, iMovie, OBS</td><td><strong>Kdenlive, OBS Studio</strong></td><td>Tour or Celenn OS Tools, <em>Videos and streaming</em></td></tr>
           <tr><td>Music, videos</td><td>Spotify, VLC</td><td><strong>Spotify, VLC, COSMIC Player</strong></td><td>COSMIC Store · COSMIC Player: <span class="here">already installed</span></td></tr>
-          <tr><td>Calls, chat</td><td>Teams, Zoom, Discord</td><td><strong>The same apps</strong></td><td>Tour or cosmic-blue Tools, <em>Messaging and video calls</em> · Teams: COSMIC Store</td></tr>
-          <tr><td>Games</td><td>Steam, Epic, GOG</td><td><strong>Steam, Heroic</strong></td><td>Tour or cosmic-blue Tools, <em>Games</em></td></tr>
+          <tr><td>Calls, chat</td><td>Teams, Zoom, Discord</td><td><strong>The same apps</strong></td><td>Tour or Celenn OS Tools, <em>Messaging and video calls</em> · Teams: COSMIC Store</td></tr>
+          <tr><td>Games</td><td>Steam, Epic, GOG</td><td><strong>Steam, Heroic</strong></td><td>Tour or Celenn OS Tools, <em>Games</em></td></tr>
           <tr><td>Files, .zip archives</td><td>Explorer, Finder, 7-Zip</td><td><strong>Files</strong></td><td><span class="here">Already installed</span></td></tr>
           <tr><td>Settings</td><td>Control Panel</td><td><strong>Settings</strong></td><td><span class="here">Already installed</span></td></tr>
           <tr><td>Task manager</td><td>Task Manager</td><td><strong>COSMIC Monitor</strong></td><td><span class="here">Already installed</span></td></tr>
           <tr><td>Updates</td><td>Windows Update</td><td><strong>Updates</strong></td><td><span class="here">Already installed</span></td></tr>
           <tr><td>Backups</td><td>File History, Time Machine</td><td><strong>Déjà Dup Backups</strong></td><td><span class="here">Already installed</span></td></tr>
-          <tr><td>Passwords</td><td>1Password, LastPass, iCloud Keychain</td><td><strong>Bitwarden, Secrets, KeePassXC</strong></td><td>Tour or cosmic-blue Tools, <em>Passwords</em></td></tr>
+          <tr><td>Passwords</td><td>1Password, LastPass, iCloud Keychain</td><td><strong>Bitwarden, Secrets, KeePassXC</strong></td><td>Tour or Celenn OS Tools, <em>Passwords</em></td></tr>
           </tbody>
         </table>
       </div>
@@ -189,7 +189,7 @@ distrobox enter arch</code></pre>
       <h3>Printers and scanners</h3>
       <p>Most network and USB printers work right away, without a driver. To add one by hand, open <strong>Print Settings</strong>: drivers for HP, Epson, Brother, Canon and others are installed. <strong>Document Scanner</strong> scans with network and USB scanners.</p>
       <h3>Other disks</h3>
-      <p>A second internal disk, or Windows' D: drive, can open at every startup: in <strong>cosmic-blue Tools</strong>, <em>Other disks</em>. It is then always at the same place, <code>/mnt/&lt;its name&gt;</code>, in Files and for Steam, which can keep a library there. A disk in Windows format (NTFS) only opens if Windows was fully shut down: turn off Windows' Fast Startup. The disk Windows runs from and encrypted disks are not offered.</p>
+      <p>A second internal disk, or Windows' D: drive, can open at every startup: in <strong>Celenn OS Tools</strong>, <em>Other disks</em>. It is then always at the same place, <code>/mnt/&lt;its name&gt;</code>, in Files and for Steam, which can keep a library there. A disk in Windows format (NTFS) only opens if Windows was fully shut down: turn off Windows' Fast Startup. The disk Windows runs from and encrypted disks are not offered.</p>
       <h3>Firmware updates</h3>
       <p>The <strong>Firmware</strong> app updates the firmware of the computer and its devices (BIOS/UEFI, SSD, dock…), when their maker publishes it on fwupd.org. Or from the terminal:</p>
       <div class="code">
@@ -205,8 +205,8 @@ distrobox enter arch</code></pre>
     </section>
 
     <section class="block">
-      <h2 id="tools">cosmic-blue Tools</h2>
-      <p><strong>cosmic-blue Tools</strong> is a toolbox: each tile opens one tool. <em>Every day</em>: update, install apps, web apps, free up space, protect your files, print, change computers. <em>My computer</em>: what is inside, the battery, other disks, the look, the NVIDIA driver, Microsoft fonts. <em>When something is wrong</em>: go back, repair, get help. A line at the top says when something needs your attention, and <em>For experienced users…</em> gathers the update channel, older versions, firmware and virtual machines. Each tool shows the matching <code>ujust</code> command, and its <strong>?</strong> button opens its part of this guide. Changes to the system ask for an administrator's password.</p>
+      <h2 id="tools">Celenn OS Tools</h2>
+      <p><strong>Celenn OS Tools</strong> is a toolbox: each tile opens one tool. <em>Every day</em>: update, install apps, web apps, free up space, protect your files, print, change computers. <em>My computer</em>: what is inside, the battery, other disks, the look, the NVIDIA driver, Microsoft fonts. <em>When something is wrong</em>: go back, repair, get help. A line at the top says when something needs your attention, and <em>For experienced users…</em> gathers the update channel, older versions, firmware and virtual machines. Each tool shows the matching <code>ujust</code> command, and its <strong>?</strong> button opens its part of this guide. Changes to the system ask for an administrator's password.</p>
     </section>
 
     <section class="block">
@@ -241,7 +241,7 @@ distrobox enter arch</code></pre>
         <dt><code>ujust toggle-dark-mode</code></dt>
         <dd>Switch between the dark and light themes.</dd>
         <dt><code>ujust reset-cosmic-theme</code></dt>
-        <dd>Bring back the cosmic-blue look.</dd>
+        <dd>Bring back the Celenn OS look.</dd>
         <dt><code>ujust reset-cosmic-config</code></dt>
         <dd>Reset all COSMIC settings (a backup is kept).</dd>
         <dt><code>ujust toggle-battery-limit</code></dt>
@@ -257,7 +257,7 @@ distrobox enter arch</code></pre>
 
     <section class="block">
       <h2 id="look">The look</h2>
-      <p>cosmic-blue comes with a blue COSMIC theme, frosted glass panels, cosmic-blue wallpapers, icons and cursors. Change anything in <strong>Settings</strong>. If you want the original look back:</p>
+      <p>Celenn OS comes with a blue COSMIC theme, frosted glass panels, Celenn OS wallpapers, icons and cursors. Change anything in <strong>Settings</strong>. If you want the original look back:</p>
       <div class="code">
         <pre><code>ujust reset-cosmic-theme</code></pre>
         <button type="button" class="copy" data-copy>Copy</button>
@@ -286,14 +286,14 @@ distrobox enter arch</code></pre>
       <h3>Backups</h3>
       <p>The <strong>Backups</strong> app (Déjà Dup) is installed: it saves your home folder to an external drive, a network share or a cloud storage, encrypted if you want, and restores single files or everything. For the terminal, <code>restic</code>, <code>borg</code> and <code>rclone</code> are installed too.</p>
       <h3>Coming from another system</h3>
-      <p>Back up your files first (Backups, or a copy to an external drive), install cosmic-blue, then copy them back into your home folder. Install your apps again from COSMIC Store; Flatpak apps keep their data in <code>~/.var/app</code>, which you can copy over from another system that used the same Flatpaks.</p>
+      <p>Back up your files first (Backups, or a copy to an external drive), install Celenn OS, then copy them back into your home folder. Install your apps again from COSMIC Store; Flatpak apps keep their data in <code>~/.var/app</code>, which you can copy over from another system that used the same Flatpaks.</p>
     </section>
 
     <section class="block">
       <h2 id="privacy">Privacy</h2>
-      <p>cosmic-blue collects nothing about you. What the system contacts on its own:</p>
+      <p>Celenn OS collects nothing about you. What the system contacts on its own:</p>
       <ul>
-        <li>Updates, once a day: the cosmic-blue images on GitHub, Flathub and the COSMIC app repository, and Homebrew if you use it (with Homebrew's usage statistics turned off).</li>
+        <li>Updates, once a day: the Celenn OS images on GitHub, Flathub and the COSMIC app repository, and Homebrew if you use it (with Homebrew's usage statistics turned off).</li>
         <li>Fedora's anonymous weekly count (<code>rpm-ostree-countme</code>): one request a week to Fedora's servers, with the Fedora release and a rough age of the system but no identifier, so that Fedora knows how many systems use it.</li>
         <li>Firefox: telemetry, studies, sponsored content and ad measurement are off. uBlock Origin blocks ads and trackers, and sites open over HTTPS whenever they can.</li>
         <li>Tailscale is installed, for <code>sudo tailscale up</code>: its service runs but does not join any network until you sign in.</li>
@@ -342,13 +342,13 @@ cosign verify-attestation --key cosign.pub --type spdxjson \
   <footer class="site-footer">
     <div class="footer-cols">
       <div>
-        <a class="brand" href="../"><img src="../img/cosmic-blue-logo.svg" alt="" width="26" height="26"><span>cosmic-blue</span></a>
+        <a class="brand" href="../"><img src="../img/celenn-logo.svg" alt="" width="26" height="26"><span>Celenn OS</span></a>
         <p>The COSMIC desktop, ready from the first boot.</p>
       </div>
       <nav aria-labelledby="footer-discover">
         <h2 id="footer-discover">Discover</h2>
         <ul>
-          <li><a href="../why/">Why cosmic-blue?</a></li>
+          <li><a href="../why/">Why Celenn OS?</a></li>
           <li><a href="../screenshots/">Screenshots</a></li>
           <li><a href="../#download">Download</a></li>
         </ul>
@@ -371,7 +371,7 @@ cosign verify-attestation --key cosign.pub --type spdxjson \
         </ul>
       </nav>
     </div>
-    <p class="legal">Built on <a href="https://universal-blue.org/">Universal Blue</a>, <a href="https://projectbluefin.io/">Bluefin</a>, <a href="https://fedoraproject.org/">Fedora</a> and <a href="https://system76.com/cosmic">COSMIC</a>. cosmic-blue is an independent project, not affiliated with or endorsed by these projects.</p>
+    <p class="legal">Built on <a href="https://universal-blue.org/">Universal Blue</a>, <a href="https://projectbluefin.io/">Bluefin</a>, <a href="https://fedoraproject.org/">Fedora</a> and <a href="https://system76.com/cosmic">COSMIC</a>. Celenn OS is an independent project, not affiliated with or endorsed by these projects.</p>
   </footer>
 
   <script src="../site.js"></script>
