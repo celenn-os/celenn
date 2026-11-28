@@ -10,7 +10,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 J = json.loads((HERE / "glyphs.json").read_text())
-GLYPHS, EXTENTS = J["gl"], J["bb"]
+# the wordmark "celenn", and the full name "Celenn OS" (wallpaper, boot screen)
+WORD, NAME = (J["gl"], J["bb"]), (J["name"]["gl"], J["name"]["bb"])
 TOP, BASE = 2607.672, 2670.336  # ascender top and baseline of the outlines
 
 DEFS = """<defs>
@@ -29,10 +30,11 @@ def mark(moon="#e6f3ff"):
     )
 
 
-def wordmark(fill, tracking=12):
+def wordmark(fill, letters=WORD, tracking=12):
     parts, x = [], 0.0
-    for glyph, (x0, x1) in zip(GLYPHS, EXTENTS):
-        parts.append(f'<path transform="translate({x - x0:.2f} 0)" d="{glyph}"/>')
+    for glyph, (x0, x1) in zip(*letters):
+        if glyph:  # a space has no outline
+            parts.append(f'<path transform="translate({x - x0:.2f} 0)" d="{glyph}"/>')
         x += (x1 - x0) + tracking
     return f'<g fill="{fill}">{"".join(parts)}</g>', x - tracking
 
@@ -42,8 +44,8 @@ def svg(viewbox, body, title="Celenn OS"):
             f"<title>{title}</title>{DEFS}{body}</svg>\n")
 
 
-def horizontal(fill, moon):
-    text, width = wordmark(fill)
+def horizontal(fill, moon, letters=WORD):
+    text, width = wordmark(fill, letters)
     height = 54.0                      # wordmark height, in mark units
     scale = height / (BASE - TOP)
     body = (f'<g transform="translate(50 50)">{mark(moon)}</g>'
@@ -62,3 +64,5 @@ def horizontal(fill, moon):
     '<circle cx="38" cy="0" r="6.5"/></g></svg>\n')
 (HERE / "celenn-logo-horizontal-dark.svg").write_text(horizontal("#e6f3ff", "#e6f3ff"))
 (HERE / "celenn-logo-horizontal-light.svg").write_text(horizontal("#0b2a8a", "#2f6bff"))
+# Mark + "Celenn OS", for the default wallpaper and the boot screen
+(HERE / "celenn-os-logo-horizontal-dark.svg").write_text(horizontal("#e6f3ff", "#e6f3ff", NAME))
